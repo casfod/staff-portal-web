@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserType } from "../../interfaces";
-import { getUsers } from "../../services/apiUser";
+import { UserType } from "../../../interfaces";
+import { getUsers } from "../../../services/apiUser";
 interface useUsersType {
   status: number;
   message: string;

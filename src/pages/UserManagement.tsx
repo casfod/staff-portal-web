@@ -1,43 +1,40 @@
-import { useState } from "react";
 import { Plus, Trash2, UserCog } from "lucide-react";
-import { useUsers } from "../features/user/useUsers";
+import { useUsers } from "../features/user/userHooks/useUsers";
 import { localStorageUser } from "../utils/localStorageUser";
-import { useDeleteUser } from "../features/user/useDeleteUser";
+import { useDeleteUser } from "../features/user/userHooks/useDeleteUser";
 import AddUserForm from "../features/user/AddUserForm";
 import Modal from "../ui/Modal";
 
+import Swal from "sweetalert2";
+
 export function UserManagement() {
-  const [showModal, setShowModal] = useState(false);
   const localStorageUserX = localStorageUser();
 
   const { data } = useUsers();
 
   const { deleteUser } = useDeleteUser();
 
-  console.log(data?.data);
+  const users = data?.data || [];
 
   const handleDelete = (id: string) => {
-    deleteUser(id);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this User?",
+      showCancelButton: true,
+      confirmButtonColor: "#1373B0",
+      cancelButtonColor: "#DC3340",
+      confirmButtonText: "Yes, delete it!",
+      customClass: { popup: "custom-style" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteUser(id!, {
+          onError: (error) => {
+            Swal.fire("Error!", error.message, "error");
+          },
+        });
+      }
+    });
   };
-
-  const users = data?.data;
-  // Mock data
-  // const users = [
-  //   {
-  //     id: 1,
-  //     name: "John Doe",
-  //     email: "john@example.com",
-  //     role: "Admin",
-  //     status: "Active",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Jane Smith",
-  //     email: "jane@example.com",
-  //     role: "Staff",
-  //     status: "Active",
-  //   },
-  // ];
 
   return (
     <div className="space-y-6">
@@ -48,10 +45,7 @@ export function UserManagement() {
         {localStorageUserX.role == "SUPER-ADMIN" && (
           <Modal>
             <Modal.Open open="addUser">
-              <button
-                onClick={() => setShowModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
+              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 <Plus className="h-4 w-4 mr-2" />
                 Add User
               </button>
@@ -122,23 +116,6 @@ export function UserManagement() {
           </tbody>
         </table>
       </div>
-      {/* 
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-          <AddUserForm />
-        </div>
-      )} */}
     </div>
   );
-}
-
-{
-  /* <div className="flex justify-end space-x-3">
-<button
-  type="button"
-  onClick={() => setShowModal(false)}
-  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
->
-  Cancel
-</button> */
 }

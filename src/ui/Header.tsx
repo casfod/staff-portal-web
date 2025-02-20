@@ -1,6 +1,6 @@
 // import { Heart } from "lucide-react";
 import logo from "../assets/logo.png";
-import { useUser } from "../features/user/useUser";
+import { useUser } from "../features/user/userHooks/useUser";
 import { localStorageUser } from "../utils/localStorageUser";
 
 export function Header() {

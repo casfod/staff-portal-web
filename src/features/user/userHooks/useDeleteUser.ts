@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse } from "axios";
-import { deleteUser as deleteUserApi } from "../../services/apiUser";
+import { deleteUser as deleteUserApi } from "../../../services/apiUser";
 import toast from "react-hot-toast";
 
 interface ErrorResponse {

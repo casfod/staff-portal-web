@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { UserType } from "../../interfaces";
-import { useAddUser } from "./useAddUser";
+import { useAddUser } from "./userHooks/useAddUser";
 import SpinnerMini from "../../ui/SpinnerMini";
 import ShowPasswordIcon from "../../ui/ShowPasswordIcon";
 

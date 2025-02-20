@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addUser as addUserApi } from "../../services/apiUser.ts";
+import { addUser as addUserApi } from "../../../services/apiUser.ts";
 import { AxiosError, AxiosResponse } from "axios";
 
-import { UserType } from "../../interfaces.ts";
+import { UserType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
 
 interface ErrorResponse {
