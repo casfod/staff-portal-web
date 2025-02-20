@@ -19,7 +19,10 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
 
-          <span className="ml-2 text-2xl  font-semibold text-gray-800">
+          <span
+            className="ml-2 text-xl  font-extrabold text-primary"
+            style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          >
             STAFF PORTAL
           </span>
           <div className="space-x-4 lg:mr-3">

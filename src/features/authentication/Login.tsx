@@ -16,10 +16,13 @@ export function Login() {
   return (
     <div className="min-h-screen bg-buttonColor flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-4">
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
         </div>
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+        <h2
+          className="text-2xl font-bold text-center text-gray-800 mb-4"
+          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+        >
           CASFOD STAFF PORTAL
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -1,5 +1,3 @@
-import React from "react";
-
 export function Dashboard() {
   // Mock data for charts
   const stats = [
