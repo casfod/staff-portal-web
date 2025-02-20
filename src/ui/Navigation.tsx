@@ -1,0 +1,63 @@
+import React from "react";
+import Navlink from "./Navlink";
+import {
+  LayoutDashboard,
+  FolderOpen,
+  FileText,
+  ShoppingCart,
+  Wallet,
+  Plane,
+  Users,
+} from "lucide-react";
+import SpinnerMini from "./SpinnerMini";
+import { useLogout } from "../features/authentication/useLogout";
+import { BiLogOut } from "react-icons/bi";
+
+const Navigation: React.FC = () => {
+  const { logout, isPending } = useLogout();
+
+  const handleLogout = async () => {
+    logout();
+  };
+  const navigation = [
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/projects", label: "Projects", icon: FolderOpen },
+    { to: "/concept-notes", label: "Concept Notes", icon: FileText },
+    {
+      to: "/purchase-requests",
+      label: "Purchase Requests",
+      icon: ShoppingCart,
+    },
+    { to: "/advance-requests", label: "Advance Requests", icon: Wallet },
+    { to: "/travel-requests", label: "Travel Requests", icon: Plane },
+    { to: "/user-management", label: "User Management", icon: Users },
+  ];
+
+  return (
+    <div className="border hidden md:flex flex-col items-center scale-95 md:scale-100 min-h-screen ">
+      <nav className="">
+        <ul className="flex flex-col items-center w-60 shadow-sm px-8 py-4">
+          {navigation.map((item) => (
+            <li className="w-full" key={item.to}>
+              <Navlink to={item.to} label={item.label} icon={item.icon} />
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {isPending ? (
+        <SpinnerMini />
+      ) : (
+        <button
+          className="flex items-center justify-center gap-2 mt-auto mb-28 text-gray-800  p-2 rounded hover:bg-[#ffa82b] hover:text-gray-800 transition-colors duration-200"
+          onClick={handleLogout}
+        >
+          <BiLogOut />
+          Log out
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default Navigation;

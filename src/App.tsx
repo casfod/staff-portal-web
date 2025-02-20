@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
-import { Layout } from './components/Layout';
-import { Login } from './components/Login';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-
-function AppContent() {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
-  return <Layout />;
-}
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { queryClient } from "./lib/react-query";
+import Router from "./Router";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router />
+      <Toaster
+        position="top-center"
+        gutter={12}
+        containerStyle={{ margin: "8px" }}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: "14px",
+            maxWidth: "500px",
+            padding: "16px 24px",
+            backgroundColor: "white",
+          },
+        }}
+      />
+
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
