@@ -43,7 +43,7 @@ const AddUserForm = () => {
 
   return (
     <div className=" w-[300px] md:w-[400px] flex flex-col items-center justify-center py-4 rounded-lg">
-      <h2 className="text-lg text-center font-medium text-gray-900 mb-4">
+      <h2 className="text-lg text-center font-medium text-gray-700 mb-4">
         Add New User
       </h2>
       <form

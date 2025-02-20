@@ -40,7 +40,7 @@ export function UserManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-gray-800">
           User Management
         </h1>
         {localStorageUserX.role == "SUPER-ADMIN" && (
@@ -85,8 +85,8 @@ export function UserManagement() {
           <tbody className="bg-white divide-y divide-gray-200">
             {users?.map((user) => (
               <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <p className="inline-flex gap-1 text-gray-900 font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                  <p className="inline-flex gap-1 text-gray-800 font-medium">
                     <span>{user?.first_name.toUpperCase()}</span>
 
                     <span>{user?.last_name.toUpperCase()}</span>

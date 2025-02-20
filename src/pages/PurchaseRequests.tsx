@@ -27,7 +27,7 @@ export function PurchaseRequests() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-gray-800">
           Purchase Requests
         </h1>
         <button
@@ -63,7 +63,7 @@ export function PurchaseRequests() {
           <tbody className="bg-white divide-y divide-gray-200">
             {requests.map((request) => (
               <tr key={request.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   {request.item}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -87,7 +87,7 @@ export function PurchaseRequests() {
       {showModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Create Purchase Request
             </h2>
             <form className="space-y-4">

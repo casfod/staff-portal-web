@@ -19,12 +19,12 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
 
-          <span className="ml-2 text-2xl  font-semibold text-gray-900">
+          <span className="ml-2 text-2xl  font-semibold text-gray-800">
             STAFF PORTAL
           </span>
           <div className="space-x-4 lg:mr-3">
-            <div className="border items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base">
-              <p className="inline-flex gap-1 text-gray-900 font-medium">
+            <div className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base">
+              <p className="inline-flex gap-1 text-gray-800 font-medium">
                 <span>{user?.first_name.toUpperCase()}</span>
 
                 <span>{user?.last_name.toUpperCase()}</span>
