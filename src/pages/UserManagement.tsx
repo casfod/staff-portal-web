@@ -6,6 +6,7 @@ import AddUserForm from "../features/user/AddUserForm";
 import Modal from "../ui/Modal";
 
 import Swal from "sweetalert2";
+import UserCard from "../features/user/UserCard";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
@@ -100,9 +101,18 @@ export function UserManagement() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
-                    <button className="text-primary hover:text-indigo-900">
-                      <UserCog className="h-5 w-5" />
-                    </button>
+                    <Modal>
+                      <Modal.Open open="userCog">
+                        <button className="text-primary hover:text-indigo-900">
+                          <UserCog className="h-5 w-5" />
+                        </button>
+                      </Modal.Open>
+
+                      <Modal.Window name="userCog">
+                        <UserCard user={user} />
+                      </Modal.Window>
+                    </Modal>
+
                     <button
                       className="text-red-600 hover:text-red-900"
                       onClick={() => handleDelete(user?.id!)}

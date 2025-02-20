@@ -91,6 +91,20 @@ export const updateUser = async function (data: UserType) {
   }
 };
 
+export const updateUserRole = async function (
+  userId: string,
+  data: Partial<UserType>
+) {
+  try {
+    const response = await axiosInstance.patch<UserType>(
+      `/users/updateUserRole/${userId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 export const addUser = async function (data: Partial<UserType>) {
   try {
     const response = await axiosInstance.post<UserType>(`/users/addUser`, data);

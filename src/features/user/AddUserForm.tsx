@@ -42,13 +42,13 @@ const AddUserForm = () => {
   };
 
   return (
-    <div className="w-full md:w-[400px] flex flex-col items-center justify-center py-2">
+    <div className=" w-[300px] md:w-[600px] flex flex-col items-center justify-center py-4 rounded-lg">
       <h2 className="text-lg text-center font-medium text-gray-900 mb-4">
         Add New User
       </h2>
       <form
         onSubmit={handleSubmit}
-        className="w-full flex flex-col items-center gap-4 sm:gap-7 bg-white bg-opacity-90 px-4  md:px-6 rounded-md shadow-xl backdrop-blur-lg md:mx-0"
+        className="w-full flex flex-col items-center gap-4 sm:gap-7 bg-white bg-opacity-90 px-4  md:px-6 rounded-md  "
       >
         <div className="flex flex-col w-full gap-4">
           <div>

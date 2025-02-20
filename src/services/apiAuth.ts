@@ -33,8 +33,6 @@ export const login = async function (email: string, password: string) {
   }
 };
 
-
-
 export const getUser = async function () {
   try {
     const response = await axios.get<UserType>(`${apiURL}/users/me`, {
