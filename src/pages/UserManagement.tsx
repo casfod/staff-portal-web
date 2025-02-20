@@ -1,26 +1,34 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2, UserCog } from "lucide-react";
+import { useUsers } from "../features/user/useUsers";
+import { localStorageUser } from "../utils/localStorageUser";
 
 export function UserManagement() {
   const [showModal, setShowModal] = useState(false);
+  const localStorageUserX = localStorageUser();
 
+  const { data } = useUsers();
+
+  console.log(data?.data);
+
+  const users = data?.data;
   // Mock data
-  const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Admin",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "Staff",
-      status: "Active",
-    },
-  ];
+  // const users = [
+  //   {
+  //     id: 1,
+  //     name: "John Doe",
+  //     email: "john@example.com",
+  //     role: "Admin",
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Jane Smith",
+  //     email: "jane@example.com",
+  //     role: "Staff",
+  //     status: "Active",
+  //   },
+  // ];
 
   return (
     <div className="space-y-6">
@@ -28,13 +36,15 @@ export function UserManagement() {
         <h1 className="text-2xl font-semibold text-gray-900">
           User Management
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add User
-        </button>
+        {localStorageUserX.role == "SUPER-ADMIN" && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add User
+          </button>
+        )}
       </div>
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -59,10 +69,14 @@ export function UserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users?.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {user.name}
+                  <p className="inline-flex gap-1 text-gray-900 font-medium">
+                    <span>{user?.first_name.toUpperCase()}</span>
+
+                    <span>{user?.last_name.toUpperCase()}</span>
+                  </p>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.email}
@@ -71,7 +85,7 @@ export function UserManagement() {
                   {user.role}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.status}
+                  {user.isDeleted === true ? "InActive" : "Active"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
