@@ -49,7 +49,7 @@ const Navigation: React.FC = () => {
         <SpinnerMini />
       ) : (
         <button
-          className="flex items-center justify-center gap-2 mt-auto mb-28 text-gray-800  p-2 rounded hover:bg-[#ffa82b] hover:text-gray-800 transition-colors duration-200"
+          className="inline-flex gap-1 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-auto mb-28"
           onClick={handleLogout}
         >
           <BiLogOut />
