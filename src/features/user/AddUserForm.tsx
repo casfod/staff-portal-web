@@ -68,7 +68,7 @@ const AddUserForm = () => {
               First Name
             </label>
             <input
-              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
               id="first_name"
               type="text"
               placeholder="Enter your name"
@@ -85,7 +85,7 @@ const AddUserForm = () => {
               Last Name
             </label>
             <input
-              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
               id="last_name"
               type="text"
               placeholder="Enter your name"
@@ -102,7 +102,7 @@ const AddUserForm = () => {
               Email
             </label>
             <input
-              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -119,7 +119,7 @@ const AddUserForm = () => {
               Roles
             </label>
             <select
-              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
               id="role"
               value={formData.role}
               onChange={handleInputChange}
@@ -143,7 +143,7 @@ const AddUserForm = () => {
             </label>
             <div className="relative w-full">
               <input
-                className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+                className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
@@ -168,7 +168,7 @@ const AddUserForm = () => {
             </label>
             <div className="relative w-full">
               <input
-                className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-secondary focus:outline-none shadow-sm text-gray-700"
+                className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
                 id="passwordConfirm"
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirm your password"
@@ -185,7 +185,7 @@ const AddUserForm = () => {
               <span className="absolute left-0 top-7 transform translate-y-1/2 cursor-pointer">
                 {!isPasswordMatch && (
                   <span
-                    className="text-red-500 text-sm font-semibold"
+                    className="text-red-500 text-xs font-semibold"
                     style={{ letterSpacing: "2px" }}
                   >
                     Passwords do not match
