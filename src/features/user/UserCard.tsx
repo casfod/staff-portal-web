@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UserType } from "../../interfaces";
 import { useUpdateUserRole } from "./userHooks/useUpdateUserRole";
 import profilePlaceHolder from "../../assets/img/profile2.jpeg";
+import Swal from "sweetalert2";
 
 interface UserCardProps {
   user: UserType;
@@ -12,20 +13,43 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
 
   const { UpdateUserRole, isPending } = useUpdateUserRole(user?.id!);
 
-  const handleStatusChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newRole = e.target.value;
-    setRole(newRole);
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = event.target.value;
 
-    UpdateUserRole({ role: newRole });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change this user's role?",
+      showCancelButton: true,
+      confirmButtonColor: "#1373B0",
+      cancelButtonColor: "#DC3340",
+      confirmButtonText: "Yes, update it!",
+      customClass: { popup: "custom-style" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setRole(newRole);
 
-    setRole(user.role);
+        UpdateUserRole(
+          { role: newRole },
+          {
+            onError: (error) => {
+              Swal.fire("Error!", error.message, "error");
+            },
+            // onSuccess: () => {
+            //   Swal.fire(
+            //     "Success!",
+            //     "User role updated successfully.",
+            //     "success"
+            //   );
+            // },
+          }
+        );
+      }
+    });
   };
 
   return (
     <div>
-      <div className="min-w-[280px] p-4 bg-white  rounded-lg">
+      <div className="min-w-[280px] p-4 bg-white rounded-lg">
         <div className="flex flex-col gap-2">
           <div className="flex items-center space-x-4">
             <img
@@ -52,11 +76,11 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
             <span
               className={`text-center px-2 py-1 rounded-full text-xs ${
                 user.isDeleted
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-green-100 text-green-700"
               }`}
             >
-              {user.isDeleted ? "Active" : "Inactive"}
+              {user.isDeleted ? "Inactive" : "Active"}
             </span>
           </p>
 
