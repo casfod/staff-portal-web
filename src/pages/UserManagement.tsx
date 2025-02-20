@@ -4,17 +4,13 @@ import { localStorageUser } from "../utils/localStorageUser";
 import { useDeleteUser } from "../features/user/userHooks/useDeleteUser";
 import AddUserForm from "../features/user/AddUserForm";
 import Modal from "../ui/Modal";
-
 import Swal from "sweetalert2";
 import UserCard from "../features/user/UserCard";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
-
   const { data } = useUsers();
-
   const { deleteUser } = useDeleteUser();
-
   const users = data?.data || [];
 
   const handleDelete = (id: string) => {
@@ -51,10 +47,6 @@ export function UserManagement() {
                 Add User
               </button>
             </Modal.Open>
-
-            <Modal.Window name="addUser">
-              <AddUserForm />
-            </Modal.Window>
           </Modal>
         )}
       </div>
@@ -88,7 +80,6 @@ export function UserManagement() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   <p className="inline-flex gap-1 text-gray-800 font-medium">
                     <span>{user?.first_name.toUpperCase()}</span>
-
                     <span>{user?.last_name.toUpperCase()}</span>
                   </p>
                 </td>
@@ -105,15 +96,11 @@ export function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       <Modal>
-                        <Modal.Open open="userCog">
+                        <Modal.Open open={`userCog-${user.id}`}>
                           <button className="text-primary hover:text-indigo-900">
                             <UserCog className="h-5 w-5" />
                           </button>
                         </Modal.Open>
-
-                        <Modal.Window name="userCog">
-                          <UserCard user={user} />
-                        </Modal.Window>
                       </Modal>
 
                       <button
@@ -124,12 +111,24 @@ export function UserManagement() {
                       </button>
                     </div>
                   </td>
-                )}{" "}
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal Windows */}
+      <Modal>
+        <Modal.Window name="addUser">
+          <AddUserForm />
+        </Modal.Window>
+        {users.map((user) => (
+          <Modal.Window key={user.id} name={`userCog-${user.id}`}>
+            <UserCard user={user} />
+          </Modal.Window>
+        ))}
+      </Modal>
     </div>
   );
 }

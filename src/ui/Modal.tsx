@@ -39,14 +39,14 @@ function Window({ children, name }: WindowProps) {
   if (name !== openName) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm py-4">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur">
       <div
-        className="bg-white z-50 relative transition duration-500 overflow-y-scroll rounded-lg"
+        className="bg-white z-50 relative transition duration-500 rounded-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()} // Prevent click events from propagating to the backdrop
       >
         <button
           onClick={() => dispatch(closeModal())}
-          className="absolute top-3 right-2 text-red-500 hover:text-gray-700"
+          className="absolute top-3 right-3 text-red-500 hover:text-gray-700"
         >
           &#x2715; {/* Close Icon */}
         </button>
