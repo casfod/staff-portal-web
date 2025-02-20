@@ -49,7 +49,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
 
   return (
     <div>
-      <div className="min-w-[280px] p-4 bg-white rounded-lg">
+      <div className="min-w-[280px] md:min-w-[350px] p-4 bg-white rounded-lg">
         <div className="flex flex-col gap-2">
           <div className="flex items-center space-x-4">
             <img

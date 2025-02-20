@@ -21,7 +21,7 @@ export function Header() {
 
           <span
             className="ml-2 text-xl  font-extrabold text-primary"
-            style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+            style={{ fontFamily: "Lato", letterSpacing: "3px" }}
           >
             STAFF PORTAL
           </span>

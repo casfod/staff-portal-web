@@ -21,7 +21,7 @@ export function Login() {
         </div>
         <h2
           className="text-2xl font-bold text-center text-gray-800 mb-4"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          style={{ fontFamily: "Lato", letterSpacing: "3px" }}
         >
           CASFOD STAFF PORTAL
         </h2>
