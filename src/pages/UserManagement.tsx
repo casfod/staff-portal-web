@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Plus, Trash2, UserCog } from "lucide-react";
 import { useUsers } from "../features/user/useUsers";
 import { localStorageUser } from "../utils/localStorageUser";
+import { useDeleteUser } from "../features/user/useDeleteUser";
+import AddUserForm from "../features/user/AddUserForm";
+import Modal from "../ui/Modal";
 
 export function UserManagement() {
   const [showModal, setShowModal] = useState(false);
@@ -9,7 +12,13 @@ export function UserManagement() {
 
   const { data } = useUsers();
 
+  const { deleteUser } = useDeleteUser();
+
   console.log(data?.data);
+
+  const handleDelete = (id: string) => {
+    deleteUser(id);
+  };
 
   const users = data?.data;
   // Mock data
@@ -37,13 +46,21 @@ export function UserManagement() {
           User Management
         </h1>
         {localStorageUserX.role == "SUPER-ADMIN" && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add User
-          </button>
+          <Modal>
+            <Modal.Open open="addUser">
+              <button
+                onClick={() => setShowModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add User
+              </button>
+            </Modal.Open>
+
+            <Modal.Window name="addUser">
+              <AddUserForm />
+            </Modal.Window>
+          </Modal>
         )}
       </div>
 
@@ -85,14 +102,17 @@ export function UserManagement() {
                   {user.role}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.isDeleted === true ? "InActive" : "Active"}
+                  {user.isDeleted === true ? "Inactive" : "Active"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
                     <button className="text-primary hover:text-indigo-900">
                       <UserCog className="h-5 w-5" />
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(user?.id!)}
+                    >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
@@ -102,74 +122,23 @@ export function UserManagement() {
           </tbody>
         </table>
       </div>
-
+      {/* 
       {showModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Add New User
-            </h2>
-            <form className="space-y-4">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Role
-                </label>
-                <select
-                  id="role"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-md"
-                >
-                  Add User
-                </button>
-              </div>
-            </form>
-          </div>
+          <AddUserForm />
         </div>
-      )}
+      )} */}
     </div>
   );
+}
+
+{
+  /* <div className="flex justify-end space-x-3">
+<button
+  type="button"
+  onClick={() => setShowModal(false)}
+  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+>
+  Cancel
+</button> */
 }

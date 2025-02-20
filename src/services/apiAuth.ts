@@ -33,24 +33,7 @@ export const login = async function (email: string, password: string) {
   }
 };
 
-export const addUser = async function (data: Partial<UserType>) {
-  try {
-    const response = await axios.post<UserType>(`${apiURL}/users/signup`, {
-      data,
-    });
-    console.log(response.data);
 
-    return response.data;
-  } catch (err) {
-    // ErrorHandler(err);
-    if (axios.isAxiosError(err)) {
-      return err.response?.data;
-    } else {
-      // Handle other errors
-      console.log(err);
-    }
-  }
-};
 
 export const getUser = async function () {
   try {

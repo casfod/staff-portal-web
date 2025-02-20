@@ -79,21 +79,10 @@ export const getUsers = async function () {
   }
 };
 
-// export const getClosedAccounts = async function () {
-//   try {
-//     const response = await axiosInstance.get<UserProfileToken>(
-//       `/users/closedAccounts`
-//     );
-//     return response.data.data;
-//   } catch (err) {
-//     return handleError(err);
-//   }
-// };
-
-export const updateUserRole = async function (userId: number, data: UserType) {
+export const updateUser = async function (data: UserType) {
   try {
     const response = await axiosInstance.patch<UserType>(
-      `/users/updateUserRole/${userId}`,
+      `/users/updateMe`,
       data
     );
     return response.data;
@@ -101,12 +90,10 @@ export const updateUserRole = async function (userId: number, data: UserType) {
     return handleError(err);
   }
 };
-export const updateUser = async function (data: UserType) {
+
+export const addUser = async function (data: Partial<UserType>) {
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updateMe`,
-      data
-    );
+    const response = await axiosInstance.post<UserType>(`/users/addUser`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -125,9 +112,11 @@ export const updatePassword = async function (data: any) {
   }
 };
 
-export const closeAccount = async function () {
+export const deleteUser = async function (userId: string) {
   try {
-    const response = await axiosInstance.delete(`/users/deleteMe`);
+    const response = await axiosInstance.patch<UserType>(
+      `/users/deleteUser/${userId}`
+    );
     return response.data;
   } catch (err) {
     return handleError(err);
