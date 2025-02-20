@@ -32,7 +32,7 @@ export function useLogin() {
         localStorage.setItem(`token-${userData.id}`, data.token);
 
         // Refetch queries after updating token
-        // queryClient.invalidateQueries(["adminOrders"] as any);
+        queryClient.setQueryData([`user-${userData.id}`] as any, userData);
         // queryClient.invalidateQueries(["orders"] as any);
 
         toast.success(`Login sucessful`);

@@ -1,15 +1,17 @@
 // import { Heart } from "lucide-react";
 import logo from "../assets/logo.png";
-import { useUser } from "../features/user/userHooks/useUser";
+// import { useUser } from "../features/user/userHooks/useUser";
 import { localStorageUser } from "../utils/localStorageUser";
 
 export function Header() {
   // const { user } = use();
 
   const localStorageUserX = localStorageUser();
-  const { data } = useUser(localStorageUserX.id);
+  // const { data, isLoading } = useUser(localStorageUserX.id);
 
-  const user = data?.data || localStorageUserX;
+  const user = localStorageUserX;
+  // const user = localStorageUserX;
+  // const user = data?.data;
 
   return (
     <header className="border-b bg-white shadow-sm py-1">

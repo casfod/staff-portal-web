@@ -75,9 +75,11 @@ export function UserManagement() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              {localStorageUserX.role == "SUPER-ADMIN" && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -99,28 +101,30 @@ export function UserManagement() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.isDeleted === true ? "Inactive" : "Active"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex space-x-2">
-                    <Modal>
-                      <Modal.Open open="userCog">
-                        <button className="text-primary hover:text-indigo-900">
-                          <UserCog className="h-5 w-5" />
-                        </button>
-                      </Modal.Open>
+                {localStorageUserX.role == "SUPER-ADMIN" && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex space-x-2">
+                      <Modal>
+                        <Modal.Open open="userCog">
+                          <button className="text-primary hover:text-indigo-900">
+                            <UserCog className="h-5 w-5" />
+                          </button>
+                        </Modal.Open>
 
-                      <Modal.Window name="userCog">
-                        <UserCard user={user} />
-                      </Modal.Window>
-                    </Modal>
+                        <Modal.Window name="userCog">
+                          <UserCard user={user} />
+                        </Modal.Window>
+                      </Modal>
 
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => handleDelete(user?.id!)}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
+                      <button
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => handleDelete(user?.id!)}
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                )}{" "}
               </tr>
             ))}
           </tbody>

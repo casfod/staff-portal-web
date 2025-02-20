@@ -45,17 +45,19 @@ const Navigation: React.FC = () => {
         </ul>
       </nav>
 
-      {isPending ? (
-        <SpinnerMini />
-      ) : (
-        <button
-          className="inline-flex gap-1 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-auto mb-28"
-          onClick={handleLogout}
-        >
-          <BiLogOut />
-          Log out
-        </button>
-      )}
+      <button
+        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-auto mb-28"
+        onClick={handleLogout}
+      >
+        {isPending ? (
+          <SpinnerMini />
+        ) : (
+          <span className="inline-flex gap-1 items-center">
+            <BiLogOut />
+            Log out
+          </span>
+        )}
+      </button>
     </div>
   );
 };
