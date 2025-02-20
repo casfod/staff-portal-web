@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addUser as addUserApi } from "../../../services/apiUser.ts";
 import { AxiosError, AxiosResponse } from "axios";
-
+import { closeModal } from "../../../store/modalSlice.ts";
 import { UserType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 
 interface ErrorResponse {
   message: string;
@@ -15,6 +16,7 @@ interface LoginError extends AxiosError {
 
 export function useAddUser() {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
   const {
     mutate: addUser,
@@ -23,17 +25,28 @@ export function useAddUser() {
   } = useMutation({
     mutationFn: (data: Partial<UserType>) => addUserApi(data),
 
-    onSuccess: () => {
-      toast.success(`User added sucessfully`);
+    onSuccess: (data) => {
+      if (data.status === "success") {
+        // Close the modal
+        dispatch(closeModal());
 
-      queryClient.invalidateQueries([`users`] as any);
+        // Show success toast
+        toast.success("User added successfully");
+
+        // Invalidate the users query to refetch data
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      } else {
+        // Handle unexpected response
+        toast.error(data.message);
+      }
     },
 
     onError: (err: LoginError) => {
-      toast.error(`${err.response?.data.message}` || "An error occurred");
+      // Show error toast
+      toast.error(err.response?.data.message || "An error occurred");
 
-      const error = err.response?.data.message;
-      console.error("Login Error:", error);
+      // Log the error for debugging
+      console.error("Add User Error:", err.response?.data.message);
     },
   });
 

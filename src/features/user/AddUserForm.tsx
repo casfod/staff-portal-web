@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { UserType } from "../../interfaces";
 import { useAddUser } from "./userHooks/useAddUser";
 import SpinnerMini from "../../ui/SpinnerMini";
@@ -11,6 +11,7 @@ const role = [
 
 const AddUserForm = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isPasswordMatch, setIsPasswordMatch] = useState<boolean>(false);
   const [formData, setFormData] = useState<Partial<UserType>>({
     first_name: "",
     last_name: "",
@@ -19,6 +20,14 @@ const AddUserForm = () => {
     password: "",
     passwordConfirm: "",
   });
+
+  useEffect(() => {
+    if (formData.password === formData.passwordConfirm) {
+      setIsPasswordMatch(true);
+    } else {
+      setIsPasswordMatch(false);
+    }
+  }, [formData.password, formData.passwordConfirm]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -173,6 +182,16 @@ const AddUserForm = () => {
               >
                 <ShowPasswordIcon showPassword={showPassword} />
               </span>
+              <span className="absolute left-0 top-7 transform translate-y-1/2 cursor-pointer">
+                {!isPasswordMatch && (
+                  <span
+                    className="text-red-500 text-sm font-semibold"
+                    style={{ letterSpacing: "2px" }}
+                  >
+                    Passwords do not match
+                  </span>
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -180,7 +199,7 @@ const AddUserForm = () => {
         <button
           type="submit"
           className="w-full h-8 md:h-10 flex justify-center items-center bg-buttonColor hover:bg-buttonColorHover text-white rounded-md shadow-md"
-          disabled={isPending}
+          disabled={isPending || !isPasswordMatch}
         >
           {isPending ? <SpinnerMini /> : "Add User"}
         </button>
