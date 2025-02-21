@@ -131,7 +131,7 @@ export function UserManagement() {
                 </td>
                 {localStorageUserX.role === "SUPER-ADMIN" && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-4">
                       <Modal>
                         <Modal.Open open={`userCog-${user.id}`}>
                           <button className="text-primary hover:text-indigo-900">
