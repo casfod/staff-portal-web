@@ -6,6 +6,7 @@ import AddUserForm from "../features/user/AddUserForm";
 import Modal from "../ui/Modal";
 import Swal from "sweetalert2";
 import UserCard from "../features/user/UserCard";
+import Spinner from "../ui/Spinner";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
@@ -74,6 +75,7 @@ export function UserManagement() {
               )}
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             {users?.map((user) => (
               <tr key={user.id}>
@@ -116,6 +118,12 @@ export function UserManagement() {
             ))}
           </tbody>
         </table>
+
+        {users.length === 0 && (
+          <div className="bg-gray-50 flex items-center justify-center w-full h-64">
+            <Spinner />
+          </div>
+        )}
       </div>
 
       {/* Modal Windows */}
