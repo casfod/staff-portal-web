@@ -1,5 +1,5 @@
 import { Plus, Trash2, UserCog } from "lucide-react";
-import { useUsers } from "../features/user/userHooks/useUsers";
+import { useUsers } from "../features/user/userHooks/useUsers1";
 import { localStorageUser } from "../utils/localStorageUser";
 import { useDeleteUser } from "../features/user/userHooks/useDeleteUser";
 import AddUserForm from "../features/user/AddUserForm";
@@ -8,41 +8,18 @@ import Swal from "sweetalert2";
 import UserCard from "../features/user/UserCard";
 import Spinner from "../ui/Spinner";
 import { BiSearch } from "react-icons/bi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { UserType } from "../interfaces";
 import { GoXCircle } from "react-icons/go";
 
-import { useDebounce } from "use-debounce";
-
-export function UserManagement() {
+export function UserManagement1() {
   const localStorageUserX = localStorageUser();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [roleFilter, setRoleFilter] = useState<string>("");
-  const [sort, setSort] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const limit = 4;
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 500); // 500ms debounce
+  const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
 
-  const { data, isLoading, isError, error } = useUsers(
-    debouncedSearchTerm,
-    roleFilter,
-    sort,
-    page,
-    limit
-  );
-
+  const { data, isLoading } = useUsers();
   const { deleteUser } = useDeleteUser();
-
-  const users = data?.data.users || [];
-  const totalPages = data?.totalPages || 1;
-
-  const handleSort = (field: string) => {
-    const order = sort.includes("asc") ? "desc" : "asc";
-    setSort(`${field}:${order}`);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const users = data?.data;
 
   const handleDelete = (id: string) => {
     Swal.fire({
@@ -55,7 +32,7 @@ export function UserManagement() {
       customClass: { popup: "custom-style" },
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteUser(id, {
+        deleteUser(id!, {
           onError: (error) => {
             Swal.fire("Error!", error.message, "error");
           },
@@ -64,17 +41,22 @@ export function UserManagement() {
     });
   };
 
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  if (isError) {
-    return <div>Error: {error.message}</div>;
-  }
+  useEffect(() => {
+    if (users) {
+      const term = searchTerm.toLowerCase();
+      const filtered = users.filter(
+        (user: UserType) =>
+          user.first_name.toLowerCase().includes(term) ||
+          user.last_name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term) ||
+          user.role.toLowerCase().includes(term)
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [searchTerm, users]);
 
   return (
     <div className="flex flex-col space-y-6">
-      {/* Header and Add User Button */}
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
@@ -94,7 +76,6 @@ export function UserManagement() {
         )}
       </div>
 
-      {/* Search Bar */}
       <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
         <span className="p-2 text-gray-400">
           <BiSearch className="w-5 h-5" />
@@ -103,49 +84,29 @@ export function UserManagement() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+          className=" w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
           placeholder="Search by Name, Email, or Role"
         />
+
         <span
-          className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
+          className=" text-gray-400  absolute right-2 top-1/2 transform 
+              -translate-y-1/2 cursor-pointer hover:scale-110"
           onClick={() => setSearchTerm("")}
         >
           <GoXCircle />
         </span>
       </div>
-
-      {/* Role Filter Dropdown */}
-      <select
-        value={roleFilter}
-        onChange={(e) => setRoleFilter(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">All Roles</option>
-        <option value="ADMIN">Admin</option>
-        <option value="USER">User</option>
-      </select>
-
-      {/* User Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("first_name")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("email")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("role")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Role
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
@@ -158,11 +119,15 @@ export function UserManagement() {
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+
+          <tbody className="bg-white divide-y divide-gray-200 max-h-screen overflow-y-scroll">
+            {filteredUsers?.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                  {`${user.first_name} ${user.last_name}`}
+                  <p className="inline-flex gap-1 text-gray-700 font-medium">
+                    <span>{user?.first_name.toUpperCase()}</span>
+                    <span>{user?.last_name.toUpperCase()}</span>
+                  </p>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.email}
@@ -171,7 +136,7 @@ export function UserManagement() {
                   {user.role}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.isDeleted ? "Inactive" : "Active"}
+                  {user.isDeleted === true ? "Inactive" : "Active"}
                 </td>
                 {localStorageUserX.role === "SUPER-ADMIN" && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -186,7 +151,7 @@ export function UserManagement() {
 
                       <button
                         className="text-red-600 hover:text-red-900"
-                        onClick={() => handleDelete(user.id!)}
+                        onClick={() => handleDelete(user?.id!)}
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -198,42 +163,24 @@ export function UserManagement() {
           </tbody>
         </table>
 
-        {/* Loading Spinner */}
         {isLoading && (
           <div className="bg-gray-50 flex items-center justify-center w-full h-64">
             <Spinner />
           </div>
         )}
-
-        {/* No Results Message */}
-        {users.length === 0 && !isLoading && (
+        {filteredUsers.length === 0 && !isLoading && (
           <div className="bg-gray-50 p-8">
             <p className="text-2xl text-center text-gray-500">No result</p>
           </div>
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i + 1}
-            onClick={() => handlePageChange(i + 1)}
-            className={`px-4 py-2 ${
-              page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
-            } rounded-lg`}
-          >
-            {i + 1}
-          </button>
-        ))}
-      </div>
-
-      {/* Modals */}
+      {/* Modal Windows */}
       <Modal>
         <Modal.Window name="addUser">
           <AddUserForm />
         </Modal.Window>
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <Modal.Window key={user.id} name={`userCog-${user.id}`}>
             <UserCard user={user} />
           </Modal.Window>

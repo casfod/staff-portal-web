@@ -70,30 +70,15 @@ const handleError = (err: any) => {
 };
 
 // API Functions
-
-export const getUsers = async function (queryParams: {
-  search?: string;
-  role?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getUsers = async function () {
   try {
-    const response = await axiosInstance.get<{
-      status: number;
-      message: string;
-      data: UserType[];
-      totalUsers: number;
-      totalPages: number;
-      currentPage: number;
-    }>(`/users`, { params: queryParams });
-
-    console.log("API Response:", response.data); // Debugging line
+    const response = await axiosInstance.get<UserType[]>(`/users`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
+
 export const updateUser = async function (data: UserType) {
   try {
     const response = await axiosInstance.patch<UserType>(
