@@ -36,7 +36,7 @@ const Navigation: React.FC = () => {
   return (
     <div className="border hidden md:flex flex-col items-center scale-95 md:scale-100 min-h-screen ">
       <nav className="">
-        <ul className="flex flex-col items-center w-60 shadow-sm px-8 py-4">
+        <ul className="flex flex-col items-center w-60 shadow-sm px-8 py-4 gap-2">
           {navigation.map((item) => (
             <li className="w-full" key={item.to}>
               <Navlink to={item.to} label={item.label} icon={item.icon} />
