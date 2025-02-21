@@ -12,7 +12,7 @@ export function Layout() {
       <div className="flex text-gray-300">
         {/* <Navigation onNavigate={setCurrentPage} currentPage={currentPage}/> */}
         <Navigation />
-        <main className="flex-1 p-6 lg:p-8">{<Outlet />}</main>
+        <main className="flex-1 mx-auto p-4 md:p-6">{<Outlet />}</main>
       </div>
     </div>
   );

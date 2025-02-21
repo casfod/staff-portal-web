@@ -14,8 +14,8 @@ export function Header() {
   // const user = data?.data;
 
   return (
-    <header className="border-b bg-white shadow-sm py-1">
-      <div className="mx-auto px-4 sm:px-6 lg:px-4">
+    <header className="border-b bg-white shadow-sm py-1 mx-auto px-4 md:pr-6">
+      <div className="">
         <div className="flex justify-between items-center h-16">
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
 
@@ -25,7 +25,7 @@ export function Header() {
           >
             STAFF PORTAL
           </span>
-          <div className="space-x-4 lg:mr-3">
+          <div className="space-x-4 ">
             <div className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base">
               <p className="inline-flex gap-1 text-gray-800 font-medium">
                 <span>{user?.first_name.toUpperCase()}</span>
