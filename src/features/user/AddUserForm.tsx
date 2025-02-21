@@ -159,12 +159,12 @@ const AddUserForm = () => {
               </span>
 
               <span className="absolute left-0 top-6 transform translate-y-1/2 cursor-pointer">
-                {formData?.password?.length! < 8 && (
+                {formData.password && ValidatePasswordLength && (
                   <span
                     className="text-red-500 text-xs font-semibold"
                     style={{ letterSpacing: "1px" }}
                   >
-                    Pasword must greater or equals to 8
+                    Pasword must be greater or equals to 8
                   </span>
                 )}
               </span>
@@ -209,7 +209,11 @@ const AddUserForm = () => {
 
         <button
           type="submit"
-          className="w-full h-8 md:h-10 flex justify-center items-center bg-buttonColor hover:bg-buttonColorHover text-white rounded-md shadow-md"
+          className={`w-full h-8 md:h-10 flex justify-center items-center ${
+            isPending || !isPasswordMatch || ValidatePasswordLength
+              ? "bg-gray-300"
+              : "bg-buttonColor hover:bg-buttonColorHover"
+          } text-white rounded-md shadow-md`}
           disabled={isPending || !isPasswordMatch || ValidatePasswordLength}
         >
           {isPending ? <SpinnerMini /> : "Add User"}
