@@ -26,7 +26,7 @@ export function useAddUser() {
     mutationFn: (data: Partial<UserType>) => addUserApi(data),
 
     onSuccess: (data) => {
-      if (data.status !== "error") {
+      if (data.status === 200) {
         // Close the modal
         dispatch(closeModal());
 
