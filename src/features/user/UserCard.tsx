@@ -15,7 +15,6 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
 
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newRole = event.target.value;
-
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change this user's role?",
@@ -24,6 +23,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       cancelButtonColor: "#DC3340",
       confirmButtonText: "Yes, update it!",
       customClass: { popup: "custom-style" },
+      animation: false, // Disable animations
     }).then((result) => {
       if (result.isConfirmed) {
         setRole(newRole);
@@ -32,14 +32,20 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           { role: newRole },
           {
             onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
+              Swal.fire({
+                title: "Error!",
+                text: error.message,
+                icon: "error",
+                animation: false, // Disable animations for error modal
+              });
             },
             // onSuccess: () => {
-            //   Swal.fire(
-            //     "Success!",
-            //     "User role updated successfully.",
-            //     "success"
-            //   );
+            //   Swal.fire({
+            //     title: "Success!",
+            //     text: "User role updated successfully.",
+            //     icon: "success",
+            //     animation: false // Disable animations for success modal
+            //   });
             // },
           }
         );
