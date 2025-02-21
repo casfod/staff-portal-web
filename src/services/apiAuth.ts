@@ -89,44 +89,41 @@ export const logout = async function () {
   }
 };
 
-// export const forgotPassword = async function (data: PasswordForgotTypes) {
-//   try {
-//     const response = await axios.post<PasswordResetTypes>(
-//       `${apiURL}/users/forgotPassword`,
-//       data
-//     );
-//     console.log(response.data);
+export const forgotPassword = async function (data: UserType) {
+  try {
+    const response = await axios.post<UserType>(
+      `${apiURL}/users/forgotPassword`,
+      data
+    );
+    console.log(response.data);
 
-//     return response.data;
-//   } catch (err) {
-//     // ErrorHandler(err);
-//     if (axios.isAxiosError(err)) {
-//       return err.response?.data;
-//     } else {
-//       // Handle other errors
-//       console.log(err);
-//     }
-//   }
-// };
-// export const resetPassword = async function (
-//   token: string,
-//   data: PasswordResetTypes
-// ) {
-//   try {
-//     const response = await axios.patch<PasswordResetTypes>(
-//       `${apiURL}/users/resetPassword/${token}`,
-//       data
-//     );
-//     console.log(response.data);
+    return response.data;
+  } catch (err) {
+    // ErrorHandler(err);
+    if (axios.isAxiosError(err)) {
+      return err.response?.data;
+    } else {
+      // Handle other errors
+      console.log(err);
+    }
+  }
+};
+export const resetPassword = async function (token: string, data: UserType) {
+  try {
+    const response = await axios.patch<UserType>(
+      `${apiURL}/users/resetPassword/${token}`,
+      data
+    );
+    console.log(response.data);
 
-//     return response.data;
-//   } catch (err) {
-//     // ErrorHandler(err);
-//     if (axios.isAxiosError(err)) {
-//       return err.response?.data;
-//     } else {
-//       // Handle other errors
-//       console.log(err);
-//     }
-//   }
-// };
+    return response.data;
+  } catch (err) {
+    // ErrorHandler(err);
+    if (axios.isAxiosError(err)) {
+      return err.response?.data;
+    } else {
+      // Handle other errors
+      console.log(err);
+    }
+  }
+};

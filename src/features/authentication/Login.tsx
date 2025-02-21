@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLogin } from "./useLogin";
+import { useLogin } from "./authHooks/useLogin";
 import SpinnerMini from "../../ui/SpinnerMini";
 import logo from "../../assets/logo.png";
 

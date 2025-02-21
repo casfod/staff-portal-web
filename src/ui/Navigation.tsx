@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import SpinnerMini from "./SpinnerMini";
-import { useLogout } from "../features/authentication/useLogout";
+import { useLogout } from "../features/authentication/authHooks/useLogout";
 import { BiLogOut } from "react-icons/bi";
 
 const Navigation: React.FC = () => {

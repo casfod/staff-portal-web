@@ -72,8 +72,8 @@ export function UserManagement() {
         )}
       </div>
 
-      <div className="flex items-center w-full max-w-[275px] h-9 bg-white border border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-        <span className="p-2 text-gray-500">
+      <div className="flex items-center w-full max-w-[275px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
+        <span className="p-2 text-gray-400">
           <BiSearch className="w-5 h-5" />
         </span>
         <input

@@ -1,15 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
-import { forgotPassword as forgotPasswordApi } from "../../services/apiAuth.ts";
+import { forgotPassword as forgotPasswordApi } from "../../../services/apiAuth.ts";
 import { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-hot-toast";
-import { PasswordForgotTypes } from "../../interfaces.ts";
+import { UserType } from "../../../interfaces.ts";
 
 interface ErrorResponse {
   message: string;
 }
 
 interface UseforgotPasswordType {
-  data: PasswordForgotTypes;
+  data: UserType;
 }
 
 interface LoginError extends AxiosError {
