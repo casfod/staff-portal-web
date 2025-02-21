@@ -48,6 +48,8 @@ const AddUserForm = () => {
     setShowPassword(!showPassword);
   };
 
+  const ValidatePasswordLength = formData?.password?.length! < 8;
+
   return (
     <div className=" w-[300px] md:w-[400px] flex flex-col items-center justify-center py-4 rounded-lg">
       <h2 className="text-lg text-center font-medium text-gray-700 mb-4">
@@ -57,7 +59,7 @@ const AddUserForm = () => {
         onSubmit={handleSubmit}
         className="w-full flex flex-col items-center gap-4 sm:gap-7 bg-white bg-opacity-90 px-4  md:px-6 rounded-md  "
       >
-        <div className="flex flex-col w-full gap-2">
+        <div className="flex flex-col w-full gap-5">
           <div>
             <label
               htmlFor="first_name"
@@ -155,6 +157,17 @@ const AddUserForm = () => {
               >
                 <ShowPasswordIcon showPassword={showPassword} />
               </span>
+
+              <span className="absolute left-0 top-6 transform translate-y-1/2 cursor-pointer">
+                {formData?.password?.length! < 8 && (
+                  <span
+                    className="text-red-500 text-xs font-semibold"
+                    style={{ letterSpacing: "1px" }}
+                  >
+                    Pasword must greater or equals to 8
+                  </span>
+                )}
+              </span>
             </div>
           </div>
           <div>
@@ -180,11 +193,11 @@ const AddUserForm = () => {
               >
                 <ShowPasswordIcon showPassword={showPassword} />
               </span>
-              <span className="absolute left-0 top-7 transform translate-y-1/2 cursor-pointer">
+              <span className="absolute left-0 top-6 transform translate-y-1/2 cursor-pointer">
                 {!isPasswordMatch && (
                   <span
                     className="text-red-500 text-xs font-semibold"
-                    style={{ letterSpacing: "2px" }}
+                    style={{ letterSpacing: "1px" }}
                   >
                     Passwords do not match
                   </span>
@@ -197,7 +210,7 @@ const AddUserForm = () => {
         <button
           type="submit"
           className="w-full h-8 md:h-10 flex justify-center items-center bg-buttonColor hover:bg-buttonColorHover text-white rounded-md shadow-md"
-          disabled={isPending || !isPasswordMatch}
+          disabled={isPending || !isPasswordMatch || ValidatePasswordLength}
         >
           {isPending ? <SpinnerMini /> : "Add User"}
         </button>
