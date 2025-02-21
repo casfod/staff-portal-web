@@ -41,8 +41,6 @@ const AddUserForm = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    console.log(formData, "Form Data");
-
     addUser(formData);
   };
 
