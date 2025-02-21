@@ -10,6 +10,7 @@ import Spinner from "../ui/Spinner";
 import { BiSearch } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { UserType } from "../interfaces";
+import { GoXCircle } from "react-icons/go";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
@@ -75,7 +76,7 @@ export function UserManagement() {
         )}
       </div>
 
-      <div className="flex items-center w-full max-w-[275px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
+      <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
         <span className="p-2 text-gray-400">
           <BiSearch className="w-5 h-5" />
         </span>
@@ -83,9 +84,17 @@ export function UserManagement() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0"
+          className=" w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
           placeholder="Search by Name, Email, or Role"
         />
+
+        <span
+          className=" text-gray-400  absolute right-2 top-1/2 transform 
+              -translate-y-1/2 cursor-pointer hover:scale-110"
+          onClick={() => setSearchTerm("")}
+        >
+          <GoXCircle />
+        </span>
       </div>
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
