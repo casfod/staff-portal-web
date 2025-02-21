@@ -60,7 +60,7 @@ export function UserManagement() {
         <h1 className="text-2xl font-semibold text-gray-800">
           User Management
         </h1>
-        {localStorageUserX.role == "SUPER-ADMIN" && (
+        {localStorageUserX.role === "SUPER-ADMIN" && (
           <Modal>
             <Modal.Open open="addUser">
               <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover">
@@ -100,7 +100,7 @@ export function UserManagement() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              {localStorageUserX.role == "SUPER-ADMIN" && (
+              {localStorageUserX.role === "SUPER-ADMIN" && (
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -126,7 +126,7 @@ export function UserManagement() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.isDeleted === true ? "Inactive" : "Active"}
                 </td>
-                {localStorageUserX.role == "SUPER-ADMIN" && (
+                {localStorageUserX.role === "SUPER-ADMIN" && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       <Modal>
