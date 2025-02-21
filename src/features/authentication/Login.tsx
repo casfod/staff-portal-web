@@ -20,7 +20,7 @@ export function Login() {
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
         </div>
         <h2
-          className="text-2xl font-bold text-center text-gray-800 mb-4"
+          className="text-2xl font-bold text-center text-gray-700 mb-4"
           style={{ fontFamily: "Lato", letterSpacing: "3px" }}
         >
           CASFOD STAFF PORTAL

@@ -27,7 +27,7 @@ export function Header() {
           </span>
           <div className="space-x-4 ">
             <div className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base">
-              <p className="inline-flex gap-1 text-gray-800 font-medium">
+              <p className="inline-flex gap-1 text-gray-700 font-medium">
                 <span>{user?.first_name.toUpperCase()}</span>
 
                 <span>{user?.last_name.toUpperCase()}</span>

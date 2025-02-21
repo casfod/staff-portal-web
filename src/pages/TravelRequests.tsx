@@ -27,7 +27,10 @@ export function TravelRequests() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1
+          className="text-2xl font-semibold text-gray-700"
+          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+        >
           Travel Requests
         </h1>
         <button
@@ -63,7 +66,7 @@ export function TravelRequests() {
           <tbody className="bg-white divide-y divide-gray-200">
             {requests.map((request) => (
               <tr key={request.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
                   {request.destination}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -87,7 +90,7 @@ export function TravelRequests() {
       {showModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-medium text-gray-800 mb-4">
+            <h2 className="text-lg font-medium text-gray-700 mb-4">
               Create Travel Request
             </h2>
             <form className="space-y-4">
