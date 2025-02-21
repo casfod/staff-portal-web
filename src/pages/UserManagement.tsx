@@ -156,8 +156,10 @@ export function UserManagement() {
             <Spinner />
           </div>
         )}
-        {filteredUsers.length === 0 && (
-          <p className="text-2xl text-center text-gray-500">No result</p>
+        {filteredUsers.length === 0 && !isLoading && (
+          <div className="bg-gray-50 p-8">
+            <p className="text-2xl text-center text-gray-500">No result</p>
+          </div>
         )}
       </div>
 
