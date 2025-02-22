@@ -21,7 +21,7 @@ export function UserManagement() {
   const limit = 10;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
 
-  const { data, isLoading, isError, error } = useUsers(
+  const { data, isLoading, isError } = useUsers(
     debouncedSearchTerm,
     sort,
     page,
@@ -29,9 +29,9 @@ export function UserManagement() {
   );
 
   const { deleteUser } = useDeleteUser();
-
-  const users = data?.data.users || [];
-  const totalPages = data?.data.totalPages || 1;
+  // Add null checks for `data` and `data.data`
+  const users = data?.data?.users ?? [];
+  const totalPages = data?.data?.totalPages ?? 1;
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSort(e.target.value);
@@ -61,8 +61,23 @@ export function UserManagement() {
     });
   };
 
+  console.log(isError);
+
   if (isError) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="  fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-15 backdrop-blur-sm">
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-semibold text-red-600">Network Error</h2>
+          <p className="text-gray-600">Check Connection</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
