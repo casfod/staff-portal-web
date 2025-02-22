@@ -34,9 +34,9 @@ const Navigation: React.FC = () => {
   ];
 
   return (
-    <div className="border hidden md:flex flex-col items-center scale-95 md:scale-100 min-h-screen ">
+    <div className="border hidden md:flex flex-col items-center scale-95 md:scale-100 min-h-screen  ">
       <nav className="">
-        <ul className="flex flex-col items-center w-60 shadow-sm px-8 py-4 gap-2">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-8 py-6">
           {navigation.map((item) => (
             <li className="w-full" key={item.to}>
               <Navlink to={item.to} label={item.label} icon={item.icon} />
@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-auto mb-28"
+        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-auto mb-32"
         onClick={handleLogout}
       >
         {isPending ? (

@@ -11,14 +11,15 @@ import { BiSearch } from "react-icons/bi";
 import { useState } from "react";
 import { GoXCircle } from "react-icons/go";
 import { useDebounce } from "use-debounce";
+import { RiArrowUpDownLine } from "react-icons/ri";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sort, setSort] = useState<string>("email:asc"); // Default sort
   const [page, setPage] = useState<number>(1);
-  const limit = 8;
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 500); // 500ms debounce
+  const limit = 10;
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
 
   const { data, isLoading, isError, error } = useUsers(
     debouncedSearchTerm,
@@ -60,16 +61,12 @@ export function UserManagement() {
     });
   };
 
-  if (isLoading) {
-    return <Spinner />;
-  }
-
   if (isError) {
     return <div>Error: {error.message}</div>;
   }
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-3">
       {/* Header and Add User Button */}
       <div className="flex justify-between items-center">
         <h1
@@ -101,7 +98,7 @@ export function UserManagement() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-            placeholder="Search by Email or Role"
+            placeholder="Search by Name, Email or Role"
           />
           <span
             className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
@@ -112,18 +109,31 @@ export function UserManagement() {
         </div>
 
         {/* Sort Dropdown */}
-        <select
-          value={sort}
-          onChange={handleSortChange}
-          className="px-4 py-2 border-2 border-gray-300 rounded-lg shadow-sm text-gray-700 placeholder-gray-400  focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="email:asc">Email (A-Z)</option>
-          <option value="email:desc">Email (Z-A)</option>
-          <option value="role:asc">Role (A-Z)</option>
-          <option value="role:desc">Role (Z-A)</option>
-          <option value="first_name:asc">Name (A-Z)</option>
-          <option value="first_name:desc">Name (Z-A)</option>
-        </select>
+        <div className="relative inline-block">
+          <select
+            value={sort}
+            onChange={handleSortChange}
+            className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm text-gray-600 appearance-none bg-white"
+          >
+            {/* Placeholder Option */}
+            <option value="" disabled selected className="text-gray-400">
+              Sort
+            </option>
+
+            {/* Sort Options */}
+            <option value="email:asc">Email (A-Z)</option>
+            <option value="email:desc">Email (Z-A)</option>
+            <option value="role:asc">Role (A-Z)</option>
+            <option value="role:desc">Role (Z-A)</option>
+            <option value="first_name:asc">Name (A-Z)</option>
+            <option value="first_name:desc">Name (Z-A)</option>
+          </select>
+
+          {/* Icon */}
+          <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+            <RiArrowUpDownLine className="h-5 w-5" />
+          </div>
+        </div>
       </div>
 
       {/* User Table */}
@@ -150,53 +160,60 @@ export function UserManagement() {
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                  {`${user.first_name} ${user.last_name}`}
+          {isLoading ? (
+            <tbody>
+              <tr>
+                <td colSpan={localStorageUserX.role === "SUPER-ADMIN" ? 5 : 4}>
+                  <div className="flex justify-center items-center h-64">
+                    <Spinner />
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.role}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.isDeleted ? "Inactive" : "Active"}
-                </td>
-                {localStorageUserX.role === "SUPER-ADMIN" && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-4">
-                      <Modal>
-                        <Modal.Open open={`userCog-${user.id}`}>
-                          <button className="text-primary hover:text-indigo-900">
-                            <UserCog className="h-5 w-5" />
-                          </button>
-                        </Modal.Open>
-                      </Modal>
-
-                      <button
-                        className="text-red-600 hover:text-red-900"
-                        onClick={() => handleDelete(user.id!)}
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                )}
               </tr>
-            ))}
-          </tbody>
+            </tbody>
+          ) : (
+            <tbody className="bg-white divide-y divide-gray-200">
+              {users.map((user) => (
+                <tr
+                  key={user.id}
+                  className="h-[40px] max-h-[40px]" // Apply max height to each row
+                >
+                  <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700">
+                    {`${user.first_name} ${user.last_name}`}
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    {user.email}
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    {user.role}
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    {user.isDeleted ? "Inactive" : "Active"}
+                  </td>
+                  {localStorageUserX.role === "SUPER-ADMIN" && (
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-4">
+                        <Modal>
+                          <Modal.Open open={`userCog-${user.id}`}>
+                            <button className="text-primary hover:text-indigo-900">
+                              <UserCog className="h-5 w-5" />
+                            </button>
+                          </Modal.Open>
+                        </Modal>
+
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDelete(user.id!)}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
-
-        {/* Loading Spinner */}
-        {isLoading && (
-          <div className="bg-gray-50 flex items-center justify-center w-full h-64">
-            <Spinner />
-          </div>
-        )}
-
         {/* No Results Message */}
         {users.length === 0 && !isLoading && (
           <div className="bg-gray-50 p-8">
@@ -205,45 +222,62 @@ export function UserManagement() {
         )}
       </div>
 
-      {/* Improved Pagination */}
-      {users.length > limit && (
-        <div className="flex justify-center items-center space-x-2">
+      {/*Pagination */}
+
+      {(users.length >= limit || totalPages > 1) && (
+        <div className="flex justify-start items-center space-x-2">
+          {/* Previous Button */}
           <button
             onClick={() => handlePageChange(page - 1)}
             disabled={page === 1}
-            className="px-4 py-2 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
+            className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
           >
             Previous
           </button>
+
+          {/* Page Numbers */}
           {Array.from({ length: totalPages }, (_, i) => {
+            const pageNumber = i + 1;
+
+            // Show the first page, last page, current page, and pages around the current page
             if (
-              i + 1 === page ||
-              Math.abs(i + 1 - page) <= 1 ||
-              i === 0 ||
-              i === totalPages - 1
+              pageNumber === 1 || // Always show the first page
+              pageNumber === totalPages || // Always show the last page
+              Math.abs(pageNumber - page) <= 1 || // Show pages around the current page
+              (pageNumber === 2 && page > 3) || // Show ellipsis after the first page if needed
+              (pageNumber === totalPages - 1 && page < totalPages - 2) // Show ellipsis before the last page if needed
             ) {
               return (
                 <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`px-4 py-2 ${
-                    page === i + 1
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`px-3 py-1 ${
+                    page === pageNumber
                       ? "bg-buttonColor hover:bg-buttonColorHover text-white"
                       : "bg-gray-200"
                   } rounded-lg`}
                 >
-                  {i + 1}
+                  {pageNumber}
                 </button>
               );
-            } else if (Math.abs(i + 1 - page) === 2) {
-              return <span key={i + 1}>...</span>;
             }
+
+            // Show ellipsis for skipped pages
+            if (
+              (pageNumber === 2 && page > 4) || // Ellipsis after the first page
+              (pageNumber === totalPages - 1 && page < totalPages - 3) // Ellipsis before the last page
+            ) {
+              return <span key={pageNumber}>...</span>;
+            }
+
             return null;
           })}
+
+          {/* Next Button */}
           <button
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
+            className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
           >
             Next
           </button>
