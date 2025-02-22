@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
-import { UserType } from "../interfaces.ts";
+import { UserType, useUsersType } from "../interfaces.ts";
 
 const url = baseUrl();
 
@@ -79,21 +79,16 @@ export const getUsers = async function (queryParams: {
   limit?: number;
 }) {
   try {
-    const response = await axiosInstance.get<{
-      status: number;
-      message: string;
-      data: UserType[];
-      totalUsers: number;
-      totalPages: number;
-      currentPage: number;
-    }>(`/users`, { params: queryParams });
-
+    const response = await axiosInstance.get<useUsersType>(`/users`, {
+      params: queryParams,
+    });
     console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
+
 export const updateUser = async function (data: UserType) {
   try {
     const response = await axiosInstance.patch<UserType>(

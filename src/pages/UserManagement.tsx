@@ -10,21 +10,18 @@ import Spinner from "../ui/Spinner";
 import { BiSearch } from "react-icons/bi";
 import { useState } from "react";
 import { GoXCircle } from "react-icons/go";
-
 import { useDebounce } from "use-debounce";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [roleFilter, setRoleFilter] = useState<string>("");
-  const [sort, setSort] = useState<string>("");
+  const [sort, setSort] = useState<string>("email:asc"); // Default sort
   const [page, setPage] = useState<number>(1);
-  const limit = 4;
+  const limit = 8;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500); // 500ms debounce
 
   const { data, isLoading, isError, error } = useUsers(
     debouncedSearchTerm,
-    roleFilter,
     sort,
     page,
     limit
@@ -33,11 +30,10 @@ export function UserManagement() {
   const { deleteUser } = useDeleteUser();
 
   const users = data?.data.users || [];
-  const totalPages = data?.totalPages || 1;
+  const totalPages = data?.data.totalPages || 1;
 
-  const handleSort = (field: string) => {
-    const order = sort.includes("asc") ? "desc" : "asc";
-    setSort(`${field}:${order}`);
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSort(e.target.value);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -94,58 +90,54 @@ export function UserManagement() {
         )}
       </div>
 
-      {/* Search Bar */}
-      <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-        <span className="p-2 text-gray-400">
-          <BiSearch className="w-5 h-5" />
-        </span>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-          placeholder="Search by Name, Email, or Role"
-        />
-        <span
-          className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-          onClick={() => setSearchTerm("")}
-        >
-          <GoXCircle />
-        </span>
-      </div>
+      {/* Search Bar and Sort Dropdown */}
+      <div className="flex items-center space-x-4">
+        <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
+          <span className="p-2 text-gray-400">
+            <BiSearch className="w-5 h-5" />
+          </span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+            placeholder="Search by Email or Role"
+          />
+          <span
+            className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
+            onClick={() => setSearchTerm("")}
+          >
+            <GoXCircle />
+          </span>
+        </div>
 
-      {/* Role Filter Dropdown */}
-      <select
-        value={roleFilter}
-        onChange={(e) => setRoleFilter(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">All Roles</option>
-        <option value="ADMIN">Admin</option>
-        <option value="USER">User</option>
-      </select>
+        {/* Sort Dropdown */}
+        <select
+          value={sort}
+          onChange={handleSortChange}
+          className="px-4 py-2 border-2 border-gray-300 rounded-lg shadow-sm text-gray-700 placeholder-gray-400  focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="email:asc">Email (A-Z)</option>
+          <option value="email:desc">Email (Z-A)</option>
+          <option value="role:asc">Role (A-Z)</option>
+          <option value="role:desc">Role (Z-A)</option>
+          <option value="first_name:asc">Name (A-Z)</option>
+          <option value="first_name:desc">Name (Z-A)</option>
+        </select>
+      </div>
 
       {/* User Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("first_name")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("email")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
-              <th
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("role")}
-              >
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Role
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
@@ -213,20 +205,50 @@ export function UserManagement() {
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => (
+      {/* Improved Pagination */}
+      {users.length > limit && (
+        <div className="flex justify-center items-center space-x-2">
           <button
-            key={i + 1}
-            onClick={() => handlePageChange(i + 1)}
-            className={`px-4 py-2 ${
-              page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
-            } rounded-lg`}
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            className="px-4 py-2 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
           >
-            {i + 1}
+            Previous
           </button>
-        ))}
-      </div>
+          {Array.from({ length: totalPages }, (_, i) => {
+            if (
+              i + 1 === page ||
+              Math.abs(i + 1 - page) <= 1 ||
+              i === 0 ||
+              i === totalPages - 1
+            ) {
+              return (
+                <button
+                  key={i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`px-4 py-2 ${
+                    page === i + 1
+                      ? "bg-buttonColor hover:bg-buttonColorHover text-white"
+                      : "bg-gray-200"
+                  } rounded-lg`}
+                >
+                  {i + 1}
+                </button>
+              );
+            } else if (Math.abs(i + 1 - page) === 2) {
+              return <span key={i + 1}>...</span>;
+            }
+            return null;
+          })}
+          <button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       <Modal>
