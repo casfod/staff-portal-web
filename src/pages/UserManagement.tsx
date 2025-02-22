@@ -61,8 +61,6 @@ export function UserManagement() {
     });
   };
 
-  console.log(isError);
-
   if (isError) {
     return (
       <div className="  fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-15 backdrop-blur-sm">

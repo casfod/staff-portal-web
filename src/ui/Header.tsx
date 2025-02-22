@@ -32,7 +32,7 @@ export function Header() {
 
                 <span>{user?.last_name.toUpperCase()}</span>
               </p>
-              <div className="bg-secondary text-sm text-center px-2 py-1 rounded-md">
+              <div className="bg-secondary text-xs lg:text-base text-center px-2 py-1 rounded-md">
                 <p className="text-gray-50">{user?.role}</p>
               </div>
             </div>
