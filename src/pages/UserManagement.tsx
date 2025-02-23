@@ -267,7 +267,7 @@ export function UserManagement() {
                   className={`px-3 py-1 ${
                     page === pageNumber
                       ? "bg-buttonColor hover:bg-buttonColorHover text-white"
-                      : "bg-gray-200"
+                      : "bg-gray-200 text-gray-700 hover:bg-buttonColor hover:bg-opacity-65 hover:text-white"
                   } rounded-lg`}
                 >
                   {pageNumber}
