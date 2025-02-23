@@ -177,7 +177,7 @@ export function UserManagement() {
             <tbody>
               <tr>
                 <td colSpan={localStorageUserX.role === "SUPER-ADMIN" ? 5 : 4}>
-                  <div className="flex justify-center items-center h-64">
+                  <div className="flex justify-center items-center h-96">
                     <Spinner />
                   </div>
                 </td>
