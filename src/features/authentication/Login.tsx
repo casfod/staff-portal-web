@@ -90,8 +90,8 @@ export function Login() {
             <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
           </div>
           <h2
-            className="text-2xl font-bold text-center text-gray-700 mb-4"
-            style={{ fontFamily: "Lato", letterSpacing: "3px" }}
+            className="text-2xl font-bold md:font-extrabold text-center text-primary mb-4"
+            style={{ fontFamily: "Lato", letterSpacing: "3.5px" }}
           >
             CASFOD STAFF PORTAL
           </h2>
@@ -157,7 +157,7 @@ export function Login() {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[#2257B3] hover:bg-opacity-90"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-primary hover:bg-opacity-95"
             >
               {isPending ? <SpinnerMini /> : " Sign In"}
             </button>
