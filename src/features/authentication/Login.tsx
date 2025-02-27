@@ -157,15 +157,16 @@ export function Login() {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#2257B3] hover:bg-opacity-90"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[#2257B3] hover:bg-opacity-90"
             >
               {isPending ? <SpinnerMini /> : " Sign In"}
             </button>
           </form>
         </div>
 
-        <p className="text-gray-50 text-center mt-8 ">
-          &copy; 2025 Casfod Staff Portal. All rights reserved.
+        <p className="inline-flex items-center gap-1 text-gray-50 font-semibold text-center mt-8 ">
+          <span className="text-lg">&copy;</span>
+          <span>2025 Casfod Staff Portal. All rights reserved.</span>
         </p>
       </div>
     </>
