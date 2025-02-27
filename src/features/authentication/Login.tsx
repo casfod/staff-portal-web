@@ -111,7 +111,7 @@ export function Login() {
                   Email
                 </label>
                 <input
-                  className="w-full h-8 md:h-10 px-4 rounded-md border 
+                  className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                 focus:border-[#052859] focus:outline-none shadow-lg 
                 text-gray-700"
                   id="email"
@@ -133,7 +133,7 @@ export function Login() {
                 </label>
                 <div className="relative w-full">
                   <input
-                    className="w-full h-8 md:h-10 px-4 rounded-md border 
+                    className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                   focus:border-[#052859] focus:outline-none shadow-lg 
                   text-gray-700"
                     id="password"
