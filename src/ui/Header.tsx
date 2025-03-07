@@ -14,7 +14,7 @@ export function Header() {
   // const user = data?.data;
 
   return (
-    <header className="border-b bg-white shadow-sm py-1 mx-auto px-4 md:pr-6">
+    <header className="border-b bg-white shadow-sm py-1 mx-auto pl-2  md:pr-8">
       <div className="">
         <div className="flex justify-between items-center h-16">
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />

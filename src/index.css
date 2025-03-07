@@ -9,6 +9,10 @@ input[type="password"]::-ms-reveal {
   display: none;
 }
 
+body {
+  overflow-y: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 8px; /* Adjust the width as needed */
 }

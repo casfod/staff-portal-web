@@ -40,11 +40,15 @@ const Navigation: React.FC = () => {
   ];
 
   return (
-    <div className="border hidden lg:flex flex-col items-center scale-95 md:scale-100 min-h-screen  ">
+    <div className="border hidden lg:flex flex-col items-center scale-95 md:scale-100 h-full">
       <nav className="">
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-8 py-6">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 py-6">
           {navigation.map((item) => (
-            <li className="w-full" key={item.to}>
+            <li
+              className="bg-white border w-full rounded-lg shadow-md"
+              key={item.to}
+              style={{ letterSpacing: "0.5px" }}
+            >
               <Navlink to={item.to} label={item.label} icon={item.icon} />
             </li>
           ))}
@@ -52,7 +56,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[93%] mb-auto"
+        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[85%] mb-auto"
         onClick={handleLogout}
       >
         {isPending ? (
