@@ -328,7 +328,7 @@ const PurchaseRequesForm: React.FC = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      {/* <Row>
         <FormRow label="Approved By *" type="medium">
           <Input
             type="text"
@@ -338,11 +338,16 @@ const PurchaseRequesForm: React.FC = () => {
             {...register("approvedBy")}
           />
         </FormRow>
-      </Row>
+      </Row> */}
 
-      <Button type="submit" size="medium">
-        Download
-      </Button>
+      <div className="flex justify-center w-full gap-4">
+        <Button type="submit" size="medium">
+          Save
+        </Button>
+        <Button type="submit" size="medium">
+          Save And Send
+        </Button>
+      </div>
     </Form>
   );
 };
