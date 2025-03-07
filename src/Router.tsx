@@ -14,6 +14,8 @@ import { TravelRequests } from "./pages/TravelRequests";
 import { UserManagement } from "./pages/UserManagement";
 import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
+import Request from "./features/purchase-request/Request";
+import AllRequests from "./features/purchase-request/AllRequests";
 
 const router = createBrowserRouter([
   {
@@ -22,11 +24,9 @@ const router = createBrowserRouter([
         <Layout />
       </AuthGuard>
     ),
-
     children: [
       { path: "/", element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <Dashboard /> },
-
       {
         path: "projects",
         element: <Projects />,
@@ -37,7 +37,12 @@ const router = createBrowserRouter([
       },
       {
         path: "purchase-requests",
-        element: <PurchaseRequests />,
+        element: <PurchaseRequests />, // Use PurchaseRequests component
+        children: [
+          { index: true, element: <Navigate to="all-request" /> }, // Redirect to "all-request"
+          { path: "all-request", element: <AllRequests /> }, // Nested route
+          { path: "request", element: <Request /> }, // Nested route
+        ],
       },
       {
         path: "advance-requests",
@@ -56,7 +61,6 @@ const router = createBrowserRouter([
   { path: "login", element: <Login /> },
   { path: "*", element: <PageNotFound /> },
 ]);
-
 function Router() {
   return <RouterProvider router={router} />;
 }

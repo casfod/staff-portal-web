@@ -12,6 +12,7 @@ import { useState } from "react";
 import { GoXCircle } from "react-icons/go";
 import { useDebounce } from "use-debounce";
 import { RiArrowUpDownLine } from "react-icons/ri";
+import { Pagination } from "../ui/Pagination";
 
 export function UserManagement() {
   const localStorageUserX = localStorageUser();
@@ -237,64 +238,13 @@ export function UserManagement() {
 
       {/*Pagination */}
 
+      {/* Pagination */}
       {(users.length >= limit || totalPages > 1) && (
-        <div className="flex justify-start items-center space-x-2">
-          {/* Previous Button */}
-          <button
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1}
-            className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
-          >
-            Previous
-          </button>
-
-          {/* Page Numbers */}
-          {Array.from({ length: totalPages }, (_, i) => {
-            const pageNumber = i + 1;
-
-            // Show the first page, last page, current page, and pages around the current page
-            if (
-              pageNumber === 1 || // Always show the first page
-              pageNumber === totalPages || // Always show the last page
-              Math.abs(pageNumber - page) <= 1 || // Show pages around the current page
-              (pageNumber === 2 && page > 3) || // Show ellipsis after the first page if needed
-              (pageNumber === totalPages - 1 && page < totalPages - 2) // Show ellipsis before the last page if needed
-            ) {
-              return (
-                <button
-                  key={pageNumber}
-                  onClick={() => handlePageChange(pageNumber)}
-                  className={`px-3 py-1 ${
-                    page === pageNumber
-                      ? "bg-buttonColor hover:bg-buttonColorHover text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-buttonColor hover:bg-opacity-65 hover:text-white"
-                  } rounded-lg`}
-                >
-                  {pageNumber}
-                </button>
-              );
-            }
-
-            // Show ellipsis for skipped pages
-            if (
-              (pageNumber === 2 && page > 4) || // Ellipsis after the first page
-              (pageNumber === totalPages - 1 && page < totalPages - 3) // Ellipsis before the last page
-            ) {
-              return <span key={pageNumber}>...</span>;
-            }
-
-            return null;
-          })}
-
-          {/* Next Button */}
-          <button
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page === totalPages}
-            className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
 
       {/* Modals */}
