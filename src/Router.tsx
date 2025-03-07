@@ -16,6 +16,7 @@ import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
 import Request from "./features/purchase-request/Request";
 import AllRequests from "./features/purchase-request/AllRequests";
+import { PurchaseVoucher } from "./pages/PurchaseVoucher";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
           { path: "all-request", element: <AllRequests /> }, // Nested route
           { path: "request", element: <Request /> }, // Nested route
         ],
+      },
+      {
+        path: "purchase-voucher",
+        element: <PurchaseVoucher />,
       },
       {
         path: "advance-requests",

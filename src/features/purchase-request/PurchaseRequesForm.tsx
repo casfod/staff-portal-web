@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { FaPlus } from "react-icons/fa";
@@ -89,9 +89,9 @@ const PurchaseRequesForm: React.FC = () => {
     <Form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Static inputs */}
       <Row>
-        <FormRow label="Date" type="small">
+        {/* <FormRow label="Date" type="small">
           <Input type="date" id="date" {...register("date")} />
-        </FormRow>
+        </FormRow> */}
         <FormRow label="Department *">
           <Input
             type="tex t"
