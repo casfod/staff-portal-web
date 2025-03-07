@@ -17,26 +17,22 @@ import { Link } from "react-router-dom";
 
 const Navigation: React.FC = () => {
   const { logout, isPending } = useLogout();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const timeoutRef = useRef<number | null>(null); // Use `number` instead of `NodeJS.Timeout`
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const handleLogout = async () => {
-    logout();
+    await logout();
   };
 
-  const handleMouseEnter = () => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setIsDropdownOpen(true);
+  const handleMouseEnter = (itemToOpen: string) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpenDropdown(itemToOpen);
   };
 
   const handleMouseLeave = () => {
-    // Set a delay before closing the dropdown
     timeoutRef.current = setTimeout(() => {
-      setIsDropdownOpen(false);
-    }, 300); // 300ms delay
+      setOpenDropdown(null);
+    }, 300);
   };
 
   const navigation = [
@@ -61,22 +57,22 @@ const Navigation: React.FC = () => {
 
   return (
     <div className="border hidden lg:flex flex-col items-center scale-95 md:scale-100 h-full">
-      <nav className="">
+      <nav>
         <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 py-6">
           {navigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
               key={item.to}
               style={{ letterSpacing: "0.5px" }}
-              onMouseEnter={handleMouseEnter}
+              onMouseEnter={() => handleMouseEnter(item.to)}
               onMouseLeave={handleMouseLeave}
             >
               <Navlink to={item.to} label={item.label} icon={item.icon} />
-              {item.dropdown && isDropdownOpen && (
+              {item.dropdown && openDropdown === item.to && (
                 <div
                   className="absolute left-full top-0 ml-2 bg-white border rounded-lg shadow-md w-48"
-                  onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
-                  onMouseLeave={handleMouseLeave} // Close dropdown after delay when mouse leaves
+                  onMouseEnter={() => handleMouseEnter(item.to)}
+                  onMouseLeave={handleMouseLeave}
                 >
                   <ul>
                     {item.dropdown.map((dropdownItem) => (
