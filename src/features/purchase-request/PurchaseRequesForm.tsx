@@ -176,11 +176,11 @@ const PurchaseRequesForm: React.FC = () => {
       </Row>
 
       {/* Dynamic itemGroup */}
-      <div className=" flex flex-wrap justify-center gap-4  max-h-[450px] bg-buttonColor border-2 border-secondary overflow-y-auto px-6 py-8 rounded-lg">
+      <div className=" flex flex-wrap justify-center gap-4  max-h-[450px]  border-2 overflow-y-auto px-6 py-8 rounded-lg">
         {itemGroup.map((group, index) => (
           <div
             key={index}
-            className=" flex flex-col gap-3 bg-white bg-opacity-90 border-2 border-secondary w-[48%] p-6 mb-3  rounded-lg"
+            className=" flex flex-col gap-3 bg-white bg-opacity-90 border-2 w-[48%] p-6 mb-3  rounded-lg shadow-md"
           >
             <h4 className="text-gray-600 text-lg font-semibold">
               ITEM {index + 1}

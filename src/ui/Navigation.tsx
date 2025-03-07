@@ -46,8 +46,8 @@ const Navigation: React.FC = () => {
       dropdown: [{ to: "/purchase-requests/request", label: "New Request" }],
     },
     {
-      to: "/purchase-voucher",
-      label: "Purchase Voucher",
+      to: "/payment-voucher",
+      label: "Payment Voucher",
       icon: ReceiptTextIcon,
     },
     { to: "/advance-requests", label: "Advance Requests", icon: Wallet },

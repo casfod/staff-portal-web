@@ -46,7 +46,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "purchase-voucher",
+        path: "payment-voucher",
         element: <PurchaseVoucher />,
       },
       {

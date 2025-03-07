@@ -23,8 +23,8 @@ const Request = () => {
         </button>
       </div>
 
-      <div className="bg-buttonColor bg-opacity-95 border-2 py-10 px-12 w-full rounded-lg">
-        <div className="bg-white bg-opacity-90 border-2 py-10 px-12 w-full rounded-lg">
+      <div className="border w-full rounded-lg">
+        <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
           <PurchaseRequesForm />
         </div>
       </div>
