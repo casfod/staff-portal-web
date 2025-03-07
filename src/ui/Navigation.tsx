@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import Navlink from "./Navlink";
 import {
   LayoutDashboard,
@@ -13,13 +13,32 @@ import {
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
 import { BiLogOut } from "react-icons/bi";
+import { Link } from "react-router-dom";
 
 const Navigation: React.FC = () => {
   const { logout, isPending } = useLogout();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const timeoutRef = useRef<number | null>(null); // Use `number` instead of `NodeJS.Timeout`
 
   const handleLogout = async () => {
     logout();
   };
+
+  const handleMouseEnter = () => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    // Set a delay before closing the dropdown
+    timeoutRef.current = setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 300); // 300ms delay
+  };
+
   const navigation = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/projects", label: "Projects", icon: FolderOpen },
@@ -28,6 +47,7 @@ const Navigation: React.FC = () => {
       to: "/purchase-requests",
       label: "Purchase Requests",
       icon: ShoppingCart,
+      dropdown: [{ to: "/purchase-requests/request", label: "New Request" }],
     },
     {
       to: "/purchase-voucher",
@@ -45,18 +65,40 @@ const Navigation: React.FC = () => {
         <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 py-6">
           {navigation.map((item) => (
             <li
-              className="bg-white border w-full rounded-lg shadow-md"
+              className="bg-white border w-full rounded-lg shadow-md relative"
               key={item.to}
               style={{ letterSpacing: "0.5px" }}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             >
               <Navlink to={item.to} label={item.label} icon={item.icon} />
+              {item.dropdown && isDropdownOpen && (
+                <div
+                  className="absolute left-full top-0 ml-2 bg-white border rounded-lg shadow-md w-48"
+                  onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
+                  onMouseLeave={handleMouseLeave} // Close dropdown after delay when mouse leaves
+                >
+                  <ul>
+                    {item.dropdown.map((dropdownItem) => (
+                      <li key={dropdownItem.to}>
+                        <Link
+                          to={dropdownItem.to}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {dropdownItem.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       </nav>
 
       <button
-        className=" px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[70%] mb-auto"
+        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[70%] mb-auto"
         onClick={handleLogout}
       >
         {isPending ? (
