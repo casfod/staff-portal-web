@@ -196,7 +196,7 @@ const PurchaseRequesForm: React.FC = () => {
         {itemGroup.map((group, index) => (
           <div
             key={index}
-            className="flex flex-col gap-3 bg-white bg-opacity-90 border-2 w-[48%] p-6 mb-3 rounded-lg shadow-md"
+            className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[48%] p-6 mb-3 rounded-lg shadow-md"
           >
             <h4 className="text-gray-600 text-lg font-semibold">
               ITEM {index + 1}
