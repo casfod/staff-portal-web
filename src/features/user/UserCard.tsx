@@ -60,19 +60,19 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           <div className="flex items-center space-x-4">
             <img
               src={profilePlaceHolder}
-              alt={`Photo of ${user.first_name} ${user.last_name}`}
+              alt={`Photo of ${user?.first_name} ${user?.last_name}`}
               className="w-24 h-24 rounded-full object-cover border"
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-700">
-                {`${user.first_name} ${user.last_name}`}
+                {`${user?.first_name} ${user?.last_name}`}
               </h2>
-              <p className="text-sm text-gray-600">{user.role}</p>
+              <p className="text-sm text-gray-600">{user?.role}</p>
             </div>
           </div>
 
           <p>
-            <span className="font-semibold">Email:</span> {user.email}
+            <span className="font-semibold">Email:</span> {user?.email}
           </p>
         </div>
 
@@ -86,20 +86,20 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                   : "bg-green-100 text-green-700"
               }`}
             >
-              {user.isDeleted ? "Inactive" : "Active"}
+              {user?.isDeleted ? "Inactive" : "Active"}
             </span>
           </p>
 
           <div>
             <label
-              htmlFor={`status-${user.id}`}
+              htmlFor={`status-${user?.id}`}
               className="text-sm md:text-base mr-2"
             >
               Role:
             </label>
 
             <select
-              id={`status-${user.id}`}
+              id={`status-${user?.id}`}
               value={role}
               onChange={handleStatusChange}
               className="text-xs md:text-sm border p-1 rounded"

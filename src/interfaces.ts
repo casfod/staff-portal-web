@@ -19,6 +19,46 @@ export interface UserType {
   passwordConfirm?: string;
 }
 
+export interface usePurChaseRequestType {
+  status: number;
+  message: string;
+  data: {
+    purchaseRequests: PurChaseRequestType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface PurChaseRequestType {
+  _id?: string;
+  department: string;
+  suggestedSupplier: string;
+  requestedBy: string;
+  address: string;
+  finalDeliveryPoint: string;
+  city: string;
+  periodOfActivity: string;
+  activityDescription: string;
+  expenseChargedTo: string;
+  accountCode: string;
+  reviewedBy?: string;
+  itemGroups?: PurchaseRequesItemGroupType[];
+  status?: string;
+  createdBy?: [];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PurchaseRequesItemGroupType {
+  description: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
+
 ///////////////////////
 ///////////////////////
 import { ChangeEvent } from "react";

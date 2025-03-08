@@ -1,47 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
-import { Form } from "react-router-dom";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
+import {
+  PurchaseRequesItemGroupType,
+  PurChaseRequestType,
+} from "../../interfaces";
+import { useSavePurchaseRequest } from "./purchaseRequestHooks/useSavePurchaseRequest";
+import SpinnerMini from "../../ui/SpinnerMini";
 
-interface FormData {
-  date: string;
-  department: string;
-  suggestedSupplier: string;
-  requestedBy: string;
-  address: string;
-  finalDeliveryPoint: string;
-  city: string;
-  periodOfActivity: string;
-  activityDescription: string;
-  expenseChargedTo: string;
-  accountCode: string;
-  reviewedBy: string;
-  approvedBy: string;
-}
+const PurchaseRequestForm: React.FC = () => {
+  // State for the main form fields
+  const [formData, setFormData] = useState<PurChaseRequestType>({
+    // date: "",
+    department: "",
+    suggestedSupplier: "",
+    requestedBy: "",
+    address: "",
+    finalDeliveryPoint: "",
+    city: "",
+    periodOfActivity: "",
+    activityDescription: "",
+    expenseChargedTo: "",
+    accountCode: "",
+    reviewedBy: "",
+    // approvedBy: "",
+  });
 
-interface ItemGroup {
-  description: string;
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
+  // State for the item groups
+  const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>([]);
+  const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
 
-const PurchaseRequesForm: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
-
-  const [itemGroup, setItemGroup] = useState<ItemGroup[]>([]);
-  const [disabledStates, setDisabledStates] = useState<boolean[]>([]); // Separate state for disabled
-
+  // Add a new item group
   const addItem = () => {
     setItemGroup([
       ...itemGroup,
@@ -54,9 +46,45 @@ const PurchaseRequesForm: React.FC = () => {
         total: 0,
       },
     ]);
-    setDisabledStates([...disabledStates, false]); // Initialize disabled state for the new item
+    setDisabledStates([...disabledStates, false]);
   };
 
+  const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
+  // Update item group fields
+  const handleItemChange = (
+    index: number,
+    field: keyof PurchaseRequesItemGroupType,
+    value: string | number
+  ) => {
+    const newItems = [...itemGroup];
+    newItems[index][field] = value as never;
+    setItemGroup(newItems);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
+  };
+
+  // Toggle edit mode for an item group
+  const handleEdit = (index: number) => {
+    const newDisabledStates = [...disabledStates];
+    newDisabledStates[index] = !newDisabledStates[index];
+    setDisabledStates(newDisabledStates);
+  };
+
+  // Update main form fields
+  const handleFormChange = (
+    field: keyof PurChaseRequestType,
+    value: string
+  ) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  // Calculate totals whenever frequency, quantity, or unitCost changes
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
@@ -66,7 +94,7 @@ const PurchaseRequesForm: React.FC = () => {
           (group.quantity || 1) *
           (group.unitCost || 0)
         ).toFixed(2)
-      ), // Convert back to number
+      ),
     }));
     setItemGroup(updatedGroups);
   }, [
@@ -75,37 +103,17 @@ const PurchaseRequesForm: React.FC = () => {
     itemGroup.map((g) => g.unitCost).join(","),
   ]);
 
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates);
-  };
-
-  const handleChange = (
-    index: number,
-    field: keyof ItemGroup,
-    value: string | number
-  ) => {
-    const newItems = [...itemGroup];
-    newItems[index][field] = value as never;
-    setItemGroup(newItems);
-  };
-
-  const handleEdit = (index: number) => {
-    const newDisabledStates = [...disabledStates];
-    newDisabledStates[index] = !newDisabledStates[index]; // Toggle disabled state
-    setDisabledStates(newDisabledStates);
-  };
-
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Form Data:", data);
+  // Handle form submission
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Data:", formData);
     console.log("Item Groups:", itemGroup);
-    // Handle form submission
-  };
 
+    const data = { ...formData, itemGroups: [...itemGroup] };
+    savePurchaseRequest(data);
+  };
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form className="space-y-6">
       {/* Static inputs */}
       <Row>
         <FormRow label="Department *">
@@ -113,21 +121,22 @@ const PurchaseRequesForm: React.FC = () => {
             type="text"
             id="department"
             required
-            {...register("department")}
+            value={formData.department}
+            onChange={(e) => handleFormChange("department", e.target.value)}
           />
         </FormRow>
       </Row>
 
       <Row>
-        <FormRow
-          label="Suggested supplier *"
-          error={errors?.suggestedSupplier?.message}
-        >
+        <FormRow label="Suggested supplier *">
           <Input
             placeholder=""
             id="suggestedSupplier"
             required
-            {...register("suggestedSupplier")}
+            value={formData.suggestedSupplier}
+            onChange={(e) =>
+              handleFormChange("suggestedSupplier", e.target.value)
+            }
           />
         </FormRow>
         <FormRow label="Requested By *">
@@ -135,18 +144,20 @@ const PurchaseRequesForm: React.FC = () => {
             placeholder=""
             id="requestedBy"
             required
-            {...register("requestedBy")}
+            value={formData.requestedBy}
+            onChange={(e) => handleFormChange("requestedBy", e.target.value)}
           />
         </FormRow>
       </Row>
 
       <Row>
-        <FormRow label="Address *" error={errors?.address?.message}>
+        <FormRow label="Address *">
           <Input
             placeholder=""
             id="address"
             required
-            {...register("address")}
+            value={formData.address}
+            onChange={(e) => handleFormChange("address", e.target.value)}
           />
         </FormRow>
         <FormRow label="Final delivery point *">
@@ -154,39 +165,47 @@ const PurchaseRequesForm: React.FC = () => {
             placeholder=""
             id="finalDeliveryPoint"
             required
-            {...register("finalDeliveryPoint")}
+            value={formData.finalDeliveryPoint}
+            onChange={(e) =>
+              handleFormChange("finalDeliveryPoint", e.target.value)
+            }
           />
         </FormRow>
       </Row>
 
       <Row>
         <FormRow label="City *">
-          <Input placeholder="" id="city" required {...register("city")} />
+          <Input
+            placeholder=""
+            id="city"
+            required
+            value={formData.city}
+            onChange={(e) => handleFormChange("city", e.target.value)}
+          />
         </FormRow>
-        <FormRow
-          label="Period of Activity *"
-          error={errors?.periodOfActivity?.message}
-        >
+        <FormRow label="Period of Activity *">
           <Input
             placeholder=""
             id="periodOfActivity"
             required
-            {...register("periodOfActivity")}
+            value={formData.periodOfActivity}
+            onChange={(e) =>
+              handleFormChange("periodOfActivity", e.target.value)
+            }
           />
         </FormRow>
       </Row>
 
       <Row>
-        <FormRow
-          label="Activity Description"
-          type="wide"
-          error={errors?.activityDescription?.message}
-        >
+        <FormRow label="Activity Description" type="wide">
           <Input
             size={50}
             placeholder=""
             id="activityDescription"
-            {...register("activityDescription")}
+            value={formData.activityDescription}
+            onChange={(e) =>
+              handleFormChange("activityDescription", e.target.value)
+            }
           />
         </FormRow>
       </Row>
@@ -206,11 +225,11 @@ const PurchaseRequesForm: React.FC = () => {
               <Input
                 placeholder=""
                 inputSize={100}
-                disabled={disabledStates[index]} // Use separate disabled state
+                disabled={disabledStates[index]}
                 value={group.description}
                 required
                 onChange={(e) =>
-                  handleChange(index, "description", e.target.value)
+                  handleItemChange(index, "description", e.target.value)
                 }
               />
             </FormRow>
@@ -222,11 +241,11 @@ const PurchaseRequesForm: React.FC = () => {
                   inputSize={100}
                   type="number"
                   min="0"
-                  disabled={disabledStates[index]} // Use separate disabled state
+                  disabled={disabledStates[index]}
                   required
                   value={group.frequency}
                   onChange={(e) =>
-                    handleChange(index, "frequency", e.target.value)
+                    handleItemChange(index, "frequency", e.target.value)
                   }
                 />
               </FormRow>
@@ -236,19 +255,21 @@ const PurchaseRequesForm: React.FC = () => {
                   inputSize={100}
                   type="number"
                   min="0"
-                  disabled={disabledStates[index]} // Use separate disabled state
+                  disabled={disabledStates[index]}
                   value={group.quantity}
                   onChange={(e) =>
-                    handleChange(index, "quantity", e.target.value)
+                    handleItemChange(index, "quantity", e.target.value)
                   }
                 />
               </FormRow>
               <FormRow label="Unit" type="small">
                 <Input
-                  disabled={disabledStates[index]} // Use separate disabled state
+                  disabled={disabledStates[index]}
                   value={group.unit}
                   placeholder=""
-                  onChange={(e) => handleChange(index, "unit", e.target.value)}
+                  onChange={(e) =>
+                    handleItemChange(index, "unit", e.target.value)
+                  }
                 />
               </FormRow>
             </Row>
@@ -258,20 +279,22 @@ const PurchaseRequesForm: React.FC = () => {
                 <Input
                   type="number"
                   min="0"
-                  disabled={disabledStates[index]} // Use separate disabled state
+                  disabled={disabledStates[index]}
                   value={group.unitCost}
                   placeholder="123..."
                   onChange={(e) =>
-                    handleChange(index, "unitCost", e.target.value)
+                    handleItemChange(index, "unitCost", e.target.value)
                   }
                 />
               </FormRow>
               <FormRow label="Total (₦) *" type="medium">
                 <Input
                   type="number"
-                  disabled={disabledStates[index]} // Use separate disabled state
+                  disabled={disabledStates[index]}
                   value={group.total}
-                  onChange={(e) => handleChange(index, "total", e.target.value)}
+                  onChange={(e) =>
+                    handleItemChange(index, "total", e.target.value)
+                  }
                 />
               </FormRow>
             </Row>
@@ -309,16 +332,15 @@ const PurchaseRequesForm: React.FC = () => {
       </div>
 
       <Row>
-        <FormRow
-          label="Expense Charged To *"
-          type="medium"
-          error={errors?.expenseChargedTo?.message}
-        >
+        <FormRow label="Expense Charged To *" type="medium">
           <Input
             type="text"
             required
             id="expenseChargedTo"
-            {...register("expenseChargedTo")}
+            value={formData.expenseChargedTo}
+            onChange={(e) =>
+              handleFormChange("expenseChargedTo", e.target.value)
+            }
           />
         </FormRow>
         <FormRow label="Account Code *" type="small">
@@ -327,7 +349,8 @@ const PurchaseRequesForm: React.FC = () => {
             required
             placeholder=""
             id="accountCode"
-            {...register("accountCode")}
+            value={formData.accountCode}
+            onChange={(e) => handleFormChange("accountCode", e.target.value)}
           />
         </FormRow>
       </Row>
@@ -339,21 +362,22 @@ const PurchaseRequesForm: React.FC = () => {
             placeholder=""
             id="reviewedBy"
             required
-            {...register("reviewedBy")}
+            value={formData.reviewedBy}
+            onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
           />
         </FormRow>
       </Row>
 
       <div className="flex justify-center w-full gap-4">
-        <Button type="submit" size="medium">
-          Save
+        <Button size="medium" onClick={handleSave}>
+          {isPending ? <SpinnerMini /> : "Save"}
         </Button>
         <Button type="submit" size="medium">
           Save And Send
         </Button>
       </div>
-    </Form>
+    </form>
   );
 };
 
-export default PurchaseRequesForm;
+export default PurchaseRequestForm;
