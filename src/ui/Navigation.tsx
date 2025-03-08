@@ -56,7 +56,7 @@ const Navigation: React.FC = () => {
   ];
 
   return (
-    <div className="border hidden lg:flex flex-col items-center scale-95 md:scale-100 h-full">
+    <div className="border hidden lg:flex flex-col items-center h-screen">
       <nav>
         <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 py-6">
           {navigation.map((item) => (

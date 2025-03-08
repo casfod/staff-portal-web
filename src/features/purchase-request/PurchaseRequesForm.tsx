@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-
 import { FaPlus } from "react-icons/fa";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
@@ -31,7 +30,6 @@ interface ItemGroup {
   unit: string;
   unitCost: number;
   total: number;
-  disabled: boolean;
 }
 
 const PurchaseRequesForm: React.FC = () => {
@@ -41,7 +39,8 @@ const PurchaseRequesForm: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const [itemGroup, setItemGroup] = React.useState<ItemGroup[]>([]);
+  const [itemGroup, setItemGroup] = useState<ItemGroup[]>([]);
+  const [disabledStates, setDisabledStates] = useState<boolean[]>([]); // Separate state for disabled
 
   const addItem = () => {
     setItemGroup([
@@ -53,14 +52,34 @@ const PurchaseRequesForm: React.FC = () => {
         unit: "",
         unitCost: 0,
         total: 0,
-        disabled: false,
       },
     ]);
+    setDisabledStates([...disabledStates, false]); // Initialize disabled state for the new item
   };
+
+  useEffect(() => {
+    const updatedGroups = itemGroup.map((group) => ({
+      ...group,
+      total: parseFloat(
+        (
+          (group.frequency || 1) *
+          (group.quantity || 1) *
+          (group.unitCost || 0)
+        ).toFixed(2)
+      ), // Convert back to number
+    }));
+    setItemGroup(updatedGroups);
+  }, [
+    itemGroup.map((g) => g.frequency).join(","),
+    itemGroup.map((g) => g.quantity).join(","),
+    itemGroup.map((g) => g.unitCost).join(","),
+  ]);
 
   const removeItem = (index: number) => {
     const newItems = itemGroup.filter((_, i) => i !== index);
     setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
   };
 
   const handleChange = (
@@ -74,9 +93,9 @@ const PurchaseRequesForm: React.FC = () => {
   };
 
   const handleEdit = (index: number) => {
-    const newItems = [...itemGroup];
-    newItems[index].disabled = !newItems[index].disabled;
-    setItemGroup(newItems);
+    const newDisabledStates = [...disabledStates];
+    newDisabledStates[index] = !newDisabledStates[index]; // Toggle disabled state
+    setDisabledStates(newDisabledStates);
   };
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
@@ -89,12 +108,9 @@ const PurchaseRequesForm: React.FC = () => {
     <Form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Static inputs */}
       <Row>
-        {/* <FormRow label="Date" type="small">
-          <Input type="date" id="date" {...register("date")} />
-        </FormRow> */}
         <FormRow label="Department *">
           <Input
-            type="tex t"
+            type="text"
             id="department"
             required
             {...register("department")}
@@ -176,11 +192,11 @@ const PurchaseRequesForm: React.FC = () => {
       </Row>
 
       {/* Dynamic itemGroup */}
-      <div className=" flex flex-wrap justify-center gap-4  max-h-[450px]  border-2 overflow-y-auto px-6 py-8 rounded-lg">
+      <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
         {itemGroup.map((group, index) => (
           <div
             key={index}
-            className=" flex flex-col gap-3 bg-white bg-opacity-90 border-2 w-[48%] p-6 mb-3  rounded-lg shadow-md"
+            className="flex flex-col gap-3 bg-white bg-opacity-90 border-2 w-[48%] p-6 mb-3 rounded-lg shadow-md"
           >
             <h4 className="text-gray-600 text-lg font-semibold">
               ITEM {index + 1}
@@ -190,7 +206,7 @@ const PurchaseRequesForm: React.FC = () => {
               <Input
                 placeholder=""
                 inputSize={100}
-                disabled={group.disabled}
+                disabled={disabledStates[index]} // Use separate disabled state
                 value={group.description}
                 required
                 onChange={(e) =>
@@ -206,7 +222,7 @@ const PurchaseRequesForm: React.FC = () => {
                   inputSize={100}
                   type="number"
                   min="0"
-                  disabled={group.disabled}
+                  disabled={disabledStates[index]} // Use separate disabled state
                   required
                   value={group.frequency}
                   onChange={(e) =>
@@ -220,7 +236,7 @@ const PurchaseRequesForm: React.FC = () => {
                   inputSize={100}
                   type="number"
                   min="0"
-                  disabled={group.disabled}
+                  disabled={disabledStates[index]} // Use separate disabled state
                   value={group.quantity}
                   onChange={(e) =>
                     handleChange(index, "quantity", e.target.value)
@@ -229,7 +245,7 @@ const PurchaseRequesForm: React.FC = () => {
               </FormRow>
               <FormRow label="Unit" type="small">
                 <Input
-                  disabled={group.disabled}
+                  disabled={disabledStates[index]} // Use separate disabled state
                   value={group.unit}
                   placeholder=""
                   onChange={(e) => handleChange(index, "unit", e.target.value)}
@@ -242,7 +258,7 @@ const PurchaseRequesForm: React.FC = () => {
                 <Input
                   type="number"
                   min="0"
-                  disabled={group.disabled}
+                  disabled={disabledStates[index]} // Use separate disabled state
                   value={group.unitCost}
                   placeholder="123..."
                   onChange={(e) =>
@@ -253,7 +269,7 @@ const PurchaseRequesForm: React.FC = () => {
               <FormRow label="Total (₦) *" type="medium">
                 <Input
                   type="number"
-                  disabled={group.disabled}
+                  disabled={disabledStates[index]} // Use separate disabled state
                   value={group.total}
                   onChange={(e) => handleChange(index, "total", e.target.value)}
                 />
@@ -270,17 +286,17 @@ const PurchaseRequesForm: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="text-white  px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
+                className="text-white px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
                 onClick={() => handleEdit(index)}
               >
-                {group.disabled ? "Edit Item" : "Done"}
+                {disabledStates[index] ? "Edit Item" : "Done"}
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-4 w-full ">
+      <div className="flex items-center gap-4 w-full">
         <Button type="button" onClick={addItem}>
           <FaPlus /> Add Item
         </Button>
@@ -327,18 +343,6 @@ const PurchaseRequesForm: React.FC = () => {
           />
         </FormRow>
       </Row>
-
-      {/* <Row>
-        <FormRow label="Approved By *" type="medium">
-          <Input
-            type="text"
-            placeholder=""
-            id="approvedBy"
-            required
-            {...register("approvedBy")}
-          />
-        </FormRow>
-      </Row> */}
 
       <div className="flex justify-center w-full gap-4">
         <Button type="submit" size="medium">
