@@ -6,7 +6,7 @@ interface Option {
 }
 
 interface SelectProps {
-  label: string;
+  label?: string;
   id: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -24,12 +24,14 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   return (
     <div>
-      <label
-        htmlFor={id}
-        className="block mb-1 font-bold text-sm text-gray-700"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={id}
+          className="block mb-1 font-bold text-sm text-gray-700"
+        >
+          {label}
+        </label>
+      )}
       <select
         className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
         id={id}
@@ -37,7 +39,7 @@ const Select: React.FC<SelectProps> = ({
         onChange={onChange}
         required={required}
       >
-        <option value="">Select a role</option>
+        <option value="">Select a reviewer</option>
         {options.map((option) => (
           <option key={option.id} value={option.id}>
             {option.name}

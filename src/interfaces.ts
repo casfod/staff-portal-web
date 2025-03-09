@@ -1,3 +1,9 @@
+export interface useAdminsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: UserType[];
+}
 export interface useUsersType {
   status: number;
   message: string;
@@ -42,7 +48,7 @@ export interface PurChaseRequestType {
   activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
-  reviewedBy?: string;
+  reviewedBy?: null | string;
   itemGroups?: PurchaseRequesItemGroupType[];
   status?: string;
   createdBy?: [];
@@ -51,6 +57,7 @@ export interface PurChaseRequestType {
 }
 
 export interface PurchaseRequesItemGroupType {
+  _id?: string;
   description: string;
   frequency: number;
   quantity: number;

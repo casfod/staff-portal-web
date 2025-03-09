@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { savePurchaseRequests as savePurchaseRequestsApi } from "../../../services/apiPurchaseRequest.ts";
+import { sendPurchaseRequests as sendPurchaseRequestsApi } from "../../../services/apiPurchaseRequest.ts";
 import { AxiosError, AxiosResponse } from "axios";
 import { PurChaseRequestType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
@@ -12,21 +12,21 @@ interface LoginError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
-export function useSavePurchaseRequest() {
+export function useSendPurchaseRequest() {
   const queryClient = useQueryClient();
 
   const {
-    mutate: savePurchaseRequest,
+    mutate: sendPurchaseRequest,
     isPending,
     isError,
   } = useMutation({
     mutationFn: (data: Partial<PurChaseRequestType>) =>
-      savePurchaseRequestsApi(data),
+      sendPurchaseRequestsApi(data),
 
     onSuccess: (data) => {
-      if (data.status === 200) {
+      if (data.status === 201) {
         // Show success toast
-        toast.success("PurchaseRequest saved successfully");
+        toast.success("PurchaseRequest sent successfully");
 
         // Invalidate the users query to refetch data
         queryClient.invalidateQueries({ queryKey: ["all-purchase-requests"] });
@@ -41,9 +41,9 @@ export function useSavePurchaseRequest() {
       toast.error(err.response?.data.message || "An error occurred");
 
       // Log the error for debugging
-      console.error("Add User Error:", err.response?.data.message);
+      console.error("Purchase Request send Error:", err.response?.data.message);
     },
   });
 
-  return { savePurchaseRequest, isPending, isError };
+  return { sendPurchaseRequest, isPending, isError };
 }

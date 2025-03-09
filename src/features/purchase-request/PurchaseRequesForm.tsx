@@ -8,13 +8,14 @@ import {
   PurchaseRequesItemGroupType,
   PurChaseRequestType,
 } from "../../interfaces";
-import { useSavePurchaseRequest } from "./purchaseRequestHooks/useSavePurchaseRequest";
+import { useSavePurchaseRequest } from "./pRHooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
+import { useAdmins } from "../user/userHooks/useAdmins";
+import Select from "../../ui/Select";
 
 const PurchaseRequestForm: React.FC = () => {
   // State for the main form fields
   const [formData, setFormData] = useState<PurChaseRequestType>({
-    // date: "",
     department: "",
     suggestedSupplier: "",
     requestedBy: "",
@@ -25,8 +26,7 @@ const PurchaseRequestForm: React.FC = () => {
     activityDescription: "",
     expenseChargedTo: "",
     accountCode: "",
-    reviewedBy: "",
-    // approvedBy: "",
+    reviewedBy: null,
   });
 
   // State for the item groups
@@ -50,6 +50,12 @@ const PurchaseRequestForm: React.FC = () => {
   };
 
   const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
+  const { data, isLoading } = useAdmins();
+
+  const admins = data?.data;
+
+  console.log("Admins:", admins);
+
   // Update item group fields
   const handleItemChange = (
     index: number,
@@ -357,14 +363,26 @@ const PurchaseRequestForm: React.FC = () => {
 
       <Row>
         <FormRow label="Reviewed By *" type="medium">
-          <Input
-            type="text"
-            placeholder=""
-            id="reviewedBy"
-            required
-            value={formData.reviewedBy}
-            onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
-          />
+          {isLoading ? (
+            <SpinnerMini /> // Show a spinner while loading admins
+          ) : (
+            <Select
+              id="reviewedBy"
+              value={formData.reviewedBy || ""} // Use empty string if null
+              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+              options={
+                admins
+                  ? admins
+                      .filter((admin) => admin.id) // Filter out admins with undefined IDs
+                      .map((admin) => ({
+                        id: admin.id as string, // Assert that admin.id is a string
+                        name: `${admin.first_name} ${admin.last_name}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
         </FormRow>
       </Row>
 
@@ -372,9 +390,11 @@ const PurchaseRequestForm: React.FC = () => {
         <Button size="medium" onClick={handleSave}>
           {isPending ? <SpinnerMini /> : "Save"}
         </Button>
-        <Button type="submit" size="medium">
-          Save And Send
-        </Button>
+        {formData.reviewedBy && (
+          <Button type="submit" size="medium">
+            Save And Send
+          </Button>
+        )}
       </div>
     </form>
   );

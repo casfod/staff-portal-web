@@ -2,11 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
-import {
-  PurChaseRequestType,
-  usePurChaseRequestType,
-  UserType,
-} from "../interfaces.ts";
+import { PurChaseRequestType, usePurChaseRequestType } from "../interfaces.ts";
 
 const url = baseUrl();
 
@@ -67,6 +63,8 @@ axiosInstance.interceptors.response.use(
 // Error Handler
 const handleError = (err: any) => {
   if (axios.isAxiosError(err)) {
+    console.log(err.response?.data);
+
     return err.response?.data;
   } else {
     console.log(err);
@@ -95,37 +93,11 @@ export const getAllPurchaseRequest = async function (queryParams: {
   }
 };
 
-export const updateUser = async function (data: UserType) {
-  try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updateMe`,
-      data
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const updateUserRole = async function (
-  userId: string,
-  data: Partial<UserType>
-) {
-  try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updateUserRole/${userId}`,
-      data
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
 export const savePurchaseRequests = async function (
   data: Partial<PurChaseRequestType>
 ) {
   try {
-    const response = await axiosInstance.post<UserType>(
+    const response = await axiosInstance.post<PurChaseRequestType>(
       `/purchase-requests/save`,
       data
     );
@@ -135,10 +107,12 @@ export const savePurchaseRequests = async function (
   }
 };
 
-export const updatePassword = async function (data: any) {
+export const sendPurchaseRequests = async function (
+  data: Partial<PurChaseRequestType>
+) {
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updatePassword`,
+    const response = await axiosInstance.post<PurChaseRequestType>(
+      `/purchase-requests`,
       data
     );
     return response.data;
@@ -147,10 +121,24 @@ export const updatePassword = async function (data: any) {
   }
 };
 
-export const deleteUser = async function (userId: string) {
+export const updatePurchaseRequest = async function (data: any) {
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/deleteUser/${userId}`
+    const response = await axiosInstance.patch<PurChaseRequestType>(
+      `/purchase-requests`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deletePurchaseRequest = async function (
+  purchaseRequestID: string
+) {
+  try {
+    const response = await axiosInstance.delete<PurChaseRequestType>(
+      `/purchase-requests/${purchaseRequestID}`
     );
     return response.data;
   } catch (err) {

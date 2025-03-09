@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
-import { UserType, useUsersType } from "../interfaces.ts";
+import { useAdminsType, UserType, useUsersType } from "../interfaces.ts";
 
 const url = baseUrl();
 
@@ -71,6 +71,15 @@ const handleError = (err: any) => {
 
 // API Functions
 
+export const getAdmins = async function () {
+  try {
+    const response = await axiosInstance.get<useAdminsType>(`/users/admins`);
+    console.log("API Response:", response.data); // Debugging line
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 export const getUsers = async function (queryParams: {
   search?: string;
   role?: string;
@@ -138,7 +147,7 @@ export const updatePassword = async function (data: any) {
 
 export const deleteUser = async function (userId: string) {
   try {
-    const response = await axiosInstance.patch<UserType>(
+    const response = await axiosInstance.delete<UserType>(
       `/users/deleteUser/${userId}`
     );
     return response.data;

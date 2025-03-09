@@ -32,7 +32,7 @@ export function useDeleteUser() {
     },
 
     onError: (error) => {
-      toast.error("Error deleting deleteUser");
+      toast.error("Error deleting User");
 
       const errorMessage =
         error.response?.data.message ||

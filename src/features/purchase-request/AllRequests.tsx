@@ -1,45 +1,38 @@
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useAllPurchaseRequests } from "./purchaseRequestHooks/useAllPurchaseRequests";
+import { useAllPurchaseRequests } from "./pRHooks/useAllPurchaseRequests";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 import { RiArrowUpDownLine } from "react-icons/ri";
 import { Pagination } from "../../ui/Pagination";
 import { dateformat } from "../../utils/dateFormat";
-import { formatMoney } from "../../utils/formatMoney";
+import { moneyFormat } from "../../utils/moneyFormat";
 import Spinner from "../../ui/Spinner";
-
-// // Mock data
-// const requests = [
-//   {
-//     id: 1,
-//     item: "Medical Supplies",
-//     amount: "$12,000",
-//     status: "Pending",
-//     requestedBy: "John Smith",
-//     date: "2024-03-01",
-//   },
-//   {
-//     id: 2,
-//     item: "Office Equipment",
-//     amount: "$5,000",
-//     status: "Approved",
-//     requestedBy: "Emma Wilson",
-//     date: "2024-02-28",
-//   },
-// ];
+import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
+import Swal from "sweetalert2";
+import { useDeletePurchaseRequest } from "./pRHooks/useDeletePurchaseRequest";
 
 const AllRequests = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [sort, setSort] = useState<string>("email:asc"); // Default sort
+  const [sort, setSort] = useState<string>("department:asc"); // Default sort
   const [page, setPage] = useState<number>(1);
   const limit = 10;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
+  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+
+  const toggleViewItems = (requestId: string) => {
+    setVisibleItems((prev) => ({
+      ...prev,
+      [requestId]: !prev[requestId], // Toggle visibility for the specific request
+    }));
+  };
 
   const { data, isLoading, isError } = useAllPurchaseRequests(
     debouncedSearchTerm,
@@ -60,6 +53,33 @@ const AllRequests = () => {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+  };
+
+  const { deletePurchaseRequest } = useDeletePurchaseRequest(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
+
+  const handleDelete = (id: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this Purchase Request?",
+      showCancelButton: true,
+      confirmButtonColor: "#1373B0",
+      cancelButtonColor: "#DC3340",
+      confirmButtonText: "Yes, delete it!",
+      customClass: { popup: "custom-style" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deletePurchaseRequest(id, {
+          onError: (error) => {
+            Swal.fire("Error!", error.message, "error");
+          },
+        });
+      }
+    });
   };
 
   if (isError) {
@@ -138,7 +158,7 @@ const AllRequests = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Item
+                Department
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Amount
@@ -151,6 +171,9 @@ const AllRequests = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
               </th>
             </tr>
           </thead>
@@ -168,28 +191,149 @@ const AllRequests = () => {
           ) : (
             <tbody className="bg-white divide-y divide-gray-200">
               {purchaseRequests.map((request) => (
-                <tr key={request._id} className="hover:cursor-pointer">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                    {request.department}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {request?.itemGroups!.map((item, index) => (
-                      <div key={index}>
-                        {formatMoney(item.total)}
-                        {/* Display the total for each item group */}
+                <>
+                  <tr key={request._id} className="hover:cursor-pointer">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                      {request.department}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {moneyFormat(
+                        request?.itemGroups!.reduce(
+                          (sum, item) => sum + item.total,
+                          0
+                        ),
+                        "NGN"
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {request.status}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {request.requestedBy}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dateformat(request.createdAt!)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-4">
+                        <span onClick={() => toggleViewItems(request._id!)}>
+                          {visibleItems[request._id!] ? (
+                            <HiMiniEyeSlash className="w-5 h-5" />
+                          ) : (
+                            <HiMiniEye className="w-5 h-5" />
+                          )}
+                        </span>
+
+                        {request.status === "draft" && (
+                          <button
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDelete(request._id!)}
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {request.status}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {request.requestedBy}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {dateformat(request.createdAt!)}
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {visibleItems[request._id!] && (
+                    <tr
+                      key={`${request._id}-items`}
+                      className="w-full h-10 scale-[90%]"
+                    >
+                      <td colSpan={6}>
+                        <div className="border border-gray-400 px-6 py-4 rounded-md">
+                          <div className="w-full text-gray-700 text-sm mb-2">
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Account Code :{" "}
+                              </span>{" "}
+                              {request.accountCode}
+                            </p>
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Charged To :{" "}
+                              </span>
+                              {request.expenseChargedTo}
+                            </p>
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Address :{" "}
+                              </span>{" "}
+                              {request.address}
+                            </p>
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                City :{" "}
+                              </span>{" "}
+                              {request.city}
+                            </p>
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Delivery Point :{" "}
+                              </span>
+                              {request.finalDeliveryPoint}
+                            </p>
+
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Period Of Activity :
+                              </span>
+                              {request.periodOfActivity}
+                            </p>
+                            <p>
+                              <span className="font-bold mr-2 uppercase">
+                                Activity Description :{" "}
+                              </span>
+                              {request.activityDescription}
+                            </p>
+                          </div>
+                          <table className=" min-w-full divide-y divide-gray-200 rounded-md">
+                            <thead>
+                              <tr>
+                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Description
+                                </th>
+                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Quantity
+                                </th>
+                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Frequency
+                                </th>
+                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Unit Cost
+                                </th>
+                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Total
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200 ">
+                              {request?.itemGroups!.map((item) => (
+                                <tr key={item._id!}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {item.description}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {item.quantity}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {item.frequency}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {moneyFormat(item.unitCost, "NGN")}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {moneyFormat(item.total, "NGN")}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           )}
