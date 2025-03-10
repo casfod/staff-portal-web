@@ -112,7 +112,7 @@ export const sendPurchaseRequests = async function (
 ) {
   try {
     const response = await axiosInstance.post<PurChaseRequestType>(
-      `/purchase-requests`,
+      `/purchase-requests/save-and-send`,
       data
     );
     return response.data;

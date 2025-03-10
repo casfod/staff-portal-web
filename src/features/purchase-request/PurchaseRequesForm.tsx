@@ -12,6 +12,7 @@ import { useSavePurchaseRequest } from "./pRHooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useAdmins } from "../user/userHooks/useAdmins";
 import Select from "../../ui/Select";
+import { useSendPurchaseRequest } from "./pRHooks/usesendPurchaseRequest";
 
 const PurchaseRequestForm: React.FC = () => {
   // State for the main form fields
@@ -50,6 +51,8 @@ const PurchaseRequestForm: React.FC = () => {
   };
 
   const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
+  const { sendPurchaseRequest, isPending: isSending } =
+    useSendPurchaseRequest();
   const { data, isLoading } = useAdmins();
 
   const admins = data?.data;
@@ -117,6 +120,15 @@ const PurchaseRequestForm: React.FC = () => {
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     savePurchaseRequest(data);
+  };
+  // Handle form submission
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Data:", formData);
+    console.log("Item Groups:", itemGroup);
+
+    const data = { ...formData, itemGroups: [...itemGroup] };
+    sendPurchaseRequest(data);
   };
   return (
     <form className="space-y-6">
@@ -362,7 +374,7 @@ const PurchaseRequestForm: React.FC = () => {
       </Row>
 
       <Row>
-        <FormRow label="Reviewed By *" type="medium">
+        <FormRow label="Reviewed By *" type="small">
           {isLoading ? (
             <SpinnerMini /> // Show a spinner while loading admins
           ) : (
@@ -391,8 +403,8 @@ const PurchaseRequestForm: React.FC = () => {
           {isPending ? <SpinnerMini /> : "Save"}
         </Button>
         {formData.reviewedBy && (
-          <Button type="submit" size="medium">
-            Save And Send
+          <Button size="medium" onClick={handleSend}>
+            {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>
         )}
       </div>

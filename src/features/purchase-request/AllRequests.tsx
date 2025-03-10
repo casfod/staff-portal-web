@@ -6,7 +6,7 @@ import { useAllPurchaseRequests } from "./pRHooks/useAllPurchaseRequests";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
-import { RiArrowUpDownLine } from "react-icons/ri";
+// import { RiArrowUpDownLine } from "react-icons/ri";
 import { Pagination } from "../../ui/Pagination";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
@@ -19,7 +19,8 @@ const AllRequests = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [sort, setSort] = useState<string>("department:asc"); // Default sort
+  // const [sort, setSort] = useState<string>("department:asc");
+  const [sort] = useState<string>("department:asc"); // Default sort
   const [page, setPage] = useState<number>(1);
   const limit = 10;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
@@ -47,9 +48,9 @@ const AllRequests = () => {
 
   console.log(purchaseRequests);
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSort(e.target.value);
-  };
+  // const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSort(e.target.value);
+  // };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -127,31 +128,35 @@ const AllRequests = () => {
 
         {/* Sort Dropdown */}
         <div className="relative inline-block">
-          <select
+          {/* <select
             value={sort}
             onChange={handleSortChange}
             className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm text-gray-600 appearance-none bg-white"
-          >
-            {/* Placeholder Option */}
-            <option value="" disabled selected className="text-gray-400">
+          > */}
+          {/* Placeholder Option */}
+          {/* <option value="" disabled selected className="text-gray-400">
               Sort
-            </option>
+            </option> */}
 
-            {/* Sort Options */}
-            <option value="department:asc">Department (A-Z)</option>
+          {/* Sort Options */}
+          {/* <option value="department:asc">Department (A-Z)</option>
             <option value="department:desc">Department (Z-A)</option>
             <option value="accountCode:asc">Account Code (A-Z)</option>
             <option value="Account Code:desc">Account Code (Z-A)</option>
             <option value="city:asc">City (A-Z)</option>
-            <option value="city:desc">City (Z-A)</option>
-          </select>
+            <option value="city:desc">City (Z-A)</option> */}
+          {/* </select> */}
 
           {/* Icon */}
-          <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+          {/* <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
             <RiArrowUpDownLine className="h-5 w-5" />
-          </div>
+         </div> */}
         </div>
       </div>
+
+      {/* ///////////////////////////// */}
+      {/*PURCHASE REQUEST TABLE*/}
+      {/* ///////////////////////////// */}
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -181,7 +186,7 @@ const AllRequests = () => {
           {isLoading ? (
             <tbody>
               <tr>
-                <td>
+                <td colSpan={6}>
                   <div className="flex justify-center items-center h-96">
                     <Spinner />
                   </div>
@@ -192,11 +197,11 @@ const AllRequests = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {purchaseRequests.map((request) => (
                 <>
-                  <tr key={request._id} className="hover:cursor-pointer">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                  <tr key={request._id} className="h-[40px] max-h-[40px]">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700">
                       {request.department}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                       {moneyFormat(
                         request?.itemGroups!.reduce(
                           (sum, item) => sum + item.total,
@@ -205,18 +210,21 @@ const AllRequests = () => {
                         "NGN"
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {request.status}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                       {request.requestedBy}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                       {dateformat(request.createdAt!)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-4">
-                        <span onClick={() => toggleViewItems(request._id!)}>
+                        <span
+                          className="hover:cursor-pointer"
+                          onClick={() => toggleViewItems(request._id!)}
+                        >
                           {visibleItems[request._id!] ? (
                             <HiMiniEyeSlash className="w-5 h-5" />
                           ) : (
@@ -226,7 +234,7 @@ const AllRequests = () => {
 
                         {request.status === "draft" && (
                           <button
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 hover:cursor-pointer"
                             onClick={() => handleDelete(request._id!)}
                           >
                             <Trash2 className="h-5 w-5" />
@@ -235,58 +243,73 @@ const AllRequests = () => {
                       </div>
                     </td>
                   </tr>
+
+                  {/* ///////////////////////////// */}
+                  {/*ITEMS TABLE*/}
+                  {/* ///////////////////////////// */}
+
                   {visibleItems[request._id!] && (
                     <tr
                       key={`${request._id}-items`}
-                      className="w-full h-10 scale-[90%]"
+                      className="w-full h-10 scale-[95%]"
                     >
                       <td colSpan={6}>
                         <div className="border border-gray-400 px-6 py-4 rounded-md">
-                          <div className="w-full text-gray-700 text-sm mb-2">
+                          <div
+                            className="w-full text-gray-700 text-sm mb-3"
+                            style={{ letterSpacing: "1px" }}
+                          >
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Account Code :{" "}
                               </span>{" "}
                               {request.accountCode}
                             </p>
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Charged To :{" "}
                               </span>
                               {request.expenseChargedTo}
                             </p>
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Address :{" "}
                               </span>{" "}
                               {request.address}
                             </p>
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 City :{" "}
                               </span>{" "}
                               {request.city}
                             </p>
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Delivery Point :{" "}
                               </span>
                               {request.finalDeliveryPoint}
                             </p>
 
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Period Of Activity :
                               </span>
                               {request.periodOfActivity}
                             </p>
                             <p>
-                              <span className="font-bold mr-2 uppercase">
+                              <span className="font-bold mr-1 uppercase">
                                 Activity Description :{" "}
                               </span>
                               {request.activityDescription}
                             </p>
                           </div>
+
+                          <h2
+                            className="text-center text-lg text-gray-700 font-semibold"
+                            style={{ letterSpacing: "2px" }}
+                          >
+                            ITEMS
+                          </h2>
                           <table className=" min-w-full divide-y divide-gray-200 rounded-md">
                             <thead>
                               <tr>
@@ -329,6 +352,33 @@ const AllRequests = () => {
                               ))}
                             </tbody>
                           </table>
+
+                          {request?.reviewedBy &&
+                            request.status !== "draft" && (
+                              <div
+                                className="w-full text-gray-700 text-sm mb-2"
+                                style={{ letterSpacing: "1px" }}
+                              >
+                                <p>
+                                  <span className="font-bold mr-1 uppercase">
+                                    Reviewed By :
+                                  </span>
+                                  {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+                                </p>
+                                {/* <p>
+                                  <span className="font-bold mr-1 uppercase">
+                                    Mail :
+                                  </span>
+                                  {request?.reviewedBy.email}
+                                </p>
+                                <p>
+                                  <span className="font-bold mr-1 uppercase">
+                                    Role :
+                                  </span>
+                                  {request?.reviewedBy.role}
+                                </p> */}
+                              </div>
+                            )}
                         </div>
                       </td>
                     </tr>

@@ -48,7 +48,7 @@ export interface PurChaseRequestType {
   activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
-  reviewedBy?: null | string;
+  reviewedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];
   status?: string;
   createdBy?: [];
