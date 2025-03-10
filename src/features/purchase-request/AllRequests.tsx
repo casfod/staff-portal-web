@@ -225,22 +225,23 @@ const AllRequests = () => {
                           )}
                         </span>
 
-                        {request.status === "draft" && (
-                          <button
-                            className=" hover:cursor-pointer"
-                            onClick={() => handleEdit(request)}
-                          >
-                            <Edit className="h-5 w-5" />
-                          </button>
-                        )}
+                        {(request.status === "draft" ||
+                          request.status === "rejected") && (
+                          <div className="flex space-x-4">
+                            <button
+                              className="hover:cursor-pointer"
+                              onClick={() => handleEdit(request)}
+                            >
+                              <Edit className="h-5 w-5" />
+                            </button>
 
-                        {request.status === "draft" && (
-                          <button
-                            className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                            onClick={() => handleDelete(request._id!)}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                            <button
+                              className="text-red-600 hover:text-red-900 hover:cursor-pointer"
+                              onClick={() => handleDelete(request._id!)}
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
