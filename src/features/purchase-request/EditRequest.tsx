@@ -1,12 +1,16 @@
+import { useNavigate, useParams } from "react-router-dom";
+import FormEditRequest from "./FormEditRequest";
 import { List } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useEffect } from "react";
 
-const Request = () => {
+const EditRequest = () => {
   const navigate = useNavigate();
+
   const param = useParams();
+
+  // Access the purchaseRequest state from Redux
 
   const purchaseRequest = useSelector(
     (state: RootState) => state.purchaseRequest.purchaseRequest
@@ -23,8 +27,6 @@ const Request = () => {
     return <div>No purchase request data available.</div>;
   }
 
-  console.log("🔥", purchaseRequest);
-
   return (
     <div className="flex flex-col items-center gap-6">
       <div className="w-full flex justify-between items-center">
@@ -32,7 +34,7 @@ const Request = () => {
           className="text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
-          Review Request
+          Update Purchase Request
         </h1>
         <button
           onClick={() => navigate(-1)} // Use relative path here
@@ -45,11 +47,11 @@ const Request = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
-          Puschase request
+          <FormEditRequest purchaseRequest={purchaseRequest} />
         </div>
       </div>
     </div>
   );
 };
 
-export default Request;
+export default EditRequest;

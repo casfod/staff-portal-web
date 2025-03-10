@@ -1,10 +1,10 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useAllPurchaseRequests } from "./pRHooks/useAllPurchaseRequests";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { BiSearch } from "react-icons/bi";
+import { BiSearch, BiSolidPen } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 // import { RiArrowUpDownLine } from "react-icons/ri";
 import { Pagination } from "../../ui/Pagination";
@@ -14,9 +14,14 @@ import Spinner from "../../ui/Spinner";
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import Swal from "sweetalert2";
 import { useDeletePurchaseRequest } from "./pRHooks/useDeletePurchaseRequest";
+import { PurChaseRequestType } from "../../interfaces";
+import { useDispatch } from "react-redux";
+import { setPurChaseRequest } from "../../store/purchaseRequestSlice";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 const AllRequests = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   // const [sort, setSort] = useState<string>("department:asc");
@@ -28,14 +33,16 @@ const AllRequests = () => {
     {}
   );
 
-  const toggleViewItems = (requestId: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [requestId]: !prev[requestId], // Toggle visibility for the specific request
-    }));
-  };
+  const localStorageUserX = localStorageUser();
 
   const { data, isLoading, isError } = useAllPurchaseRequests(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
+
+  const { deletePurchaseRequest } = useDeletePurchaseRequest(
     debouncedSearchTerm,
     sort,
     page,
@@ -52,16 +59,26 @@ const AllRequests = () => {
   //   setSort(e.target.value);
   // };
 
+  const toggleViewItems = (requestId: string) => {
+    setVisibleItems((prev) => ({
+      ...prev,
+      [requestId]: !prev[requestId], // Toggle visibility for the specific request
+    }));
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
-  const { deletePurchaseRequest } = useDeletePurchaseRequest(
-    debouncedSearchTerm,
-    sort,
-    page,
-    limit
-  );
+  const handleAction = (request: PurChaseRequestType) => {
+    dispatch(setPurChaseRequest(request));
+    navigate(`/purchase-requests/request/${request._id}`);
+  };
+
+  const handleEdit = (request: PurChaseRequestType) => {
+    dispatch(setPurChaseRequest(request));
+    navigate(`/purchase-requests/edit-request/${request._id}`);
+  };
 
   const handleDelete = (id: string) => {
     Swal.fire({
@@ -97,7 +114,7 @@ const AllRequests = () => {
           Purchase Requests
         </h1>
         <button
-          onClick={() => navigate("/purchase-requests/request")} // Use relative path here
+          onClick={() => navigate("/purchase-requests/create-request")} // Use relative path here
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -127,31 +144,7 @@ const AllRequests = () => {
         </div>
 
         {/* Sort Dropdown */}
-        <div className="relative inline-block">
-          {/* <select
-            value={sort}
-            onChange={handleSortChange}
-            className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm text-gray-600 appearance-none bg-white"
-          > */}
-          {/* Placeholder Option */}
-          {/* <option value="" disabled selected className="text-gray-400">
-              Sort
-            </option> */}
-
-          {/* Sort Options */}
-          {/* <option value="department:asc">Department (A-Z)</option>
-            <option value="department:desc">Department (Z-A)</option>
-            <option value="accountCode:asc">Account Code (A-Z)</option>
-            <option value="Account Code:desc">Account Code (Z-A)</option>
-            <option value="city:asc">City (A-Z)</option>
-            <option value="city:desc">City (Z-A)</option> */}
-          {/* </select> */}
-
-          {/* Icon */}
-          {/* <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
-            <RiArrowUpDownLine className="h-5 w-5" />
-         </div> */}
-        </div>
+        {/* <div className="relative inline-block"></div> */}
       </div>
 
       {/* ///////////////////////////// */}
@@ -234,6 +227,15 @@ const AllRequests = () => {
 
                         {request.status === "draft" && (
                           <button
+                            className=" hover:cursor-pointer"
+                            onClick={() => handleEdit(request)}
+                          >
+                            <Edit className="h-5 w-5" />
+                          </button>
+                        )}
+
+                        {request.status === "draft" && (
+                          <button
                             className="text-red-600 hover:text-red-900 hover:cursor-pointer"
                             onClick={() => handleDelete(request._id!)}
                           >
@@ -310,7 +312,7 @@ const AllRequests = () => {
                           >
                             ITEMS
                           </h2>
-                          <table className=" min-w-full divide-y divide-gray-200 rounded-md">
+                          <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
                             <thead>
                               <tr>
                                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -356,27 +358,27 @@ const AllRequests = () => {
                           {request?.reviewedBy &&
                             request.status !== "draft" && (
                               <div
-                                className="w-full text-gray-700 text-sm mb-2"
+                                className="flex justify-between items-center w-full text-gray-700 text-sm mb-2"
                                 style={{ letterSpacing: "1px" }}
                               >
-                                <p>
-                                  <span className="font-bold mr-1 uppercase">
-                                    Reviewed By :
-                                  </span>
-                                  {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
-                                </p>
-                                {/* <p>
-                                  <span className="font-bold mr-1 uppercase">
-                                    Mail :
-                                  </span>
-                                  {request?.reviewedBy.email}
-                                </p>
-                                <p>
-                                  <span className="font-bold mr-1 uppercase">
-                                    Role :
-                                  </span>
-                                  {request?.reviewedBy.role}
-                                </p> */}
+                                <div>
+                                  <p>
+                                    <span className="font-bold mr-1 uppercase">
+                                      Reviewed By :
+                                    </span>
+                                    {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+                                  </p>
+                                </div>
+
+                                {localStorageUserX.role !== "STAFF" && (
+                                  <button
+                                    onClick={() => handleAction(request)} // Use relative path here
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                                  >
+                                    <BiSolidPen className="h-4 w-4 mr-2" />
+                                    Action
+                                  </button>
+                                )}
                               </div>
                             )}
                         </div>

@@ -1,29 +1,9 @@
 import { List } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { RootState } from "../../store/store";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import PurchaseRequesForm from "./PurchaseRequesForm";
 
-const Request = () => {
+const CreateRequest = () => {
   const navigate = useNavigate();
-  const param = useParams();
-
-  const purchaseRequest = useSelector(
-    (state: RootState) => state.purchaseRequest.purchaseRequest
-  );
-
-  useEffect(() => {
-    if (!param || !purchaseRequest) {
-      navigate("/purchase-requests");
-    }
-  }, [purchaseRequest, param]);
-
-  // Handle the case where purchaseRequest is null
-  if (!purchaseRequest) {
-    return <div>No purchase request data available.</div>;
-  }
-
-  console.log("🔥", purchaseRequest);
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -32,7 +12,7 @@ const Request = () => {
           className="text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
-          Review Request
+          New Purchase Request
         </h1>
         <button
           onClick={() => navigate(-1)} // Use relative path here
@@ -45,11 +25,11 @@ const Request = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
-          Puschase request
+          <PurchaseRequesForm />
         </div>
       </div>
     </div>
   );
 };
 
-export default Request;
+export default CreateRequest;

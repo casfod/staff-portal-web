@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Login } from "./features/authentication/Login";
 import AuthGuard from "./features/authentication/AuthGuard";
 import { Dashboard } from "./pages/Dashboard";
@@ -17,6 +13,37 @@ import { Layout } from "./ui/Layout";
 import Request from "./features/purchase-request/Request";
 import AllRequests from "./features/purchase-request/AllRequests";
 import { PurchaseVoucher } from "./pages/PurchaseVoucher";
+import EditRequest from "./features/purchase-request/EditRequest";
+import { AnimatePresence, motion } from "framer-motion";
+import CreateRequest from "./features/purchase-request/CreateRequest";
+
+const pageVariants = {
+  initial: { opacity: 0, y: -20 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] },
+  },
+  exit: {
+    opacity: 0,
+    y: 20,
+    transition: { duration: 0.3, ease: "easeInOut" },
+  },
+};
+
+const AnimatedRoute = ({ element }: { element: React.ReactNode }) => (
+  <AnimatePresence mode="wait">
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      {element}
+    </motion.div>
+  </AnimatePresence>
+);
 
 const router = createBrowserRouter([
   {
@@ -27,47 +54,58 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "/", element: <Navigate to="dashboard" /> },
-      { path: "dashboard", element: <Dashboard /> },
+      { path: "dashboard", element: <AnimatedRoute element={<Dashboard />} /> },
       {
         path: "projects",
-        element: <Projects />,
+        element: <AnimatedRoute element={<Projects />} />,
       },
       {
         path: "concept-notes",
-        element: <ConceptNotes />,
+        element: <AnimatedRoute element={<ConceptNotes />} />,
       },
       {
         path: "purchase-requests",
-        element: <PurchaseRequests />, // Use PurchaseRequests component
+        element: <AnimatedRoute element={<PurchaseRequests />} />,
         children: [
-          { index: true, element: <Navigate to="all-request" /> }, // Redirect to "all-request"
-          { path: "all-request", element: <AllRequests /> }, // Nested route
-          { path: "request", element: <Request /> }, // Nested route
+          { index: true, element: <Navigate to="all-request" /> },
+          {
+            path: "all-request",
+            element: <AnimatedRoute element={<AllRequests />} />,
+          },
+          {
+            path: "create-request",
+            element: <AnimatedRoute element={<CreateRequest />} />,
+          },
+          {
+            path: "request/:requestId",
+            element: <AnimatedRoute element={<Request />} />,
+          },
+          {
+            path: "edit-request/:requestId",
+            element: <AnimatedRoute element={<EditRequest />} />,
+          },
         ],
       },
       {
         path: "payment-voucher",
-        element: <PurchaseVoucher />,
+        element: <AnimatedRoute element={<PurchaseVoucher />} />,
       },
       {
         path: "advance-requests",
-        element: <AdvanceRequests />,
+        element: <AnimatedRoute element={<AdvanceRequests />} />,
       },
       {
         path: "travel-requests",
-        element: <TravelRequests />,
+        element: <AnimatedRoute element={<TravelRequests />} />,
       },
       {
         path: "user-management",
-        element: <UserManagement />,
+        element: <AnimatedRoute element={<UserManagement />} />,
       },
     ],
   },
-  { path: "login", element: <Login /> },
-  { path: "*", element: <PageNotFound /> },
+  { path: "login", element: <AnimatedRoute element={<Login />} /> },
+  { path: "*", element: <AnimatedRoute element={<PageNotFound />} /> },
 ]);
-function Router() {
-  return <RouterProvider router={router} />;
-}
 
-export default Router;
+export default router;

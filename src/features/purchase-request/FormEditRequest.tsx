@@ -8,31 +8,50 @@ import {
   PurchaseRequesItemGroupType,
   PurChaseRequestType,
 } from "../../interfaces";
-import { useSavePurchaseRequest } from "./pRHooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useAdmins } from "../user/userHooks/useAdmins";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./pRHooks/useSendPurchaseRequest";
+import { useDispatch } from "react-redux";
 
-const PurchaseRequestForm: React.FC = () => {
+import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
+import { useUpdatePurChaseRequest } from "./pRHooks/useUpdatePurChaseRequest";
+import { useParams } from "react-router-dom";
+
+interface FormEditRequestProps {
+  purchaseRequest: PurChaseRequestType;
+}
+
+const FormEditRequest: React.FC<FormEditRequestProps> = ({
+  purchaseRequest,
+}) => {
+  const dispatch = useDispatch();
+  const param = useParams();
+
   // State for the main form fields
   const [formData, setFormData] = useState<PurChaseRequestType>({
-    department: "",
-    suggestedSupplier: "",
-    requestedBy: "",
-    address: "",
-    finalDeliveryPoint: "",
-    city: "",
-    periodOfActivity: "",
-    activityDescription: "",
-    expenseChargedTo: "",
-    accountCode: "",
+    department: purchaseRequest.department,
+    suggestedSupplier: purchaseRequest.suggestedSupplier,
+    requestedBy: purchaseRequest.requestedBy,
+    address: purchaseRequest.address,
+    finalDeliveryPoint: purchaseRequest.finalDeliveryPoint,
+    city: purchaseRequest.city,
+    periodOfActivity: purchaseRequest.periodOfActivity,
+    activityDescription: purchaseRequest.activityDescription,
+    expenseChargedTo: purchaseRequest.expenseChargedTo,
+    accountCode: purchaseRequest.accountCode,
     reviewedBy: null,
   });
 
-  // State for the item groups
-  const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>([]);
-  const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
+  // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
+  const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>(
+    purchaseRequest.itemGroups || []
+  );
+
+  // Initialize disabledStates with false for each item group
+  const [disabledStates, setDisabledStates] = useState<boolean[]>(
+    Array(itemGroup.length).fill(false)
+  );
 
   // Add a new item group
   const addItem = () => {
@@ -47,17 +66,23 @@ const PurchaseRequestForm: React.FC = () => {
         total: 0,
       },
     ]);
-    setDisabledStates([...disabledStates, false]);
+    setDisabledStates([...disabledStates, false]); // Add a new disabled state
   };
 
-  const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
-  const { sendPurchaseRequest, isPending: isSending } =
-    useSendPurchaseRequest();
-  const { data, isLoading } = useAdmins();
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates); // Remove the corresponding disabled state
+  };
 
-  const admins = data?.data;
-
-  console.log("Admins:", admins);
+  // Toggle edit mode for an item group
+  const handleEdit = (index: number) => {
+    const newDisabledStates = [...disabledStates];
+    newDisabledStates[index] = !newDisabledStates[index];
+    setDisabledStates(newDisabledStates);
+  };
 
   // Update item group fields
   const handleItemChange = (
@@ -70,20 +95,35 @@ const PurchaseRequestForm: React.FC = () => {
     setItemGroup(newItems);
   };
 
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates);
-  };
+  // Calculate totals whenever frequency, quantity, or unitCost changes
+  useEffect(() => {
+    const updatedGroups = itemGroup.map((group) => ({
+      ...group,
+      total: parseFloat(
+        (
+          (group.frequency || 1) *
+          (group.quantity || 1) *
+          (group.unitCost || 0)
+        ).toFixed(2)
+      ),
+    }));
+    setItemGroup(updatedGroups);
+  }, [
+    itemGroup.map((g) => g.frequency).join(","),
+    itemGroup.map((g) => g.quantity).join(","),
+    itemGroup.map((g) => g.unitCost).join(","),
+  ]);
 
-  // Toggle edit mode for an item group
-  const handleEdit = (index: number) => {
-    const newDisabledStates = [...disabledStates];
-    newDisabledStates[index] = !newDisabledStates[index];
-    setDisabledStates(newDisabledStates);
-  };
+  const { updatePurchaseRequest, isPending } = useUpdatePurChaseRequest(
+    param.requestId!
+  );
+  const { sendPurchaseRequest, isPending: isSending } =
+    useSendPurchaseRequest();
+  const { data, isLoading } = useAdmins();
+
+  const admins = data?.data;
+
+  console.log("Admins:", admins);
 
   // Update main form fields
   const handleFormChange = (
@@ -113,13 +153,14 @@ const PurchaseRequestForm: React.FC = () => {
   ]);
 
   // Handle form submission
-  const handleSave = (e: React.FormEvent) => {
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form Data:", formData);
     console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    savePurchaseRequest(data);
+    updatePurchaseRequest(data);
+    // dispatch(resetPurchaseRequest());
   };
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
@@ -129,6 +170,8 @@ const PurchaseRequestForm: React.FC = () => {
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     sendPurchaseRequest(data);
+
+    dispatch(resetPurchaseRequest());
   };
   return (
     <form className="space-y-6">
@@ -399,8 +442,8 @@ const PurchaseRequestForm: React.FC = () => {
       </Row>
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleSave}>
-          {isPending ? <SpinnerMini /> : "Save"}
+        <Button size="medium" onClick={handleUpdate}>
+          {isPending ? <SpinnerMini /> : "Update"}
         </Button>
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
@@ -412,4 +455,4 @@ const PurchaseRequestForm: React.FC = () => {
   );
 };
 
-export default PurchaseRequestForm;
+export default FormEditRequest;

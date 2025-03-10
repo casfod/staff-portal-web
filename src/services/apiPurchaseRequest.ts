@@ -121,10 +121,13 @@ export const sendPurchaseRequests = async function (
   }
 };
 
-export const updatePurchaseRequest = async function (data: any) {
+export const updatePurchaseRequest = async function (
+  requestId: string,
+  data: Partial<PurChaseRequestType>
+) {
   try {
-    const response = await axiosInstance.patch<PurChaseRequestType>(
-      `/purchase-requests`,
+    const response = await axiosInstance.put<Partial<PurChaseRequestType>>(
+      `/purchase-requests/${requestId}`,
       data
     );
     return response.data;

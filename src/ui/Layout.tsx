@@ -7,7 +7,10 @@ import { Header } from "./Header";
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-[#F8F8F8]" style={{ fontFamily: "Cabin" }}>
+    <div
+      className="min-h-screen bg-[#F8F8F8] overflow-y-hidden"
+      style={{ fontFamily: "Cabin" }}
+    >
       <Header />
       <div className="flex text-gray-300 overflow-y-hidden">
         {/* <Navigation onNavigate={setCurrentPage} currentPage={currentPage}/> */}
