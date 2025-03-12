@@ -273,7 +273,7 @@ const Request = () => {
                               >
                                 {localStorageUserX.id ===
                                   purchaseRequest?.reviewedBy.id && (
-                                  <div className="w-full">
+                                  <div className="flex flex-col w-full gap-2">
                                     <label htmlFor="content">
                                       <span className="font-bold uppercase">
                                         Comment
@@ -282,7 +282,7 @@ const Request = () => {
                                     </label>
                                     <textarea
                                       id="content"
-                                      className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
+                                      className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-sm focus:outline-none"
                                       value={comment}
                                       onChange={(e) =>
                                         setComment(e.target.value)
