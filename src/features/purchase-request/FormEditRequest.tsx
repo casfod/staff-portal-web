@@ -40,7 +40,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     activityDescription: purchaseRequest.activityDescription,
     expenseChargedTo: purchaseRequest.expenseChargedTo,
     accountCode: purchaseRequest.accountCode,
-    reviewedBy: null,
+    reviewedBy: purchaseRequest.reviewedBy,
   });
 
   // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
@@ -174,7 +174,12 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     dispatch(resetPurchaseRequest());
   };
   return (
-    <form className="space-y-6">
+    <form className="space-y-6 uppercase ">
+      <p
+        className="text-gray-700"
+        style={{ letterSpacing: "1px" }}
+      >{`Status : ${purchaseRequest.status}`}</p>
+
       {/* Static inputs */}
       <Row>
         <FormRow label="Department *">
@@ -416,30 +421,49 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row>
-        <FormRow label="Reviewed By *" type="small">
-          {isLoading ? (
-            <SpinnerMini /> // Show a spinner while loading admins
-          ) : (
-            <Select
-              id="reviewedBy"
-              value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
-              options={
-                admins
-                  ? admins
-                      .filter((admin) => admin.id) // Filter out admins with undefined IDs
-                      .map((admin) => ({
-                        id: admin.id as string, // Assert that admin.id is a string
-                        name: `${admin.first_name} ${admin.last_name}`,
-                      }))
-                  : []
-              }
-              required
-            />
+      {purchaseRequest.reviewedBy ? (
+        <div className="text-gray-700">
+          <p className="mb-2">
+            <span className="font-bold mr-1  uppercase">Reviewed By :</span>
+            {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
+          </p>
+
+          {purchaseRequest?.comments && (
+            <div className="mb-2">
+              <span className="font-bold mr-1  uppercase">Comments :</span>
+
+              {purchaseRequest?.comments?.map((comment) => (
+                <p>{`${comment.comment}`}</p>
+              ))}
+            </div>
           )}
-        </FormRow>
-      </Row>
+        </div>
+      ) : (
+        <Row>
+          <FormRow label="Reviewed By *" type="small">
+            {isLoading ? (
+              <SpinnerMini /> // Show a spinner while loading admins
+            ) : (
+              <Select
+                id="reviewedBy"
+                value={formData.reviewedBy || ""} // Use empty string if null
+                onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+                options={
+                  admins
+                    ? admins
+                        .filter((admin) => admin.id) // Filter out admins with undefined IDs
+                        .map((admin) => ({
+                          id: admin.id as string, // Assert that admin.id is a string
+                          name: `${admin.first_name} ${admin.last_name}`,
+                        }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        </Row>
+      )}
 
       <div className="flex justify-center w-full gap-4">
         <Button size="medium" onClick={handleUpdate}>

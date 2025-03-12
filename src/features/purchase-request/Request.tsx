@@ -257,7 +257,7 @@ const Request = () => {
                           </p>
                           <div className="mb-2">
                             <span className="font-bold mr-1  uppercase">
-                              comenents :
+                              Comments :
                             </span>
 
                             {purchaseRequest?.comments?.map((comment) => (
@@ -265,38 +265,49 @@ const Request = () => {
                             ))}
                           </div>
 
-                          <div
-                            className="flex flex-col w-full gap-3"
-                            style={{ letterSpacing: "1px" }}
-                          >
-                            <div className="w-full">
-                              <label htmlFor="content">
-                                <span className="font-bold  uppercase">
-                                  Comment :
-                                </span>{" "}
-                                <em>( Optional )</em>
-                              </label>
-                              <textarea
-                                id="content"
-                                className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                required
-                              />
-                            </div>
+                          {purchaseRequest.status !== "approved" &&
+                            purchaseRequest.status !== "rejected" && (
+                              <form
+                                className="flex flex-col w-full gap-3"
+                                style={{ letterSpacing: "1px" }}
+                              >
+                                <div className="w-full">
+                                  <label htmlFor="content">
+                                    <span className="font-bold uppercase">
+                                      Comment
+                                    </span>{" "}
+                                    <em>(Optional)</em>
+                                  </label>
+                                  <textarea
+                                    id="content"
+                                    className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    aria-label="Enter your comment"
+                                  />
+                                </div>
 
-                            <select
-                              className="bg-buttonColor hover:to-buttonColorHover text-white self-end text-xs md:text-sm border-2 px-3 py-2 rounded"
-                              id={`status-${purchaseRequest?._id}`}
-                              value={status}
-                              onChange={handleStatusChange}
-                              disabled={isPending}
-                            >
-                              <option value="">ACTIONS</option>
-                              <option value="approved">APPROVE</option>
-                              <option value="rejected">REJECT</option>
-                            </select>
-                          </div>
+                                <div className="bg-buttonColor hover:to-buttonColorHover text-white self-end px-3 py-2 rounded-md">
+                                  <label
+                                    htmlFor={`status-${purchaseRequest?._id}`}
+                                    className="sr-only"
+                                  >
+                                    Select Action
+                                  </label>
+                                  <select
+                                    className="text-xs md:text-sm bg-inherit"
+                                    id={`status-${purchaseRequest?._id}`}
+                                    value={status}
+                                    onChange={handleStatusChange}
+                                    disabled={isPending}
+                                  >
+                                    <option value="">ACTIONS</option>
+                                    <option value="approved">APPROVE</option>
+                                    <option value="rejected">REJECT</option>
+                                  </select>
+                                </div>
+                              </form>
+                            )}
                         </div>
                       )}
                   </div>
@@ -304,10 +315,7 @@ const Request = () => {
               </tr>
             </>
           </tbody>
-          t
         </table>
-
-        <form></form>
       </div>
     </div>
   );
