@@ -7,18 +7,18 @@ import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./pRHooks/useUpdateStatus";
 import Swal from "sweetalert2";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 const Request = () => {
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const navigate = useNavigate();
   const param = useParams();
+  const localStorageUserX = localStorageUser();
 
   const purchaseRequest = useSelector(
     (state: RootState) => state.purchaseRequest.purchaseRequest
   );
-
-  console.log(purchaseRequest);
 
   useEffect(() => {
     if (!param || !purchaseRequest) {
@@ -271,23 +271,28 @@ const Request = () => {
                                 className="flex flex-col w-full gap-3"
                                 style={{ letterSpacing: "1px" }}
                               >
-                                <div className="w-full">
-                                  <label htmlFor="content">
-                                    <span className="font-bold uppercase">
-                                      Comment
-                                    </span>{" "}
-                                    <em>(Optional)</em>
-                                  </label>
-                                  <textarea
-                                    id="content"
-                                    className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    aria-label="Enter your comment"
-                                  />
-                                </div>
+                                {localStorageUserX.id ===
+                                  purchaseRequest?.reviewedBy.id && (
+                                  <div className="w-full">
+                                    <label htmlFor="content">
+                                      <span className="font-bold uppercase">
+                                        Comment
+                                      </span>{" "}
+                                      <em>(Optional)</em>
+                                    </label>
+                                    <textarea
+                                      id="content"
+                                      className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
+                                      value={comment}
+                                      onChange={(e) =>
+                                        setComment(e.target.value)
+                                      }
+                                      aria-label="Enter your comment"
+                                    />
+                                  </div>
+                                )}
 
-                                <div className="bg-buttonColor hover:to-buttonColorHover text-white self-end px-3 py-2 rounded-md">
+                                <div className="bg-buttonColor hover:to-buttonColorHover text-white self-center px-3 py-2 rounded-md">
                                   <label
                                     htmlFor={`status-${purchaseRequest?._id}`}
                                     className="sr-only"
