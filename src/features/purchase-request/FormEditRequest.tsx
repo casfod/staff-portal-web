@@ -40,7 +40,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     activityDescription: purchaseRequest.activityDescription,
     expenseChargedTo: purchaseRequest.expenseChargedTo,
     accountCode: purchaseRequest.accountCode,
-    reviewedBy: purchaseRequest.reviewedBy,
+    reviewedBy: purchaseRequest?.reviewedBy?.id,
   });
 
   // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
