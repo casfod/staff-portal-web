@@ -126,9 +126,9 @@ const AddUserForm = () => {
               required
             >
               <option value="">Select a role</option>
-              {role.map((station) => (
-                <option key={station.id} value={station.id}>
-                  {station.name}
+              {role.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.name}
                 </option>
               ))}
             </select>

@@ -136,6 +136,21 @@ export const updatePurchaseRequest = async function (
   }
 };
 
+export const updateStatus = async function (
+  requestId: string,
+  data: { status: string; comments: [{ comment: string }] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(
+      `/purchase-requests/update-status/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deletePurchaseRequest = async function (
   purchaseRequestID: string
 ) {

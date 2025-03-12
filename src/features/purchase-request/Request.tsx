@@ -2,11 +2,15 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
+import { useUpdateStatus } from "./pRHooks/useUpdateStatus";
+import Swal from "sweetalert2";
 
 const Request = () => {
+  const [status, setStatus] = useState("");
+  const [comment, setComment] = useState("");
   const navigate = useNavigate();
   const param = useParams();
 
@@ -14,21 +18,63 @@ const Request = () => {
     (state: RootState) => state.purchaseRequest.purchaseRequest
   );
 
+  console.log(purchaseRequest);
+
   useEffect(() => {
     if (!param || !purchaseRequest) {
       navigate("/purchase-requests");
     }
   }, [purchaseRequest, param]);
 
+  const { updateStatus, isPending } = useUpdateStatus(param.requestId!);
+
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = event.target.value;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change this request status?",
+      showCancelButton: true,
+      confirmButtonColor: "#1373B0",
+      cancelButtonColor: "#DC3340",
+      confirmButtonText: "Yes, update it!",
+      customClass: { popup: "custom-style" },
+      animation: false, // Disable animations
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setStatus(newStatus);
+
+        updateStatus(
+          { status: newStatus, comments: [{ comment: comment }] },
+          {
+            onError: (error) => {
+              Swal.fire({
+                title: "Error!",
+                text: error.message,
+                icon: "error",
+                animation: false, // Disable animations for error modal
+              });
+            },
+            // onSuccess: () => {
+            //   Swal.fire({
+            //     title: "Success!",
+            //     text: "User role updated successfully.",
+            //     icon: "success",
+            //     animation: false // Disable animations for success modal
+            //   });
+            // },
+          }
+        );
+      }
+    });
+  };
+
   // Handle the case where purchaseRequest is null
   if (!purchaseRequest) {
     return <div>No purchase request data available.</div>;
   }
 
-  console.log("🔥", purchaseRequest);
-
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 pb-16">
       <div className="w-full flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
@@ -90,39 +136,6 @@ const Request = () => {
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500">
                   {dateformat(purchaseRequest.createdAt!)}
                 </td>
-                {/* <td className="px-6 py-2 whitespace-nowrap text-gray-500">
-                  <div className="flex space-x-4">
-                    <span
-                      className="hover:cursor-pointer"
-                      onClick={() => toggleViewItems(purchaseRequest._id!)}
-                    >
-                      {visibleItems[purchaseRequest._id!] ? (
-                        <HiMiniEyeSlash className="w-5 h-5" />
-                      ) : (
-                        <HiMiniEye className="w-5 h-5" />
-                      )}
-                    </span>
-
-                    {(purchaseRequest.status === "draft" ||
-                      purchaseRequest.status === "rejected") && (
-                      <div className="flex space-x-4">
-                        <button
-                          className="hover:cursor-pointer"
-                          onClick={() => handleEdit(purchaseRequest)}
-                        >
-                          <Edit className="h-5 w-5" />
-                        </button>
-
-                        <button
-                          className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                          onClick={() => handleDelete(purchaseRequest._id!)}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </td> */}
               </tr>
 
               {/* ///////////////////////////// */}
@@ -235,17 +248,54 @@ const Request = () => {
 
                     {purchaseRequest?.reviewedBy &&
                       purchaseRequest.status !== "draft" && (
-                        <div
-                          className="flex justify-between items-center w-full text-gray-700 mb-2"
-                          style={{ letterSpacing: "1px" }}
-                        >
-                          <div>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Reviewed By :
-                              </span>
-                              {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
-                            </p>
+                        <div className="text-gray-700">
+                          <p className="mb-2">
+                            <span className="font-bold mr-1  uppercase">
+                              Reviewed By :
+                            </span>
+                            {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
+                          </p>
+                          <div className="mb-2">
+                            <span className="font-bold mr-1  uppercase">
+                              comenents :
+                            </span>
+
+                            {purchaseRequest?.comments?.map((comment) => (
+                              <p>{`${comment.comment}`}</p>
+                            ))}
+                          </div>
+
+                          <div
+                            className="flex flex-col w-full gap-3"
+                            style={{ letterSpacing: "1px" }}
+                          >
+                            <div className="w-full">
+                              <label htmlFor="content">
+                                <span className="font-bold  uppercase">
+                                  Comment :
+                                </span>{" "}
+                                <em>( Optional )</em>
+                              </label>
+                              <textarea
+                                id="content"
+                                className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-lg focus:outline-none"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                required
+                              />
+                            </div>
+
+                            <select
+                              className="bg-buttonColor hover:to-buttonColorHover text-white self-end text-xs md:text-sm border-2 px-3 py-2 rounded"
+                              id={`status-${purchaseRequest?._id}`}
+                              value={status}
+                              onChange={handleStatusChange}
+                              disabled={isPending}
+                            >
+                              <option value="">ACTIONS</option>
+                              <option value="approved">APPROVE</option>
+                              <option value="rejected">REJECT</option>
+                            </select>
                           </div>
                         </div>
                       )}
@@ -256,6 +306,8 @@ const Request = () => {
           </tbody>
           t
         </table>
+
+        <form></form>
       </div>
     </div>
   );

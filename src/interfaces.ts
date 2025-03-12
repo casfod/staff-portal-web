@@ -50,6 +50,7 @@ export interface PurChaseRequestType {
   accountCode: string;
   reviewedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];
+  comments?: [{ comment: string }];
   status?: string;
   createdBy?: [];
   createdAt?: string;
