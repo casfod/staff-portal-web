@@ -18,6 +18,7 @@ import { PurChaseRequestType } from "../../interfaces";
 import { useDispatch } from "react-redux";
 import { setPurChaseRequest } from "../../store/purchaseRequestSlice";
 import { localStorageUser } from "../../utils/localStorageUser";
+import { SlMagnifier } from "react-icons/sl";
 
 const AllRequests = () => {
   const navigate = useNavigate();
@@ -226,23 +227,24 @@ const AllRequests = () => {
                         </span>
 
                         {(request.status === "draft" ||
-                          request.status === "rejected") && (
-                          <div className="flex space-x-4">
-                            <button
-                              className="hover:cursor-pointer"
-                              onClick={() => handleEdit(request)}
-                            >
-                              <Edit className="h-5 w-5" />
-                            </button>
+                          request.status === "rejected") &&
+                          request?.createdBy?.id! === localStorageUserX.id && (
+                            <div className="flex space-x-4">
+                              <button
+                                className="hover:cursor-pointer"
+                                onClick={() => handleEdit(request)}
+                              >
+                                <Edit className="h-5 w-5" />
+                              </button>
 
-                            <button
-                              className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                              onClick={() => handleDelete(request._id!)}
-                            >
-                              <Trash2 className="h-5 w-5" />
-                            </button>
-                          </div>
-                        )}
+                              <button
+                                className="text-red-600 hover:text-red-900 hover:cursor-pointer"
+                                onClick={() => handleDelete(request._id!)}
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -376,8 +378,17 @@ const AllRequests = () => {
                                     onClick={() => handleAction(request)} // Use relative path here
                                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
                                   >
-                                    <BiSolidPen className="h-4 w-4 mr-2" />
-                                    Action
+                                    {request.status === "pending" ? (
+                                      <span className="inline-flex items-center gap-1">
+                                        <BiSolidPen className="h-4 w-4 mr-2" />
+                                        <span>Action</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1">
+                                        <SlMagnifier />
+                                        <span>Inspect</span>
+                                      </span>
+                                    )}
                                   </button>
                                 )}
                               </div>

@@ -52,7 +52,7 @@ export interface PurChaseRequestType {
   itemGroups?: PurchaseRequesItemGroupType[];
   comments?: [{ comment: string }];
   status?: string;
-  createdBy?: [];
+  createdBy?: Partial<UserType>;
   createdAt?: string;
   updatedAt?: string;
 }

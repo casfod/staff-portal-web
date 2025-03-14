@@ -54,14 +54,6 @@ const Request = () => {
                 animation: false, // Disable animations for error modal
               });
             },
-            // onSuccess: () => {
-            //   Swal.fire({
-            //     title: "Success!",
-            //     text: "User role updated successfully.",
-            //     icon: "success",
-            //     animation: false // Disable animations for success modal
-            //   });
-            // },
           }
         );
       }
@@ -149,52 +141,72 @@ const Request = () => {
                 <td colSpan={6}>
                   <div className="border border-gray-400 px-6 py-4 rounded-md">
                     <div
-                      className="w-full text-gray-700 mb-3"
+                      className="flex justify-between w-full text-gray-700 mb-3"
                       style={{ letterSpacing: "1px" }}
                     >
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Account Code :{" "}
-                        </span>{" "}
-                        {purchaseRequest.accountCode}
-                      </p>
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Charged To :{" "}
-                        </span>
-                        {purchaseRequest.expenseChargedTo}
-                      </p>
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Address :{" "}
-                        </span>{" "}
-                        {purchaseRequest.address}
-                      </p>
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          City :{" "}
-                        </span>{" "}
-                        {purchaseRequest.city}
-                      </p>
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Delivery Point :{" "}
-                        </span>
-                        {purchaseRequest.finalDeliveryPoint}
-                      </p>
+                      <div>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Account Code :{" "}
+                          </span>{" "}
+                          {purchaseRequest.accountCode}
+                        </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Charged To :{" "}
+                          </span>
+                          {purchaseRequest.expenseChargedTo}
+                        </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Address :{" "}
+                          </span>{" "}
+                          {purchaseRequest.address}
+                        </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            City :{" "}
+                          </span>{" "}
+                          {purchaseRequest.city}
+                        </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Delivery Point :{" "}
+                          </span>
+                          {purchaseRequest.finalDeliveryPoint}
+                        </p>
 
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Period Of Activity :
-                        </span>
-                        {purchaseRequest.periodOfActivity}
-                      </p>
-                      <p>
-                        <span className="font-bold mr-1 uppercase">
-                          Activity Description :{" "}
-                        </span>
-                        {purchaseRequest.activityDescription}
-                      </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Period Of Activity :
+                          </span>
+                          {purchaseRequest.periodOfActivity}
+                        </p>
+                        <p>
+                          <span className="font-bold mr-1 uppercase">
+                            Activity Description :{" "}
+                          </span>
+                          {purchaseRequest.activityDescription}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`w-fit h-fit border text-white px-2 py-1 rounded-lg uppercase mb-1
+                      
+                      ${
+                        purchaseRequest.status === "pending" && "bg-secondary"
+                      } ${
+                          purchaseRequest.status === "approved" && "bg-teal-600"
+                        } ${
+                          purchaseRequest.status === "rejected" && "bg-red-500"
+                        }
+                      `}
+                      >
+                        <p
+                          className={``}
+                          style={{ letterSpacing: "1px" }}
+                        >{`Status : ${purchaseRequest.status}`}</p>
+                      </div>
                     </div>
 
                     <h2

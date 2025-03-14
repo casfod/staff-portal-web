@@ -115,8 +115,6 @@ const PurchaseRequestForm: React.FC = () => {
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     savePurchaseRequest(data);
@@ -124,12 +122,11 @@ const PurchaseRequestForm: React.FC = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     sendPurchaseRequest(data);
   };
+
   return (
     <form className="space-y-6">
       {/* Static inputs */}
