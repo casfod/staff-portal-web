@@ -12,6 +12,7 @@ interface SelectProps {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: Option[];
   required?: boolean;
+  customLabel: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -21,6 +22,7 @@ const Select: React.FC<SelectProps> = ({
   onChange,
   options,
   required = false,
+  customLabel,
 }) => {
   return (
     <div>
@@ -39,7 +41,7 @@ const Select: React.FC<SelectProps> = ({
         onChange={onChange}
         required={required}
       >
-        <option value="">Select a reviewer</option>
+        <option value="">{customLabel}</option>
         {options.map((option) => (
           <option key={option.id} value={option.id}>
             {option.name}

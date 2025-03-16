@@ -10,7 +10,7 @@ import {
 } from "../../interfaces";
 import { useSavePurchaseRequest } from "./pRHooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useAdmins } from "../user/userHooks/useAdmins";
+import { useInspectors } from "../user/userHooks/useInspectors";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./pRHooks/useSendPurchaseRequest";
 
@@ -19,7 +19,6 @@ const PurchaseRequestForm: React.FC = () => {
   const [formData, setFormData] = useState<PurChaseRequestType>({
     department: "",
     suggestedSupplier: "",
-    requestedBy: "",
     address: "",
     finalDeliveryPoint: "",
     city: "",
@@ -53,11 +52,11 @@ const PurchaseRequestForm: React.FC = () => {
   const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
-  const { data, isLoading } = useAdmins();
+  const { data, isLoading } = useInspectors();
 
-  const admins = data?.data;
+  const inspectors = data?.data;
 
-  console.log("Admins:", admins);
+  console.log("inspectors:", inspectors);
 
   // Update item group fields
   const handleItemChange = (
@@ -140,9 +139,6 @@ const PurchaseRequestForm: React.FC = () => {
             onChange={(e) => handleFormChange("department", e.target.value)}
           />
         </FormRow>
-      </Row>
-
-      <Row>
         <FormRow label="Suggested supplier *">
           <Input
             placeholder=""
@@ -152,15 +148,6 @@ const PurchaseRequestForm: React.FC = () => {
             onChange={(e) =>
               handleFormChange("suggestedSupplier", e.target.value)
             }
-          />
-        </FormRow>
-        <FormRow label="Requested By *">
-          <Input
-            placeholder=""
-            id="requestedBy"
-            required
-            value={formData.requestedBy}
-            onChange={(e) => handleFormChange("requestedBy", e.target.value)}
           />
         </FormRow>
       </Row>
@@ -373,19 +360,20 @@ const PurchaseRequestForm: React.FC = () => {
       <Row>
         <FormRow label="Reviewed By *" type="small">
           {isLoading ? (
-            <SpinnerMini /> // Show a spinner while loading admins
+            <SpinnerMini /> // Show a spinner while loading inspectors
           ) : (
             <Select
               id="reviewedBy"
+              customLabel="Select inspector"
               value={formData.reviewedBy || ""} // Use empty string if null
               onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
               options={
-                admins
-                  ? admins
-                      .filter((admin) => admin.id) // Filter out admins with undefined IDs
-                      .map((admin) => ({
-                        id: admin.id as string, // Assert that admin.id is a string
-                        name: `${admin.first_name} ${admin.last_name}`,
+                inspectors
+                  ? inspectors
+                      .filter((inspector) => inspector.id) // Filter out inspectors with undefined IDs
+                      .map((inspector) => ({
+                        id: inspector.id as string, // Assert that inspector.id is a string
+                        name: `${inspector.first_name} ${inspector.last_name}`,
                       }))
                   : []
               }

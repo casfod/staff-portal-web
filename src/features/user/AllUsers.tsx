@@ -1,7 +1,6 @@
 import Swal from "sweetalert2";
 
 import { BiSearch } from "react-icons/bi";
-import { useState } from "react";
 import { GoXCircle } from "react-icons/go";
 import { useDebounce } from "use-debounce";
 import { RiArrowUpDownLine } from "react-icons/ri";
@@ -15,14 +14,29 @@ import { Pagination } from "../../ui/Pagination";
 import AddUserForm from "./AddUserForm";
 import UserCard from "./UserCard";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import {
+  setSearchTerm,
+  setSort,
+  setPage,
+  resetQuery,
+} from "../../store/genericQuerySlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { useEffect, useMemo } from "react";
 
 export function AllUsers() {
   const localStorageUserX = localStorageUser();
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [sort, setSort] = useState<string>("email:asc"); // Default sort
-  const [page, setPage] = useState<number>(1);
-  const limit = 10;
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
+  const dispatch = useDispatch();
+  const { searchTerm, sort, page, limit } = useSelector(
+    (state: RootState) => state.genericQuerySlice
+  );
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetQuery());
+    };
+  }, [dispatch]);
 
   const { data, isLoading, isError } = useUsers(
     debouncedSearchTerm,
@@ -33,15 +47,15 @@ export function AllUsers() {
 
   const { deleteUser } = useDeleteUser();
   // Add null checks for `data` and `data.data`
-  const users = data?.data?.users ?? [];
-  const totalPages = data?.data?.totalPages ?? 1;
+  const users = useMemo(() => data?.data?.users ?? [], [data]);
+  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSort(e.target.value);
+    dispatch(setSort(e.target.value));
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    dispatch(setPage(newPage));
   };
 
   const handleDelete = (id: string) => {
@@ -99,13 +113,13 @@ export function AllUsers() {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
             className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
             placeholder="Search by Name, Email or Role"
           />
           <span
             className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-            onClick={() => setSearchTerm("")}
+            onClick={() => dispatch(setSearchTerm(""))}
           >
             <GoXCircle />
           </span>

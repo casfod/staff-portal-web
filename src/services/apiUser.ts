@@ -74,12 +74,23 @@ const handleError = (err: any) => {
 export const getAdmins = async function () {
   try {
     const response = await axiosInstance.get<useAdminsType>(`/users/admins`);
-    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
+export const getInspectors = async function () {
+  try {
+    const response = await axiosInstance.get<useAdminsType>(
+      `/users/inspectors`
+    );
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const getUsers = async function (queryParams: {
   search?: string;
   role?: string;
@@ -91,7 +102,6 @@ export const getUsers = async function (queryParams: {
     const response = await axiosInstance.get<useUsersType>(`/users`, {
       params: queryParams,
     });
-    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);

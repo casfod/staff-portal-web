@@ -48,8 +48,8 @@ const Navigation: React.FC = () => {
       ],
     },
     {
-      to: "/payment-voucher",
-      label: "Payment Voucher",
+      to: "/payment-Requests",
+      label: "Payment Requests",
       icon: ReceiptTextIcon,
     },
     { to: "/advance-requests", label: "Advance Requests", icon: Wallet },

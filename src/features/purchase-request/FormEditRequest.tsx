@@ -9,7 +9,6 @@ import {
   PurChaseRequestType,
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useAdmins } from "../user/userHooks/useAdmins";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./pRHooks/useSendPurchaseRequest";
 import { useDispatch } from "react-redux";
@@ -17,6 +16,8 @@ import { useDispatch } from "react-redux";
 import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
 import { useUpdatePurChaseRequest } from "./pRHooks/useUpdatePurChaseRequest";
 import { useParams } from "react-router-dom";
+import { useAdmins } from "../user/userHooks/useAdmins";
+import { useInspectors } from "../user/userHooks/useInspectors";
 
 interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;
@@ -32,7 +33,6 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
   const [formData, setFormData] = useState<PurChaseRequestType>({
     department: purchaseRequest.department,
     suggestedSupplier: purchaseRequest.suggestedSupplier,
-    requestedBy: purchaseRequest.requestedBy,
     address: purchaseRequest.address,
     finalDeliveryPoint: purchaseRequest.finalDeliveryPoint,
     city: purchaseRequest.city,
@@ -41,6 +41,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     expenseChargedTo: purchaseRequest.expenseChargedTo,
     accountCode: purchaseRequest.accountCode,
     reviewedBy: purchaseRequest?.reviewedBy?.id,
+    approvedBy: purchaseRequest?.approvedBy?.id,
   });
 
   // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
@@ -119,11 +120,14 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
   );
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
-  const { data, isLoading } = useAdmins();
+  const { data: inspectorsData, isLoading: isLoadingInspectors } =
+    useInspectors();
+  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
 
-  const admins = data?.data;
+  const admins = adminsData?.data;
+  const inspectors = inspectorsData?.data;
 
-  console.log("Admins:", admins);
+  console.log("inspectors:", inspectors);
 
   // Update main form fields
   const handleFormChange = (
@@ -176,10 +180,17 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
 
   return (
     <form className="space-y-6 uppercase ">
-      <p
-        className="text-gray-700"
-        style={{ letterSpacing: "1px" }}
-      >{`Status : ${purchaseRequest.status}`}</p>
+      <Row>
+        <p
+          className="text-gray-700"
+          style={{ letterSpacing: "1px" }}
+        >{`Status : ${purchaseRequest.status}`}</p>
+
+        <p
+          className="text-gray-700"
+          style={{ letterSpacing: "1px" }}
+        >{`Requested by : ${purchaseRequest.requestedBy}`}</p>
+      </Row>
 
       {/* Static inputs */}
       <Row>
@@ -192,9 +203,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             onChange={(e) => handleFormChange("department", e.target.value)}
           />
         </FormRow>
-      </Row>
 
-      <Row>
         <FormRow label="Suggested supplier *">
           <Input
             placeholder=""
@@ -204,15 +213,6 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             onChange={(e) =>
               handleFormChange("suggestedSupplier", e.target.value)
             }
-          />
-        </FormRow>
-        <FormRow label="Requested By *">
-          <Input
-            placeholder=""
-            id="requestedBy"
-            required
-            value={formData.requestedBy}
-            onChange={(e) => handleFormChange("requestedBy", e.target.value)}
           />
         </FormRow>
       </Row>
@@ -439,23 +439,50 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             </div>
           )}
         </div>
-      ) : (
+      ) : purchaseRequest.status === "reviewed" ? (
         <Row>
-          <FormRow label="Reviewed By *" type="small">
-            {isLoading ? (
-              <SpinnerMini /> // Show a spinner while loading admins
+          <FormRow label="Approved By *" type="small">
+            {isLoadingAmins ? (
+              <SpinnerMini /> // Show a spinner while loading inspectors
             ) : (
               <Select
-                id="reviewedBy"
-                value={formData.reviewedBy || ""} // Use empty string if null
+                id="approvedBy"
+                customLabel="Select an admin"
+                value={formData.approvedBy || ""} // Use empty string if null
                 onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
                 options={
                   admins
                     ? admins
-                        .filter((admin) => admin.id) // Filter out admins with undefined IDs
+                        .filter((admin) => admin.id) // Filter out inspectors with undefined IDs
                         .map((admin) => ({
                           id: admin.id as string, // Assert that admin.id is a string
                           name: `${admin.first_name} ${admin.last_name}`,
+                        }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        </Row>
+      ) : (
+        <Row>
+          <FormRow label="Reviewed By *" type="small">
+            {isLoadingInspectors ? (
+              <SpinnerMini /> // Show a spinner while loading inspectors
+            ) : (
+              <Select
+                id="reviewedBy"
+                customLabel="Select inspector"
+                value={formData.reviewedBy || ""} // Use empty string if null
+                onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+                options={
+                  inspectors
+                    ? inspectors
+                        .filter((inspector) => inspector.id) // Filter out inspectors with undefined IDs
+                        .map((inspector) => ({
+                          id: inspector.id as string, // Assert that inspector.id is a string
+                          name: `${inspector.first_name} ${inspector.last_name}`,
                         }))
                     : []
                 }

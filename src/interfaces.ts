@@ -40,7 +40,7 @@ export interface PurChaseRequestType {
   _id?: string;
   department: string;
   suggestedSupplier: string;
-  requestedBy: string;
+  requestedBy?: string;
   address: string;
   finalDeliveryPoint: string;
   city: string;
@@ -49,6 +49,7 @@ export interface PurChaseRequestType {
   expenseChargedTo: string;
   accountCode: string;
   reviewedBy?: any;
+  approvedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];
   comments?: [{ comment: string }];
   status?: string;

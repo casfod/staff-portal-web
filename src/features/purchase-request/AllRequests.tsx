@@ -1,12 +1,11 @@
 import { Plus, Trash2, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useAllPurchaseRequests } from "./pRHooks/useAllPurchaseRequests";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { BiSearch, BiSolidPen } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
-// import { RiArrowUpDownLine } from "react-icons/ri";
 import { Pagination } from "../../ui/Pagination";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
@@ -15,26 +14,37 @@ import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import Swal from "sweetalert2";
 import { useDeletePurchaseRequest } from "./pRHooks/useDeletePurchaseRequest";
 import { PurChaseRequestType } from "../../interfaces";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setPurChaseRequest } from "../../store/purchaseRequestSlice";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { SlMagnifier } from "react-icons/sl";
+import {
+  setSearchTerm,
+  setPage,
+  resetQuery,
+} from "../../store/genericQuerySlice";
+
+import { RootState } from "../../store/store";
 
 const AllRequests = () => {
+  const localStorageUserX = localStorageUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  // const [sort, setSort] = useState<string>("department:asc");
-  const [sort] = useState<string>("department:asc"); // Default sort
-  const [page, setPage] = useState<number>(1);
-  const limit = 10;
+  const { searchTerm, sort, page, limit } = useSelector(
+    (state: RootState) => state.genericQuerySlice
+  );
+
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
   const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
     {}
   );
 
-  const localStorageUserX = localStorageUser();
+  useEffect(() => {
+    return () => {
+      dispatch(resetQuery());
+    };
+  }, [dispatch]);
 
   const { data, isLoading, isError } = useAllPurchaseRequests(
     debouncedSearchTerm,
@@ -51,14 +61,11 @@ const AllRequests = () => {
   );
 
   // Add null checks for `data` and `data.data`
-  const purchaseRequests = data?.data?.purchaseRequests ?? [];
-  const totalPages = data?.data?.totalPages ?? 1;
-
-  console.log(purchaseRequests);
-
-  // const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   setSort(e.target.value);
-  // };
+  const purchaseRequests = useMemo(
+    () => data?.data?.purchaseRequests ?? [],
+    [data]
+  );
+  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
   const toggleViewItems = (requestId: string) => {
     setVisibleItems((prev) => ({
@@ -68,7 +75,7 @@ const AllRequests = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    dispatch(setPage(newPage));
   };
 
   const handleAction = (request: PurChaseRequestType) => {
@@ -132,13 +139,13 @@ const AllRequests = () => {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
             className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
             placeholder="Search by Name, Email or Role"
           />
           <span
             className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-            onClick={() => setSearchTerm("")}
+            onClick={() => dispatch(setSearchTerm(""))}
           >
             <GoXCircle />
           </span>
@@ -364,33 +371,53 @@ const AllRequests = () => {
                                 className="flex justify-between items-center w-full text-gray-700 text-sm mb-2"
                                 style={{ letterSpacing: "1px" }}
                               >
-                                <div>
+                                <div className="flex flex-col gap-2">
                                   <p>
                                     <span className="font-bold mr-1 uppercase">
                                       Reviewed By :
                                     </span>
                                     {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
                                   </p>
+                                  {request.approvedBy && (
+                                    <p>
+                                      <span className="font-bold mr-1 uppercase">
+                                        ApprovedBy By :
+                                      </span>
+                                      {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
+                                    </p>
+                                  )}
+
+                                  <div className="flex flex-col gap-2">
+                                    <span className="font-bold mr-1  uppercase">
+                                      Comments :
+                                    </span>
+
+                                    <div className="flex flex-col gap-2">
+                                      {request?.comments?.map((comment) => (
+                                        <div className="border-2 px-4 py-2 rounded-lg shadow-lg">
+                                          <p>{`${comment.comment}`}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
                                 </div>
 
-                                {localStorageUserX.role !== "STAFF" && (
-                                  <button
-                                    onClick={() => handleAction(request)} // Use relative path here
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-                                  >
-                                    {request.status === "pending" ? (
-                                      <span className="inline-flex items-center gap-1">
-                                        <BiSolidPen className="h-4 w-4 mr-2" />
-                                        <span>Action</span>
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1">
-                                        <SlMagnifier />
-                                        <span>Inspect</span>
-                                      </span>
-                                    )}
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => handleAction(request)} // Use relative path here
+                                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                                >
+                                  {request.status === "pending" ? (
+                                    <span className="inline-flex items-center gap-1">
+                                      <BiSolidPen className="h-4 w-4 mr-2" />
+                                      <span>Action</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1">
+                                      <SlMagnifier />
+                                      <span>Inspect</span>
+                                    </span>
+                                  )}
+                                </button>
                               </div>
                             )}
                         </div>

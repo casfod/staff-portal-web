@@ -12,7 +12,7 @@ import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
 import Request from "./features/purchase-request/Request";
 import AllRequests from "./features/purchase-request/AllRequests";
-import { PurchaseVoucher } from "./pages/PurchaseVoucher";
+import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateRequest from "./features/purchase-request/CreateRequest";
@@ -87,8 +87,8 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "payment-voucher",
-        element: <AnimatedRoute element={<PurchaseVoucher />} />,
+        path: "payment-Requests",
+        element: <AnimatedRoute element={<PaymentRequests />} />,
       },
       {
         path: "advance-requests",

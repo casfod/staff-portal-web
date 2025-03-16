@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
-export function PurchaseVoucher() {
+export function PaymentRequests() {
   const [showModal, setShowModal] = useState(false);
 
   // Mock data
@@ -30,14 +30,14 @@ export function PurchaseVoucher() {
           className="text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
-          Purchase Voucher
+          Payment Requests
         </h1>
         <button
           onClick={() => setShowModal(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <Plus className="h-4 w-4 mr-2" />
-          New Voucher
+          New Request
         </button>
       </div>
 
