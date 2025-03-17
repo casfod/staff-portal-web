@@ -300,16 +300,18 @@ const Request = () => {
                         <div className="text-gray-700">
                           <p className="mb-2">
                             <span className="font-bold mr-1  uppercase">
-                              Requested By :
-                            </span>
-                            {`${purchaseRequest?.requestedBy}`}
-                          </p>
-                          <p className="mb-2">
-                            <span className="font-bold mr-1  uppercase">
                               Reviewed By :
                             </span>
                             {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
                           </p>
+                          {purchaseRequest?.approvedBy && (
+                            <p className="mb-2">
+                              <span className="font-bold mr-1  uppercase">
+                                Approved By :
+                              </span>
+                              {`${purchaseRequest?.approvedBy?.first_name} ${purchaseRequest?.approvedBy?.last_name}`}
+                            </p>
+                          )}
                           <div className="flex flex-col gap-2">
                             <span className="font-bold mr-1  uppercase">
                               Comments :
