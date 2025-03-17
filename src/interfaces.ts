@@ -51,7 +51,7 @@ export interface PurChaseRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];
-  comments?: [{ comment: string }];
+  comments?: [{ user: Partial<UserType>; text: string }];
   status?: string;
   createdBy?: Partial<UserType>;
   createdAt?: string;

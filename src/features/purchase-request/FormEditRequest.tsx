@@ -434,7 +434,12 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
               <span className="font-bold mr-1  uppercase">Comments :</span>
 
               {purchaseRequest?.comments?.map((comment) => (
-                <p>{`${comment.comment}`}</p>
+                <div className="border-2 px-4 py-2 rounded-lg shadow-lg">
+                  <p className="text-base font-extrabold">
+                    {`${comment.user.first_name} ${comment.user.last_name}`}
+                  </p>
+                  <p className="text-sm">{`${comment.text}`}</p>
+                </div>
               ))}
             </div>
           )}

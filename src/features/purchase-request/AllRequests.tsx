@@ -381,7 +381,7 @@ const AllRequests = () => {
                                   {request.approvedBy && (
                                     <p>
                                       <span className="font-bold mr-1 uppercase">
-                                        ApprovedBy By :
+                                        Approval :
                                       </span>
                                       {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
                                     </p>
@@ -395,7 +395,10 @@ const AllRequests = () => {
                                     <div className="flex flex-col gap-2">
                                       {request?.comments?.map((comment) => (
                                         <div className="border-2 px-4 py-2 rounded-lg shadow-lg">
-                                          <p>{`${comment.comment}`}</p>
+                                          <p className="text-base font-extrabold">
+                                            {`${comment.user.first_name} ${comment.user.last_name}`}
+                                          </p>
+                                          <p className="text-sm">{`${comment.text}`}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -406,15 +409,17 @@ const AllRequests = () => {
                                   onClick={() => handleAction(request)} // Use relative path here
                                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
                                 >
-                                  {request.status === "pending" ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      <BiSolidPen className="h-4 w-4 mr-2" />
-                                      <span>Action</span>
-                                    </span>
-                                  ) : (
+                                  {request.status === "approved" ||
+                                  request.status === "pending" ||
+                                  request.status === "reviewed" ? (
                                     <span className="inline-flex items-center gap-1">
                                       <SlMagnifier />
                                       <span>Inspect</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1">
+                                      <BiSolidPen className="h-4 w-4 mr-2" />
+                                      <span>Action</span>
                                     </span>
                                   )}
                                 </button>

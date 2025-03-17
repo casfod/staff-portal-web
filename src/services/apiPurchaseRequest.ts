@@ -138,7 +138,7 @@ export const updatePurchaseRequest = async function (
 
 export const updateStatus = async function (
   requestId: string,
-  data: { status: string; comments: [{ comment: string }] }
+  data: { status: string; comment: string }
 ) {
   try {
     const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(

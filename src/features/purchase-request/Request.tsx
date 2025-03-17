@@ -73,7 +73,7 @@ const Request = () => {
       if (result.isConfirmed) {
         setStatus(newStatus);
         updateStatus(
-          { status: newStatus, comments: [{ comment: comment }] },
+          { status: newStatus, comment: comment },
           {
             onError: (error) => {
               Swal.fire({
@@ -307,7 +307,7 @@ const Request = () => {
                           {purchaseRequest?.approvedBy && (
                             <p className="mb-2">
                               <span className="font-bold mr-1  uppercase">
-                                Approved By :
+                                Approval:
                               </span>
                               {`${purchaseRequest?.approvedBy?.first_name} ${purchaseRequest?.approvedBy?.last_name}`}
                             </p>
@@ -320,7 +320,10 @@ const Request = () => {
                             <div className="flex flex-col gap-2 mb-2">
                               {purchaseRequest?.comments?.map((comment) => (
                                 <div className="w-fit border-2 px-4 py-2 rounded-lg shadow-lg">
-                                  <p>{`${comment.comment}`}</p>
+                                  <p className="text-base font-extrabold">
+                                    {`${comment.user.first_name} ${comment.user.last_name}`}
+                                  </p>
+                                  <p className="text-sm">{`${comment.text}`}</p>
                                 </div>
                               ))}
                             </div>

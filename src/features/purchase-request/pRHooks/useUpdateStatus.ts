@@ -25,7 +25,7 @@ export function useUpdateStatus(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comments: [{ comment: string }] }) =>
+    mutationFn: (data: { status: string; comment: string }) =>
       updateStatusApi(requestId, data),
 
     onSuccess: (data) => {
