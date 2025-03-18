@@ -80,7 +80,7 @@ const Project = () => {
               style={{ letterSpacing: "1px" }}
             >
               <td colSpan={5}>
-                <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
+                <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-white">
                   {/* Project Details Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="flex flex-col gap-2">
@@ -160,7 +160,7 @@ const Project = () => {
                       Sectors
                     </h3>
                     <table className="min-w-[50%] divide-y divide-gray-200 rounded-lg overflow-hidden">
-                      <thead className="bg-gray-100">
+                      <thead className="bg-[#F8F8F8]">
                         <tr>
                           <th className="px-4 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                             Sector
@@ -170,7 +170,7 @@ const Project = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="border divide-y divide-gray-200">
                         {project?.sectors?.map((sector, index) => (
                           <tr
                             key={index}
