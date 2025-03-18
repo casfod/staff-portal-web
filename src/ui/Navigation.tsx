@@ -14,8 +14,9 @@ import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
 import { BiLogOut } from "react-icons/bi";
 import { Link } from "react-router-dom";
-
+import { localStorageUser } from "../utils/localStorageUser";
 const Navigation: React.FC = () => {
+  const localStorageUserX = localStorageUser();
   const { logout, isPending } = useLogout();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const timeoutRef = useRef<number | null>(null);
@@ -35,6 +36,7 @@ const Navigation: React.FC = () => {
     }, 300);
   };
 
+  // Define the navigation items
   const navigation = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/projects", label: "Projects", icon: FolderOpen },
@@ -57,11 +59,22 @@ const Navigation: React.FC = () => {
     { to: "/user-management", label: "User Management", icon: Users },
   ];
 
+  // Filter navigation items based on user role
+  const filteredNavigation = navigation.filter((item) => {
+    if (item.label === "Projects") {
+      return (
+        localStorageUserX.role === "SUPER-ADMIN" ||
+        localStorageUserX.role === "ADMIN"
+      );
+    }
+    return true; // Include all other items
+  });
+
   return (
-    <div className="border-r hidden lg:flex flex-col items-center  h-full">
+    <div className="border-r hidden lg:flex flex-col items-center h-full">
       <nav>
         <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 pt-6">
-          {navigation.map((item) => (
+          {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
               key={item.to}
@@ -96,7 +109,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[80%] "
+        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[80%]"
         onClick={handleLogout}
       >
         {isPending ? (

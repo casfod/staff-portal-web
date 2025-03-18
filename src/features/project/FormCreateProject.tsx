@@ -121,6 +121,16 @@ const FormCreateProject = () => {
 
         {/* Project Partners and  Project Code*/}
         <Row>
+          <FormRow label="Project Code *">
+            <Input
+              type="text"
+              id="project_code"
+              required
+              value={formData.project_code}
+              onChange={(e) => handleFormChange("project_code", e.target.value)}
+            />
+          </FormRow>
+
           <FormRow label="Project Partner(s) *">
             <Input
               type="text"
@@ -130,16 +140,6 @@ const FormCreateProject = () => {
               onChange={(e) =>
                 handleFormChange("project_partners", e.target.value.split(", "))
               }
-            />
-          </FormRow>
-
-          <FormRow label="Project Code *">
-            <Input
-              type="text"
-              id="project_code"
-              required
-              value={formData.project_code}
-              onChange={(e) => handleFormChange("project_code", e.target.value)}
             />
           </FormRow>
         </Row>

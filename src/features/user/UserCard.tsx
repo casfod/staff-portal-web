@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserType } from "../../interfaces";
-import { useUpdateUserRole } from "./userHooks/useUpdateUserRole";
+import { useUpdateUserRole } from "./Hooks/useUpdateUserRole";
 import profilePlaceHolder from "../../assets/img/profile2.jpeg";
 import Swal from "sweetalert2";
 

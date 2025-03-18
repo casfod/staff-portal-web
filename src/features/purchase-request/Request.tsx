@@ -5,15 +5,15 @@ import { RootState } from "../../store/store";
 import { useEffect, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
-import { useUpdateStatus } from "./pRHooks/useUpdateStatus";
+import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import Swal from "sweetalert2";
 import { localStorageUser } from "../../utils/localStorageUser";
-import { useAdmins } from "../user/userHooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useAdmins";
 import FormRow from "../../ui/FormRow";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import { PurChaseRequestType } from "../../interfaces";
-import { useUpdatePurChaseRequest } from "./pRHooks/useUpdatePurChaseRequest";
+import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import Button from "../../ui/Button";
 
 const Request = () => {

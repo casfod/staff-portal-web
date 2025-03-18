@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
@@ -50,6 +50,10 @@ export function AllProjects() {
   const handleAction = (project: Project) => {
     dispatch(setProject(project));
     navigate(`/projects/project/${project._id}`);
+  };
+  const handleEdit = (project: Project) => {
+    dispatch(setProject(project));
+    navigate(`/projects/edit-project/${project._id}`);
   };
 
   if (isError) {
@@ -136,16 +140,25 @@ export function AllProjects() {
                     {dateformat(project.createdAt!)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span
-                      className="hover:cursor-pointer"
-                      onClick={() => toggleViewItems(project._id!)}
-                    >
-                      {visibleItems[project._id!] ? (
-                        <HiMiniEyeSlash className="w-5 h-5" />
-                      ) : (
-                        <HiMiniEye className="w-5 h-5" />
-                      )}
-                    </span>
+                    <div className="flex space-x-4">
+                      <span
+                        className="hover:cursor-pointer"
+                        onClick={() => toggleViewItems(project._id!)}
+                      >
+                        {visibleItems[project._id!] ? (
+                          <HiMiniEyeSlash className="w-5 h-5" />
+                        ) : (
+                          <HiMiniEye className="w-5 h-5" />
+                        )}
+                      </span>
+
+                      <button
+                        className="hover:cursor-pointer"
+                        onClick={() => handleEdit(project)}
+                      >
+                        <Edit className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
 
@@ -202,7 +215,7 @@ export function AllProjects() {
                               <span className="font-extrabold uppercase">
                                 Partners:
                               </span>{" "}
-                              {project.project_partners}
+                              {project.project_partners.join(", ")}
                             </p>
                           </div>
                         </div>

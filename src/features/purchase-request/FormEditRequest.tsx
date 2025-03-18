@@ -10,14 +10,14 @@ import {
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
-import { useSendPurchaseRequest } from "./pRHooks/useSendPurchaseRequest";
+import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 import { useDispatch } from "react-redux";
 
 import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
-import { useUpdatePurChaseRequest } from "./pRHooks/useUpdatePurChaseRequest";
+import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import { useParams } from "react-router-dom";
-import { useAdmins } from "../user/userHooks/useAdmins";
-import { useInspectors } from "../user/userHooks/useInspectors";
+import { useAdmins } from "../user/Hooks/useAdmins";
+import { useInspectors } from "../user/Hooks/useInspectors";
 
 interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;

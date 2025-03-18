@@ -8,11 +8,11 @@ import {
   PurchaseRequesItemGroupType,
   PurChaseRequestType,
 } from "../../interfaces";
-import { useSavePurchaseRequest } from "./pRHooks/useSavePurchaseRequest";
+import { useSavePurchaseRequest } from "./Hooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useInspectors } from "../user/userHooks/useInspectors";
+import { useInspectors } from "../user/Hooks/useInspectors";
 import Select from "../../ui/Select";
-import { useSendPurchaseRequest } from "./pRHooks/useSendPurchaseRequest";
+import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 
 const PurchaseRequestForm: React.FC = () => {
   // State for the main form fields

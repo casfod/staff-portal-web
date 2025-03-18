@@ -17,10 +17,9 @@ import EditRequest from "./features/purchase-request/EditRequest";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateRequest from "./features/purchase-request/CreateRequest";
 import { AllProjects } from "./features/project/AllProjects";
-import FormCreateProject from "./features/project/FormCreateProject";
 import Project from "./features/project/Project";
-import FormEditProject from "./features/project/FormEditProject";
 import CreateProject from "./features/project/CreateProject.tsx";
+import EditProject from "./features/project/EditProject.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -79,7 +78,7 @@ const router = createBrowserRouter([
           },
           {
             path: "edit-project/:projectId",
-            element: <AnimatedRoute element={<FormEditProject />} />,
+            element: <AnimatedRoute element={<EditProject />} />,
           },
         ],
       },
