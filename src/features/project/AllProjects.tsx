@@ -128,7 +128,7 @@ export function AllProjects() {
               <>
                 <tr key={project._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                    {truncateText(project.project_title, 35, "...")}
+                    {truncateText(project.project_title, 40, "...")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
                     {project.status}
@@ -210,6 +210,13 @@ export function AllProjects() {
                                 Summary:
                               </span>{" "}
                               {project.project_summary}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Implementation Period:
+                              </span>{" "}
+                              <span>{project.implementation_period.from}</span>{" "}
+                              - <span>{project.implementation_period.to}</span>
                             </p>
                             <p className="text-sm text-gray-700">
                               <span className="font-extrabold uppercase">
