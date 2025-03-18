@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Login } from "./features/authentication/Login";
 import AuthGuard from "./features/authentication/AuthGuard";
 import { Dashboard } from "./pages/Dashboard";
-import { Projects } from "./pages/Projects";
+import { Projects } from "./pages/Projects.tsx";
 import { ConceptNotes } from "./pages/ConceptNotes";
 import { PurchaseRequests } from "./pages/PurchaseRequests";
 import { AdvanceRequests } from "./pages/AdvanceRequests";
@@ -16,6 +16,11 @@ import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateRequest from "./features/purchase-request/CreateRequest";
+import { AllProjects } from "./features/project/AllProjects";
+import FormCreateProject from "./features/project/FormCreateProject";
+import Project from "./features/project/Project";
+import FormEditProject from "./features/project/FormEditProject";
+import CreateProject from "./features/project/CreateProject.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -58,6 +63,25 @@ const router = createBrowserRouter([
       {
         path: "projects",
         element: <AnimatedRoute element={<Projects />} />,
+        children: [
+          { index: true, element: <Navigate to="all-projects" /> },
+          {
+            path: "all-projects",
+            element: <AnimatedRoute element={<AllProjects />} />,
+          },
+          {
+            path: "create-project",
+            element: <AnimatedRoute element={<CreateProject />} />,
+          },
+          {
+            path: "project/:projectId",
+            element: <AnimatedRoute element={<Project />} />,
+          },
+          {
+            path: "edit-project/:projectId",
+            element: <AnimatedRoute element={<FormEditProject />} />,
+          },
+        ],
       },
       {
         path: "concept-notes",

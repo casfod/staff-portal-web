@@ -150,9 +150,6 @@ const AllRequests = () => {
             <GoXCircle />
           </span>
         </div>
-
-        {/* Sort Dropdown */}
-        {/* <div className="relative inline-block"></div> */}
       </div>
 
       {/* ///////////////////////////// */}
@@ -266,7 +263,7 @@ const AllRequests = () => {
                       className="w-full h-10 scale-[95%]"
                     >
                       <td colSpan={6}>
-                        <div className="border border-gray-400 px-6 py-4 rounded-md">
+                        <div className="border border-gray-300 bg-[#F8F8F8] px-6 py-4 rounded-md">
                           <div
                             className="w-full text-gray-700 text-sm mb-3"
                             style={{ letterSpacing: "1px" }}
@@ -394,7 +391,7 @@ const AllRequests = () => {
 
                                     <div className="flex flex-col gap-2">
                                       {request?.comments?.map((comment) => (
-                                        <div className="border-2 px-4 py-2 rounded-lg shadow-lg">
+                                        <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
                                           <p className="text-base font-extrabold">
                                             {`${comment.user.first_name} ${comment.user.last_name}`}
                                           </p>

@@ -1,3 +1,7 @@
+///////////////////////
+//User
+///////////////////////
+
 export interface useAdminsType {
   status: number;
   message: string;
@@ -24,6 +28,10 @@ export interface UserType {
   password?: string;
   passwordConfirm?: string;
 }
+
+///////////////////////
+//PurChaseRequest
+///////////////////////
 
 export interface usePurChaseRequestType {
   status: number;
@@ -69,6 +77,57 @@ export interface PurchaseRequesItemGroupType {
 }
 
 ///////////////////////
+//Project
+///////////////////////
+
+export interface useProjectType {
+  status: number;
+  message: string;
+  data: {
+    projects: Project[];
+    totalProjects: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface Project {
+  _id?: string;
+  project_title: string;
+  donor: string;
+  project_partners: string[];
+  project_code: string;
+  implementation_period: ImplementationPeriod;
+  project_budget: number;
+  sectors: Sector[];
+  project_locations: string[];
+  target_beneficiaries: TargetBeneficiaries;
+  project_objectives: string;
+  project_summary: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ImplementationPeriod {
+  from: string;
+  to: string;
+}
+
+export interface Sector {
+  name: string;
+  percentage: number;
+}
+
+export interface TargetBeneficiaries {
+  women: number;
+  girls: number;
+  boys: number;
+  men: number;
+}
+
+///////////////////////
+//SUB-INTERFACE
 ///////////////////////
 import { ChangeEvent } from "react";
 
