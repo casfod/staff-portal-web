@@ -14,6 +14,9 @@ import { GoXCircle } from "react-icons/go";
 import { Pagination } from "../../ui/Pagination";
 import { useDebounce } from "use-debounce";
 import { moneyFormat } from "../../utils/moneyFormat";
+import { SlMagnifier } from "react-icons/sl";
+import { Project } from "../../interfaces";
+import { setProject } from "../../store/projectSlice";
 
 export function AllProjects() {
   const navigate = useNavigate();
@@ -42,6 +45,11 @@ export function AllProjects() {
 
   const handlePageChange = (newPage: number) => {
     dispatch(setPage(newPage));
+  };
+
+  const handleAction = (project: Project) => {
+    dispatch(setProject(project));
+    navigate(`/projects/project/${project._id}`);
   };
 
   if (isError) {
@@ -160,7 +168,7 @@ export function AllProjects() {
                             </p>
                             <p className="text-sm text-gray-700">
                               <span className="font-extrabold uppercase">
-                                Project Title:
+                                Project Name:
                               </span>{" "}
                               {project.project_title}
                             </p>
@@ -256,6 +264,18 @@ export function AllProjects() {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+
+                        <div className="flex justify-center w-full">
+                          <button
+                            onClick={() => handleAction(project)} // Use relative path here
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <SlMagnifier />
+                              <span>Inspect</span>
+                            </span>
+                          </button>
                         </div>
                       </div>
                     </td>
