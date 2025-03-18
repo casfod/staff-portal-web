@@ -85,7 +85,7 @@ const Navigation: React.FC = () => {
               <Navlink to={item.to} label={item.label} icon={item.icon} />
               {item.dropdown && openDropdown === item.to && (
                 <div
-                  className="absolute left-full top-0 ml-2 bg-white border rounded-lg shadow-md w-48"
+                  className="absolute left-full top-0 ml-2 bg-white border rounded-lg shadow-md w-48 z-50"
                   onMouseEnter={() => handleMouseEnter(item.to)}
                   onMouseLeave={handleMouseLeave}
                 >
