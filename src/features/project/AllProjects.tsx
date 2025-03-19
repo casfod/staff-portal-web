@@ -17,6 +17,7 @@ import { moneyFormat } from "../../utils/moneyFormat";
 import { SlMagnifier } from "react-icons/sl";
 import { Project } from "../../interfaces";
 import { setProject } from "../../store/projectSlice";
+import Spinner from "../../ui/Spinner";
 
 export function AllProjects() {
   const navigate = useNavigate();
@@ -27,7 +28,12 @@ export function AllProjects() {
   );
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
 
-  const { data, isError } = useProjects(debouncedSearchTerm, sort, page, limit);
+  const { data, isLoading, isError } = useProjects(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
 
   // State for toggling nested tables
   const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
@@ -109,8 +115,11 @@ export function AllProjects() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
+              </th> */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Project Code
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Budget
@@ -123,187 +132,222 @@ export function AllProjects() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {projects.map((project) => (
-              <>
-                <tr key={project._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                    {truncateText(project.project_title, 40, "...")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
-                    {project.status}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {moneyFormat(Number(project.project_budget), "USD")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {dateformat(project.createdAt!)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-4">
-                      <span
-                        className="hover:cursor-pointer"
-                        onClick={() => toggleViewItems(project._id!)}
-                      >
-                        {visibleItems[project._id!] ? (
-                          <HiMiniEyeSlash className="w-5 h-5" />
-                        ) : (
-                          <HiMiniEye className="w-5 h-5" />
-                        )}
-                      </span>
 
-                      <button
-                        className="hover:cursor-pointer"
-                        onClick={() => handleEdit(project)}
-                      >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+          {isLoading ? (
+            <tbody>
+              <tr>
+                <td colSpan={6}>
+                  <div className="flex justify-center items-center h-96">
+                    <Spinner />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          ) : (
+            <tbody className="bg-white divide-y divide-gray-200">
+              {projects.map((project) => (
+                <>
+                  <tr key={project._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                      {truncateText(project.project_title, 40, "...")}
+                    </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                      {project.status}
+                    </td> */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                      {project.project_code}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {moneyFormat(Number(project.project_budget), "USD")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dateformat(project.createdAt!)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-4">
+                        <span
+                          className="hover:cursor-pointer"
+                          onClick={() => toggleViewItems(project._id!)}
+                        >
+                          {visibleItems[project._id!] ? (
+                            <HiMiniEyeSlash className="w-5 h-5" />
+                          ) : (
+                            <HiMiniEye className="w-5 h-5" />
+                          )}
+                        </span>
 
-                {visibleItems[project._id!] && (
-                  <tr
-                    key={`${project._id}-details`}
-                    className="w-full h-10 scale-[95%]"
-                    style={{ letterSpacing: "1px" }}
-                  >
-                    <td colSpan={5}>
-                      <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
-                        {/* Project Details Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                          <div className="flex flex-col gap-2">
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Project Code:
-                              </span>{" "}
-                              {project.project_code}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Project Name:
-                              </span>{" "}
-                              {project.project_title}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Donor:
-                              </span>{" "}
-                              {project.donor}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Objectives:
-                              </span>{" "}
-                              {project.project_objectives}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Locations:
-                              </span>{" "}
-                              {project.project_locations.join(", ")}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Summary:
-                              </span>{" "}
-                              {project.project_summary}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Implementation Period:
-                              </span>{" "}
-                              <span>{project.implementation_period.from}</span>{" "}
-                              - <span>{project.implementation_period.to}</span>
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
-                                Partners:
-                              </span>{" "}
-                              {project.project_partners.join(", ")}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Target Beneficiaries Section */}
-                        <div className="mb-6">
-                          <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">
-                            Target Beneficiaries
-                          </h3>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-sm text-gray-700">
-                              <span className="font-semibold">Men:</span>{" "}
-                              {project.target_beneficiaries.men}
-                            </div>
-                            <div className="text-sm text-gray-700">
-                              <span className="font-semibold">Women:</span>{" "}
-                              {project.target_beneficiaries.women}
-                            </div>
-                            <div className="text-sm text-gray-700">
-                              <span className="font-semibold">Boys:</span>{" "}
-                              {project.target_beneficiaries.boys}
-                            </div>
-                            <div className="text-sm text-gray-700">
-                              <span className="font-semibold">Girls:</span>{" "}
-                              {project.target_beneficiaries.girls}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Sectors Table */}
-                        <div className="mb-4">
-                          <h3 className="text-lg font-semibold text-gray-700 uppercase mb-3">
-                            Sectors
-                          </h3>
-                          <table className="min-w-[50%] divide-y divide-gray-200 rounded-lg overflow-hidden">
-                            <thead className="bg-gray-100">
-                              <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                  Sector
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                  Percentage
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {project.sectors?.map((sector, index) => (
-                                <tr
-                                  key={index}
-                                  className="hover:bg-gray-50 transition-colors"
-                                >
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                                    {sector.name}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                                    {sector.percentage}%
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        <div className="flex justify-center w-full">
-                          <button
-                            onClick={() => handleAction(project)} // Use relative path here
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-                          >
-                            <span className="inline-flex items-center gap-1">
-                              <SlMagnifier />
-                              <span>Inspect</span>
-                            </span>
-                          </button>
-                        </div>
+                        <button
+                          className="hover:cursor-pointer"
+                          onClick={() => handleEdit(project)}
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
-                )}
-              </>
-            ))}
-          </tbody>
+
+                  {visibleItems[project._id!] && (
+                    <tr
+                      key={`${project._id}-details`}
+                      className="w-full h-10 scale-[95%]"
+                      style={{ letterSpacing: "1px" }}
+                    >
+                      <td colSpan={5}>
+                        <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
+                          {/* Project Details Section */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="flex flex-col gap-2">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Project Code:
+                                </span>{" "}
+                                {project.project_code}
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Project Name:
+                                </span>{" "}
+                                {project.project_title}
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Donor:
+                                </span>{" "}
+                                {project.donor}
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Objectives:
+                                </span>{" "}
+                                {project.project_objectives}
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Target Beneficiaries:
+                                </span>{" "}
+                                {project.target_beneficiaries.join(", ")}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Account Code:
+                                </span>{" "}
+                                <span>{project.account_code.name}</span> -{" "}
+                                <span>{project.account_code.code}</span>
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Implementation Period:
+                                </span>{" "}
+                                <span>
+                                  {project.implementation_period.from}
+                                </span>{" "}
+                                -{" "}
+                                <span>{project.implementation_period.to}</span>
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Locations:
+                                </span>{" "}
+                                {project.project_locations.join(", ")}
+                              </p>
+
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Partners:
+                                </span>{" "}
+                                {project.project_partners.join(", ")}
+                              </p>
+
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Summary:
+                                </span>{" "}
+                                {project.project_summary}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Target Beneficiaries Section */}
+                          {/* <div className="mb-6">
+                            <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">
+                              Target Beneficiaries
+                            </h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div className="text-sm text-gray-700">
+                                <span className="font-semibold">Men:</span>{" "}
+                                {project.target_beneficiaries.men}
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-semibold">Women:</span>{" "}
+                                {project.target_beneficiaries.women}
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-semibold">Boys:</span>{" "}
+                                {project.target_beneficiaries.boys}
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-semibold">Girls:</span>{" "}
+                                {project.target_beneficiaries.girls}
+                              </div>
+                            </div>
+                          </div> */}
+
+                          {/* Sectors Table */}
+                          <div className="w-[50%]  mb-4">
+                            <h3 className="text-center font-semibold text-gray-700 uppercase mb-3">
+                              Sectors
+                            </h3>
+                            <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                              <thead className="bg-gray-100">
+                                <tr>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    Sector
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    Percentage
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {project.sectors?.map((sector, index) => (
+                                  <tr
+                                    key={index}
+                                    className="hover:bg-gray-50 transition-colors"
+                                  >
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                      {sector.name}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                      {sector.percentage}%
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div className="flex justify-center w-full">
+                            <button
+                              onClick={() => handleAction(project)} // Use relative path here
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                <SlMagnifier />
+                                <span>Inspect</span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+            </tbody>
+          )}
         </table>
       </div>
 

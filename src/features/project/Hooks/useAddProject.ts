@@ -3,6 +3,7 @@ import { addProject as savePurchaseRequestsApi } from "../../../services/apiProj
 import { AxiosError, AxiosResponse } from "axios";
 import { Project } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -14,6 +15,7 @@ interface LoginError extends AxiosError {
 
 export function useAddProject() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const {
     mutate: addProject,
@@ -29,6 +31,7 @@ export function useAddProject() {
 
         // Invalidate the users query to refetch data
         queryClient.invalidateQueries({ queryKey: ["projects"] });
+        navigate(-1);
       } else {
         // Handle unexpected response
         toast.error(data.message);

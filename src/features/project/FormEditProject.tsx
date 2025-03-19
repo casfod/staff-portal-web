@@ -31,15 +31,20 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       from: project.implementation_period.from,
       to: project.implementation_period.to,
     },
+    account_code: {
+      name: project.account_code.name,
+      code: project.account_code.code,
+    },
     project_budget: project.project_budget,
     sectors: [...project.sectors],
     project_locations: [...project.project_locations],
-    target_beneficiaries: {
-      women: project.target_beneficiaries.women,
-      girls: project.target_beneficiaries.girls,
-      boys: project.target_beneficiaries.boys,
-      men: project.target_beneficiaries.men,
-    },
+    target_beneficiaries: [...project.target_beneficiaries],
+    // target_beneficiaries: {
+    //   women: project.target_beneficiaries.women,
+    //   girls: project.target_beneficiaries.girls,
+    //   boys: project.target_beneficiaries.boys,
+    //   men: project.target_beneficiaries.men,
+    // },
     project_objectives: project.project_objectives,
     project_summary: project.project_summary,
   });
@@ -151,6 +156,32 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
               value={formData.project_partners.join(", ")}
               onChange={(e) =>
                 handleFormChange("project_partners", e.target.value.split(", "))
+              }
+            />
+          </FormRow>
+        </Row>
+
+        {/* Account code*/}
+        <Row>
+          <FormRow label="Account Name *">
+            <Input
+              type="text"
+              min="0"
+              required
+              value={formData.account_code.name}
+              onChange={(e) =>
+                handleNestedChange("account_code", "name", e.target.value)
+              }
+            />
+          </FormRow>
+          <FormRow label="Account code *">
+            <Input
+              type="text"
+              min="0"
+              required
+              value={formData.account_code.code}
+              onChange={(e) =>
+                handleNestedChange("account_code", "code", e.target.value)
               }
             />
           </FormRow>
@@ -295,7 +326,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </Row>
 
         {/* Target Beneficiaries */}
-        <Row>
+        {/* <Row>
           <FormRow label="Women *" type="small">
             <Input
               type="number"
@@ -356,6 +387,23 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
               }
             />
           </FormRow>
+        </Row> */}
+
+        <Row>
+          <FormRow label="Target Beneficiaries *" type="wide">
+            <Input
+              type="text"
+              id="target_beneficiaries"
+              required
+              value={formData.target_beneficiaries.join(", ")}
+              onChange={(e) =>
+                handleFormChange(
+                  "target_beneficiaries",
+                  e.target.value.split(", ")
+                )
+              }
+            />
+          </FormRow>
         </Row>
 
         {/* Project Objectives */}
@@ -368,6 +416,40 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
               value={formData.project_objectives}
               onChange={(e) =>
                 handleFormChange("project_objectives", e.target.value)
+              }
+            />
+          </FormRow>
+        </Row>
+
+        {/* Implementation Period */}
+        <Row>
+          <FormRow label="Implementation Period (From) *">
+            <Input
+              type="date"
+              id="implementation_period_from"
+              required
+              value={formData.implementation_period.from}
+              onChange={(e) =>
+                handleNestedChange(
+                  "implementation_period",
+                  "from",
+                  e.target.value
+                )
+              }
+            />
+          </FormRow>
+          <FormRow label="Implementation Period (To) *">
+            <Input
+              type="date"
+              id="implementation_period_to"
+              required
+              value={formData.implementation_period.to}
+              onChange={(e) =>
+                handleNestedChange(
+                  "implementation_period",
+                  "to",
+                  e.target.value
+                )
               }
             />
           </FormRow>

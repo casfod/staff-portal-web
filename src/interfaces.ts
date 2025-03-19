@@ -99,9 +99,11 @@ export interface Project {
   project_code: string;
   implementation_period: ImplementationPeriod;
   project_budget: number;
+  account_code: AccountCode;
   sectors: Sector[];
   project_locations: string[];
-  target_beneficiaries: TargetBeneficiaries;
+  target_beneficiaries: string[];
+  // target_beneficiaries: TargetBeneficiaries;
   project_objectives: string;
   project_summary: string;
   status?: string;
@@ -114,6 +116,10 @@ export interface ImplementationPeriod {
   to: string;
 }
 
+export interface AccountCode {
+  name: string;
+  code: string;
+}
 export interface Sector {
   name: string;
   percentage: number;

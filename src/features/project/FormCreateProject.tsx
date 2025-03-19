@@ -24,10 +24,15 @@ const FormCreateProject = () => {
     project_partners: [],
     project_code: "",
     implementation_period: { from: "", to: "" },
+    account_code: {
+      name: "",
+      code: "",
+    },
     project_budget: 0,
     sectors: [{ name: "", percentage: 0 }],
     project_locations: [],
-    target_beneficiaries: { women: 0, girls: 0, boys: 0, men: 0 },
+    target_beneficiaries: [],
+    // target_beneficiaries: { women: 0, girls: 0, boys: 0, men: 0 },
     project_objectives: "",
     project_summary: "",
   });
@@ -144,35 +149,27 @@ const FormCreateProject = () => {
           </FormRow>
         </Row>
 
-        {/* Implementation Period */}
+        {/* Account code*/}
         <Row>
-          <FormRow label="Implementation Period (From) *">
+          <FormRow label="Account Name *">
             <Input
-              type="date"
-              id="implementation_period_from"
+              type="text"
+              min="0"
               required
-              value={formData.implementation_period.from}
+              value={formData.account_code.name}
               onChange={(e) =>
-                handleNestedChange(
-                  "implementation_period",
-                  "from",
-                  e.target.value
-                )
+                handleNestedChange("account_code", "name", e.target.value)
               }
             />
           </FormRow>
-          <FormRow label="Implementation Period (To) *">
+          <FormRow label="Account code *">
             <Input
-              type="date"
-              id="implementation_period_to"
+              type="text"
+              min="0"
               required
-              value={formData.implementation_period.to}
+              value={formData.account_code.code}
               onChange={(e) =>
-                handleNestedChange(
-                  "implementation_period",
-                  "to",
-                  e.target.value
-                )
+                handleNestedChange("account_code", "code", e.target.value)
               }
             />
           </FormRow>
@@ -283,7 +280,7 @@ const FormCreateProject = () => {
         </Row>
 
         {/* Target Beneficiaries */}
-        <Row>
+        {/* <Row>
           <FormRow label="Women *" type="small">
             <Input
               type="number"
@@ -344,6 +341,23 @@ const FormCreateProject = () => {
               }
             />
           </FormRow>
+        </Row> */}
+
+        <Row>
+          <FormRow label="Target Beneficiaries *" type="wide">
+            <Input
+              type="text"
+              id="target_beneficiaries"
+              required
+              value={formData.target_beneficiaries.join(", ")}
+              onChange={(e) =>
+                handleFormChange(
+                  "target_beneficiaries",
+                  e.target.value.split(", ")
+                )
+              }
+            />
+          </FormRow>
         </Row>
 
         {/* Project Objectives */}
@@ -356,6 +370,39 @@ const FormCreateProject = () => {
               value={formData.project_objectives}
               onChange={(e) =>
                 handleFormChange("project_objectives", e.target.value)
+              }
+            />
+          </FormRow>
+        </Row>
+        {/* Implementation Period */}
+        <Row>
+          <FormRow label="Implementation Period (From) *">
+            <Input
+              type="date"
+              id="implementation_period_from"
+              required
+              value={formData.implementation_period.from}
+              onChange={(e) =>
+                handleNestedChange(
+                  "implementation_period",
+                  "from",
+                  e.target.value
+                )
+              }
+            />
+          </FormRow>
+          <FormRow label="Implementation Period (To) *">
+            <Input
+              type="date"
+              id="implementation_period_to"
+              required
+              value={formData.implementation_period.to}
+              onChange={(e) =>
+                handleNestedChange(
+                  "implementation_period",
+                  "to",
+                  e.target.value
+                )
               }
             />
           </FormRow>

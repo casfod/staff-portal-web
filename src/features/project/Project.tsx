@@ -15,7 +15,7 @@ const Project = () => {
 
   // Redirect if no project or params are available
   useEffect(() => {
-    if (!param || !project) {
+    if (!project || !param) {
       navigate("/projects");
     }
   }, [project, param]);
@@ -47,8 +47,11 @@ const Project = () => {
               <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Status
+              </th> */}
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+                Project Code
               </th>
               <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Budget
@@ -64,7 +67,7 @@ const Project = () => {
                 {truncateText(project?.project_title!, 35, "...")}
               </td>
               <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
-                {project?.status}
+                {project?.project_code}
               </td>
               <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
                 {moneyFormat(Number(project?.project_budget), "USD")}
@@ -84,53 +87,75 @@ const Project = () => {
                   {/* Project Details Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="flex flex-col gap-2">
-                      <p className=" text-gray-700">
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Code:
                         </span>{" "}
                         {project?.project_code}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Name:
                         </span>{" "}
                         {project?.project_title}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">Donor:</span>{" "}
                         {project?.donor}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">
                           Objectives:
                         </span>{" "}
                         {project?.project_objectives}
                       </p>
+                      <p className="text-sm text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Target Beneficiaries:
+                        </span>{" "}
+                        {project?.target_beneficiaries.join(", ")}
+                      </p>
                     </div>
+
                     <div className="flex flex-col gap-2">
-                      <p className=" text-gray-700">
+                      <p className="text-sm text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Account Code:
+                        </span>{" "}
+                        <span>{project?.account_code.name}</span> -{" "}
+                        <span>{project?.account_code.code}</span>
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Implementation Period:
+                        </span>{" "}
+                        <span>{project?.implementation_period.from}</span> -{" "}
+                        <span>{project?.implementation_period.to}</span>
+                      </p>
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">
                           Locations:
                         </span>{" "}
                         {project?.project_locations.join(", ")}
                       </p>
-                      <p className=" text-gray-700">
+
+                      <p className="text-sm text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Partners:
+                        </span>{" "}
+                        {project?.project_partners.join(", ")}
+                      </p>
+
+                      <p className="text-sm text-gray-700">
                         <span className="font-extrabold uppercase">
                           Summary:
                         </span>{" "}
                         {project?.project_summary}
                       </p>
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Partners:
-                        </span>{" "}
-                        {project?.project_partners}
-                      </p>
                     </div>
                   </div>
-
                   {/* Target Beneficiaries Section */}
-                  <div className="mb-6">
+                  {/* <div className="mb-6">
                     <h3 className=" font-semibold text-gray-700 uppercase mb-2">
                       Target Beneficiaries
                     </h3>
@@ -152,14 +177,14 @@ const Project = () => {
                         {project?.target_beneficiaries.girls}
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Sectors Table */}
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-700 uppercase mb-3">
+                  <div className="w-[50%]  mb-4">
+                    <h3 className="text-center font-semibold text-gray-700 uppercase mb-3">
                       Sectors
                     </h3>
-                    <table className="min-w-[50%] divide-y divide-gray-200 rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
                       <thead className="bg-[#F8F8F8]">
                         <tr>
                           <th className="px-4 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">

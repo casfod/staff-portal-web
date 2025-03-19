@@ -3,6 +3,7 @@ import { savePurchaseRequests as savePurchaseRequestsApi } from "../../../servic
 import { AxiosError, AxiosResponse } from "axios";
 import { PurChaseRequestType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -14,6 +15,7 @@ interface LoginError extends AxiosError {
 
 export function useSavePurchaseRequest() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const {
     mutate: savePurchaseRequest,
@@ -30,6 +32,7 @@ export function useSavePurchaseRequest() {
 
         // Invalidate the users query to refetch data
         queryClient.invalidateQueries({ queryKey: ["all-purchase-requests"] });
+        navigate(-1);
       } else {
         // Handle unexpected response
         toast.error(data.message);
