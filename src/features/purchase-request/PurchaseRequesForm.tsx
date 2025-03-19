@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
@@ -13,6 +13,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import { useInspectors } from "../user/Hooks/useInspectors";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
+import { useProjects } from "../project/Hooks/useProjects";
 
 const PurchaseRequestForm: React.FC = () => {
   // State for the main form fields
@@ -32,6 +33,9 @@ const PurchaseRequestForm: React.FC = () => {
   // State for the item groups
   const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
+  // const [selectedProject, setSelectedProject] = useState<{
+  //   account_code: { code: string };
+  // } | null>(null);
 
   // Add a new item group
   const addItem = () => {
@@ -52,11 +56,15 @@ const PurchaseRequestForm: React.FC = () => {
   const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
+
   const { data, isLoading } = useInspectors();
+  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
-  const inspectors = data?.data;
-
-  console.log("inspectors:", inspectors);
+  const inspectors = useMemo(() => data?.data ?? [], [data]);
+  const projects = useMemo(
+    () => projectData?.data?.projects ?? [],
+    [projectData]
+  );
 
   // Update item group fields
   const handleItemChange = (
@@ -84,12 +92,24 @@ const PurchaseRequestForm: React.FC = () => {
     setDisabledStates(newDisabledStates);
   };
 
-  // Update main form fields
   const handleFormChange = (
     field: keyof PurChaseRequestType,
     value: string
   ) => {
-    setFormData({ ...formData, [field]: value });
+    if (field === "expenseChargedTo") {
+      const selected = projects.find(
+        (project) =>
+          // `${project.account_code.name} - ${project.account_code.code}` ===
+          `${project.account_code.name}` === value
+      );
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: selected ? selected.account_code.code : "",
+      });
+    } else {
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
@@ -334,17 +354,32 @@ const PurchaseRequestForm: React.FC = () => {
       </div>
 
       <Row>
-        <FormRow label="Expense Charged To *" type="medium">
-          <Input
-            type="text"
-            required
-            id="expenseChargedTo"
-            value={formData.expenseChargedTo}
-            onChange={(e) =>
-              handleFormChange("expenseChargedTo", e.target.value)
-            }
-          />
+        <FormRow label="Expense Charged To *" type="small">
+          {isLoadingProjects ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              id="expenseChargedTo"
+              customLabel="Select Account Code"
+              value={formData.expenseChargedTo || ""}
+              onChange={(e) =>
+                handleFormChange("expenseChargedTo", e.target.value)
+              }
+              options={
+                projects
+                  ? projects
+                      .filter((project) => project._id)
+                      .map((project) => ({
+                        id: `${project.account_code.name}`,
+                        name: `${project.account_code.name}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
         </FormRow>
+
         <FormRow label="Account Code *" type="small">
           <Input
             type="text"
@@ -353,6 +388,7 @@ const PurchaseRequestForm: React.FC = () => {
             id="accountCode"
             value={formData.accountCode}
             onChange={(e) => handleFormChange("accountCode", e.target.value)}
+            readOnly
           />
         </FormRow>
       </Row>

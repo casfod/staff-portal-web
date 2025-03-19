@@ -13,12 +13,19 @@ const Project = () => {
 
   const project = useSelector((state: RootState) => state.project?.project);
 
+  console.log(project);
+
   // Redirect if no project or params are available
   useEffect(() => {
     if (!project || !param) {
       navigate("/projects");
     }
   }, [project, param]);
+
+  // Handle the case where project is null
+  if (!project) {
+    return <div>No project data available.</div>;
+  }
 
   return (
     <div className="flex flex-col items-center gap-6 pb-16">

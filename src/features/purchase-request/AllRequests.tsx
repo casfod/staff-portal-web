@@ -365,10 +365,10 @@ const AllRequests = () => {
                           {request?.reviewedBy &&
                             request.status !== "draft" && (
                               <div
-                                className="flex justify-between items-center w-full text-gray-700 text-sm mb-2"
+                                className=" flex flex-col justify-between  w-full text-gray-700 text-sm mb-2"
                                 style={{ letterSpacing: "1px" }}
                               >
-                                <div className="flex flex-col gap-2">
+                                <div className="w-fit flex flex-col gap-2">
                                   <p>
                                     <span className="font-bold mr-1 uppercase">
                                       Reviewed By :
@@ -404,7 +404,7 @@ const AllRequests = () => {
 
                                 <button
                                   onClick={() => handleAction(request)} // Use relative path here
-                                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                                  className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"
                                 >
                                   {request.status === "approved" ||
                                   request.status === "pending" ||
