@@ -5,12 +5,13 @@ import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import {
+  Project,
   PurchaseRequesItemGroupType,
   PurChaseRequestType,
 } from "../../interfaces";
 import { useSavePurchaseRequest } from "./Hooks/useSavePurchaseRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useInspectors } from "../user/Hooks/useInspectors";
+import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 import { useProjects } from "../project/Hooks/useProjects";
@@ -33,9 +34,7 @@ const PurchaseRequestForm: React.FC = () => {
   // State for the item groups
   const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
-  // const [selectedProject, setSelectedProject] = useState<{
-  //   account_code: { code: string };
-  // } | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Add a new item group
   const addItem = () => {
@@ -57,14 +56,16 @@ const PurchaseRequestForm: React.FC = () => {
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
 
-  const { data, isLoading } = useInspectors();
+  const { data, isLoading } = useReviewers();
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
-  const inspectors = useMemo(() => data?.data ?? [], [data]);
+  const reviewers = useMemo(() => data?.data ?? [], [data]);
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  console.log("=>", projects);
 
   // Update item group fields
   const handleItemChange = (
@@ -97,17 +98,29 @@ const PurchaseRequestForm: React.FC = () => {
     value: string
   ) => {
     if (field === "expenseChargedTo") {
-      const selected = projects.find(
+      // Find the selected project
+      const selectedProject = projects.find(
         (project) =>
-          // `${project.account_code.name} - ${project.account_code.code}` ===
-          `${project.account_code.name}` === value
+          `${project.project_title} - ${project.project_code}` === value
       );
+
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
       setFormData({
         ...formData,
         expenseChargedTo: value,
-        accountCode: selected ? selected.account_code.code : "",
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
       });
     } else {
+      // Handle other fields
       setFormData({ ...formData, [field]: value });
     }
   };
@@ -133,8 +146,10 @@ const PurchaseRequestForm: React.FC = () => {
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+    console.log("Is form valid?", isFormValid);
+    if (!isFormValid) return; // Stop if form is invalid
     e.preventDefault();
-
     const data = { ...formData, itemGroups: [...itemGroup] };
     savePurchaseRequest(data);
   };
@@ -352,15 +367,16 @@ const PurchaseRequestForm: React.FC = () => {
           Added
         </span>
       </div>
-
       <Row>
+        {/* First Select: Projects */}
         <FormRow label="Expense Charged To *" type="small">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
+              key={projects.length} // Force re-render when projects change
               id="expenseChargedTo"
-              customLabel="Select Account Code"
+              customLabel="Select Project"
               value={formData.expenseChargedTo || ""}
               onChange={(e) =>
                 handleFormChange("expenseChargedTo", e.target.value)
@@ -368,10 +384,11 @@ const PurchaseRequestForm: React.FC = () => {
               options={
                 projects
                   ? projects
-                      .filter((project) => project._id)
+                      .filter((project) => project.id)
                       .map((project) => ({
-                        id: `${project.account_code.name}`,
-                        name: `${project.account_code.name}`,
+                        id: `${project.project_title} - ${project.project_code}`,
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -380,36 +397,50 @@ const PurchaseRequestForm: React.FC = () => {
           )}
         </FormRow>
 
-        <FormRow label="Account Code *" type="small">
-          <Input
-            type="text"
-            required
-            placeholder=""
-            id="accountCode"
-            value={formData.accountCode}
-            onChange={(e) => handleFormChange("accountCode", e.target.value)}
-            readOnly
-          />
-        </FormRow>
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *" type="small">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(e) =>
+                  handleFormChange("accountCode", e.target.value)
+                }
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name} - ${account.code}`,
+                        name: `${account.name} - ${account.code}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
-
       <Row>
         <FormRow label="Reviewed By *" type="small">
           {isLoading ? (
-            <SpinnerMini /> // Show a spinner while loading inspectors
+            <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
               id="reviewedBy"
-              customLabel="Select inspector"
+              customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null
               onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
               options={
-                inspectors
-                  ? inspectors
-                      .filter((inspector) => inspector.id) // Filter out inspectors with undefined IDs
-                      .map((inspector) => ({
-                        id: inspector.id as string, // Assert that inspector.id is a string
-                        name: `${inspector.first_name} ${inspector.last_name}`,
+                reviewers
+                  ? reviewers
+                      .filter((reviewer) => reviewer.id) // Filter out reviewers with undefined IDs
+                      .map((reviewer) => ({
+                        id: reviewer.id as string, // Assert that reviewer.id is a string
+                        name: `${reviewer.first_name} ${reviewer.last_name}`,
                       }))
                   : []
               }

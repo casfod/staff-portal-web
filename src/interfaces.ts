@@ -45,7 +45,7 @@ export interface usePurChaseRequestType {
 }
 
 export interface PurChaseRequestType {
-  _id?: string;
+  id?: string;
   department: string;
   suggestedSupplier: string;
   requestedBy?: string;
@@ -67,7 +67,7 @@ export interface PurChaseRequestType {
 }
 
 export interface PurchaseRequesItemGroupType {
-  _id?: string;
+  id?: string;
   description: string;
   frequency: number;
   quantity: number;
@@ -92,14 +92,14 @@ export interface useProjectType {
 }
 
 export interface Project {
-  _id?: string;
+  id?: string;
   project_title: string;
   donor: string;
   project_partners: string[];
   project_code: string;
   implementation_period: ImplementationPeriod;
   project_budget: number;
-  account_code: AccountCode;
+  account_code: AccountCode[];
   sectors: Sector[];
   project_locations: string[];
   target_beneficiaries: string[];

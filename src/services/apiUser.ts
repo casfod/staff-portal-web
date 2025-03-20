@@ -79,11 +79,9 @@ export const getAdmins = async function () {
     return handleError(err);
   }
 };
-export const getInspectors = async function () {
+export const getReviewers = async function () {
   try {
-    const response = await axiosInstance.get<useAdminsType>(
-      `/users/inspectors`
-    );
+    const response = await axiosInstance.get<useAdminsType>(`/users/reviewers`);
 
     return response.data;
   } catch (err) {

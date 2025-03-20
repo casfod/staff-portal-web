@@ -17,7 +17,7 @@ import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
 import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import { useParams } from "react-router-dom";
 import { useAdmins } from "../user/Hooks/useAdmins";
-import { useInspectors } from "../user/Hooks/useInspectors";
+import { useReviewers } from "../user/Hooks/useReviewers";
 
 interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;
@@ -120,14 +120,13 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
   );
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
-  const { data: inspectorsData, isLoading: isLoadingInspectors } =
-    useInspectors();
+  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
 
   const admins = adminsData?.data;
-  const inspectors = inspectorsData?.data;
+  const reviewers = reviewersData?.data;
 
-  console.log("inspectors:", inspectors);
+  console.log("Reviewers:", reviewers);
 
   // Update main form fields
   const handleFormChange = (
@@ -448,7 +447,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         <Row>
           <FormRow label="Approved By *" type="small">
             {isLoadingAmins ? (
-              <SpinnerMini /> // Show a spinner while loading inspectors
+              <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
               <Select
                 id="approvedBy"
@@ -458,7 +457,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
                 options={
                   admins
                     ? admins
-                        .filter((admin) => admin.id) // Filter out inspectors with undefined IDs
+                        .filter((admin) => admin.id) // Filter out Reviewers with undefined IDs
                         .map((admin) => ({
                           id: admin.id as string, // Assert that admin.id is a string
                           name: `${admin.first_name} ${admin.last_name}`,
@@ -473,21 +472,21 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       ) : (
         <Row>
           <FormRow label="Reviewed By *" type="small">
-            {isLoadingInspectors ? (
-              <SpinnerMini /> // Show a spinner while loading inspectors
+            {isLoadingReviewers ? (
+              <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
               <Select
                 id="reviewedBy"
-                customLabel="Select inspector"
+                customLabel="Select Reviewer"
                 value={formData.reviewedBy || ""} // Use empty string if null
                 onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
                 options={
-                  inspectors
-                    ? inspectors
-                        .filter((inspector) => inspector.id) // Filter out inspectors with undefined IDs
-                        .map((inspector) => ({
-                          id: inspector.id as string, // Assert that inspector.id is a string
-                          name: `${inspector.first_name} ${inspector.last_name}`,
+                  reviewers
+                    ? reviewers
+                        .filter((reviewer) => reviewer.id) // Filter out reviewers with undefined IDs
+                        .map((reviewer) => ({
+                          id: reviewer.id as string, // Assert that reviewer.id is a string
+                          name: `${reviewer.first_name} ${reviewer.last_name}`,
                         }))
                     : []
                 }

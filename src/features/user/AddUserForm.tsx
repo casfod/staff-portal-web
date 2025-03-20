@@ -6,7 +6,7 @@ import ShowPasswordIcon from "../../ui/ShowPasswordIcon";
 
 const role = [
   { id: "ADMIN", name: "ADMIN" },
-  { id: "INSPECTOR", name: "INSPECTOR" },
+  { id: "REVIEWER", name: "REVIEWER" },
   { id: "STAFF", name: "STAFF" },
 ];
 

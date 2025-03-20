@@ -31,10 +31,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       from: project.implementation_period.from,
       to: project.implementation_period.to,
     },
-    account_code: {
-      name: project.account_code.name,
-      code: project.account_code.code,
-    },
+    account_code: [...project.account_code],
     project_budget: project.project_budget,
     sectors: [...project.sectors],
     project_locations: [...project.project_locations],
@@ -83,6 +80,16 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
     setFormData({ ...formData, sectors: updatedSectors });
   };
 
+  const handleAccountCodeChange = (
+    index: number,
+    field: keyof Project["account_code"][0], // Explicitly type the field
+    value: string
+  ) => {
+    const updatedAccountCodes = [...formData.account_code];
+    updatedAccountCodes[index][field] = value;
+    setFormData({ ...formData, account_code: updatedAccountCodes });
+  };
+
   // Add a new sector
   const addSector = () => {
     setFormData({
@@ -97,7 +104,21 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
     setFormData({ ...formData, sectors: updatedSectors });
   };
 
-  const { updateProject, isPending } = useUpdateProject(project._id!);
+  const addAccountCode = () => {
+    setFormData({
+      ...formData,
+      account_code: [...formData.account_code, { name: "", code: "" }],
+    });
+  };
+
+  const removeAccountCode = (index: number) => {
+    const updatedAccountCodes = formData.account_code.filter(
+      (_, i) => i !== index
+    );
+    setFormData({ ...formData, account_code: updatedAccountCodes });
+  };
+
+  const { updateProject, isPending } = useUpdateProject(project.id!);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +183,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </Row>
 
         {/* Account code*/}
-        <Row>
+        {/* <Row>
           <FormRow label="Account Name *">
             <Input
               type="text"
@@ -185,7 +206,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
               }
             />
           </FormRow>
-        </Row>
+        </Row> */}
 
         {/* Implementation Period */}
         <Row>
@@ -236,75 +257,137 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
           </FormRow>
         </Row>
 
-        {/* Sectors */}
-        <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
-          {formData.sectors.map((sector, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
-            >
-              <h4 className="text-gray-600 text-lg font-semibold">
-                SECTOR {index + 1}
-              </h4>
+        {/* Account Code */}
+        <div className="flex flex-col gap-2 scale-[85%]">
+          <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+            {formData.account_code.map((account, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              >
+                <h4 className="text-gray-600 text-lg font-semibold">
+                  ACCOUNT {index + 1}
+                </h4>
 
-              <FormRow label="Sector Name *" type="wide">
-                <select
-                  value={sector.name}
-                  required
-                  onChange={(e) =>
-                    handleSectorChange(index, "name", e.target.value)
-                  }
-                  className="w-full p-2 text-gray-600  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="" disabled>
-                    Select a sector
-                  </option>
-                  {sectorOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </FormRow>
+                <FormRow label="Account Name *" type="wide">
+                  <Input
+                    type="text"
+                    required
+                    value={account.name}
+                    onChange={(e) =>
+                      handleAccountCodeChange(index, "name", e.target.value)
+                    }
+                  />
+                </FormRow>
 
-              <FormRow label="Percentage *" type="medium">
-                <Input
-                  placeholder=""
-                  inputSize={100}
-                  type="number"
-                  min="0"
-                  max="100"
-                  required
-                  value={sector.percentage}
-                  onChange={(e) =>
-                    handleSectorChange(index, "percentage", e.target.value)
-                  }
-                />
-              </FormRow>
+                <FormRow label="Account Code *" type="wide">
+                  <Input
+                    type="text"
+                    required
+                    value={account.code}
+                    onChange={(e) =>
+                      handleAccountCodeChange(index, "code", e.target.value)
+                    }
+                  />
+                </FormRow>
 
-              <div className="flex gap-2 mt-4">
-                <button
-                  type="button"
-                  className="text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
-                  onClick={() => removeSector(index)}
-                >
-                  Delete Sector {index + 1}
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    type="button"
+                    className="text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
+                    onClick={() => removeAccountCode(index)}
+                  >
+                    Delete Account {index + 1}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 w-full">
+            <Button type="button" onClick={addAccountCode}>
+              <FaPlus /> Add Account
+            </Button>
+            <span className="text-gray-700 font-bold">
+              {formData.account_code.length > 1
+                ? formData.account_code.length + " Accounts "
+                : formData.account_code.length + " Account "}
+              Added
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4 w-full">
-          <Button type="button" onClick={addSector}>
-            <FaPlus /> Add Sector
-          </Button>
-          <span className="text-gray-700 font-bold">
-            {formData.sectors.length > 1
-              ? formData.sectors.length + " Sectors "
-              : formData.sectors.length + " Sector "}
-            Added
-          </span>
+        {/* Sectors */}
+        <div className="flex flex-col gap-2 scale-[85%]">
+          <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+            {formData.sectors.map((sector, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              >
+                <h4 className="text-gray-600 text-lg font-semibold">
+                  SECTOR {index + 1}
+                </h4>
+
+                <FormRow label="Sector Name *" type="wide">
+                  <select
+                    value={sector.name}
+                    required
+                    onChange={(e) =>
+                      handleSectorChange(index, "name", e.target.value)
+                    }
+                    className="w-full p-2 text-gray-600  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="" disabled>
+                      Select a sector
+                    </option>
+                    {sectorOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </FormRow>
+
+                <FormRow label="Percentage *" type="medium">
+                  <Input
+                    placeholder=""
+                    inputSize={100}
+                    type="number"
+                    min="0"
+                    max="100"
+                    required
+                    value={sector.percentage}
+                    onChange={(e) =>
+                      handleSectorChange(index, "percentage", e.target.value)
+                    }
+                  />
+                </FormRow>
+
+                <div className="flex gap-2 mt-4">
+                  <button
+                    type="button"
+                    className="text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
+                    onClick={() => removeSector(index)}
+                  >
+                    Delete Sector {index + 1}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 w-full">
+            <Button type="button" onClick={addSector}>
+              <FaPlus /> Add Sector
+            </Button>
+            <span className="text-gray-700 font-bold">
+              {formData.sectors.length > 1
+                ? formData.sectors.length + " Sectors "
+                : formData.sectors.length + " Sector "}
+              Added
+            </span>
+          </div>
         </div>
 
         {/* Project Locations */}
@@ -473,7 +556,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         {/* Submit Button */}
         <div className="flex justify-center w-full gap-4">
           <Button size="medium" disabled={isPending} onClick={handleSubmit}>
-            {isPending ? <SpinnerMini /> : "Submit"}
+            {isPending ? <SpinnerMini /> : "Update"}
           </Button>
         </div>
       </form>

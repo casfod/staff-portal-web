@@ -69,7 +69,7 @@ const Project = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            <tr key={project?._id}>
+            <tr key={project?.id}>
               <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700">
                 {truncateText(project?.project_title!, 35, "...")}
               </td>
@@ -85,7 +85,7 @@ const Project = () => {
             </tr>
 
             <tr
-              key={`${project?._id}-details`}
+              key={`${project?.id}-details`}
               className="w-full h-10"
               style={{ letterSpacing: "1px" }}
             >
@@ -94,66 +94,76 @@ const Project = () => {
                   {/* Project Details Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="flex flex-col gap-2">
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Code:
                         </span>{" "}
                         {project?.project_code}
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Name:
                         </span>{" "}
                         {project?.project_title}
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">Donor:</span>{" "}
                         {project?.donor}
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Objectives:
                         </span>{" "}
                         {project?.project_objectives}
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Target Beneficiaries:
                         </span>{" "}
                         {project?.target_beneficiaries.join(", ")}
                       </p>
+                      <p className=" text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Budget:
+                        </span>{" "}
+                        {moneyFormat(Number(project.project_budget), "USD")}
+                      </p>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Account Code:
-                        </span>{" "}
-                        <span>{project?.account_code.name}</span> -{" "}
-                        <span>{project?.account_code.code}</span>
-                      </p>
-                      <p className="text-sm text-gray-700">
+                      <div className=" text-gray-700">
+                        <h2 className="font-extrabold uppercase">
+                          Account Codes:
+                        </h2>{" "}
+                        {project?.account_code.map((account, index) => (
+                          <p key={index}>
+                            <span>{account.name}</span> -{" "}
+                            <span>{account.code}</span>
+                          </p>
+                        ))}
+                      </div>
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Implementation Period:
                         </span>{" "}
                         <span>{project?.implementation_period.from}</span> -{" "}
                         <span>{project?.implementation_period.to}</span>
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Locations:
                         </span>{" "}
                         {project?.project_locations.join(", ")}
                       </p>
 
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Partners:
                         </span>{" "}
                         {project?.project_partners.join(", ")}
                       </p>
 
-                      <p className="text-sm text-gray-700">
+                      <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
                           Summary:
                         </span>{" "}
@@ -187,11 +197,11 @@ const Project = () => {
                   </div> */}
 
                   {/* Sectors Table */}
-                  <div className="w-[50%]  mb-4">
-                    <h3 className="text-center font-semibold text-gray-700 uppercase mb-3">
+                  <div className="border w-[50%]  mb-4 rounded-md">
+                    <h3 className="text-center font-semibold text-gray-700 uppercase py-2">
                       Sectors
                     </h3>
-                    <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                    <table className="border min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
                       <thead className="bg-[#F8F8F8]">
                         <tr>
                           <th className="px-4 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
@@ -202,7 +212,7 @@ const Project = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="border divide-y divide-gray-200">
+                      <tbody className=" divide-y divide-gray-200">
                         {project?.sectors?.map((sector, index) => (
                           <tr
                             key={index}

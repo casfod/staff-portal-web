@@ -146,7 +146,7 @@ const Request = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
-              <tr key={purchaseRequest._id} className="h-[40px] max-h-[40px]">
+              <tr key={purchaseRequest.id} className="h-[40px] max-h-[40px]">
                 <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700">
                   {purchaseRequest.department}
                 </td>
@@ -172,7 +172,7 @@ const Request = () => {
 
               {/* Items Table Section */}
               <tr
-                key={`${purchaseRequest._id}-items`}
+                key={`${purchaseRequest.id}-items`}
                 className="w-full h-10 scale-[98%] "
               >
                 <td colSpan={6}>
@@ -273,7 +273,7 @@ const Request = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200 ">
                         {purchaseRequest?.itemGroups!.map((item) => (
-                          <tr key={item._id!}>
+                          <tr key={item.id!}>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                               {item.description}
                             </td>
@@ -330,8 +330,8 @@ const Request = () => {
                           </div>
 
                           {
-                            // Condition 1: Render for INSPECTOR when status is "pending"
-                            (localStorageUserX.role === "INSPECTOR" &&
+                            // Condition 1: Render for REVIEWER when status is "pending"
+                            (localStorageUserX.role === "REVIEWER" &&
                               purchaseRequest.status === "pending") ||
                             // Condition 2: Render for SUPER-ADMIN or ADMIN when status is "reviewed"
                             ((localStorageUserX.role === "SUPER-ADMIN" ||
@@ -369,14 +369,14 @@ const Request = () => {
                                     {/* Action Dropdown */}
                                     <div className="bg-buttonColor hover:to-buttonColorHover text-white self-center px-3 py-2 rounded-md">
                                       <label
-                                        htmlFor={`status-${purchaseRequest?._id}`}
+                                        htmlFor={`status-${purchaseRequest?.id}`}
                                         className="sr-only"
                                       >
                                         Select Action
                                       </label>
                                       <select
                                         className="text-xs md:text-sm bg-inherit"
-                                        id={`status-${purchaseRequest?._id}`}
+                                        id={`status-${purchaseRequest?.id}`}
                                         value={status}
                                         onChange={handleStatusChange}
                                         disabled={isPending}

@@ -22,7 +22,7 @@ const Navigation: React.FC = () => {
   const timeoutRef = useRef<number | null>(null);
 
   const handleLogout = async () => {
-    await logout();
+    logout();
   };
 
   const handleMouseEnter = (itemToOpen: string) => {
@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
-    if (item.label === "Projects") {
+    if (item.label === "User Management") {
       return (
         localStorageUserX.role === "SUPER-ADMIN" ||
         localStorageUserX.role === "ADMIN"

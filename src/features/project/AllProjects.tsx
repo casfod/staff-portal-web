@@ -18,8 +18,10 @@ import { SlMagnifier } from "react-icons/sl";
 import { Project } from "../../interfaces";
 import { setProject } from "../../store/projectSlice";
 import Spinner from "../../ui/Spinner";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 export function AllProjects() {
+  const localStorageUserX = localStorageUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -41,6 +43,8 @@ export function AllProjects() {
   const projects = useMemo(() => data?.data?.projects ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
+  console.log(projects);
+
   // Toggle nested table visibility
   const toggleViewItems = (id: string) => {
     setVisibleItems((prev) => ({
@@ -55,11 +59,11 @@ export function AllProjects() {
 
   const handleAction = (project: Project) => {
     dispatch(setProject(project));
-    navigate(`/projects/project/${project._id}`);
+    navigate(`/projects/project/${project.id}`);
   };
   const handleEdit = (project: Project) => {
     dispatch(setProject(project));
-    navigate(`/projects/edit-project/${project._id}`);
+    navigate(`/projects/edit-project/${project.id}`);
   };
 
   if (isError) {
@@ -76,13 +80,15 @@ export function AllProjects() {
         >
           Projects
         </h1>
-        <button
-          onClick={() => navigate("/projects/create-project")}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </button>
+        {localStorageUserX.role === "SUPER-ADMIN" && (
+          <button
+            onClick={() => navigate("/projects/create-project")}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </button>
+        )}
       </div>
 
       {/* Search Bar and Sort Dropdown */}
@@ -147,7 +153,7 @@ export function AllProjects() {
             <tbody className="bg-white divide-y divide-gray-200">
               {projects.map((project) => (
                 <>
-                  <tr key={project._id}>
+                  <tr key={project.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
@@ -167,28 +173,29 @@ export function AllProjects() {
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
-                          onClick={() => toggleViewItems(project._id!)}
+                          onClick={() => toggleViewItems(project.id!)}
                         >
-                          {visibleItems[project._id!] ? (
+                          {visibleItems[project.id!] ? (
                             <HiMiniEyeSlash className="w-5 h-5" />
                           ) : (
                             <HiMiniEye className="w-5 h-5" />
                           )}
                         </span>
-
-                        <button
-                          className="hover:cursor-pointer"
-                          onClick={() => handleEdit(project)}
-                        >
-                          <Edit className="h-5 w-5" />
-                        </button>
+                        {localStorageUserX.role === "SUPER-ADMIN" && (
+                          <button
+                            className="hover:cursor-pointer"
+                            onClick={() => handleEdit(project)}
+                          >
+                            <Edit className="h-5 w-5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
 
-                  {visibleItems[project._id!] && (
+                  {visibleItems[project.id!] && (
                     <tr
-                      key={`${project._id}-details`}
+                      key={`${project.id}-details`}
                       className="w-full h-10 scale-[95%]"
                       style={{ letterSpacing: "1px" }}
                     >
@@ -227,16 +234,29 @@ export function AllProjects() {
                                 </span>{" "}
                                 {project.target_beneficiaries.join(", ")}
                               </p>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Budget:
+                                </span>{" "}
+                                {moneyFormat(
+                                  Number(project.project_budget),
+                                  "USD"
+                                )}
+                              </p>
                             </div>
 
                             <div className="flex flex-col gap-2">
-                              <p className="text-sm text-gray-700">
-                                <span className="font-extrabold uppercase">
-                                  Account Code:
-                                </span>{" "}
-                                <span>{project.account_code.name}</span> -{" "}
-                                <span>{project.account_code.code}</span>
-                              </p>
+                              <div className=" text-gray-700">
+                                <h2 className="font-extrabold uppercase">
+                                  Account Codes:
+                                </h2>{" "}
+                                {project?.account_code.map((account, index) => (
+                                  <p key={index}>
+                                    <span>{account.name}</span> -{" "}
+                                    <span>{account.code}</span>
+                                  </p>
+                                ))}
+                              </div>
                               <p className="text-sm text-gray-700">
                                 <span className="font-extrabold uppercase">
                                   Implementation Period:
@@ -296,8 +316,8 @@ export function AllProjects() {
                           </div> */}
 
                           {/* Sectors Table */}
-                          <div className="w-[50%]  mb-4">
-                            <h3 className="text-center font-semibold text-gray-700 uppercase mb-3">
+                          <div className="border border-gray-300 w-[50%]  mb-4 rounded-md">
+                            <h3 className="text-center font-semibold text-gray-700 uppercase py-2">
                               Sectors
                             </h3>
                             <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
