@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
-import { Project, useProjectType } from "../interfaces.ts";
+import { Project, UseProjectStatsType, useProjectType } from "../interfaces.ts";
 
 const url = baseUrl();
 
@@ -70,6 +70,17 @@ const handleError = (err: any) => {
 };
 
 // API Functions
+
+export const getProjectsStats = async function () {
+  try {
+    const response = await axiosInstance.get<UseProjectStatsType>(
+      `/projects/stats`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 
 export const getProjects = async function (queryParams: {
   search?: string;

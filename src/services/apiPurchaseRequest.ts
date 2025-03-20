@@ -2,7 +2,12 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
-import { PurChaseRequestType, usePurChaseRequestType } from "../interfaces.ts";
+import {
+  PurChaseRequestType,
+  // PurchaseRequestStats,
+  usePurChaseRequestType,
+  UsePurchaseStatsType,
+} from "../interfaces.ts";
 
 const url = baseUrl();
 
@@ -93,6 +98,16 @@ export const getAllPurchaseRequest = async function (queryParams: {
   }
 };
 
+export const getPurchaseRequestStats = async function () {
+  try {
+    const response = await axiosInstance.get<UsePurchaseStatsType>(
+      `/purchase-requests/stats`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 export const savePurchaseRequests = async function (
   data: Partial<PurChaseRequestType>
 ) {

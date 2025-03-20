@@ -32,6 +32,17 @@ export interface UserType {
 ///////////////////////
 //PurChaseRequest
 ///////////////////////
+export interface PurchaseRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UsePurchaseStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: PurchaseRequestStats;
+}
 
 export interface usePurChaseRequestType {
   status: number;
@@ -79,6 +90,16 @@ export interface PurchaseRequesItemGroupType {
 ///////////////////////
 //Project
 ///////////////////////
+
+export interface ProjectStats {
+  totalProjects: number;
+}
+export interface UseProjectStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: ProjectStats;
+}
 
 export interface useProjectType {
   status: number;
