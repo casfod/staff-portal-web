@@ -1,4 +1,4 @@
-import { Edit, Plus } from "lucide-react";
+import { Dot, Edit, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
@@ -203,7 +203,7 @@ export function AllProjects() {
                         <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
                           {/* Project Details Section */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
                               <p className="text-sm text-gray-700">
                                 <span className="font-extrabold uppercase">
                                   Project Code:
@@ -234,6 +234,34 @@ export function AllProjects() {
                                 </span>{" "}
                                 {project.target_beneficiaries.join(", ")}
                               </p>
+
+                              {/* <div className="text-sm text-gray-700">
+                                <p className="font-extrabold uppercase">
+                                  Locations:
+                                </p>{" "}
+                                {project.project_locations.map(
+                                  (location, index) => (
+                                    <ul key={index}>
+                                      {" "}
+                                      <li className="inline-flex items-center">
+                                        {" "}
+                                        <span className="mb-auto ">
+                                          <Dot />
+                                        </span>{" "}
+                                        {location}
+                                      </li>
+                                    </ul>
+                                  )
+                                )}
+                              </div> */}
+
+                              <p className="text-sm text-gray-700">
+                                <span className="font-extrabold uppercase">
+                                  Locations:
+                                </span>{" "}
+                                {project.project_locations.join(", ")}
+                              </p>
+
                               <p className="text-sm text-gray-700">
                                 <span className="font-extrabold uppercase">
                                   Budget:
@@ -245,34 +273,24 @@ export function AllProjects() {
                               </p>
                             </div>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
                               <div className=" text-gray-700">
-                                <h2 className="font-extrabold uppercase">
+                                <h2 className="text-sm font-extrabold uppercase">
                                   Account Codes:
                                 </h2>{" "}
                                 {project?.account_code.map((account, index) => (
-                                  <p key={index}>
-                                    <span>{account.name}</span> -{" "}
-                                    <span>{account.code}</span>
-                                  </p>
+                                  <ul key={index}>
+                                    {" "}
+                                    <li className="inline-flex items-center">
+                                      {" "}
+                                      <span className="mb-auto ">
+                                        <Dot />
+                                      </span>{" "}
+                                      {account.name}
+                                    </li>
+                                  </ul>
                                 ))}
                               </div>
-                              <p className="text-sm text-gray-700">
-                                <span className="font-extrabold uppercase">
-                                  Implementation Period:
-                                </span>{" "}
-                                <span>
-                                  {project.implementation_period.from}
-                                </span>{" "}
-                                -{" "}
-                                <span>{project.implementation_period.to}</span>
-                              </p>
-                              <p className="text-sm text-gray-700">
-                                <span className="font-extrabold uppercase">
-                                  Locations:
-                                </span>{" "}
-                                {project.project_locations.join(", ")}
-                              </p>
 
                               <p className="text-sm text-gray-700">
                                 <span className="font-extrabold uppercase">
@@ -283,9 +301,13 @@ export function AllProjects() {
 
                               <p className="text-sm text-gray-700">
                                 <span className="font-extrabold uppercase">
-                                  Summary:
+                                  Implementation Period:
                                 </span>{" "}
-                                {project.project_summary}
+                                <span>
+                                  {project.implementation_period.from}
+                                </span>{" "}
+                                -{" "}
+                                <span>{project.implementation_period.to}</span>
                               </p>
                             </div>
                           </div>
@@ -347,6 +369,15 @@ export function AllProjects() {
                                 ))}
                               </tbody>
                             </table>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Summary:
+                              </span>{" "}
+                              {project.project_summary}
+                            </p>
                           </div>
 
                           <div className="flex justify-center w-full">

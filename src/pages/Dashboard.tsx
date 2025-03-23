@@ -52,14 +52,12 @@ export function Dashboard() {
     { name: "Advance Requests", total: 20, approved: 15 },
   ];
 
-  console.log(purchaseRequestStats);
-
   if (isErrorPurchaseRequestStats || isErrorProjectsStats) {
     return <NetworkErrorUI />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 pb-16">
       <h1
         className="text-2xl font-semibold text-gray-700"
         style={{ fontFamily: "Lato", letterSpacing: "2px" }}
@@ -68,43 +66,18 @@ export function Dashboard() {
       </h1>
 
       <div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         style={{ letterSpacing: "1.2px" }}
       >
         {stats.map((stat) => (
-          <div
-            key={stat.name}
-            className={`${
-              stat.name === "Total Projects"
-                ? "bg-buttonColor text-white"
-                : "bg-white"
-            } rounded-lg shadow p-6`}
-          >
-            <h3
-              className={`text-lg font-medium ${
-                stat.name === "Total Projects" ? "text-white" : "text-gray-700"
-              } mb-2`}
-            >
+          <div key={stat.name} className={`bg-white rounded-lg shadow p-6`}>
+            <h3 className={`text-lg font-medium text-gray-700 mb-2`}>
               {stat.name}
             </h3>
             <div className="flex justify-between items-center">
               <div>
-                <p
-                  className={`text-sm ${
-                    stat.name === "Total Projects"
-                      ? "text-gray-200"
-                      : "text-gray-500"
-                  }`}
-                >
-                  Total
-                </p>
-                <p
-                  className={`text-2xl font-semibold ${
-                    stat.name === "Total Projects"
-                      ? "text-white"
-                      : "text-gray-700"
-                  } `}
-                >
+                <p className={`text-sm text-gray-500`}>Total</p>
+                <p className={`text-2xl font-semibold text-gray-700  `}>
                   {stat.total}
                 </p>
               </div>

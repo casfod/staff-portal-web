@@ -79,7 +79,7 @@ export const getUser = async function () {
 
 export const logout = async function () {
   try {
-    const response = await axios.post(`${apiURL}/users/logout`);
+    const response = await axios.get(`${apiURL}/users/logout`);
     // console.log(response.data);
     document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 

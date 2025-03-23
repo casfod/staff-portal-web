@@ -1,4 +1,4 @@
-import { List } from "lucide-react";
+import { Dot, List } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
@@ -93,36 +93,64 @@ const Project = () => {
                 <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-white">
                   {/* Project Details Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="flex flex-col gap-2">
-                      <p className=" text-gray-700">
+                    <div className="flex flex-col gap-3">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Code:
                         </span>{" "}
-                        {project?.project_code}
+                        {project.project_code}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Project Name:
                         </span>{" "}
-                        {project?.project_title}
+                        {project.project_title}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">Donor:</span>{" "}
-                        {project?.donor}
+                        {project.donor}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Objectives:
                         </span>{" "}
-                        {project?.project_objectives}
+                        {project.project_objectives}
                       </p>
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Target Beneficiaries:
                         </span>{" "}
-                        {project?.target_beneficiaries.join(", ")}
+                        {project.target_beneficiaries.join(", ")}
                       </p>
-                      <p className=" text-gray-700">
+
+                      {/* <div className="text-gray-700">
+                                <p className="font-extrabold uppercase">
+                                  Locations:
+                                </p>{" "}
+                                {project.project_locations.map(
+                                  (location, index) => (
+                                    <ul key={index}>
+                                      {" "}
+                                      <li className="inline-flex items-center">
+                                        {" "}
+                                        <span className="mb-auto ">
+                                          <Dot />
+                                        </span>{" "}
+                                        {location}
+                                      </li>
+                                    </ul>
+                                  )
+                                )}
+                              </div> */}
+
+                      <p className="text-gray-700">
+                        <span className="font-extrabold uppercase">
+                          Locations:
+                        </span>{" "}
+                        {project.project_locations.join(", ")}
+                      </p>
+
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Budget:
                         </span>{" "}
@@ -130,44 +158,38 @@ const Project = () => {
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       <div className=" text-gray-700">
                         <h2 className="font-extrabold uppercase">
                           Account Codes:
                         </h2>{" "}
                         {project?.account_code.map((account, index) => (
-                          <p key={index}>
-                            <span>{account.name}</span> -{" "}
-                            <span>{account.code}</span>
-                          </p>
+                          <ul key={index}>
+                            {" "}
+                            <li className="inline-flex items-center">
+                              {" "}
+                              <span className="mb-auto ">
+                                <Dot />
+                              </span>{" "}
+                              {account.name}
+                            </li>
+                          </ul>
                         ))}
                       </div>
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Implementation Period:
-                        </span>{" "}
-                        <span>{project?.implementation_period.from}</span> -{" "}
-                        <span>{project?.implementation_period.to}</span>
-                      </p>
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Locations:
-                        </span>{" "}
-                        {project?.project_locations.join(", ")}
-                      </p>
 
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
                           Partners:
                         </span>{" "}
-                        {project?.project_partners.join(", ")}
+                        {project.project_partners.join(", ")}
                       </p>
 
-                      <p className=" text-gray-700">
+                      <p className="text-gray-700">
                         <span className="font-extrabold uppercase">
-                          Summary:
+                          Implementation Period:
                         </span>{" "}
-                        {project?.project_summary}
+                        <span>{project.implementation_period.from}</span> -{" "}
+                        <span>{project.implementation_period.to}</span>
                       </p>
                     </div>
                   </div>

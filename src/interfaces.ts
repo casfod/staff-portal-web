@@ -139,7 +139,7 @@ export interface ImplementationPeriod {
 
 export interface AccountCode {
   name: string;
-  code: string;
+  code?: string;
 }
 export interface Sector {
   name: string;

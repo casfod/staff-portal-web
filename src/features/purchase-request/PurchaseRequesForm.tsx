@@ -65,8 +65,6 @@ const PurchaseRequestForm: React.FC = () => {
     [projectData]
   );
 
-  console.log("=>", projects);
-
   // Update item group fields
   const handleItemChange = (
     index: number,
@@ -413,8 +411,8 @@ const PurchaseRequestForm: React.FC = () => {
                 options={
                   selectedProject
                     ? selectedProject.account_code.map((account) => ({
-                        id: `${account.name} - ${account.code}`,
-                        name: `${account.name} - ${account.code}`,
+                        id: `${account.name}`,
+                        name: `${account.name}`,
                       }))
                     : []
                 }

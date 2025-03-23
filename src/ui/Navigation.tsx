@@ -61,6 +61,11 @@ const Navigation: React.FC = () => {
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
+    // Check if localStorageUserX is null or undefined
+    if (!localStorageUserX) {
+      return true; // Include all items if no user is logged in
+    }
+
     if (item.label === "User Management") {
       return (
         localStorageUserX.role === "SUPER-ADMIN" ||
@@ -73,7 +78,7 @@ const Navigation: React.FC = () => {
   return (
     <div className="border-r hidden lg:flex flex-col items-center h-full">
       <nav>
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 px-6 pt-6">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-3 px-6 pt-6">
           {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"

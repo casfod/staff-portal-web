@@ -193,11 +193,11 @@ const FormCreateProject = () => {
                 key={index}
                 className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
               >
-                <h4 className="text-gray-600 text-lg font-semibold">
-                  ACCOUNT {index + 1}
-                </h4>
+                {/* <h4 className="text-gray-600 text-lg font-semibold">
+                  ACCOUNT CODE {index + 1}
+                </h4> */}
 
-                <FormRow label="Account Name *" type="wide">
+                <FormRow label={`Account Code ${index + 1} *`} type="wide">
                   <Input
                     type="text"
                     required
@@ -207,7 +207,7 @@ const FormCreateProject = () => {
                     }
                   />
                 </FormRow>
-
+                {/* 
                 <FormRow label="Account Code *" type="wide">
                   <Input
                     type="text"
@@ -217,7 +217,7 @@ const FormCreateProject = () => {
                       handleAccountCodeChange(index, "code", e.target.value)
                     }
                   />
-                </FormRow>
+                </FormRow> */}
 
                 <div className="flex gap-2 mt-4">
                   <button
@@ -234,12 +234,12 @@ const FormCreateProject = () => {
 
           <div className="flex items-center gap-4 w-full">
             <Button type="button" onClick={addAccountCode}>
-              <FaPlus /> Add Account
+              <FaPlus /> Add Account Code
             </Button>
             <span className="text-gray-700 font-bold">
               {formData.account_code.length > 1
-                ? formData.account_code.length + " Accounts "
-                : formData.account_code.length + " Account "}
+                ? formData.account_code.length + " Account Codes "
+                : formData.account_code.length + " Account Code "}
               Added
             </span>
           </div>
