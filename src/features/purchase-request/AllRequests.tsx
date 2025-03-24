@@ -141,7 +141,7 @@ const AllRequests = () => {
             value={searchTerm}
             onChange={(e) => dispatch(setSearchTerm(e.target.value))}
             className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-            placeholder="Search by Name, Email or Role"
+            placeholder="Search"
           />
           <span
             className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
@@ -216,7 +216,7 @@ const AllRequests = () => {
                         } 
                         ${
                           request.status === "pending" &&
-                          "bg-secondary text-white"
+                          "bg-amber-500 text-white"
                         } ${
                           request.status === "approved" &&
                           "bg-teal-600 text-white"
@@ -429,17 +429,10 @@ const AllRequests = () => {
                                   onClick={() => handleAction(request)} // Use relative path here
                                   className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"
                                 >
-                                  {request.status === "approved" ||
-                                  request.status === "pending" ||
-                                  request.status === "reviewed" ? (
+                                  {request.status !== "draft" && (
                                     <span className="inline-flex items-center gap-1">
                                       <SlMagnifier />
                                       <span>Inspect</span>
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1">
-                                      <BiSolidPen className="h-4 w-4 mr-2" />
-                                      <span>Action</span>
                                     </span>
                                   )}
                                 </button>
