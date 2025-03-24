@@ -4,6 +4,7 @@ import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchase
 import NetworkErrorUI from "../ui/NetworkErrorUI";
 import { ProjectStats, PurchaseRequestStats } from "../interfaces";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
+import SpinnerMini from "../ui/SpinnerMini";
 
 export function Dashboard() {
   // Fetch purchase request stats
@@ -36,16 +37,24 @@ export function Dashboard() {
   const stats = [
     {
       name: "Total Projects",
-      total: isLoadingProjectsStats ? 0 : projectsStats?.totalProjects ?? 0,
+      total: isLoadingProjectsStats ? (
+        <SpinnerMini />
+      ) : (
+        projectsStats?.totalProjects ?? 0
+      ),
     },
     {
       name: "Purchase Requests",
-      total: isLoadingPurchaseRequestStats
-        ? 0
-        : purchaseRequestStats?.totalRequests ?? 0,
-      approved: isLoadingPurchaseRequestStats
-        ? 0
-        : purchaseRequestStats?.totalApprovedRequests ?? 0,
+      total: isLoadingPurchaseRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        purchaseRequestStats?.totalRequests ?? 0
+      ),
+      approved: isLoadingPurchaseRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        purchaseRequestStats?.totalApprovedRequests ?? 0
+      ),
     },
     { name: "Payment Requests", total: 45, approved: 10 },
     { name: "Travel Requests", total: 15, approved: 10 },
@@ -77,9 +86,11 @@ export function Dashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <p className={`text-sm text-gray-500`}>Total</p>
-                <p className={`text-2xl font-semibold text-gray-700  `}>
-                  {stat.total}
-                </p>
+                {
+                  <p className={`text-2xl font-semibold text-gray-700  `}>
+                    {stat.total}
+                  </p>
+                }
               </div>
               {stat.approved && (
                 <div>

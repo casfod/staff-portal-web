@@ -209,7 +209,20 @@ const AllRequests = () => {
                       )}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
-                      {request.status}
+                      <div
+                        className={`w-fit h-fit border text-white px-2  whitespace-nowrap  rounded-lg uppercase mb-1
+                      ${request.status === "pending" && "bg-secondary"} ${
+                          request.status === "approved" && "bg-teal-600"
+                        } 
+                      ${request.status === "rejected" && "bg-red-500"} ${
+                          request.status === "reviewed" && "bg-buttonColor"
+                        }`}
+                      >
+                        <p
+                          className={``}
+                          // style={{ letterSpacing: "1px" }}
+                        >{`${request.status}`}</p>
+                      </div>
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                       {request.requestedBy}
@@ -265,7 +278,7 @@ const AllRequests = () => {
                       <td colSpan={6}>
                         <div className="border border-gray-300 bg-[#F8F8F8] px-6 py-4 rounded-md">
                           <div
-                            className="w-full text-gray-700 text-sm mb-3"
+                            className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
                             style={{ letterSpacing: "1px" }}
                           >
                             <p>
@@ -393,7 +406,7 @@ const AllRequests = () => {
                                       {request?.comments?.map((comment) => (
                                         <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
                                           <p className="text-base font-extrabold">
-                                            {`${comment.user.first_name} ${comment.user.last_name}`}
+                                            {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
                                           </p>
                                           <p className="text-sm">{`${comment.text}`}</p>
                                         </div>

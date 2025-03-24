@@ -1,4 +1,5 @@
 import React from "react";
+import { truncateText } from "../utils/truncateText";
 
 interface Option {
   id: string;
@@ -44,7 +45,7 @@ const Select: React.FC<SelectProps> = ({
         <option value="">{customLabel}</option>
         {options.map((option) => (
           <option key={option.id} value={option.id}>
-            {option.name}
+            {truncateText(option.name, 70, "...")}
           </option>
         ))}
       </select>

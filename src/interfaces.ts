@@ -67,6 +67,7 @@ export interface PurChaseRequestType {
   activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
+  project?: Partial<Project> | string | null;
   reviewedBy?: any;
   approvedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];

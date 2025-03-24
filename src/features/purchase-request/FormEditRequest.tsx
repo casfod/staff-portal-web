@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import {
+  Project,
   PurchaseRequesItemGroupType,
   PurChaseRequestType,
 } from "../../interfaces";
@@ -18,6 +19,7 @@ import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import { useParams } from "react-router-dom";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
+import { useProjects } from "../project/Hooks/useProjects";
 
 interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;
@@ -43,6 +45,9 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     reviewedBy: purchaseRequest?.reviewedBy?.id,
     approvedBy: purchaseRequest?.approvedBy?.id,
   });
+  const [selectedProject, setSelectedProject] = useState<Project | any>(
+    purchaseRequest?.project!
+  );
 
   // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
   const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>(
@@ -122,18 +127,53 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     useSendPurchaseRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
-  const admins = adminsData?.data;
-  const reviewers = reviewersData?.data;
-
-  console.log("Reviewers:", reviewers);
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  const projects = useMemo(
+    () => projectData?.data?.projects ?? [],
+    [projectData]
+  );
 
   // Update main form fields
+  // const handleFormChange = (
+  //   field: keyof PurChaseRequestType,
+  //   value: string
+  // ) => {
+  //   setFormData({ ...formData, [field]: value });
+  // };
+
   const handleFormChange = (
     field: keyof PurChaseRequestType,
     value: string
   ) => {
-    setFormData({ ...formData, [field]: value });
+    if (field === "expenseChargedTo") {
+      // Find the selected project
+      const selectedProject = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
+
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
@@ -288,9 +328,9 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             </h4>
 
             <FormRow label="Description *" type="wide">
-              <Input
+              <input
+                className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
                 placeholder=""
-                inputSize={100}
                 disabled={disabledStates[index]}
                 value={group.description}
                 required
@@ -397,7 +437,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </span>
       </div>
 
-      <Row>
+      {/* <Row>
         <FormRow label="Expense Charged To *" type="medium">
           <Input
             type="text"
@@ -419,6 +459,66 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             onChange={(e) => handleFormChange("accountCode", e.target.value)}
           />
         </FormRow>
+      </Row> */}
+
+      <Row>
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *" type="small">
+          {isLoadingProjects ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
+              customLabel="Select Project"
+              value={formData.expenseChargedTo || ""}
+              onChange={(e) =>
+                handleFormChange("expenseChargedTo", e.target.value)
+              }
+              options={
+                projects
+                  ? projects
+                      .filter((project) => project.id)
+                      .map((project) => ({
+                        id: `${project.project_title} - ${project.project_code}`,
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
+        </FormRow>
+
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *" type="small">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(e) =>
+                  handleFormChange("accountCode", e.target.value)
+                }
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map(
+                        (account: { name: string }) => ({
+                          id: `${account.name}`,
+                          name: `${account.name}`,
+                        })
+                      )
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
 
       {purchaseRequest.reviewedBy ? (

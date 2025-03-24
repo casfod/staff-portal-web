@@ -19,6 +19,10 @@ import Button from "../../ui/Button";
 const Request = () => {
   // State and hooks initialization
   const localStorageUserX = localStorageUser();
+  const purchaseRequest = useSelector(
+    (state: RootState) => state.purchaseRequest.purchaseRequest
+  );
+
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState<Partial<PurChaseRequestType>>({
@@ -29,9 +33,6 @@ const Request = () => {
   const param = useParams();
 
   // Fetch purchase request from Redux store
-  const purchaseRequest = useSelector(
-    (state: RootState) => state.purchaseRequest.purchaseRequest
-  );
 
   // Redirect if no purchase request or params are available
   useEffect(() => {
@@ -41,7 +42,9 @@ const Request = () => {
   }, [purchaseRequest, param]);
 
   // Custom hooks for updating status and purchase request
-  const { updateStatus, isPending } = useUpdateStatus(param.requestId!);
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
+    param.requestId!
+  );
   const { updatePurchaseRequest, isPending: isUpdating } =
     useUpdatePurChaseRequest(param.requestId!);
 
@@ -58,8 +61,7 @@ const Request = () => {
   };
 
   // Handle status change with confirmation dialog
-  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = event.target.value;
+  const handleStatusChange = () => {
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change this request status?",
@@ -71,9 +73,8 @@ const Request = () => {
       animation: false, // Disable animations
     }).then((result) => {
       if (result.isConfirmed) {
-        setStatus(newStatus);
         updateStatus(
-          { status: newStatus, comment: comment },
+          { status: status, comment: comment },
           {
             onError: (error) => {
               Swal.fire({
@@ -160,7 +161,24 @@ const Request = () => {
                   )}
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
-                  {purchaseRequest.status}
+                  <div
+                    className={`w-fit h-fit border text-white px-2  whitespace-nowrap  rounded-lg uppercase mb-1
+                      ${
+                        purchaseRequest.status === "pending" && "bg-secondary"
+                      } ${
+                      purchaseRequest.status === "approved" && "bg-teal-600"
+                    } ${
+                      purchaseRequest.status === "rejected" && "bg-red-500"
+                    } ${
+                      purchaseRequest.status === "reviewed" && "bg-buttonColor"
+                    }
+                      `}
+                  >
+                    <p
+                      className={``}
+                      style={{ letterSpacing: "1px" }}
+                    >{`${purchaseRequest.status}`}</p>
+                  </div>
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500">
                   {purchaseRequest.requestedBy}
@@ -181,7 +199,7 @@ const Request = () => {
                       className="flex justify-between w-full text-gray-700 mb-3"
                       style={{ letterSpacing: "1px" }}
                     >
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <p>
                           <span className="font-bold mr-1 uppercase">
                             Account Code :{" "}
@@ -225,23 +243,6 @@ const Request = () => {
                           </span>
                           {purchaseRequest.activityDescription}
                         </p>
-                      </div>
-
-                      <div
-                        className={`w-fit h-fit border text-white px-2 py-1 rounded-lg uppercase mb-1
-                      ${
-                        purchaseRequest.status === "pending" && "bg-secondary"
-                      } ${
-                          purchaseRequest.status === "approved" && "bg-teal-600"
-                        } ${
-                          purchaseRequest.status === "rejected" && "bg-red-500"
-                        }
-                      `}
-                      >
-                        <p
-                          className={``}
-                          style={{ letterSpacing: "1px" }}
-                        >{`Status : ${purchaseRequest.status}`}</p>
                       </div>
                     </div>
 
@@ -321,7 +322,7 @@ const Request = () => {
                               {purchaseRequest?.comments?.map((comment) => (
                                 <div className="w-fit border-2 px-4 py-2 rounded-lg shadow-lg">
                                   <p className="text-base font-extrabold">
-                                    {`${comment.user.first_name} ${comment.user.last_name}`}
+                                    {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
                                   </p>
                                   <p className="text-sm">{`${comment.text}`}</p>
                                 </div>
@@ -367,7 +368,7 @@ const Request = () => {
                                     </div>
 
                                     {/* Action Dropdown */}
-                                    <div className="bg-buttonColor hover:to-buttonColorHover text-white self-center px-3 py-2 rounded-md">
+                                    <div className="w-fit border border-gray-700   rounded-md">
                                       <label
                                         htmlFor={`status-${purchaseRequest?.id}`}
                                         className="sr-only"
@@ -375,11 +376,13 @@ const Request = () => {
                                         Select Action
                                       </label>
                                       <select
-                                        className="text-xs md:text-sm bg-inherit"
+                                        className="text-xs md:text-sm bg-inherit px-3 py-2 rounded-md"
                                         id={`status-${purchaseRequest?.id}`}
                                         value={status}
-                                        onChange={handleStatusChange}
-                                        disabled={isPending}
+                                        onChange={(e) =>
+                                          setStatus(e.target.value)
+                                        }
+                                        disabled={isUpdatingStatus}
                                       >
                                         <option value="">ACTIONS</option>
                                         {purchaseRequest.status ===
@@ -395,6 +398,21 @@ const Request = () => {
                                         <option value="rejected">REJECT</option>
                                       </select>
                                     </div>
+
+                                    {status && (
+                                      <div className="flex w-full justify-center p-4">
+                                        <Button
+                                          size="medium"
+                                          onClick={handleStatusChange}
+                                        >
+                                          {isUpdatingStatus ? (
+                                            <SpinnerMini />
+                                          ) : (
+                                            "Update Status"
+                                          )}
+                                        </Button>
+                                      </div>
+                                    )}
                                   </>
                                 )}
                               </form>

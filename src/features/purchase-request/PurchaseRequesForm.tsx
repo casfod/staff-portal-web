@@ -24,6 +24,7 @@ const PurchaseRequestForm: React.FC = () => {
     address: "",
     finalDeliveryPoint: "",
     city: "",
+    project: null,
     periodOfActivity: "",
     activityDescription: "",
     expenseChargedTo: "",
@@ -102,6 +103,7 @@ const PurchaseRequestForm: React.FC = () => {
           `${project.project_title} - ${project.project_code}` === value
       );
 
+      formData.project = selectedProject?.id;
       // Update the selected project state
       setSelectedProject(selectedProject || null);
 
@@ -257,9 +259,9 @@ const PurchaseRequestForm: React.FC = () => {
             </h4>
 
             <FormRow label="Description *" type="wide">
-              <Input
+              <input
+                className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
                 placeholder=""
-                inputSize={100}
                 disabled={disabledStates[index]}
                 value={group.description}
                 required
@@ -449,9 +451,11 @@ const PurchaseRequestForm: React.FC = () => {
       </Row>
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleSave}>
-          {isPending ? <SpinnerMini /> : "Save"}
-        </Button>
+        {!formData.reviewedBy && (
+          <Button size="medium" onClick={handleSave}>
+            {isPending ? <SpinnerMini /> : "Save"}
+          </Button>
+        )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Save And Send"}
