@@ -210,12 +210,22 @@ const AllRequests = () => {
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       <div
-                        className={`w-fit h-fit border text-white px-2  whitespace-nowrap  rounded-lg uppercase mb-1
-                      ${request.status === "pending" && "bg-secondary"} ${
-                          request.status === "approved" && "bg-teal-600"
+                        className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
+                        ${
+                          request.status === "draft" && "border border-gray-400"
                         } 
-                      ${request.status === "rejected" && "bg-red-500"} ${
-                          request.status === "reviewed" && "bg-buttonColor"
+                        ${
+                          request.status === "pending" &&
+                          "bg-secondary text-white"
+                        } ${
+                          request.status === "approved" &&
+                          "bg-teal-600 text-white"
+                        } 
+                      ${
+                        request.status === "rejected" && "bg-red-500 text-white"
+                      }  ${
+                          request.status === "reviewed" &&
+                          "bg-buttonColor text-white"
                         }`}
                       >
                         <p

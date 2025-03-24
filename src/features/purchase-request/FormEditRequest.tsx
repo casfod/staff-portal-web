@@ -200,6 +200,9 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     e.preventDefault();
     console.log("Form Data:", formData);
     console.log("Item Groups:", itemGroup);
+    if (formData.reviewedBy === "") {
+      formData.reviewedBy = null;
+    }
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     updatePurchaseRequest(data);
@@ -603,7 +606,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </Button>
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
-            {isSending ? <SpinnerMini /> : "Save And Send"}
+            {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>
         )}
       </div>

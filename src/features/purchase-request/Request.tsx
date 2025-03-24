@@ -453,13 +453,15 @@ const Request = () => {
                           </FormRow>
                           {purchaseRequest.status === "reviewed" && (
                             <div className="flex w-full justify-center p-4">
-                              <Button size="medium" onClick={handleSend}>
-                                {isUpdating ? (
-                                  <SpinnerMini />
-                                ) : (
-                                  "Request Approval"
-                                )}
-                              </Button>
+                              {formData.approvedBy && (
+                                <Button size="medium" onClick={handleSend}>
+                                  {isUpdating ? (
+                                    <SpinnerMini />
+                                  ) : (
+                                    "Request Approval"
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
