@@ -114,7 +114,7 @@ export function AllUsers() {
             type="text"
             value={searchTerm}
             onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-            className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+            className="w-full h-full px-2 text-gray-700 placeholder-gray-400 placeholder:tracking-widest rounded-lg focus:outline-none focus:ring-0 mr-7"
             placeholder="Search"
           />
           <span

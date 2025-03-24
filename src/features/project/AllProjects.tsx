@@ -71,7 +71,7 @@ export function AllProjects() {
   }
 
   return (
-    <div className="flex flex-col space-y-3">
+    <div className="flex flex-col space-y-3 pb-16">
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1

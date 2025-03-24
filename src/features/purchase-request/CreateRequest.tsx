@@ -1,12 +1,12 @@
 import { List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import PurchaseRequesForm from "./PurchaseRequesForm";
+import FormAddPurchaseReques from "./FormAddPurchaseReques";
 
 const CreateRequest = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 pb-16">
       <div className="w-full flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
@@ -25,7 +25,7 @@ const CreateRequest = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
-          <PurchaseRequesForm />
+          <FormAddPurchaseReques />
         </div>
       </div>
     </div>

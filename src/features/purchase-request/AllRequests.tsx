@@ -113,7 +113,7 @@ const AllRequests = () => {
   }
 
   return (
-    <div className="flex flex-col space-y-3">
+    <div className="flex flex-col space-y-3 pb-16">
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"

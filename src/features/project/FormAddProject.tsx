@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { Project } from "../../interfaces";
-import Row from "../../ui/Row";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
-import SpinnerMini from "../../ui/SpinnerMini";
+import Row from "../../ui/Row";
 import Button from "../../ui/Button";
 import { FaPlus } from "react-icons/fa";
-import { useUpdateProject } from "./Hooks/useUpdateProject";
-
-interface FormEditProjectProps {
-  project: Project;
-}
+import SpinnerMini from "../../ui/SpinnerMini";
+import { useAddProject } from "./Hooks/useAddProject";
 
 // Define the sector options
 const sectorOptions = [
@@ -21,30 +17,24 @@ const sectorOptions = [
   "Livelihood",
 ];
 
-const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
+const FormAddProject = () => {
   const [formData, setFormData] = useState<Project>({
-    project_title: project.project_title,
-    donor: project.donor,
-    project_partners: [...project.project_partners],
-    project_code: project.project_code,
-    implementation_period: {
-      from: project.implementation_period.from,
-      to: project.implementation_period.to,
-    },
-    account_code: [...project.account_code],
-    project_budget: project.project_budget,
-    sectors: [...project.sectors],
-    project_locations: [...project.project_locations],
-    target_beneficiaries: [...project.target_beneficiaries],
-    // target_beneficiaries: {
-    //   women: project.target_beneficiaries.women,
-    //   girls: project.target_beneficiaries.girls,
-    //   boys: project.target_beneficiaries.boys,
-    //   men: project.target_beneficiaries.men,
-    // },
-    project_objectives: project.project_objectives,
-    project_summary: project.project_summary,
+    project_title: "",
+    donor: "",
+    project_partners: [],
+    project_code: "",
+    implementation_period: { from: "", to: "" },
+    account_code: [],
+    project_budget: 0,
+    sectors: [],
+    project_locations: [],
+    target_beneficiaries: [],
+    // target_beneficiaries: { women: 0, girls: 0, boys: 0, men: 0 },
+    project_objectives: "",
+    project_summary: "",
   });
+
+  const { addProject, isPending } = useAddProject();
 
   // Handle changes for top-level fields
   const handleFormChange = (
@@ -104,6 +94,15 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
     setFormData({ ...formData, sectors: updatedSectors });
   };
 
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    console.log("Project:", formData);
+
+    addProject(formData);
+  };
+
   const addAccountCode = () => {
     setFormData({
       ...formData,
@@ -116,17 +115,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       (_, i) => i !== index
     );
     setFormData({ ...formData, account_code: updatedAccountCodes });
-  };
-
-  const { updateProject, isPending } = useUpdateProject(project.id!);
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    console.log("Project:", formData);
-
-    updateProject(formData);
   };
 
   return (
@@ -179,62 +167,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </FormRow>
       </Row>
 
-      {/* Account code*/}
-      {/* <Row>
-          <FormRow label="Account Name *">
-            <Input
-              type="text"
-              min="0"
-              required
-              value={formData.account_code.name}
-              onChange={(e) =>
-                handleNestedChange("account_code", "name", e.target.value)
-              }
-            />
-          </FormRow>
-          <FormRow label="Account code *">
-            <Input
-              type="text"
-              min="0"
-              required
-              value={formData.account_code.code}
-              onChange={(e) =>
-                handleNestedChange("account_code", "code", e.target.value)
-              }
-            />
-          </FormRow>
-        </Row> */}
-
-      {/* Implementation Period */}
-      <Row>
-        <FormRow label="Implementation Period (From) *">
-          <Input
-            type="date"
-            id="implementation_period_from"
-            required
-            value={formData.implementation_period.from}
-            onChange={(e) =>
-              handleNestedChange(
-                "implementation_period",
-                "from",
-                e.target.value
-              )
-            }
-          />
-        </FormRow>
-        <FormRow label="Implementation Period (To) *">
-          <Input
-            type="date"
-            id="implementation_period_to"
-            required
-            value={formData.implementation_period.to}
-            onChange={(e) =>
-              handleNestedChange("implementation_period", "to", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-
       {/* Project Budget */}
       <Row>
         <FormRow label="Project Budget *">
@@ -257,7 +189,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
               className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
             >
               {/* <h4 className="text-gray-600 text-lg font-semibold">
-                  ACCOUNT {index + 1}
+                  ACCOUNT CODE {index + 1}
                 </h4> */}
 
               <FormRow label={`Account Code ${index + 1} *`} type="wide">
@@ -270,8 +202,8 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
                   }
                 />
               </FormRow>
-
-              {/* <FormRow label="Account Code *" type="wide">
+              {/* 
+                <FormRow label="Account Code *" type="wide">
                   <Input
                     type="text"
                     required
@@ -396,70 +328,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </FormRow>
       </Row>
 
-      {/* Target Beneficiaries */}
-      {/* <Row>
-          <FormRow label="Women *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.women}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "women",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Girls *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.girls}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "girls",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Boys *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.boys}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "boys",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Men *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.men}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "men",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-        </Row> */}
-
       <Row>
         <FormRow label="Target Beneficiaries *" type="wide">
           <Input
@@ -491,7 +359,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
           />
         </FormRow>
       </Row>
-
       {/* Implementation Period */}
       <Row>
         <FormRow label="Implementation Period (From) *">
@@ -540,10 +407,11 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       {/* Submit Button */}
       <div className="flex justify-center w-full gap-4">
         <Button size="medium" disabled={isPending} onClick={handleSubmit}>
-          {isPending ? <SpinnerMini /> : "Update"}
+          {isPending ? <SpinnerMini /> : "Submit"}
         </Button>
       </div>
     </form>
   );
 };
-export default FormEditProject;
+
+export default FormAddProject;
