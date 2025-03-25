@@ -20,6 +20,10 @@ import { AllProjects } from "./features/project/AllProjects";
 import Project from "./features/project/Project";
 import CreateProject from "./features/project/CreateProject.tsx";
 import EditProject from "./features/project/EditProject.tsx";
+import AllConceptNotes from "./features/concept-note/AllConceptNotes.tsx";
+import CreateConceptNote from "./features/concept-note/CreateConceptNote.tsx";
+import ConceptNote from "./features/concept-note/ConceptNote.tsx";
+import EditConceptNote from "./features/concept-note/EditConceptNote.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -85,6 +89,25 @@ const router = createBrowserRouter([
       {
         path: "concept-notes",
         element: <AnimatedRoute element={<ConceptNotes />} />,
+        children: [
+          { index: true, element: <Navigate to="concept-notes" /> },
+          {
+            path: "concept-notes",
+            element: <AnimatedRoute element={<AllConceptNotes />} />,
+          },
+          {
+            path: "create-concept-note",
+            element: <AnimatedRoute element={<CreateConceptNote />} />,
+          },
+          {
+            path: "concept-note/:requestId",
+            element: <AnimatedRoute element={<ConceptNote />} />,
+          },
+          {
+            path: "edit-concept-note/:requestId",
+            element: <AnimatedRoute element={<EditConceptNote />} />,
+          },
+        ],
       },
       {
         path: "purchase-requests",

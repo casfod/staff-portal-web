@@ -188,10 +188,6 @@ const FormAddProject = () => {
               key={index}
               className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
             >
-              {/* <h4 className="text-gray-600 text-lg font-semibold">
-                  ACCOUNT CODE {index + 1}
-                </h4> */}
-
               <FormRow label={`Account Code ${index + 1} *`} type="wide">
                 <Input
                   type="text"
@@ -202,17 +198,6 @@ const FormAddProject = () => {
                   }
                 />
               </FormRow>
-              {/* 
-                <FormRow label="Account Code *" type="wide">
-                  <Input
-                    type="text"
-                    required
-                    value={account.code}
-                    onChange={(e) =>
-                      handleAccountCodeChange(index, "code", e.target.value)
-                    }
-                  />
-                </FormRow> */}
 
               <div className="flex gap-2 mt-4">
                 <button
@@ -330,8 +315,8 @@ const FormAddProject = () => {
 
       <Row>
         <FormRow label="Target Beneficiaries *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
             id="target_beneficiaries"
             required
             value={formData.target_beneficiaries.join(", ")}
@@ -348,8 +333,9 @@ const FormAddProject = () => {
       {/* Project Objectives */}
       <Row>
         <FormRow label="Project Objectives *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
             id="project_objectives"
             required
             value={formData.project_objectives}
@@ -392,8 +378,9 @@ const FormAddProject = () => {
       {/* Project Summary */}
       <Row>
         <FormRow label="Project Summary *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
             id="project_summary"
             required
             value={formData.project_summary}

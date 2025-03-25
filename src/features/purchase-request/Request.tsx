@@ -2,7 +2,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
@@ -50,7 +50,7 @@ const Request = () => {
 
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
-  const admins = adminsData?.data;
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   // Handle form field changes
   const handleFormChange = (

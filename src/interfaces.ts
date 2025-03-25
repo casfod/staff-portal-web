@@ -155,6 +155,62 @@ export interface TargetBeneficiaries {
 }
 
 ///////////////////////
+//ConceptNote //
+///////////////////////
+
+export interface ConceptNote {
+  id?: string;
+  staff_name?: string;
+  staff_role?: string;
+  project_code: string;
+  activity_title: string;
+  activity_location: string;
+  activity_period: {
+    from: string;
+    to: string;
+  };
+  background_context: string;
+  // objectives_purpose: string[];
+  objectives_purpose: string;
+  detailed_activity_description: string;
+  // detailed_activity_description: {
+  //   title: string;
+  //   description: string;
+  // }[];
+  strategic_plan: string;
+  // benefits_of_project: string[];
+  benefits_of_project: string;
+  preparedBy?: any;
+  approvedBy?: any;
+  status?: "pending" | "approved" | "rejected";
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UseConceptNoteType {
+  status: number;
+  message: string;
+  data: {
+    conceptNotes: ConceptNote[];
+    totalConceptNotes: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface ConceptNoteStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UseConceptNoteStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: ConceptNoteStats;
+}
+
+///////////////////////
 //SUB-INTERFACE
 ///////////////////////
 import { ChangeEvent } from "react";

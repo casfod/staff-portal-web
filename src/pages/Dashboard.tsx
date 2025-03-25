@@ -2,9 +2,14 @@ import { useMemo } from "react";
 import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchaseStats";
 
 import NetworkErrorUI from "../ui/NetworkErrorUI";
-import { ProjectStats, PurchaseRequestStats } from "../interfaces";
+import {
+  ConceptNoteStats,
+  ProjectStats,
+  PurchaseRequestStats,
+} from "../interfaces";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
 import SpinnerMini from "../ui/SpinnerMini";
+import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchaseStats";
 
 export function Dashboard() {
   // Fetch purchase request stats
@@ -20,6 +25,12 @@ export function Dashboard() {
     isLoading: isLoadingProjectsStats,
     isError: isErrorProjectsStats,
   } = useProjectStats(); // Use the correct hook
+  // Fetch project stats
+  const {
+    data: conceptNotesStatsData,
+    isLoading: isLoadingConceptNotesStats,
+    isError: isErrorConceptNotesStats,
+  } = useConceptNotesStats(); // Use the correct hook
 
   // Explicitly type purchase request stats
   const purchaseRequestStats = useMemo(
@@ -32,6 +43,14 @@ export function Dashboard() {
     () => (projectsStatsData?.data as ProjectStats) ?? {},
     [projectsStatsData]
   );
+
+  // Explicitly type concept note stats
+  const conceptNotesStats = useMemo(
+    () => (conceptNotesStatsData?.data as ConceptNoteStats) ?? {},
+    [conceptNotesStatsData]
+  );
+
+  console.log(conceptNotesStats);
 
   // Define stats array
   const stats = [
@@ -56,12 +75,29 @@ export function Dashboard() {
         purchaseRequestStats?.totalApprovedRequests ?? 0
       ),
     },
+    {
+      name: "Concept Notes",
+      total: isLoadingConceptNotesStats ? (
+        <SpinnerMini />
+      ) : (
+        conceptNotesStats.totalRequests ?? 0
+      ),
+      approved: isLoadingConceptNotesStats ? (
+        <SpinnerMini />
+      ) : (
+        conceptNotesStats.totalApprovedRequests ?? 0
+      ),
+    },
     { name: "Payment Requests", total: 45, approved: 10 },
     { name: "Travel Requests", total: 15, approved: 10 },
     { name: "Advance Requests", total: 20, approved: 15 },
   ];
 
-  if (isErrorPurchaseRequestStats || isErrorProjectsStats) {
+  if (
+    isErrorPurchaseRequestStats ||
+    isErrorProjectsStats ||
+    isErrorConceptNotesStats
+  ) {
     return <NetworkErrorUI />;
   }
 
