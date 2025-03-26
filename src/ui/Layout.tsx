@@ -9,7 +9,7 @@ export function Layout() {
   return (
     <div
       className="min-h-screen bg-[#F8F8F8] overflow-y-hidden"
-      style={{ fontFamily: "Cabin" }}
+      style={{ fontFamily: "Cabin", letterSpacing: "0.9px" }}
     >
       <Header />
       <div className="flex text-gray-300 overflow-y-hidden">

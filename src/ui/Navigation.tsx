@@ -76,7 +76,10 @@ const Navigation: React.FC = () => {
   });
 
   return (
-    <div className="border-r hidden lg:flex flex-col items-center h-full">
+    <div
+      className="border-r hidden lg:flex flex-col items-center h-full"
+      style={{ fontFamily: "Cabin" }}
+    >
       <nav>
         <ul className="flex flex-col items-center w-60 shadow-sm gap-3 px-6 pt-6">
           {filteredNavigation.map((item) => (

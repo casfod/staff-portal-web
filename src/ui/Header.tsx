@@ -20,13 +20,16 @@ export function Header() {
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
 
           <span
-            className="ml-2 text-xl  font-extrabold text-primary"
-            style={{ fontFamily: "Lato", letterSpacing: "3px" }}
+            className="ml-2 text-lg  font-extrabold text-primary"
+            style={{ fontFamily: "Sora", letterSpacing: "5px" }}
           >
             STAFF PORTAL
           </span>
           <div className="space-x-4 ">
-            <div className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base">
+            <div
+              className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base"
+              style={{ fontFamily: "Sora", letterSpacing: "1px" }}
+            >
               <p className="inline-flex gap-1 text-gray-700 font-medium">
                 <span>{user?.first_name.toUpperCase()}</span>
 

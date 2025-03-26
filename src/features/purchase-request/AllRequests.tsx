@@ -117,7 +117,7 @@ const AllRequests = () => {
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          style={{ letterSpacing: "2px" }}
         >
           Purchase Requests
         </h1>
@@ -196,7 +196,7 @@ const AllRequests = () => {
               {purchaseRequests.map((request) => (
                 <>
                   <tr key={request.id} className="h-[40px] max-h-[40px]">
-                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
                       {request.department}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
@@ -234,10 +234,10 @@ const AllRequests = () => {
                         >{`${request.status}`}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {request.requestedBy}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(request.createdAt!)}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">

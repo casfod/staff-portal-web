@@ -29,7 +29,7 @@ export function AdvanceRequests() {
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          style={{ letterSpacing: "2px" }}
         >
           Advance Requests
         </h1>

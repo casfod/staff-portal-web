@@ -101,7 +101,7 @@ const AllConceptNotes = () => {
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          style={{ letterSpacing: "2px" }}
         >
           Concept Notes
         </h1>
@@ -168,14 +168,14 @@ const AllConceptNotes = () => {
                         {note.status}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {note.staff_name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(note?.createdAt!)}
                     </td>
 
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
@@ -228,60 +228,58 @@ const AllConceptNotes = () => {
                               </span>{" "}
                               {note.project_code}
                             </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                            <div className="text-sm text-gray-700">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Activity Title:
-                              </span>{" "}
-                              {note.activity_title}
-                            </p>
+                              </h2>{" "}
+                              <p>{note.activity_title}</p>
+                            </div>
 
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Objectives Purpose:
-                              </span>{" "}
-                              {note.objectives_purpose}
-                            </p>
-
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                              </h2>{" "}
+                              <p> {note.objectives_purpose}</p>
+                            </div>
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Background Context:
-                              </span>{" "}
-                              {note.background_context}
-                            </p>
+                              </h2>{" "}
+                              <p>{note.background_context}</p>
+                            </div>
 
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Benefits Of Project:
-                              </span>{" "}
-                              {note.benefits_of_project}
-                            </p>
+                              </h2>{" "}
+                              <p>{note.benefits_of_project}</p>
+                            </div>
 
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Strategic Plan:
-                              </span>{" "}
-                              {note.strategic_plan}
-                            </p>
-
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                              </h2>{" "}
+                              <p>{note.strategic_plan}</p>
+                            </div>
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Activity Location:
-                              </span>{" "}
-                              {note.activity_location}
-                            </p>
+                              </h2>{" "}
+                              <p>{note.activity_location}</p>
+                            </div>
 
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Detailed Activity Description:
-                              </span>{" "}
-                              {note.detailed_activity_description}
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              <span className="font-extrabold uppercase">
+                              </h2>{" "}
+                              <p>{note.detailed_activity_description}</p>
+                            </div>
+                            <div className="text-sm text-gray-700 whitespace-pre-line">
+                              <h2 className="font-extrabold uppercase mb-1">
                                 Means of verification:
-                              </span>{" "}
-                              {note.means_of_verification}
-                            </p>
+                              </h2>{" "}
+                              <p>{note.means_of_verification}</p>
+                            </div>
 
                             <p className="text-sm text-gray-700">
                               <span className="font-extrabold uppercase">
@@ -323,7 +321,7 @@ const AllConceptNotes = () => {
                                 {note?.approvedBy.role}
                               </p>
 
-                              <div className="flex flex-col gap-2 text-gray-600">
+                              <div className="flex flex-col gap-2 text-gray-600 mt-3">
                                 <span className="font-bold mr-1  uppercase">
                                   Comments :
                                 </span>

@@ -75,7 +75,7 @@ const ConceptNote = () => {
           className="text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
-          Review Project
+          Concept Note
         </h1>
         <button
           onClick={() => navigate(-1)} // Use relative path here
@@ -91,19 +91,19 @@ const ConceptNote = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                 Prepared By
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th> */}
             </tr>
@@ -112,10 +112,10 @@ const ConceptNote = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               <tr key={conceptNote?.id}>
-                <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-700 uppercase">
                   {conceptNote.project_code}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                   <div
                     className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
                         ${
@@ -137,10 +137,10 @@ const ConceptNote = () => {
                     {conceptNote.status}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
                   {conceptNote.staff_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
                   {dateformat(conceptNote?.createdAt!)}
                 </td>
 
@@ -185,9 +185,10 @@ const ConceptNote = () => {
                 className="w-full h-10 "
                 style={{ letterSpacing: "1px" }}
               >
+                {" "}
                 <td colSpan={5}>
                   <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm ">
-                    {/* conceptNote Details Section */}
+                    {/* note Details Section */}
 
                     <div className="flex flex-col gap-3">
                       <p className=" text-gray-700">
@@ -196,60 +197,58 @@ const ConceptNote = () => {
                         </span>{" "}
                         {conceptNote.project_code}
                       </p>
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                      <div className=" text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Activity Title:
-                        </span>{" "}
-                        {conceptNote.activity_title}
-                      </p>
+                        </h2>{" "}
+                        <p>{conceptNote.activity_title}</p>
+                      </div>
 
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Objectives Purpose:
-                        </span>{" "}
-                        {conceptNote.objectives_purpose}
-                      </p>
-
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                        </h2>{" "}
+                        <p> {conceptNote.objectives_purpose}</p>
+                      </div>
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Background Context:
-                        </span>{" "}
-                        {conceptNote.background_context}
-                      </p>
+                        </h2>{" "}
+                        <p>{conceptNote.background_context}</p>
+                      </div>
 
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Benefits Of Project:
-                        </span>{" "}
-                        {conceptNote.benefits_of_project}
-                      </p>
+                        </h2>{" "}
+                        <p>{conceptNote.benefits_of_project}</p>
+                      </div>
 
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Strategic Plan:
-                        </span>{" "}
-                        {conceptNote.strategic_plan}
-                      </p>
-
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                        </h2>{" "}
+                        <p>{conceptNote.strategic_plan}</p>
+                      </div>
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Activity Location:
-                        </span>{" "}
-                        {conceptNote.activity_location}
-                      </p>
+                        </h2>{" "}
+                        <p>{conceptNote.activity_location}</p>
+                      </div>
 
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Detailed Activity Description:
-                        </span>{" "}
-                        {conceptNote.detailed_activity_description}
-                      </p>
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
+                        </h2>{" "}
+                        <p>{conceptNote.detailed_activity_description}</p>
+                      </div>
+                      <div className="text-gray-700 whitespace-pre-line">
+                        <h2 className="font-extrabold uppercase mb-1">
                           Means of verification:
-                        </span>{" "}
-                        {conceptNote.means_of_verification}
-                      </p>
+                        </h2>{" "}
+                        <p>{conceptNote.means_of_verification}</p>
+                      </div>
 
                       <p className=" text-gray-700">
                         <span className="font-extrabold uppercase">
@@ -260,58 +259,62 @@ const ConceptNote = () => {
                           "NGN"
                         )}
                       </p>
-                    </div>
 
-                    <div className="w-fit  mt-4">
-                      <p className=" text-gray-700">
-                        <span className="font-bold mr-1 uppercase">
-                          Prepared By :
-                        </span>
-                        {`${conceptNote?.preparedBy?.first_name} ${conceptNote?.preparedBy?.last_name}`}
-                      </p>
-
-                      <p className=" text-gray-700">
-                        <span className="font-bold mr-1 uppercase">Role :</span>
-                        {conceptNote?.preparedBy.role}
-                      </p>
-                    </div>
-
-                    {conceptNote?.approvedBy && (
-                      <div className=" w-fit  mt-4">
+                      <div className="w-fit  mt-4">
                         <p className=" text-gray-700">
                           <span className="font-bold mr-1 uppercase">
-                            Approved By :
+                            Prepared By :
                           </span>
-                          {`${conceptNote?.approvedBy?.first_name} ${conceptNote?.approvedBy?.last_name}`}
+                          {`${conceptNote?.preparedBy?.first_name} ${conceptNote?.preparedBy?.last_name}`}
                         </p>
 
                         <p className=" text-gray-700">
                           <span className="font-bold mr-1 uppercase">
                             Role :
                           </span>
-                          {conceptNote?.approvedBy.role}
+                          {conceptNote?.preparedBy.role}
                         </p>
                       </div>
-                    )}
+
+                      {conceptNote?.approvedBy && (
+                        <div className=" w-fit  mt-4">
+                          <p className=" text-gray-700">
+                            <span className="font-bold mr-1 uppercase">
+                              Approved By :
+                            </span>
+                            {`${conceptNote?.approvedBy?.first_name} ${conceptNote?.approvedBy?.last_name}`}
+                          </p>
+
+                          <p className=" text-gray-700">
+                            <span className="font-bold mr-1 uppercase">
+                              Role :
+                            </span>
+                            {conceptNote?.approvedBy.role}
+                          </p>
+
+                          <div className="flex flex-col gap-2 text-gray-600 mt-3">
+                            <span className="font-bold mr-1  uppercase">
+                              Comments :
+                            </span>
+
+                            <div className="flex flex-col gap-2 ">
+                              {conceptNote?.comments?.map((comment) => (
+                                <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
+                                  <p className="text-base font-extrabold">
+                                    {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
+                                  </p>
+                                  <p className="">{`${comment.text}`}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>
             </>
-
-            <div className="flex flex-col gap-2 text-gray-600">
-              <span className="font-bold mr-1  uppercase">Comments :</span>
-
-              <div className="flex flex-col gap-2 ">
-                {conceptNote?.comments?.map((comment) => (
-                  <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
-                    <p className="text-base font-extrabold">
-                      {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
-                    </p>
-                    <p className="text-sm">{`${comment.text}`}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </tbody>
         </table>
       </div>
@@ -339,7 +342,7 @@ const ConceptNote = () => {
                 Select Action
               </label>
               <select
-                className="text-xs md:text-sm bg-inherit px-3 py-2 rounded-md"
+                className="text-xs md: bg-inherit px-3 py-2 rounded-md"
                 id={`status-${conceptNote?.id}`}
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}

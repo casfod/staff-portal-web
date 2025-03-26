@@ -70,16 +70,16 @@ const Project = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             <tr key={project?.id}>
-              <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700">
+              <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700 uppercase">
                 {truncateText(project?.project_title!, 35, "...")}
               </td>
               <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
                 {project?.project_code}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
                 {moneyFormat(Number(project?.project_budget), "USD")}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
                 {dateformat(project?.createdAt!)}
               </td>
             </tr>

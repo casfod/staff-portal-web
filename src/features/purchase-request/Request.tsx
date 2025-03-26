@@ -148,7 +148,7 @@ const Request = () => {
             <>
               {/* Purchase Request Details Row */}
               <tr key={purchaseRequest.id} className="h-[40px] max-h-[40px]">
-                <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700">
+                <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
                   {purchaseRequest.department}
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500">
@@ -180,10 +180,10 @@ const Request = () => {
                     >{`${purchaseRequest.status}`}</p>
                   </div>
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
                   {purchaseRequest.requestedBy}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
                   {dateformat(purchaseRequest.createdAt!)}
                 </td>
               </tr>

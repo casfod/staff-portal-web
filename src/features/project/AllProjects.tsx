@@ -76,7 +76,7 @@ export function AllProjects() {
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+          style={{ letterSpacing: "2px" }}
         >
           Projects
         </h1>
@@ -154,7 +154,7 @@ export function AllProjects() {
               {projects.map((project) => (
                 <>
                   <tr key={project.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
@@ -163,10 +163,10 @@ export function AllProjects() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {project.project_code}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
                       {moneyFormat(Number(project.project_budget), "USD")}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(project.createdAt!)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -216,14 +216,14 @@ export function AllProjects() {
                                 </span>{" "}
                                 {project.project_title}
                               </p>
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-700 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Donor:
                                 </span>{" "}
                                 {project.donor}
                               </p>
-                              <p className="text-sm text-gray-700">
-                                <span className="font-extrabold uppercase">
+                              <p className="text-sm text-gray-700 whitespace-pre-line">
+                                <span className="font-extrabold uppercase ">
                                   Objectives:
                                 </span>{" "}
                                 {project.project_objectives}

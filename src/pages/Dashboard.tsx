@@ -105,32 +105,34 @@ export function Dashboard() {
     <div className="flex flex-col gap-4 pb-16">
       <h1
         className="text-2xl font-semibold text-gray-700"
-        style={{ fontFamily: "Lato", letterSpacing: "2px" }}
+        style={{ letterSpacing: "2px" }}
       >
         Dashboard
       </h1>
 
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        style={{ letterSpacing: "1.2px" }}
+        style={{ fontFamily: "Sora", letterSpacing: "1px" }}
       >
         {stats.map((stat) => (
           <div key={stat.name} className={`bg-white rounded-lg shadow p-6`}>
-            <h3 className={`text-lg font-medium text-gray-700 mb-2`}>
+            <h3 className={`text-lg font-medium text-gray-600 mb-2`}>
               {stat.name}
             </h3>
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm text-gray-500`}>Total</p>
+                <p className={`text-sm text-gray-500 font-semibold`}>Total</p>
                 {
-                  <p className={`text-2xl font-semibold text-gray-700  `}>
+                  <p className={`text-2xl font-semibold text-gray-600  `}>
                     {stat.total}
                   </p>
                 }
               </div>
               {stat.approved && (
                 <div>
-                  <p className="text-sm text-gray-500">Approved</p>
+                  <p className="text-sm text-gray-500 font-semibold">
+                    Approved
+                  </p>
                   <p className="text-2xl font-semibold text-green-600">
                     {stat.approved}
                   </p>
