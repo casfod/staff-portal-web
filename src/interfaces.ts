@@ -204,7 +204,7 @@ export interface UseConceptNoteType {
 
 export interface ConceptNoteStats {
   totalConceptNotes: number;
-  totalApprovedRequests: number;
+  totalApprovedConceptNotes: number;
 }
 
 export interface UseConceptNoteStatsType {

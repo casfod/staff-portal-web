@@ -85,7 +85,7 @@ export function Dashboard() {
       approved: isLoadingConceptNotesStats ? (
         <SpinnerMini />
       ) : (
-        conceptNotesStats.totalApprovedRequests ?? 0
+        conceptNotesStats.totalApprovedConceptNotes ?? 0
       ),
     },
     { name: "Payment Requests", total: 45, approved: 10 },
