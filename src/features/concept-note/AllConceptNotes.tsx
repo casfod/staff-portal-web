@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { useMemo } from "react";
+import { Edit, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useAllConceptNotes } from "./Hooks/useAllConceptNotes";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -10,10 +10,23 @@ import { Pagination } from "../../ui/Pagination";
 import { useNavigate } from "react-router-dom";
 import { setPage } from "../../store/genericQuerySlice";
 import Spinner from "../../ui/Spinner";
+import { localStorageUser } from "../../utils/localStorageUser";
+import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
+import Swal from "sweetalert2";
+import { ConceptNote } from "../../interfaces";
+import { setConceptNote } from "../../store/conceptNoteSlice";
+import { moneyFormat } from "../../utils/moneyFormat";
+import { SlMagnifier } from "react-icons/sl";
+import { useDeleteConceptNote } from "./Hooks/useDeleteConceptNote";
 
 const AllConceptNotes = () => {
+  const localStorageUserX = localStorageUser();
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const { searchTerm, sort, page, limit } = useSelector(
     (state: RootState) => state.genericQuerySlice
@@ -37,6 +50,48 @@ const AllConceptNotes = () => {
     dispatch(setPage(newPage));
   };
 
+  const toggleViewItems = (requestId: string) => {
+    setVisibleItems((prev) => ({
+      ...prev,
+      [requestId]: !prev[requestId], // Toggle visibility for the specific request
+    }));
+  };
+
+  const handleEdit = (conceptNote: ConceptNote) => {
+    dispatch(setConceptNote(conceptNote));
+    navigate(`/concept-notes/edit-concept-note/${conceptNote.id}`);
+  };
+  const handleAction = (conceptNote: ConceptNote) => {
+    dispatch(setConceptNote(conceptNote));
+    navigate(`/concept-notes/concept-note/${conceptNote.id}`);
+  };
+
+  const { deleteConceptNote } = useDeleteConceptNote(
+    searchTerm,
+    sort,
+    page,
+    limit
+  );
+
+  const handleDelete = (id: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this Concept Note?",
+      showCancelButton: true,
+      confirmButtonColor: "#1373B0",
+      cancelButtonColor: "#DC3340",
+      confirmButtonText: "Yes, delete it!",
+      customClass: { popup: "custom-style" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteConceptNote(id, {
+          onError: (error) => {
+            Swal.fire("Error!", error.message, "error");
+          },
+        });
+      }
+    });
+  };
   if (isError) {
     return <NetworkErrorUI />;
   }
@@ -74,6 +129,9 @@ const AllConceptNotes = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           {isLoading ? (
@@ -89,20 +147,217 @@ const AllConceptNotes = () => {
           ) : (
             <tbody className="bg-white divide-y divide-gray-200">
               {conceptNotes.map((note) => (
-                <tr key={note?.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                    {note.project_code}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {note.status}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {note.staff_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {dateformat(note?.createdAt!)}
-                  </td>
-                </tr>
+                <>
+                  <tr key={note?.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                      {note.project_code}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div
+                        className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
+                        ${note.status === "draft" && "border border-gray-400"} 
+                        ${
+                          note.status === "pending" && "bg-amber-500 text-white"
+                        } ${
+                          note.status === "approved" && "bg-teal-600 text-white"
+                        } 
+                      ${
+                        note.status === "rejected" && "bg-red-500 text-white"
+                      }  `}
+                      >
+                        {note.status}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {note.staff_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dateformat(note?.createdAt!)}
+                    </td>
+
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-4">
+                        <span
+                          className="hover:cursor-pointer"
+                          onClick={() => toggleViewItems(note.id!)}
+                        >
+                          {visibleItems[note.id!] ? (
+                            <HiMiniEyeSlash className="w-5 h-5" />
+                          ) : (
+                            <HiMiniEye className="w-5 h-5" />
+                          )}
+                        </span>
+
+                        {(note?.status === "draft" ||
+                          note.status === "rejected") &&
+                          note?.preparedBy?.id! === localStorageUserX.id && (
+                            <div className="flex space-x-4">
+                              <button
+                                className="hover:cursor-pointer"
+                                onClick={() => handleEdit(note)}
+                              >
+                                <Edit className="h-5 w-5" />
+                              </button>
+
+                              <button
+                                className="text-red-600 hover:text-red-900 hover:cursor-pointer"
+                                onClick={() => handleDelete(note.id!)}
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    </td>
+                  </tr>
+
+                  {visibleItems[note.id!] && (
+                    <tr
+                      key={`${note.id}-details`}
+                      className="w-full h-10 scale-[95%]"
+                      style={{ letterSpacing: "1px" }}
+                    >
+                      <td colSpan={5}>
+                        <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
+                          {/* note Details Section */}
+
+                          <div className="flex flex-col gap-3">
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Project Code:
+                              </span>{" "}
+                              {note.project_code}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Activity Title:
+                              </span>{" "}
+                              {note.activity_title}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Objectives Purpose:
+                              </span>{" "}
+                              {note.objectives_purpose}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Background Context:
+                              </span>{" "}
+                              {note.background_context}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Benefits Of Project:
+                              </span>{" "}
+                              {note.benefits_of_project}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Strategic Plan:
+                              </span>{" "}
+                              {note.strategic_plan}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Activity Location:
+                              </span>{" "}
+                              {note.activity_location}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Detailed Activity Description:
+                              </span>{" "}
+                              {note.detailed_activity_description}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Means of verification:
+                              </span>{" "}
+                              {note.means_of_verification}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-extrabold uppercase">
+                                Budget:
+                              </span>{" "}
+                              {moneyFormat(Number(note.activity_budget), "NGN")}
+                            </p>
+                          </div>
+
+                          <div className="w-fit  mt-4">
+                            <p className="text-sm text-gray-700">
+                              <span className="font-bold mr-1 uppercase">
+                                Prepared By :
+                              </span>
+                              {`${note?.preparedBy?.first_name} ${note?.preparedBy?.last_name}`}
+                            </p>
+
+                            <p className="text-sm text-gray-700">
+                              <span className="font-bold mr-1 uppercase">
+                                Role :
+                              </span>
+                              {note?.preparedBy.role}
+                            </p>
+                          </div>
+
+                          {note?.approvedBy && (
+                            <div className=" w-fit  mt-4">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-bold mr-1 uppercase">
+                                  Approved By :
+                                </span>
+                                {`${note?.approvedBy?.first_name} ${note?.approvedBy?.last_name}`}
+                              </p>
+
+                              <p className="text-sm text-gray-700">
+                                <span className="font-bold mr-1 uppercase">
+                                  Role :
+                                </span>
+                                {note?.approvedBy.role}
+                              </p>
+
+                              <div className="flex flex-col gap-2 text-gray-600">
+                                <span className="font-bold mr-1  uppercase">
+                                  Comments :
+                                </span>
+
+                                <div className="flex flex-col gap-2 ">
+                                  {note?.comments?.map((comment) => (
+                                    <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
+                                      <p className="text-base font-extrabold">
+                                        {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
+                                      </p>
+                                      <p className="text-sm">{`${comment.text}`}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex justify-center w-full">
+                            <button
+                              onClick={() => handleAction(note)} // Use relative path here
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                <SlMagnifier />
+                                <span>Inspect</span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           )}

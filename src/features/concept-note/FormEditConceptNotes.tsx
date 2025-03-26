@@ -4,31 +4,43 @@ import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
 import { useSaveConceptNote } from "./Hooks/useSaveConceptNotes";
-import { useSendConceptNote } from "./Hooks/useSendConceptNotes";
 import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
+import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { resetConceptNote } from "../../store/conceptNoteSlice";
 // import { FaPlus, FaTrash } from "react-icons/fa";
-const FormAddConceptNotes = () => {
+interface FormEditConceptNotesProps {
+  conceptNote: ConceptNote;
+}
+
+const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [formData, setFormData] = useState<Partial<ConceptNote>>({
-    activity_title: "",
-    activity_location: "",
-    activity_period: { from: "", to: "" },
-    background_context: "",
-    objectives_purpose: "",
-    detailed_activity_description: "",
-    strategic_plan: "",
-    benefits_of_project: "",
-    means_of_verification: "",
-    activity_budget: 0,
-    project_code: "", // Initialize as empty string
+    activity_title: conceptNote.activity_title,
+    activity_location: conceptNote.activity_location,
+    activity_period: {
+      from: conceptNote.activity_period.from,
+      to: conceptNote.activity_period.to,
+    },
+    background_context: conceptNote.background_context,
+    objectives_purpose: conceptNote.objectives_purpose,
+    detailed_activity_description: conceptNote.detailed_activity_description,
+    strategic_plan: conceptNote.strategic_plan,
+    benefits_of_project: conceptNote.benefits_of_project,
+    means_of_verification: conceptNote.means_of_verification,
+    activity_budget: conceptNote.activity_budget,
+    project_code: conceptNote.project_code, // Initialize as empty string
     approvedBy: null,
   });
+  const param = useParams();
+  const dispatch = useDispatch();
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
@@ -87,11 +99,12 @@ const FormAddConceptNotes = () => {
     isPending: isSaving,
     isError: isErrorSave,
   } = useSaveConceptNote();
+
   const {
-    sendConceptNote,
-    isPending: isSending,
-    isError: isErrorSend,
-  } = useSendConceptNote();
+    updateConceptNote,
+    isPending: isUpdating,
+    isError: isErrorUpdate,
+  } = useUpdateConceptNote(param.requestId!);
 
   // Handle form submission
 
@@ -117,14 +130,22 @@ const FormAddConceptNotes = () => {
   };
 
   // Handle form submission
-  const handleSend = (e: React.FormEvent) => {
+  // const handleUpdate = (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const data = { ...formData };
+  //   sendConceptNote(data);
+  // };
+
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
 
     const data = { ...formData };
-    sendConceptNote(data);
+    updateConceptNote(data);
+    dispatch(resetConceptNote());
   };
 
-  if (isErrorSave || isErrorSend) {
+  if (isErrorSave || isErrorUpdate) {
     return <NetworkErrorUI />;
   }
 
@@ -352,12 +373,12 @@ const FormAddConceptNotes = () => {
             <div className="flex justify-center w-full gap-4">
               {!formData.approvedBy && (
                 <Button size="medium" onClick={handleSave}>
-                  {isSaving ? <SpinnerMini /> : "Save"}
+                  {isSaving ? <SpinnerMini /> : "update"}
                 </Button>
               )}
               {formData.approvedBy && (
-                <Button size="medium" onClick={handleSend}>
-                  {isSending ? <SpinnerMini /> : "Save And Send"}
+                <Button size="medium" onClick={handleUpdate}>
+                  {isUpdating ? <SpinnerMini /> : "update And Send"}
                 </Button>
               )}
             </div>
@@ -368,4 +389,4 @@ const FormAddConceptNotes = () => {
   );
 };
 
-export default FormAddConceptNotes;
+export default FormEditConceptNotes;

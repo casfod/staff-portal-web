@@ -80,7 +80,7 @@ export function Dashboard() {
       total: isLoadingConceptNotesStats ? (
         <SpinnerMini />
       ) : (
-        conceptNotesStats.totalRequests ?? 0
+        conceptNotesStats.totalConceptNotes ?? 0
       ),
       approved: isLoadingConceptNotesStats ? (
         <SpinnerMini />

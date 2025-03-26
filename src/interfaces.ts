@@ -180,9 +180,13 @@ export interface ConceptNote {
   strategic_plan: string;
   // benefits_of_project: string[];
   benefits_of_project: string;
+  means_of_verification: string;
+  activity_budget: number;
+  comments?: [{ user: Partial<UserType>; text: string }];
+
   preparedBy?: any;
   approvedBy?: any;
-  status?: "pending" | "approved" | "rejected";
+  status?: "pending" | "approved" | "rejected" | "draft";
   createdAt?: string;
   updatedAt?: string;
 }
@@ -199,7 +203,7 @@ export interface UseConceptNoteType {
 }
 
 export interface ConceptNoteStats {
-  totalRequests: number;
+  totalConceptNotes: number;
   totalApprovedRequests: number;
 }
 

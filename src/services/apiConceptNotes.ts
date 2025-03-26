@@ -157,6 +157,21 @@ export const updateConceptNote = async function (
   }
 };
 
+export const updateStatus = async function (
+  requestId: string,
+  data: { status: string; comment: string }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<ConceptNote>>(
+      `/concept-notes/update-status/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deleteConceptNote = async function (conceptNoteId: string) {
   try {
     const response = await axiosInstance.delete<ConceptNote>(
