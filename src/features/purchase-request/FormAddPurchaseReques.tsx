@@ -239,8 +239,9 @@ const FormAddPurchaseReques: React.FC = () => {
 
       <Row>
         <FormRow label="Activity Description" type="wide">
-          <Input
-            size={50}
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
             placeholder=""
             id="activityDescription"
             value={formData.activityDescription}
