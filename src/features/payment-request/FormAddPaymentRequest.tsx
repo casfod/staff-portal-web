@@ -1,33 +1,28 @@
 import { useMemo, useState } from "react";
-import { ConceptNote, Project } from "../../interfaces";
+import { PaymentRequestType, Project } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
-import { useSaveConceptNote } from "./Hooks/useSaveConceptNotes";
-import { useSendConceptNote } from "./Hooks/useSendConceptNotes";
+import { useSavePaymentRequest } from "./Hooks/useSavePaymentRequest";
+import { useSendPaymentRequest } from "./Hooks/useSendPaymentRequest";
 import { useProjects } from "../project/Hooks/useProjects";
+import { bankNames } from "./data/Banks";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
-
 // import { FaPlus, FaTrash } from "react-icons/fa";
-const FormAddConceptNotes = () => {
+const FormAddPaymentRequest = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const [formData, setFormData] = useState<Partial<ConceptNote>>({
-    activity_title: "",
-    activity_location: "",
-    activity_period: { from: "", to: "" },
-    background_context: "",
-    objectives_purpose: "",
-    detailed_activity_description: "",
-    strategic_plan: "",
-    benefits_of_project: "",
-    means_of_verification: "",
-    activity_budget: 0,
-    project_code: "", // Initialize as empty string
+  const [formData, setFormData] = useState<Partial<PaymentRequestType>>({
+    purposeOfExpense: "",
+    amountInWords: "",
+    amountInFigure: 0,
+    grantCode: "", // Initialize as empty string
+    dateOfExpense: "",
+    specialInstruction: "",
     approvedBy: null,
   });
 
@@ -44,7 +39,7 @@ const FormAddConceptNotes = () => {
 
   // Handle changes for top-level fields
   const handleFormChange = (
-    field: keyof ConceptNote,
+    field: keyof PaymentRequestType,
     value: string | string[] | number
   ) => {
     if (selectedProject) {
@@ -53,19 +48,18 @@ const FormAddConceptNotes = () => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleNestedChange = (
-    parentField: keyof ConceptNote,
-    field: string,
-    value: string | number
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
-      },
-    }));
-  };
+  const {
+    savePaymentRequest,
+    isPending: isSaving,
+    isError: isErrorSave,
+  } = useSavePaymentRequest();
+  const {
+    sendPaymentRequest,
+    isPending: isSending,
+    isError: isErrorSend,
+  } = useSendPaymentRequest();
+
+  // Handle form submission
 
   const handelProjectsChange = (value: string) => {
     if (value) {
@@ -78,23 +72,11 @@ const FormAddConceptNotes = () => {
         // Update both the selected project AND the form data
         setFormData((prev) => ({
           ...prev,
-          project_code: selectedProject.project_code,
+          grantCode: selectedProject.project_code,
         }));
       }
     }
   };
-  const {
-    saveConceptNote,
-    isPending: isSaving,
-    isError: isErrorSave,
-  } = useSaveConceptNote();
-  const {
-    sendConceptNote,
-    isPending: isSending,
-    isError: isErrorSend,
-  } = useSendConceptNote();
-
-  // Handle form submission
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
@@ -107,14 +89,14 @@ const FormAddConceptNotes = () => {
       formData.approvedBy = null;
     }
 
-    // Make sure project_code is included
+    // Make sure grantCode is included
     const data = {
       ...formData,
-      project_code: selectedProject?.project_code || formData.project_code,
+      // grantCode: selectedProject?.grantCode || formData.grantCode,
     };
 
-    console.log("Submitting data:", data); // Verify project_code is included
-    saveConceptNote(data);
+    console.log("Submitting data:", data); // Verify grantCode is included
+    savePaymentRequest(data);
   };
 
   // Handle form submission
@@ -122,7 +104,7 @@ const FormAddConceptNotes = () => {
     e.preventDefault();
 
     const data = { ...formData };
-    sendConceptNote(data);
+    sendPaymentRequest(data);
   };
 
   if (isErrorSave || isErrorSend) {
@@ -157,165 +139,121 @@ const FormAddConceptNotes = () => {
           )}
         </FormRow>
 
-        <FormRow label="Project Code *" type="small">
+        <FormRow label="Grant Code *" type="small">
           <Input
             type="text"
-            id="project_code"
+            id="grantCode"
             required
             readOnly
             value={
               selectedProject
                 ? selectedProject.project_code
-                : formData.project_code
+                : formData.grantCode
             }
           />
         </FormRow>
       </Row>
       <Row>
-        <FormRow label="Activity Title *">
-          <Input
-            type="text"
-            id="activity_title"
-            required
-            value={formData.activity_title}
-            onChange={(e) => handleFormChange("activity_title", e.target.value)}
-          />
-        </FormRow>
-
-        <FormRow label="Activity Location *">
-          <Input
-            type="text"
-            id="activity_location"
-            required
-            value={formData.activity_location}
-            onChange={(e) =>
-              handleFormChange("activity_location", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-
-      <Row>
-        <FormRow label="Activity Period (From) *">
+        <FormRow label="Date Of Expense*">
           <Input
             type="date"
-            id="activity_period_from"
+            id="dateOfExpense"
             required
-            value={formData.activity_period?.from}
-            onChange={(e) =>
-              handleNestedChange("activity_period", "from", e.target.value)
-            }
+            value={formData.dateOfExpense}
+            onChange={(e) => handleFormChange("dateOfExpense", e.target.value)}
           />
         </FormRow>
-        <FormRow label="Activity Period (To) *">
-          <Input
-            type="date"
-            id="activity_period_to"
+      </Row>
+      <Row>
+        <FormRow label="Purpose Of Expense *" type="wide">
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
+            id="purposeOfExpense"
             required
-            value={formData.activity_period?.to}
+            value={formData.purposeOfExpense}
             onChange={(e) =>
-              handleNestedChange("activity_period", "to", e.target.value)
+              handleFormChange("purposeOfExpense", e.target.value)
             }
           />
         </FormRow>
       </Row>
 
       <Row>
-        <FormRow label="Activity Budget *" type="small">
+        <FormRow label="Amount In Figure *" type="small">
           <Input
             type="number"
-            id="activity_budget"
+            id="amountInFigure"
             required
-            value={formData.activity_budget}
-            onChange={(e) =>
-              handleFormChange("activity_budget", e.target.value)
+            value={formData.amountInFigure}
+            onChange={(e) => handleFormChange("amountInFigure", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+
+      <Row>
+        <FormRow label="Amount In Words*" type="wide">
+          <Input
+            type="text"
+            id="amountInWords"
+            required
+            value={formData.amountInWords}
+            onChange={(e) => handleFormChange("amountInWords", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+      <Row>
+        <FormRow label="Account Number*">
+          <Input
+            type="text"
+            id="accountNumber"
+            required
+            value={formData.accountNumber}
+            onChange={(e) => handleFormChange("accountNumber", e.target.value)}
+          />
+        </FormRow>
+        <FormRow label="Account Name*">
+          <Input
+            type="text"
+            id="accountName"
+            required
+            value={formData.accountName}
+            onChange={(e) => handleFormChange("accountName", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+      <Row>
+        <FormRow label="Bank Name *" type="small">
+          <Select
+            id="bankName"
+            customLabel="Select a Bank"
+            value={formData.bankName || ""} // Use empty string if null
+            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            options={
+              bankNames
+                ? bankNames.map((bank) => ({
+                    id: bank.name as string, // Assert that bank.id is a string
+                    name: `${bank.name}`,
+                  }))
+                : []
             }
+            required
           />
         </FormRow>
       </Row>
 
       {/* Background Context */}
-      <Row>
-        <FormRow label="Background Context *" type="wide">
-          <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
-            maxLength={4000}
-            id="background_context"
-            required
-            value={formData.background_context}
-            onChange={(e) =>
-              handleFormChange("background_context", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
 
       <Row>
-        <FormRow label="Objectives/Purpose *" type="wide">
+        <FormRow label="Special Instruction*" type="wide">
           <textarea
             className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
             maxLength={4000}
-            id="objectives_purpose"
+            id="specialInstruction"
             required
-            value={formData.objectives_purpose}
+            value={formData.specialInstruction}
             onChange={(e) =>
-              handleFormChange("objectives_purpose", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-      <Row>
-        <FormRow label="Detailed Activity Description *" type="wide">
-          <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
-            maxLength={4000}
-            id="detailed_activity_description"
-            required
-            value={formData.detailed_activity_description}
-            onChange={(e) =>
-              handleFormChange("detailed_activity_description", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-
-      {/* Strategic Plan */}
-      <Row>
-        <FormRow label="Strategic Plan *" type="wide">
-          <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
-            maxLength={4000}
-            id="strategic_plan"
-            required
-            value={formData.strategic_plan}
-            onChange={(e) => handleFormChange("strategic_plan", e.target.value)}
-          />
-        </FormRow>
-      </Row>
-      <Row>
-        <FormRow label="Benefits of Project *" type="wide">
-          <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
-            maxLength={4000}
-            id="benefits_of_project"
-            required
-            value={formData.benefits_of_project}
-            onChange={(e) =>
-              handleFormChange("benefits_of_project", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-
-      <Row>
-        <FormRow label="Means Of Verification *" type="wide">
-          <Input
-            type="text"
-            id="means_of_verification"
-            required
-            value={formData.means_of_verification}
-            onChange={(e) =>
-              handleFormChange("means_of_verification", e.target.value)
+              handleFormChange("specialInstruction", e.target.value)
             }
           />
         </FormRow>
@@ -369,4 +307,4 @@ const FormAddConceptNotes = () => {
   );
 };
 
-export default FormAddConceptNotes;
+export default FormAddPaymentRequest;

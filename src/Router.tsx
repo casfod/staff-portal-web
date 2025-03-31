@@ -24,6 +24,10 @@ import AllConceptNotes from "./features/concept-note/AllConceptNotes.tsx";
 import CreateConceptNote from "./features/concept-note/CreateConceptNote.tsx";
 import ConceptNote from "./features/concept-note/ConceptNote.tsx";
 import EditConceptNote from "./features/concept-note/EditConceptNote.tsx";
+import AllPaymentRequests from "./features/payment-request/AllPaymentRequests.tsx";
+import CreatePaymentRequest from "./features/payment-request/CreatePaymentRequest.tsx";
+import PaymentRequest from "./features/payment-request/PaymentRequest.tsx";
+import EditPaymentRequest from "./features/payment-request/EditPaymentRequest.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -133,9 +137,29 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "payment-Requests",
+        path: "payment-requests",
         element: <AnimatedRoute element={<PaymentRequests />} />,
+        children: [
+          { index: true, element: <Navigate to="all-payment-request" /> },
+          {
+            path: "all-payment-request",
+            element: <AnimatedRoute element={<AllPaymentRequests />} />,
+          },
+          {
+            path: "create-payment-request",
+            element: <AnimatedRoute element={<CreatePaymentRequest />} />,
+          },
+          {
+            path: "payment-request/:requestId",
+            element: <AnimatedRoute element={<PaymentRequest />} />,
+          },
+          {
+            path: "edit-request/:requestId",
+            element: <AnimatedRoute element={<EditPaymentRequest />} />,
+          },
+        ],
       },
+
       {
         path: "advance-requests",
         element: <AnimatedRoute element={<AdvanceRequests />} />,

@@ -4,12 +4,14 @@ import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchase
 import NetworkErrorUI from "../ui/NetworkErrorUI";
 import {
   ConceptNoteStats,
+  PaymentRequestStats,
   ProjectStats,
   PurchaseRequestStats,
 } from "../interfaces";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
 import SpinnerMini from "../ui/SpinnerMini";
 import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchaseStats";
+import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
 
 export function Dashboard() {
   // Fetch purchase request stats
@@ -31,11 +33,21 @@ export function Dashboard() {
     isLoading: isLoadingConceptNotesStats,
     isError: isErrorConceptNotesStats,
   } = useConceptNotesStats(); // Use the correct hook
+  const {
+    data: paymentRequestStatsData,
+    isLoading: isLoadingPaymentRequestStats,
+    isError: isErrorPaymentRequestStats,
+  } = usePaymentRequestStats(); // Use the correct hook
 
   // Explicitly type purchase request stats
   const purchaseRequestStats = useMemo(
     () => (purchaseRequestStatsData?.data as PurchaseRequestStats) ?? {},
     [purchaseRequestStatsData]
+  );
+  // Explicitly type purchase request stats
+  const paymentRequestStats = useMemo(
+    () => (paymentRequestStatsData?.data as PaymentRequestStats) ?? {},
+    [paymentRequestStatsData]
   );
 
   // Explicitly type project stats
@@ -50,7 +62,7 @@ export function Dashboard() {
     [conceptNotesStatsData]
   );
 
-  console.log(conceptNotesStats);
+  console.log(paymentRequestStatsData);
 
   // Define stats array
   const stats = [
@@ -88,7 +100,19 @@ export function Dashboard() {
         conceptNotesStats.totalApprovedConceptNotes ?? 0
       ),
     },
-    { name: "Payment Requests", total: 45, approved: 10 },
+    {
+      name: "Payment Requests",
+      total: isLoadingPaymentRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        paymentRequestStats?.totalRequests ?? 0
+      ),
+      approved: isLoadingPaymentRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        paymentRequestStats?.totalApprovedRequests ?? 0
+      ),
+    },
     { name: "Travel Requests", total: 15, approved: 10 },
     { name: "Advance Requests", total: 20, approved: 15 },
   ];
@@ -96,7 +120,8 @@ export function Dashboard() {
   if (
     isErrorPurchaseRequestStats ||
     isErrorProjectsStats ||
-    isErrorConceptNotesStats
+    isErrorConceptNotesStats ||
+    isErrorPaymentRequestStats
   ) {
     return <NetworkErrorUI />;
   }
@@ -115,7 +140,7 @@ export function Dashboard() {
         style={{ fontFamily: "Sora", letterSpacing: "1px" }}
       >
         {stats.map((stat) => (
-          <div key={stat.name} className={`bg-white rounded-lg shadow p-6`}>
+          <div key={stat.name} className={`bg-white rounded-lg shadow-md p-6`}>
             <h3 className={`text-lg font-medium text-gray-600 mb-2`}>
               {stat.name}
             </h3>

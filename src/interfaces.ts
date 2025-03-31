@@ -89,6 +89,63 @@ export interface PurchaseRequesItemGroupType {
 }
 
 ///////////////////////
+//PaymentRequest
+///////////////////////
+
+export interface PaymentRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UsePaymentStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: PaymentRequestStats;
+}
+
+export interface usePaymentRequestType {
+  status: number;
+  message: string;
+  data: {
+    paymentRequests: PaymentRequestType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface PaymentRequestType {
+  id?: string;
+  requestBy: string;
+  amountInFigure: number;
+  amountInWords: string;
+  purposeOfExpense: string;
+  grantCode: string;
+  dateOfExpense: string;
+  specialInstruction: string;
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
+
+  requestedBy?: Partial<UserType>;
+  requestedAt?: string;
+
+  reviewedBy?: any;
+  reviewedAt?: string;
+
+  approvedBy?: any;
+  approvedAt?: string;
+
+  comments?: [{ user: Partial<UserType>; text: string }];
+  status: string;
+
+  // Mongoose timestamps (auto-generated)
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+///////////////////////
 //Project
 ///////////////////////
 
