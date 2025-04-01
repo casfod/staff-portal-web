@@ -150,7 +150,7 @@ const router = createBrowserRouter([
             element: <AnimatedRoute element={<CreatePaymentRequest />} />,
           },
           {
-            path: "payment-request/:requestId",
+            path: "request/:requestId",
             element: <AnimatedRoute element={<PaymentRequest />} />,
           },
           {

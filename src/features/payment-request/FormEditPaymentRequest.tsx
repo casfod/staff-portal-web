@@ -14,20 +14,27 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 // import { FaPlus, FaTrash } from "react-icons/fa";
-const FormAddPaymentRequest = () => {
+
+interface FormEditPaymentRequestProps {
+  paymentRequest: PaymentRequestType;
+}
+
+const FormEditPaymentRequest = ({
+  paymentRequest,
+}: FormEditPaymentRequestProps) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [formData, setFormData] = useState<Partial<PaymentRequestType>>({
-    purposeOfExpense: "",
-    amountInWords: "",
-    amountInFigure: 0,
-    grantCode: "", // Initialize as empty string
-    dateOfExpense: "",
-    specialInstruction: "",
-    accountNumber: "",
-    accountName: "",
-    bankName: "",
-    approvedBy: null,
+    purposeOfExpense: paymentRequest.purposeOfExpense,
+    amountInWords: paymentRequest.amountInWords,
+    amountInFigure: paymentRequest.amountInFigure,
+    grantCode: paymentRequest.grantCode,
+    dateOfExpense: paymentRequest.dateOfExpense,
+    specialInstruction: paymentRequest.specialInstruction,
+    accountNumber: paymentRequest.accountNumber,
+    accountName: paymentRequest.accountName,
+    bankName: paymentRequest.bankName,
+    approvedBy: paymentRequest.approvedBy || null,
   });
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
@@ -305,4 +312,4 @@ const FormAddPaymentRequest = () => {
   );
 };
 
-export default FormAddPaymentRequest;
+export default FormEditPaymentRequest;

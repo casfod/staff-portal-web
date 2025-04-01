@@ -26,6 +26,7 @@ import {
 
 import { RootState } from "../../store/store";
 import { setPaymentRequest } from "../../store/paymentRequestSlice";
+import { RequestDetails } from "./RequestDetails";
 
 const AllPaymentRequests = () => {
   const localStorageUserX = localStorageUser();
@@ -154,16 +155,28 @@ const AllPaymentRequests = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {paymentRequests.map((request) => (
-              <>
-                <tr key={request.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
-                    {request.requestBy}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div
-                      className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase 
+
+          {isLoading ? (
+            <tbody>
+              <tr>
+                <td colSpan={6}>
+                  <div className="flex justify-center items-center h-96">
+                    <Spinner />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          ) : (
+            <tbody className="bg-white divide-y divide-gray-200">
+              {paymentRequests.map((request) => (
+                <>
+                  <tr key={request.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
+                      {request.requestBy}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div
+                        className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase 
                         ${
                           request.status === "draft" && "border border-gray-400"
                         } 
@@ -171,197 +184,197 @@ const AllPaymentRequests = () => {
                           request.status === "pending" &&
                           "bg-amber-500 text-white"
                         } ${
-                        request.status === "approved" &&
-                        "bg-teal-600 text-white"
-                      } 
+                          request.status === "approved" &&
+                          "bg-teal-600 text-white"
+                        } 
                       ${
                         request.status === "rejected" && "bg-red-500 text-white"
                       }  ${
-                        request.status === "reviewed" &&
-                        "bg-buttonColor text-white"
-                      }`}
-                    >
-                      {request.status}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {moneyFormat(request.amountInFigure, "NGN")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
-                    {dateformat(request.createdAt!)}
-                  </td>
-
-                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-4">
-                      <span
-                        className="hover:cursor-pointer"
-                        onClick={() => toggleViewItems(request.id!)}
+                          request.status === "reviewed" &&
+                          "bg-buttonColor text-white"
+                        }`}
                       >
-                        {visibleItems[request.id!] ? (
-                          <HiMiniEyeSlash className="w-5 h-5" />
-                        ) : (
-                          <HiMiniEye className="w-5 h-5" />
-                        )}
-                      </span>
+                        {request.status}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {moneyFormat(request.amountInFigure, "NGN")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                      {dateformat(request.createdAt!)}
+                    </td>
 
-                      {(request.status === "draft" ||
-                        request.status === "rejected") &&
-                        request?.requestedBy?.id! === localStorageUserX.id && (
-                          <div className="flex space-x-4">
-                            <button
-                              className="hover:cursor-pointer"
-                              onClick={() => handleEdit(request)}
-                            >
-                              <Edit className="h-5 w-5" />
-                            </button>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-4">
+                        <span
+                          className="hover:cursor-pointer"
+                          onClick={() => toggleViewItems(request.id!)}
+                        >
+                          {visibleItems[request.id!] ? (
+                            <HiMiniEyeSlash className="w-5 h-5" />
+                          ) : (
+                            <HiMiniEye className="w-5 h-5" />
+                          )}
+                        </span>
 
-                            <button
-                              className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                              onClick={() => handleDelete(request.id!)}
-                            >
-                              <Trash2 className="h-5 w-5" />
-                            </button>
-                          </div>
-                        )}
-                    </div>
-                  </td>
-                </tr>
+                        {(request.status === "draft" ||
+                          request.status === "rejected") &&
+                          request?.requestedBy?.id! ===
+                            localStorageUserX.id && (
+                            <div className="flex space-x-4">
+                              <button
+                                className="hover:cursor-pointer"
+                                onClick={() => handleEdit(request)}
+                              >
+                                <Edit className="h-5 w-5" />
+                              </button>
 
-                {visibleItems[request.id!] && (
-                  <tr
-                    key={`${request.id}-details`}
-                    className="w-full h-10 scale-[95%]"
-                    style={{ letterSpacing: "1px" }}
-                  >
-                    <td colSpan={5}>
-                      <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
-                        {/* request Details Section */}
+                              <button
+                                className="text-red-600 hover:text-red-900 hover:cursor-pointer"
+                                onClick={() => handleDelete(request.id!)}
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    </td>
+                  </tr>
 
-                        <div className="flex flex-col gap-3">
-                          <p className="text-sm text-gray-700">
-                            <span className="font-extrabold uppercase">
+                  {visibleItems[request.id!] && (
+                    <tr
+                      key={`${request.id}-details`}
+                      className="w-full h-10 scale-[95%]"
+                      style={{ letterSpacing: "1px" }}
+                    >
+                      <td colSpan={5}>
+                        {/* <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
+                      
+                        <div className="flex flex-col gap-4">
+                          <div className="text-sm text-gray-700">
+                            <span className="font-bold uppercase">
                               Grant Code:
                             </span>{" "}
                             {request.grantCode}
-                          </p>
-
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
-                              Amount In Words:
-                            </h2>{" "}
-                            <p> {request.amountInWords}</p>
                           </div>
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
+
+                          <div className="text-sm text-gray-700">
+                            <h2 className="font-bold uppercase mb-1">
+                              Amount In Words:
+                            </h2>
+                            <p>{request.amountInWords}</p>
+                          </div>
+
+                          <div className="text-sm text-gray-700">
+                            <h2 className="font-bold uppercase mb-1">
                               Requested By:
-                            </h2>{" "}
+                            </h2>
                             <p>{`${request.requestedBy?.first_name} ${request.requestedBy?.last_name}`}</p>
                           </div>
 
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
+                          <div className="text-sm text-gray-700">
+                            <h2 className="font-bold uppercase mb-1">
                               Special Instruction:
-                            </h2>{" "}
+                            </h2>
                             <p>{request.specialInstruction}</p>
                           </div>
 
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
-                              Account Name:
-                            </h2>{" "}
-                            <p>{request.accountName}</p>
-                          </div>
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
-                              Account Number:
-                            </h2>{" "}
-                            <p>{request.accountNumber}</p>
+                          <div className="text-sm text-gray-700">
+                            <h2 className="font-bold uppercase mb-1">
+                              Account Details:
+                            </h2>
+                            <ul className="list-disc pl-5">
+                              <li>
+                                <strong>Account Name:</strong>{" "}
+                                {request.accountName}
+                              </li>
+                              <li>
+                                <strong>Account Number:</strong>{" "}
+                                {request.accountNumber}
+                              </li>
+                              <li>
+                                <strong>Bank Name:</strong> {request.bankName}
+                              </li>
+                            </ul>
                           </div>
 
-                          <div className="text-sm text-gray-700 whitespace-pre-line">
-                            <h2 className="font-extrabold uppercase mb-1">
-                              Bank Name:
-                            </h2>{" "}
-                            <p>{request.bankName}</p>
-                          </div>
-
-                          <p className="text-sm text-gray-700">
-                            <span className="font-extrabold uppercase">
-                              Budget:
-                            </span>{" "}
+                          <div className="text-sm text-gray-700">
+                            <span className="font-bold uppercase">Budget:</span>{" "}
                             {moneyFormat(Number(request.amountInFigure), "NGN")}
-                          </p>
+                          </div>
                         </div>
 
-                        {/* <div className="w-fit  mt-4">
-                          <p className="text-sm text-gray-700">
-                            <span className="font-bold mr-1 uppercase">
-                              Prepared By :
-                            </span>
-                            {`${request?.preparedBy?.first_name} ${request?.preparedBy?.last_name}`}
-                          </p>
+                        
+                        {request?.reviewedBy && request.status !== "draft" && (
+                          <div className="border-t pt-4 mt-4">
+                            <div className="text-sm text-gray-700">
+                              <p>
+                                <strong>Reviewed By:</strong>{" "}
+                                {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+                              </p>
+                              <p>
+                                <strong>Reviewed At:</strong>{" "}
+                                {dateformat(request.reviewedAt!)}
+                              </p>
+                              {request.approvedBy && (
+                                <>
+                                  <p>
+                                    <strong>Approval:</strong>{" "}
+                                    {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
+                                  </p>
+                                  <p>
+                                    <strong>Approved At:</strong>{" "}
+                                    {dateformat(request.approvedAt!)}
+                                  </p>
+                                </>
+                              )}
+                            </div>
 
-                          <p className="text-sm text-gray-700">
-                            <span className="font-bold mr-1 uppercase">
-                              Role :
-                            </span>
-                            {request?.preparedBy.role}
-                          </p>
-                        </div> */}
-
-                        {request?.approvedBy && (
-                          <div className=" w-fit  mt-4">
-                            <p className="text-sm text-gray-700">
-                              <span className="font-bold mr-1 uppercase">
-                                Approved By :
-                              </span>
-                              {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
-                            </p>
-
-                            <p className="text-sm text-gray-700">
-                              <span className="font-bold mr-1 uppercase">
-                                Role :
-                              </span>
-                              {request?.approvedBy.role}
-                            </p>
-
-                            <div className="flex flex-col gap-2 text-gray-600 mt-3">
-                              <span className="font-bold mr-1  uppercase">
-                                Comments :
-                              </span>
-
-                              <div className="flex flex-col gap-2 ">
-                                {request?.comments?.map((comment) => (
-                                  <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
-                                    <p className="text-base font-extrabold">
-                                      {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
-                                    </p>
-                                    <p className="text-sm">{`${comment.text}`}</p>
-                                  </div>
-                                ))}
-                              </div>
+                            <div className="text-sm text-gray-700 mt-4">
+                              <h2 className="font-bold uppercase mb-2">
+                                Comments:
+                              </h2>
+                              {request?.comments?.map((comment, index) => (
+                                <div
+                                  key={index}
+                                  className="border px-4 py-2 rounded-lg shadow-lg bg-white mb-2"
+                                >
+                                  <p className="font-bold">{`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}</p>
+                                  <p>{comment.text}</p>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
 
-                        <div className="flex justify-center w-full">
+                        <div className="flex justify-center mt-6">
                           <button
-                            onClick={() => handleAction(request)} // Use relative path here
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                            onClick={() => handleAction(request)}
+                            className="px-4 py-2 rounded-md shadow-md bg-buttonColor hover:bg-buttonColorHover text-white text-sm"
                           >
-                            <span className="inline-flex items-center gap-1">
-                              <SlMagnifier />
-                              <span>Inspect</span>
-                            </span>
+                            {request.status !== "draft" ? (
+                              <span className="flex items-center gap-2">
+                                <SlMagnifier />
+                                Inspect
+                              </span>
+                            ) : (
+                              "Draft Action"
+                            )}
                           </button>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
-          </tbody>
+                      </div> */}
+
+                        <RequestDetails
+                          request={request}
+                          handleAction={handleAction}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+            </tbody>
+          )}
         </table>
       </div>
     </div>
