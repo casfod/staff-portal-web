@@ -15,9 +15,7 @@ import Swal from "sweetalert2";
 import { useDeletePaymentRequest } from "./Hooks/useDeletePaymentRequest";
 import { PaymentRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
-// import { setPaymentRequest } from "../../store/paymentRequestSlice";
 import { localStorageUser } from "../../utils/localStorageUser";
-import { SlMagnifier } from "react-icons/sl";
 import {
   setSearchTerm,
   setPage,
@@ -132,6 +130,28 @@ const AllPaymentRequests = () => {
           <Plus className="h-4 w-4 mr-2" />
           New Request
         </button>
+      </div>
+
+      {/* Search Bar and Sort Dropdown */}
+      <div className="flex items-center space-x-4">
+        <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
+          <span className="p-2 text-gray-400">
+            <BiSearch className="w-5 h-5" />
+          </span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+            className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+            placeholder="Search"
+          />
+          <span
+            className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
+            onClick={() => dispatch(setSearchTerm(""))}
+          >
+            <GoXCircle />
+          </span>
+        </div>
       </div>
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -377,6 +397,15 @@ const AllPaymentRequests = () => {
           )}
         </table>
       </div>
+
+      {/* Pagination */}
+      {(paymentRequests.length >= limit || totalPages > 1) && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };

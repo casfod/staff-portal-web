@@ -143,7 +143,7 @@ const FormAddPaymentRequest = () => {
           )}
         </FormRow>
 
-        <FormRow label="Grant Code *" type="small">
+        {/* <FormRow label="Grant Code *" type="small">
           <Input
             type="text"
             id="grantCode"
@@ -155,8 +155,36 @@ const FormAddPaymentRequest = () => {
                 : formData.grantCode
             }
           />
-        </FormRow>
+        </FormRow> */}
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Grant Code *" type="small">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                id="grantCode"
+                customLabel="Select Grant Code"
+                value={formData.grantCode || ""}
+                onChange={(e) => handleFormChange("grantCode", e.target.value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name}`,
+                        name: `${account.name}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
+
+      {/* /////////////////////// */}
+      {/* /////////////////////// */}
+      {/* /////////////////////// */}
       <Row>
         <FormRow label="Date Of Expense*">
           <Input

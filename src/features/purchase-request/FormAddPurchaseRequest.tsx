@@ -16,7 +16,7 @@ import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 import { useProjects } from "../project/Hooks/useProjects";
 
-const FormAddPurchaseReques: React.FC = () => {
+const FormAddPurchaseRequest: React.FC = () => {
   // State for the main form fields
   const [formData, setFormData] = useState<PurChaseRequestType>({
     department: "",
@@ -471,4 +471,4 @@ const FormAddPurchaseReques: React.FC = () => {
   );
 };
 
-export default FormAddPurchaseReques;
+export default FormAddPurchaseRequest;

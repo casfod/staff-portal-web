@@ -2,20 +2,33 @@ import { SlMagnifier } from "react-icons/sl";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PaymentRequestType } from "../../interfaces";
+import { useLocation, useParams } from "react-router-dom";
 
 interface RequestDetailsProps {
   request: PaymentRequestType;
-  handleAction: (request: PaymentRequestType) => void;
+  handleAction?: (request: PaymentRequestType) => void;
 }
 
 export const RequestDetails = ({
   request,
   handleAction,
 }: RequestDetailsProps) => {
+  const param = useParams();
+
+  const isInspect = param.requestId!;
+
   return (
-    <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
+    <div
+      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
+        !isInspect && "bg-[#F8F8F8]"
+      }`}
+    >
       {/* Request Details Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+          !isInspect && "text-sm"
+        } text-gray-700`}
+      >
         {/* Left Column */}
         <div className="space-y-3">
           <p>
@@ -113,7 +126,7 @@ export const RequestDetails = ({
             </div>
 
             {/* Inspect Button */}
-            {request.status !== "draft" && (
+            {handleAction && request.status !== "draft" && (
               <button
                 onClick={() => handleAction(request)}
                 className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"

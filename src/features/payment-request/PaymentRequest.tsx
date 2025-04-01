@@ -15,6 +15,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Select from "../../ui/Select";
+import { RequestDetails } from "./RequestDetails";
 
 const PaymentRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -182,87 +183,33 @@ const PaymentRequest = () => {
                 style={{ letterSpacing: "1px" }}
               >
                 <td colSpan={5}>
-                  <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm">
+                  <>
                     {/* paymentRequest Details Section */}
 
-                    <div className="flex flex-col gap-3">
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Grant Code:
-                        </span>{" "}
-                        {paymentRequest.grantCode}
-                      </p>
-
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Amount In Words:
-                        </h2>{" "}
-                        <p> {paymentRequest.amountInWords}</p>
-                      </div>
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Requested By:
-                        </h2>{" "}
-                        <p>{`${paymentRequest.requestedBy?.first_name} ${paymentRequest.requestedBy?.last_name}`}</p>
-                      </div>
-
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Special Instruction:
-                        </h2>{" "}
-                        <p>{paymentRequest.specialInstruction}</p>
-                      </div>
-
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Account Name:
-                        </h2>{" "}
-                        <p>{paymentRequest.accountName}</p>
-                      </div>
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Account Number:
-                        </h2>{" "}
-                        <p>{paymentRequest.accountNumber}</p>
-                      </div>
-
-                      <div className=" text-gray-700 whitespace-pre-line">
-                        <h2 className="font-extrabold uppercase mb-1">
-                          Bank Name:
-                        </h2>{" "}
-                        <p>{paymentRequest.bankName}</p>
-                      </div>
-
-                      <p className=" text-gray-700">
-                        <span className="font-extrabold uppercase">
-                          Budget:
-                        </span>{" "}
-                        {moneyFormat(
-                          Number(paymentRequest.amountInFigure),
-                          "NGN"
-                        )}
-                      </p>
-                    </div>
+                    <RequestDetails
+                      request={paymentRequest}
+                      // handleAction={handleAction}
+                    />
 
                     {/* Comments and Actions Section */}
                     {paymentRequest?.reviewedBy &&
                       paymentRequest.status !== "draft" && (
                         <div className="text-gray-700">
-                          <p className="mb-2">
+                          {/* <p className="mb-2">
                             <span className="font-bold mr-1  uppercase">
                               Reviewed By :
                             </span>
                             {`${paymentRequest?.reviewedBy?.first_name} ${paymentRequest?.reviewedBy?.last_name}`}
-                          </p>
-                          {paymentRequest?.approvedBy && (
+                          </p> */}
+                          {/* {paymentRequest?.approvedBy && (
                             <p className="mb-2">
                               <span className="font-bold mr-1  uppercase">
                                 Approval:
                               </span>
                               {`${paymentRequest?.approvedBy?.first_name} ${paymentRequest?.approvedBy?.last_name}`}
                             </p>
-                          )}
-                          <div className="flex flex-col gap-2">
+                          )} */}
+                          {/* <div className="flex flex-col gap-2">
                             <span className="font-bold mr-1  uppercase">
                               Comments :
                             </span>
@@ -277,7 +224,7 @@ const PaymentRequest = () => {
                                 </div>
                               ))}
                             </div>
-                          </div>
+                          </div> */}
 
                           {
                             // Condition 1: Render for REVIEWER when status is "pending"
@@ -415,7 +362,7 @@ const PaymentRequest = () => {
                           )}
                         </div>
                       )}
-                  </div>
+                  </>
                 </td>
               </tr>
             </>

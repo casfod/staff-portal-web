@@ -1,6 +1,6 @@
 import { List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import FormAddPurchaseReques from "./FormAddPurchaseReques";
+import FormAddPurchaseRequest from "./FormAddPurchaseRequest";
 
 const CreateRequest = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const CreateRequest = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
-          <FormAddPurchaseReques />
+          <FormAddPurchaseRequest />
         </div>
       </div>
     </div>
