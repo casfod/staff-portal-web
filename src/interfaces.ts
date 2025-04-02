@@ -87,6 +87,64 @@ export interface PurchaseRequesItemGroupType {
   unitCost: number;
   total: number;
 }
+///////////////////////
+//AdvanceRequest
+///////////////////////
+export interface AdvanceRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UseAdvanceStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: AdvanceRequestStats;
+}
+
+export interface useAdvanceRequestType {
+  status: number;
+  message: string;
+  data: {
+    advanceRequests: AdvanceRequestType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface AdvanceRequestType {
+  id?: string;
+  department: string;
+  suggestedSupplier: string;
+  requestedBy?: string;
+  address: string;
+  finalDeliveryPoint: string;
+  city: string;
+  periodOfActivity: {
+    from: string;
+    to: string;
+  };
+  activityDescription: string;
+  reviewedBy?: any;
+  approvedBy?: any;
+  itemGroups?: AdvanceRequesItemGroupType[];
+  comments?: [{ user: Partial<UserType>; text: string }];
+  status?: string;
+  createdBy?: Partial<UserType>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdvanceRequesItemGroupType {
+  id?: string;
+  description: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
 
 ///////////////////////
 //PaymentRequest

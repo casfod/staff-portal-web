@@ -29,6 +29,10 @@ import CreatePaymentRequest from "./features/payment-request/CreatePaymentReques
 import PaymentRequest from "./features/payment-request/PaymentRequest.tsx";
 import EditPaymentRequest from "./features/payment-request/EditPaymentRequest.tsx";
 import { ExpenseClaims } from "./pages/ExpenseClaims.tsx";
+import AllAdvanceRequests from "./features/advance-request/AllAdvanceRequests.tsx";
+import AdvanceRequest from "./features/advance-request/AdvanceRequest.tsx";
+import CreateAdvanceRequest from "./features/advance-request/CreateAdvanceRequest.tsx";
+import EditAdvanceRequest from "./features/advance-request/EditAdvanceRequest.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -138,6 +142,29 @@ const router = createBrowserRouter([
         ],
       },
       {
+        path: "advance-requests",
+        element: <AnimatedRoute element={<AdvanceRequests />} />,
+        children: [
+          { index: true, element: <Navigate to="all-advance-request" /> },
+          {
+            path: "all-advance-request",
+            element: <AnimatedRoute element={<AllAdvanceRequests />} />,
+          },
+          {
+            path: "create-request",
+            element: <AnimatedRoute element={<CreateAdvanceRequest />} />,
+          },
+          {
+            path: "request/:requestId",
+            element: <AnimatedRoute element={<AdvanceRequest />} />,
+          },
+          {
+            path: "edit-request/:requestId",
+            element: <AnimatedRoute element={<EditAdvanceRequest />} />,
+          },
+        ],
+      },
+      {
         path: "payment-requests",
         element: <AnimatedRoute element={<PaymentRequests />} />,
         children: [
@@ -161,10 +188,10 @@ const router = createBrowserRouter([
         ],
       },
 
-      {
-        path: "advance-requests",
-        element: <AnimatedRoute element={<AdvanceRequests />} />,
-      },
+      // {
+      //   path: "advance-requests",
+      //   element: <AnimatedRoute element={<AdvanceRequests />} />,
+      // },
       {
         path: "travel-requests",
         element: <AnimatedRoute element={<TravelRequests />} />,
