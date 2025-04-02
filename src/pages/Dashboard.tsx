@@ -3,6 +3,7 @@ import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchase
 
 import NetworkErrorUI from "../ui/NetworkErrorUI";
 import {
+  AdvanceRequestStats,
   ConceptNoteStats,
   PaymentRequestStats,
   ProjectStats,
@@ -12,6 +13,7 @@ import { useProjectStats } from "../features/project/Hooks/useProjectStats";
 import SpinnerMini from "../ui/SpinnerMini";
 import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchaseStats";
 import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
+import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
 
 export function Dashboard() {
   // Fetch purchase request stats
@@ -38,16 +40,27 @@ export function Dashboard() {
     isLoading: isLoadingPaymentRequestStats,
     isError: isErrorPaymentRequestStats,
   } = usePaymentRequestStats(); // Use the correct hook
+  const {
+    data: advaanceRequestStatsData,
+    isLoading: isLoadingAdvanceRequestStats,
+    isError: isErrorAdvanceRequestStats,
+  } = useAdvanceRequestStats(); // Use the correct hook
 
   // Explicitly type purchase request stats
   const purchaseRequestStats = useMemo(
     () => (purchaseRequestStatsData?.data as PurchaseRequestStats) ?? {},
     [purchaseRequestStatsData]
   );
-  // Explicitly type purchase request stats
+  // Explicitly type payment request stats
   const paymentRequestStats = useMemo(
     () => (paymentRequestStatsData?.data as PaymentRequestStats) ?? {},
     [paymentRequestStatsData]
+  );
+
+  // Explicitly type advance request stats
+  const advanceRequestStats = useMemo(
+    () => (advaanceRequestStatsData?.data as AdvanceRequestStats) ?? {},
+    [advaanceRequestStatsData]
   );
 
   // Explicitly type project stats
@@ -113,8 +126,20 @@ export function Dashboard() {
         paymentRequestStats?.totalApprovedRequests ?? 0
       ),
     },
+    {
+      name: "Advance Requests",
+      total: isLoadingAdvanceRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        advanceRequestStats?.totalRequests ?? 0
+      ),
+      approved: isLoadingAdvanceRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        advanceRequestStats?.totalApprovedRequests ?? 0
+      ),
+    },
     { name: "Travel Requests", total: 15, approved: 10 },
-    { name: "Advance Requests", total: 20, approved: 15 },
     { name: "Expense Claims", total: 10, approved: 13 },
   ];
 
@@ -122,7 +147,8 @@ export function Dashboard() {
     isErrorPurchaseRequestStats ||
     isErrorProjectsStats ||
     isErrorConceptNotesStats ||
-    isErrorPaymentRequestStats
+    isErrorPaymentRequestStats ||
+    isErrorAdvanceRequestStats
   ) {
     return <NetworkErrorUI />;
   }
