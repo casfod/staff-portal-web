@@ -18,38 +18,67 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         !isInspect && "bg-[#F8F8F8]"
       }`}
     >
+      {/* Request Details Section */}
       <div
-        className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
-        style={{ letterSpacing: "1px" }}
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+          !isInspect && "text-sm"
+        } text-gray-700 mb-3`}
       >
-        <p>
-          <span className="font-bold mr-1 uppercase">Department : </span>{" "}
-          {request.department}
-        </p>
-        <p>
-          <span className="font-bold mr-1 uppercase">Address : </span>{" "}
-          {request.address}
-        </p>
-        <p>
-          <span className="font-bold mr-1 uppercase">City : </span>{" "}
-          {request.city}
-        </p>
-        <p>
-          <span className="font-bold mr-1 uppercase">Delivery Point : </span>
-          {request.finalDeliveryPoint}
-        </p>
+        <div
+          className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
+          style={{ letterSpacing: "1px" }}
+        >
+          <p>
+            <span className="font-bold mr-1 uppercase">Department : </span>{" "}
+            {request.department}
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">Address : </span>{" "}
+            {request.address}
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">City : </span>{" "}
+            {request.city}
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">Delivery Point : </span>
+            {request.finalDeliveryPoint}
+          </p>
 
-        <p className="text-sm text-gray-700">
-          <span className="font-extrabold uppercase">Period Of Activity:</span>{" "}
-          <span>{request.periodOfActivity.from}</span> -{" "}
-          <span>{request.periodOfActivity.to}</span>
-        </p>
-        <p>
-          <span className="font-bold mr-1 uppercase">
-            Activity Description :{" "}
-          </span>
-          {request.activityDescription}
-        </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-extrabold uppercase">
+              Period Of Activity:
+            </span>{" "}
+            <span>{request.periodOfActivity.from}</span> -{" "}
+            <span>{request.periodOfActivity.to}</span>
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">
+              Activity Description :{" "}
+            </span>
+            {request.activityDescription}
+          </p>
+        </div>
+
+        <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
+          <h2>RECIPIENTS INFORMATION</h2>
+
+          {[
+            { label: "Account Name", value: request.accountName },
+            { label: "Account Number", value: request.accountNumber },
+            { label: "Bank Name", value: request.bankName },
+          ].map(({ label, value }) => (
+            <div key={label} className="whitespace-pre-line ">
+              <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
+              <p>{value}</p>
+            </div>
+          ))}
+
+          {/* <p>
+            <span className="font-extrabold uppercase">Budget:</span>{" "}
+            {moneyFormat(Number(request.amountInFigure), "NGN")}
+          </p> */}
+        </div>
       </div>
 
       <h2

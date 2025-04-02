@@ -126,6 +126,9 @@ export interface AdvanceRequestType {
     to: string;
   };
   activityDescription: string;
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
   reviewedBy?: any;
   approvedBy?: any;
   itemGroups?: AdvanceRequesItemGroupType[];

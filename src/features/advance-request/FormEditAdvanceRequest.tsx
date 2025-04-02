@@ -18,6 +18,7 @@ import { useUpdateAdvanceRequest } from "./Hooks/useUpdateAdvanceRequest";
 import { useParams } from "react-router-dom";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
+import { bankNames } from "../../assets/Banks";
 
 interface FormEditAdavanceRequestProps {
   advanceRequest: AdvanceRequestType;
@@ -38,6 +39,9 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     city: advanceRequest.city,
     periodOfActivity: advanceRequest.periodOfActivity,
     activityDescription: advanceRequest.activityDescription,
+    accountNumber: advanceRequest.accountNumber,
+    accountName: advanceRequest.accountNumber,
+    bankName: advanceRequest.bankName,
     reviewedBy: advanceRequest?.reviewedBy?.id,
     approvedBy: advanceRequest?.approvedBy?.id,
   });
@@ -416,6 +420,46 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
           </div>
         ))}
       </div>
+
+      <Row>
+        <FormRow label="Account Number*">
+          <Input
+            type="text"
+            id="accountNumber"
+            required
+            value={formData.accountNumber}
+            onChange={(e) => handleFormChange("accountNumber", e.target.value)}
+          />
+        </FormRow>
+        <FormRow label="Account Name*">
+          <Input
+            type="text"
+            id="accountName"
+            required
+            value={formData.accountName}
+            onChange={(e) => handleFormChange("accountName", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+      <Row>
+        <FormRow label="Bank Name *" type="small">
+          <Select
+            id="bankName"
+            customLabel="Select a Bank"
+            value={formData.bankName || ""} // Use empty string if null
+            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            options={
+              bankNames
+                ? bankNames.map((bank) => ({
+                    id: bank.name as string, // Assert that bank.id is a string
+                    name: `${bank.name}`,
+                  }))
+                : []
+            }
+            required
+          />
+        </FormRow>
+      </Row>
 
       <div className="flex items-center gap-4 w-full">
         <Button type="button" onClick={addItem}>

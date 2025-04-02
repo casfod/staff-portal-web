@@ -13,6 +13,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { useSendAdvanceRequest } from "./Hooks/useSendAdvanceRequest";
+import { bankNames } from "../../assets/Banks";
 
 const FormAddAdvanceRequest: React.FC = () => {
   // State for the main form fields
@@ -22,6 +23,9 @@ const FormAddAdvanceRequest: React.FC = () => {
     address: "",
     finalDeliveryPoint: "",
     city: "",
+    accountNumber: "",
+    accountName: "",
+    bankName: "",
     periodOfActivity: { from: "", to: "" },
     activityDescription: "",
     reviewedBy: null,
@@ -359,6 +363,46 @@ const FormAddAdvanceRequest: React.FC = () => {
           Added
         </span>
       </div>
+
+      <Row>
+        <FormRow label="Account Number*">
+          <Input
+            type="text"
+            id="accountNumber"
+            required
+            value={formData.accountNumber}
+            onChange={(e) => handleFormChange("accountNumber", e.target.value)}
+          />
+        </FormRow>
+        <FormRow label="Account Name*">
+          <Input
+            type="text"
+            id="accountName"
+            required
+            value={formData.accountName}
+            onChange={(e) => handleFormChange("accountName", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+      <Row>
+        <FormRow label="Bank Name *" type="small">
+          <Select
+            id="bankName"
+            customLabel="Select a Bank"
+            value={formData.bankName || ""} // Use empty string if null
+            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            options={
+              bankNames
+                ? bankNames.map((bank) => ({
+                    id: bank.name as string, // Assert that bank.id is a string
+                    name: `${bank.name}`,
+                  }))
+                : []
+            }
+            required
+          />
+        </FormRow>
+      </Row>
 
       <Row>
         <FormRow label="Reviewed By *" type="small">
