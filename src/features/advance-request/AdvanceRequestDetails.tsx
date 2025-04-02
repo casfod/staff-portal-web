@@ -22,7 +22,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !isInspect && "text-sm"
-        } text-gray-700 mb-3`}
+        } text-gray-700 mb-3 border-b border-gray-300 pb-6`}
       >
         <div
           className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
@@ -61,7 +61,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         </div>
 
         <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
-          <h2>RECIPIENTS INFORMATION</h2>
+          <h2 className="font-bold">RECIPIENTS INFORMATION</h2>
 
           {[
             { label: "Account Name", value: request.accountName },
