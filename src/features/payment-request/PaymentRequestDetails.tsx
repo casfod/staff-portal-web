@@ -2,14 +2,14 @@ import { SlMagnifier } from "react-icons/sl";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PaymentRequestType } from "../../interfaces";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 interface RequestDetailsProps {
   request: PaymentRequestType;
   handleAction?: (request: PaymentRequestType) => void;
 }
 
-export const RequestDetails = ({
+export const PaymentRequestDetails = ({
   request,
   handleAction,
 }: RequestDetailsProps) => {
@@ -38,11 +38,13 @@ export const RequestDetails = ({
 
           {[
             { label: "Amount In Words", value: request.amountInWords },
+
+            { label: "Purpose Of Expense", value: request.purposeOfExpense },
+            { label: "Special Instruction", value: request.specialInstruction },
             {
               label: "Requested By",
               value: `${request.requestedBy?.first_name} ${request.requestedBy?.last_name}`,
             },
-            { label: "Special Instruction", value: request.specialInstruction },
           ].map(({ label, value }) => (
             <div key={label} className="whitespace-pre-line">
               <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
@@ -52,13 +54,13 @@ export const RequestDetails = ({
         </div>
 
         {/* Right Column */}
-        <div className="space-y-3">
+        <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
           {[
             { label: "Account Name", value: request.accountName },
             { label: "Account Number", value: request.accountNumber },
             { label: "Bank Name", value: request.bankName },
           ].map(({ label, value }) => (
-            <div key={label} className="whitespace-pre-line">
+            <div key={label} className="whitespace-pre-line ">
               <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
               <p>{value}</p>
             </div>

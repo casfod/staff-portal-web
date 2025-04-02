@@ -25,6 +25,7 @@ import {
 } from "../../store/genericQuerySlice";
 
 import { RootState } from "../../store/store";
+import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
 
 const AllRequests = () => {
   const localStorageUserX = localStorageUser();
@@ -196,10 +197,10 @@ const AllRequests = () => {
               {purchaseRequests.map((request) => (
                 <>
                   <tr key={request.id} className="h-[40px] max-h-[40px]">
-                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
                       {request.department}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       {moneyFormat(
                         request?.itemGroups!.reduce(
                           (sum, item) => sum + item.total,
@@ -208,7 +209,7 @@ const AllRequests = () => {
                         "NGN"
                       )}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
                       <div
                         className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
                         ${
@@ -234,13 +235,13 @@ const AllRequests = () => {
                         >{`${request.status}`}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {request.requestedBy}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(request.createdAt!)}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
@@ -286,159 +287,61 @@ const AllRequests = () => {
                       className="w-full h-10 scale-[95%]"
                     >
                       <td colSpan={6}>
-                        <div className="border border-gray-300 bg-[#F8F8F8] px-6 py-4 rounded-md">
+                        <PurchaseRequestDetails request={request} />
+
+                        {request?.reviewedBy && request.status !== "draft" && (
                           <div
-                            className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
+                            className=" flex flex-col justify-between  w-full text-gray-700 text-sm mb-2 mt-4"
                             style={{ letterSpacing: "1px" }}
                           >
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Account Code :{" "}
-                              </span>{" "}
-                              {request.accountCode}
-                            </p>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Charged To :{" "}
-                              </span>
-                              {request.expenseChargedTo}
-                            </p>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Address :{" "}
-                              </span>{" "}
-                              {request.address}
-                            </p>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                City :{" "}
-                              </span>{" "}
-                              {request.city}
-                            </p>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Delivery Point :{" "}
-                              </span>
-                              {request.finalDeliveryPoint}
-                            </p>
+                            <div className="w-fit flex flex-col gap-2">
+                              <p>
+                                <span className="font-bold mr-1 uppercase">
+                                  Reviewed By :
+                                </span>
+                                {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+                              </p>
+                              {request.approvedBy && (
+                                <p>
+                                  <span className="font-bold mr-1 uppercase">
+                                    Approval :
+                                  </span>
+                                  {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
+                                </p>
+                              )}
 
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Period Of Activity :
-                              </span>
-                              {request.periodOfActivity}
-                            </p>
-                            <p>
-                              <span className="font-bold mr-1 uppercase">
-                                Activity Description :{" "}
-                              </span>
-                              {request.activityDescription}
-                            </p>
-                          </div>
+                              <div className="flex flex-col gap-2">
+                                <span className="font-bold mr-1  uppercase">
+                                  Comments :
+                                </span>
 
-                          <h2
-                            className="text-center text-lg text-gray-700 font-semibold"
-                            style={{ letterSpacing: "2px" }}
-                          >
-                            ITEMS
-                          </h2>
-                          <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
-                            <thead>
-                              <tr>
-                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Description
-                                </th>
-                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Quantity
-                                </th>
-                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Frequency
-                                </th>
-                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Unit Cost
-                                </th>
-                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Total
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200 ">
-                              {request?.itemGroups!.map((item) => (
-                                <tr key={item.id!}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {item.description}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {item.quantity}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {item.frequency}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {moneyFormat(item.unitCost, "NGN")}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {moneyFormat(item.total, "NGN")}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-
-                          {request?.reviewedBy &&
-                            request.status !== "draft" && (
-                              <div
-                                className=" flex flex-col justify-between  w-full text-gray-700 text-sm mb-2"
-                                style={{ letterSpacing: "1px" }}
-                              >
-                                <div className="w-fit flex flex-col gap-2">
-                                  <p>
-                                    <span className="font-bold mr-1 uppercase">
-                                      Reviewed By :
-                                    </span>
-                                    {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
-                                  </p>
-                                  {request.approvedBy && (
-                                    <p>
-                                      <span className="font-bold mr-1 uppercase">
-                                        Approval :
-                                      </span>
-                                      {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
-                                    </p>
-                                  )}
-
-                                  <div className="flex flex-col gap-2">
-                                    <span className="font-bold mr-1  uppercase">
-                                      Comments :
-                                    </span>
-
-                                    <div className="flex flex-col gap-2">
-                                      {request?.comments?.map((comment) => (
-                                        <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
-                                          <p className="text-base font-extrabold">
-                                            {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
-                                          </p>
-                                          <p className="text-sm">{`${comment.text}`}</p>
-                                        </div>
-                                      ))}
+                                <div className="flex flex-col gap-2">
+                                  {request?.comments?.map((comment) => (
+                                    <div className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white">
+                                      <p className="text-base font-extrabold">
+                                        {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
+                                      </p>
+                                      <p className="text-sm">{`${comment.text}`}</p>
                                     </div>
-                                  </div>
+                                  ))}
                                 </div>
-
-                                <button
-                                  onClick={() => handleAction(request)} // Use relative path here
-                                  className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"
-                                >
-                                  {request.status !== "draft" && (
-                                    <span className="inline-flex items-center gap-1">
-                                      <SlMagnifier />
-                                      <span>Inspect</span>
-                                    </span>
-                                  )}
-                                </button>
                               </div>
+                            </div>
+                            {handleAction && (
+                              <button
+                                onClick={() => handleAction(request)} // Use relative path here
+                                className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"
+                              >
+                                {request.status !== "draft" && (
+                                  <span className="inline-flex items-center gap-1">
+                                    <SlMagnifier />
+                                    <span>Inspect</span>
+                                  </span>
+                                )}
+                              </button>
                             )}
-                        </div>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )}

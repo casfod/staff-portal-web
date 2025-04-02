@@ -15,7 +15,8 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Select from "../../ui/Select";
-import { RequestDetails } from "./RequestDetails";
+// import { RequestDetails } from "./RequestDetails";
+import { PaymentRequestDetails } from "./PaymentRequestDetails";
 
 const PaymentRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -183,10 +184,10 @@ const PaymentRequest = () => {
                 style={{ letterSpacing: "1px" }}
               >
                 <td colSpan={5}>
-                  <>
+                  <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm">
                     {/* paymentRequest Details Section */}
 
-                    <RequestDetails
+                    <PaymentRequestDetails
                       request={paymentRequest}
                       // handleAction={handleAction}
                     />
@@ -194,7 +195,7 @@ const PaymentRequest = () => {
                     {/* Comments and Actions Section */}
                     {paymentRequest?.reviewedBy &&
                       paymentRequest.status !== "draft" && (
-                        <div className="text-gray-700">
+                        <div className="text-gray-700  mt-3">
                           {/* <p className="mb-2">
                             <span className="font-bold mr-1  uppercase">
                               Reviewed By :
@@ -362,7 +363,7 @@ const PaymentRequest = () => {
                           )}
                         </div>
                       )}
-                  </>
+                  </div>
                 </td>
               </tr>
             </>

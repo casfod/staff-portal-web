@@ -15,6 +15,7 @@ import Select from "../../ui/Select";
 import { PurChaseRequestType } from "../../interfaces";
 import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import Button from "../../ui/Button";
+import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
 
 const Request = () => {
   // State and hooks initialization
@@ -195,110 +196,12 @@ const Request = () => {
               >
                 <td colSpan={6}>
                   <div className="border border-gray-400 px-6 py-4 rounded-md">
-                    <div
-                      className="flex justify-between w-full text-gray-700 mb-3"
-                      style={{ letterSpacing: "1px" }}
-                    >
-                      <div className="flex flex-col gap-2">
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Account Code :{" "}
-                          </span>{" "}
-                          {purchaseRequest.accountCode}
-                        </p>
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Charged To :{" "}
-                          </span>
-                          {purchaseRequest.expenseChargedTo}
-                        </p>
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Address :{" "}
-                          </span>{" "}
-                          {purchaseRequest.address}
-                        </p>
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            City :{" "}
-                          </span>{" "}
-                          {purchaseRequest.city}
-                        </p>
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Delivery Point :{" "}
-                          </span>
-                          {purchaseRequest.finalDeliveryPoint}
-                        </p>
-
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Period Of Activity :
-                          </span>
-                          {purchaseRequest.periodOfActivity}
-                        </p>
-                        <p>
-                          <span className="font-bold mr-1 uppercase">
-                            Activity Description :{" "}
-                          </span>
-                          {purchaseRequest.activityDescription}
-                        </p>
-                      </div>
-                    </div>
-
-                    <h2
-                      className="text-center text-lg text-gray-700 font-semibold"
-                      style={{ letterSpacing: "2px" }}
-                    >
-                      ITEMS
-                    </h2>
-                    <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
-                      <thead>
-                        <tr>
-                          <th className="px-6 py-3 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Description
-                          </th>
-                          <th className="px-6 py-3 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Quantity
-                          </th>
-                          <th className="px-6 py-3 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Frequency
-                          </th>
-                          <th className="px-6 py-3 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Unit Cost
-                          </th>
-                          <th className="px-6 py-3 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Total
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200 ">
-                        {purchaseRequest?.itemGroups!.map((item) => (
-                          <tr key={item.id!}>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                              {item.description}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                              {item.quantity}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                              {item.frequency}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                              {moneyFormat(item.unitCost, "NGN")}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                              {moneyFormat(item.total, "NGN")}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <PurchaseRequestDetails request={purchaseRequest} />
 
                     {/* Comments and Actions Section */}
                     {purchaseRequest?.reviewedBy &&
                       purchaseRequest.status !== "draft" && (
-                        <div className="text-gray-700">
+                        <div className="text-gray-700 mt-4">
                           <p className="mb-2">
                             <span className="font-bold mr-1  uppercase">
                               Reviewed By :
@@ -313,7 +216,7 @@ const Request = () => {
                               {`${purchaseRequest?.approvedBy?.first_name} ${purchaseRequest?.approvedBy?.last_name}`}
                             </p>
                           )}
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold mr-1  uppercase">
                               Comments :
                             </span>
@@ -342,12 +245,13 @@ const Request = () => {
                                 className="flex flex-col w-full gap-3"
                                 style={{ letterSpacing: "1px" }}
                               >
-                                {/* Comment Section */}
                                 {(localStorageUserX.role === "SUPER-ADMIN" ||
-                                  localStorageUserX.id ===
-                                    purchaseRequest?.reviewedBy.id ||
-                                  localStorageUserX.id ===
-                                    purchaseRequest?.approvedBy.id) && (
+                                  (purchaseRequest?.reviewedBy &&
+                                    localStorageUserX.id ===
+                                      purchaseRequest.reviewedBy.id) ||
+                                  (purchaseRequest?.approvedBy &&
+                                    localStorageUserX.id ===
+                                      purchaseRequest.approvedBy.id)) && (
                                   <>
                                     <div className="flex flex-col w-full gap-2">
                                       <label htmlFor="content">
@@ -367,7 +271,6 @@ const Request = () => {
                                       />
                                     </div>
 
-                                    {/* Action Dropdown */}
                                     <div className="w-fit border border-gray-700   rounded-md">
                                       <label
                                         htmlFor={`status-${purchaseRequest?.id}`}

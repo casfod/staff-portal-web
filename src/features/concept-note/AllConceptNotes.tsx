@@ -149,10 +149,10 @@ const AllConceptNotes = () => {
               {conceptNotes.map((note) => (
                 <>
                   <tr key={note?.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700">
                       {note.project_code}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       <div
                         className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
                         ${note.status === "draft" && "border border-gray-400"} 
@@ -168,10 +168,10 @@ const AllConceptNotes = () => {
                         {note.status}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {note.staff_name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(note?.createdAt!)}
                     </td>
 

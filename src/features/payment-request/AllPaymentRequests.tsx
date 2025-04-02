@@ -24,7 +24,7 @@ import {
 
 import { RootState } from "../../store/store";
 import { setPaymentRequest } from "../../store/paymentRequestSlice";
-import { RequestDetails } from "./RequestDetails";
+import { PaymentRequestDetails } from "./PaymentRequestDetails";
 
 const AllPaymentRequests = () => {
   const localStorageUserX = localStorageUser();
@@ -191,10 +191,10 @@ const AllPaymentRequests = () => {
               {paymentRequests.map((request) => (
                 <>
                   <tr key={request.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
                       {request.requestBy}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       <div
                         className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase 
                         ${
@@ -217,14 +217,14 @@ const AllPaymentRequests = () => {
                         {request.status}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       {moneyFormat(request.amountInFigure, "NGN")}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {dateformat(request.createdAt!)}
                     </td>
 
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
@@ -384,7 +384,7 @@ const AllPaymentRequests = () => {
                         </div>
                       </div> */}
 
-                        <RequestDetails
+                        <PaymentRequestDetails
                           request={request}
                           handleAction={handleAction}
                         />

@@ -9,6 +9,7 @@ import {
   Wallet,
   Plane,
   Users,
+  Banknote,
 } from "lucide-react";
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
@@ -56,6 +57,7 @@ const Navigation: React.FC = () => {
     },
     { to: "/advance-requests", label: "Advance Requests", icon: Wallet },
     { to: "/travel-requests", label: "Travel Requests", icon: Plane },
+    { to: "/expense-claims", label: "Expense Claims", icon: Banknote },
     { to: "/user-management", label: "User Management", icon: Users },
   ];
 

@@ -115,6 +115,7 @@ export function Dashboard() {
     },
     { name: "Travel Requests", total: 15, approved: 10 },
     { name: "Advance Requests", total: 20, approved: 15 },
+    { name: "Expense Claims", total: 10, approved: 13 },
   ];
 
   if (

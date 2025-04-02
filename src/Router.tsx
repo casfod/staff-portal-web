@@ -28,6 +28,7 @@ import AllPaymentRequests from "./features/payment-request/AllPaymentRequests.ts
 import CreatePaymentRequest from "./features/payment-request/CreatePaymentRequest.tsx";
 import PaymentRequest from "./features/payment-request/PaymentRequest.tsx";
 import EditPaymentRequest from "./features/payment-request/EditPaymentRequest.tsx";
+import { ExpenseClaims } from "./pages/ExpenseClaims.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -167,6 +168,10 @@ const router = createBrowserRouter([
       {
         path: "travel-requests",
         element: <AnimatedRoute element={<TravelRequests />} />,
+      },
+      {
+        path: "expense-claims",
+        element: <AnimatedRoute element={<ExpenseClaims />} />,
       },
       {
         path: "user-management",
