@@ -46,7 +46,9 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     reviewedBy: travelRequest.reviewedBy,
   });
   // State for the item groups
-  const [itemGroup, setItemGroup] = useState<TravelRequestItemGroup[]>([]);
+  const [itemGroup, setItemGroup] = useState<TravelRequestItemGroup[]>([
+    ...travelRequest.expenses,
+  ]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
@@ -413,36 +415,12 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
             id="project"
             required
             readOnly
-            value={selectedProject?.project_code || ""} // Still shows just the code
+            value={
+              selectedProject
+                ? selectedProject?.project_code
+                : travelRequest.project || ""
+            } // Still shows just the code
           />
-        </FormRow>
-      </Row>
-
-      <Row>
-        <FormRow label="Reviewed By *" type="small">
-          {isLoadingReviewers ? (
-            <SpinnerMini /> // Show a spinner while loading reviewers
-          ) : (
-            <Select
-              id="reviewedBy"
-              customLabel="Select Reviewer"
-              value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(value) => handleFormChange("reviewedBy", value)}
-              options={
-                reviewers
-                  ? reviewers
-                      .filter((reviewer) => reviewer.id) // Filter out reviewers with undefined IDs
-                      .map((reviewer) => ({
-                        id: reviewer.id as string, // Assert that reviewer.id is a string
-                        name: `${reviewer.first_name} ${reviewer.last_name}`,
-                      }))
-                  : []
-              }
-              optionsHeight={220}
-              filterable={true}
-              required
-            />
-          )}
         </FormRow>
       </Row>
 

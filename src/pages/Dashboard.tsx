@@ -8,12 +8,14 @@ import {
   PaymentRequestStats,
   ProjectStats,
   PurchaseRequestStats,
+  TravelRequestStats,
 } from "../interfaces";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
 import SpinnerMini from "../ui/SpinnerMini";
 import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchaseStats";
 import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
 import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
+import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
 
 export function Dashboard() {
   // Fetch purchase request stats
@@ -41,10 +43,15 @@ export function Dashboard() {
     isError: isErrorPaymentRequestStats,
   } = usePaymentRequestStats(); // Use the correct hook
   const {
-    data: advaanceRequestStatsData,
+    data: advanceRequestStatsData,
     isLoading: isLoadingAdvanceRequestStats,
     isError: isErrorAdvanceRequestStats,
   } = useAdvanceRequestStats(); // Use the correct hook
+  const {
+    data: travelRequestStatsData,
+    isLoading: isLoadingTravelRequestStats,
+    isError: isErrorTravelRequestStats,
+  } = useTravelRequestStats(); // Use the correct hook
 
   // Explicitly type purchase request stats
   const purchaseRequestStats = useMemo(
@@ -59,8 +66,13 @@ export function Dashboard() {
 
   // Explicitly type advance request stats
   const advanceRequestStats = useMemo(
-    () => (advaanceRequestStatsData?.data as AdvanceRequestStats) ?? {},
-    [advaanceRequestStatsData]
+    () => (advanceRequestStatsData?.data as AdvanceRequestStats) ?? {},
+    [advanceRequestStatsData]
+  );
+
+  const travelRequestStats = useMemo(
+    () => (travelRequestStatsData?.data as TravelRequestStats) ?? {},
+    [advanceRequestStatsData]
   );
 
   // Explicitly type project stats
@@ -139,7 +151,20 @@ export function Dashboard() {
         advanceRequestStats?.totalApprovedRequests ?? 0
       ),
     },
-    { name: "Travel Requests", total: 15, approved: 10 },
+    {
+      name: "Travel Requests",
+      total: isLoadingTravelRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        travelRequestStats?.totalRequests ?? 0
+      ),
+      approved: isLoadingTravelRequestStats ? (
+        <SpinnerMini />
+      ) : (
+        travelRequestStats?.totalApprovedRequests ?? 0
+      ),
+    },
+
     { name: "Expense Claims", total: 10, approved: 13 },
   ];
 
@@ -148,7 +173,8 @@ export function Dashboard() {
     isErrorProjectsStats ||
     isErrorConceptNotesStats ||
     isErrorPaymentRequestStats ||
-    isErrorAdvanceRequestStats
+    isErrorAdvanceRequestStats ||
+    isErrorTravelRequestStats
   ) {
     return <NetworkErrorUI />;
   }
