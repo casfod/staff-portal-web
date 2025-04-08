@@ -389,16 +389,18 @@ const FormAddAdvanceRequest: React.FC = () => {
           <Select
             id="bankName"
             customLabel="Select a Bank"
-            value={formData.bankName || ""} // Use empty string if null
-            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            value={formData.bankName || ""}
+            onChange={(value) => handleFormChange("bankName", value)} // Direct value now
             options={
               bankNames
                 ? bankNames.map((bank) => ({
-                    id: bank.name as string, // Assert that bank.id is a string
+                    id: bank.name as string,
                     name: `${bank.name}`,
                   }))
                 : []
             }
+            optionsHeight={220}
+            filterable={true}
             required
           />
         </FormRow>
@@ -413,7 +415,7 @@ const FormAddAdvanceRequest: React.FC = () => {
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
               options={
                 reviewers
                   ? reviewers
@@ -424,6 +426,8 @@ const FormAddAdvanceRequest: React.FC = () => {
                       }))
                   : []
               }
+              optionsHeight={220}
+              filterable={true}
               required
             />
           )}

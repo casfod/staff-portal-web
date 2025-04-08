@@ -7,12 +7,13 @@ import { useSavePaymentRequest } from "./Hooks/useSavePaymentRequest";
 import { useSendPaymentRequest } from "./Hooks/useSendPaymentRequest";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
-import { bankNames } from "./data/Banks";
+
 // import { useAdmins } from "../user/Hooks/useAdmins";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import { bankNames } from "../../assets/Banks";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface FormEditPaymentRequestProps {
@@ -134,7 +135,7 @@ const FormEditPaymentRequest = ({
               id="projects"
               customLabel="Select Project"
               value={""}
-              onChange={(e) => handelProjectsChange(e.target.value)}
+              onChange={(value) => handelProjectsChange(value)}
               options={
                 projects
                   ? projects
@@ -145,6 +146,8 @@ const FormEditPaymentRequest = ({
                       }))
                   : []
               }
+              optionsHeight={220}
+              filterable={true}
               required
             />
           )}
@@ -239,7 +242,7 @@ const FormEditPaymentRequest = ({
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
-            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            onChange={(value) => handleFormChange("bankName", value)}
             options={
               bankNames
                 ? bankNames.map((bank) => ({
@@ -248,6 +251,8 @@ const FormEditPaymentRequest = ({
                   }))
                 : []
             }
+            optionsHeight={220}
+            filterable={true}
             required
           />
         </FormRow>
@@ -279,7 +284,7 @@ const FormEditPaymentRequest = ({
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
               options={
                 reviewers
                   ? reviewers
@@ -290,6 +295,7 @@ const FormEditPaymentRequest = ({
                       }))
                   : []
               }
+              optionsHeight={220}
               required
             />
           )}

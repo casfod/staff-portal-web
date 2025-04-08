@@ -7,12 +7,13 @@ import { useSavePaymentRequest } from "./Hooks/useSavePaymentRequest";
 import { useSendPaymentRequest } from "./Hooks/useSendPaymentRequest";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
-import { bankNames } from "./data/Banks";
+
 // import { useAdmins } from "../user/Hooks/useAdmins";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import { bankNames } from "../../assets/Banks";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 const FormAddPaymentRequest = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -127,7 +128,7 @@ const FormAddPaymentRequest = () => {
               id="projects"
               customLabel="Select Project"
               value={""}
-              onChange={(e) => handelProjectsChange(e.target.value)}
+              onChange={(value) => handelProjectsChange(value)}
               options={
                 projects
                   ? projects
@@ -138,6 +139,8 @@ const FormAddPaymentRequest = () => {
                       }))
                   : []
               }
+              optionsHeight={220}
+              filterable={true}
               required
             />
           )}
@@ -166,7 +169,7 @@ const FormAddPaymentRequest = () => {
                 id="grantCode"
                 customLabel="Select Grant Code"
                 value={formData.grantCode || ""}
-                onChange={(e) => handleFormChange("grantCode", e.target.value)}
+                onChange={(value) => handleFormChange("grantCode", value)}
                 options={
                   selectedProject
                     ? selectedProject.account_code.map((account) => ({
@@ -175,6 +178,8 @@ const FormAddPaymentRequest = () => {
                       }))
                     : []
                 }
+                optionsHeight={220}
+                filterable={true}
                 required
               />
             )}
@@ -260,7 +265,7 @@ const FormAddPaymentRequest = () => {
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
-            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            onChange={(value) => handleFormChange("bankName", value)}
             options={
               bankNames
                 ? bankNames.map((bank) => ({
@@ -269,6 +274,8 @@ const FormAddPaymentRequest = () => {
                   }))
                 : []
             }
+            optionsHeight={220}
+            filterable={true}
             required
           />
         </FormRow>
@@ -300,7 +307,7 @@ const FormAddPaymentRequest = () => {
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
               options={
                 reviewers
                   ? reviewers
@@ -311,6 +318,8 @@ const FormAddPaymentRequest = () => {
                       }))
                   : []
               }
+              optionsHeight={220}
+              filterable={true}
               required
             />
           )}
