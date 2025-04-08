@@ -150,6 +150,64 @@ export interface AdvanceRequesItemGroupType {
 }
 
 ///////////////////////
+//TravelRequest
+///////////////////////
+
+export interface TravelRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UseTravelStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: TravelRequestStats;
+}
+
+export interface useTravelRequestType {
+  status: number;
+  message: string;
+  data: {
+    travelRequests: TravelRequestType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface TravelRequestItemGroup {
+  expense: string;
+  location: string;
+  daysNumber: number;
+  rate: number;
+  total: number;
+}
+
+export interface TravelRequestType {
+  id?: string;
+  staffName?: string;
+  travelRequest: {
+    from: string;
+    to: string;
+  };
+  project: string;
+  budget: number;
+  travelReason: string;
+  dayOfDeparture: string;
+  dayOfReturn: string;
+  expenses: TravelRequestItemGroup[];
+
+  comments?: [{ user: Partial<UserType>; text: string }];
+  status?: string;
+  createdBy?: Partial<UserType>;
+  createdAt?: string;
+  updatedAt?: string;
+  reviewedBy?: any;
+  approvedBy?: any;
+}
+
+///////////////////////
 //PaymentRequest
 ///////////////////////
 

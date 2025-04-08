@@ -447,7 +447,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
-            onChange={(e) => handleFormChange("bankName", e.target.value)}
+            onChange={(value) => handleFormChange("bankName", value)}
             options={
               bankNames
                 ? bankNames.map((bank) => ({
@@ -529,7 +529,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
                 id="approvedBy"
                 customLabel="Select an admin"
                 value={formData.approvedBy || ""} // Use empty string if null
-                onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+                onChange={(value) => handleFormChange("reviewedBy", value)}
                 options={
                   admins
                     ? admins
@@ -555,7 +555,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
                 id="reviewedBy"
                 customLabel="Select Reviewer"
                 value={formData.reviewedBy || ""} // Use empty string if null
-                onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+                onChange={(value) => handleFormChange("reviewedBy", value)}
                 options={
                   reviewers
                     ? reviewers

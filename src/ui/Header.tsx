@@ -23,7 +23,7 @@ export function Header() {
             className="ml-2 text-lg  font-extrabold text-primary"
             style={{ fontFamily: "Sora", letterSpacing: "5px" }}
           >
-            STAFF PORTAL
+            POSSIBILITY HUB
           </span>
           <div className="space-x-4 ">
             <div

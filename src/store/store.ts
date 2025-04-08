@@ -5,6 +5,7 @@ import projectReducer from "./projectSlice.ts";
 import conceptNoteReducer from "./conceptNoteSlice.ts";
 import purchaseRequestReducer from "./purchaseRequestSlice.ts";
 import advanceRequestReducer from "./advanceRequestSlice.ts";
+import travelRequestReducer from "./travelRequestSlice.ts";
 import paymentRequestReducer from "./paymentRequestSlice.ts";
 import genericQuerySliceReducer from "./genericQuerySlice.ts";
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     paymentRequest: paymentRequestReducer,
     purchaseRequest: purchaseRequestReducer,
     advanceRequest: advanceRequestReducer,
+    travelRequest: travelRequestReducer,
     project: projectReducer,
     conceptNote: conceptNoteReducer,
     genericQuerySlice: genericQuerySliceReducer,

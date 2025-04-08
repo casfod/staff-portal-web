@@ -33,6 +33,10 @@ import AllAdvanceRequests from "./features/advance-request/AllAdvanceRequests.ts
 import AdvanceRequest from "./features/advance-request/AdvanceRequest.tsx";
 import CreateAdvanceRequest from "./features/advance-request/CreateAdvanceRequest.tsx";
 import EditAdvanceRequest from "./features/advance-request/EditAdvanceRequest.tsx";
+import AllTravelRequests from "./features/travel-request/AllTravelRequests.tsx";
+import CreateTravelRequest from "./features/travel-request/CreateTravelRequest.tsx";
+import TravelRequest from "./features/travel-request/TravelRequest.tsx";
+import EditTravelRequest from "./features/travel-request/EditTravelRequest.tsx";
 
 const pageVariants = {
   initial: { opacity: 0, y: -20 },
@@ -188,14 +192,30 @@ const router = createBrowserRouter([
         ],
       },
 
-      // {
-      //   path: "advance-requests",
-      //   element: <AnimatedRoute element={<AdvanceRequests />} />,
-      // },
       {
         path: "travel-requests",
         element: <AnimatedRoute element={<TravelRequests />} />,
+        children: [
+          { index: true, element: <Navigate to="all-travel-request" /> },
+          {
+            path: "all-travel-request",
+            element: <AnimatedRoute element={<AllTravelRequests />} />,
+          },
+          {
+            path: "create-request",
+            element: <AnimatedRoute element={<CreateTravelRequest />} />,
+          },
+          {
+            path: "request/:requestId",
+            element: <AnimatedRoute element={<TravelRequest />} />,
+          },
+          {
+            path: "edit-request/:requestId",
+            element: <AnimatedRoute element={<EditTravelRequest />} />,
+          },
+        ],
       },
+
       {
         path: "expense-claims",
         element: <AnimatedRoute element={<ExpenseClaims />} />,

@@ -383,9 +383,7 @@ const FormAddPurchaseRequest: React.FC = () => {
               id="expenseChargedTo"
               customLabel="Select Project"
               value={formData.expenseChargedTo || ""}
-              onChange={(e) =>
-                handleFormChange("expenseChargedTo", e.target.value)
-              }
+              onChange={(value) => handleFormChange("expenseChargedTo", value)}
               options={
                 projects
                   ? projects
@@ -412,9 +410,7 @@ const FormAddPurchaseRequest: React.FC = () => {
                 id="accountCode"
                 customLabel="Select Account Code"
                 value={formData.accountCode || ""}
-                onChange={(e) =>
-                  handleFormChange("accountCode", e.target.value)
-                }
+                onChange={(value) => handleFormChange("accountCode", value)}
                 options={
                   selectedProject
                     ? selectedProject.account_code.map((account) => ({
@@ -438,7 +434,7 @@ const FormAddPurchaseRequest: React.FC = () => {
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
               options={
                 reviewers
                   ? reviewers
