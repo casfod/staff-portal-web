@@ -145,6 +145,8 @@ const TravelRequest = () => {
                 {dateformat(travelRequest.createdAt!)}
               </td>
             </tr>
+
+            {/* Item Table Section */}
             <tr>
               <td colSpan={5}>
                 <div className="border border-gray-300 px-6 py-4 rounded-md h-auto relative">
