@@ -17,7 +17,7 @@ import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
 import Button from "../../ui/Button";
 import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
 
-const Request = () => {
+const PurchaseRequest = () => {
   // State and hooks initialization
   const localStorageUserX = localStorageUser();
   const purchaseRequest = useSelector(
@@ -337,8 +337,8 @@ const Request = () => {
                                 id="approvedBy"
                                 customLabel="Select an admin"
                                 value={formData.approvedBy || ""} // Use empty string if null
-                                onChange={(e) =>
-                                  handleFormChange("approvedBy", e.target.value)
+                                onChange={(value) =>
+                                  handleFormChange("approvedBy", value)
                                 }
                                 options={
                                   admins
@@ -380,4 +380,4 @@ const Request = () => {
   );
 };
 
-export default Request;
+export default PurchaseRequest;

@@ -19,7 +19,7 @@ export const login = async function (email: string, password: string) {
       email,
       password,
     });
-    console.log(response.data);
+    console.log(response);
 
     return response.data;
   } catch (err) {

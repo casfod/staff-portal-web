@@ -165,7 +165,7 @@ const Select: React.FC<SelectProps> = ({
       {/* Options Dropdown */}
       {isOpen && (
         <div
-          className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
           style={{
             maxHeight:
               typeof optionsHeight === "number"

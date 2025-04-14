@@ -19,6 +19,7 @@ import { useSendTravelRequest } from "./Hooks/useSendTravelRequest";
 import { resetTravelRequest } from "../../store/travelRequestSlice";
 import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
+import { expenses } from "../../assets/expenses";
 
 interface FormEditTravelRequestProps {
   travelRequest: TravelRequestType;
@@ -229,7 +230,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
       </Row>
 
       <Row>
-        <FormRow label="Travel Request (From) *" type="wide">
+        <FormRow label="Departure (From) *" type="wide">
           <Input
             type="text"
             id="travelRequest_from"
@@ -242,7 +243,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
         </FormRow>
       </Row>
       <Row>
-        <FormRow label="Travel Request (To) *" type="wide">
+        <FormRow label="Destination (To) *" type="wide">
           <Input
             type="text"
             id="travelRequest_to"
@@ -267,14 +268,21 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
             </h4>
             <Row>
               <FormRow label="Expense *" type="wide">
-                <Input
-                  className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
-                  placeholder=""
-                  disabled={disabledStates[index]}
+                <Select
+                  id="expense"
+                  customLabel="Select an Expense"
                   required
-                  value={group.expense}
-                  onChange={(e) =>
-                    handleItemChange(index, "expense", e.target.value)
+                  value={group.expense || ""}
+                  onChange={(value) =>
+                    handleItemChange(index, "expense", value)
+                  }
+                  options={
+                    expenses
+                      ? expenses.map((expense) => ({
+                          id: expense.name as string, // Assert that expense.id is a string
+                          name: `${expense.name}`,
+                        }))
+                      : []
                   }
                 />
               </FormRow>

@@ -331,8 +331,8 @@ const PaymentRequest = () => {
                                 id="approvedBy"
                                 customLabel="Select an admin"
                                 value={formData.approvedBy || ""} // Use empty string if null
-                                onChange={(e) =>
-                                  handleFormChange("approvedBy", e.target.value)
+                                onChange={(value) =>
+                                  handleFormChange("approvedBy", value)
                                 }
                                 options={
                                   admins

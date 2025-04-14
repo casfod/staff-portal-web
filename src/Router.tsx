@@ -10,8 +10,8 @@ import { TravelRequests } from "./pages/TravelRequests";
 import { UserManagement } from "./pages/UserManagement";
 import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
-import Request from "./features/purchase-request/Request";
-import AllRequests from "./features/purchase-request/AllRequests";
+import PurchaseRequest from "./features/purchase-request/PurchaseRequest.tsx";
+import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
 import { AnimatePresence, motion } from "framer-motion";
@@ -129,7 +129,7 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="all-request" /> },
           {
             path: "all-request",
-            element: <AnimatedRoute element={<AllRequests />} />,
+            element: <AnimatedRoute element={<AllPurchaseRequests />} />,
           },
           {
             path: "create-request",
@@ -137,7 +137,7 @@ const router = createBrowserRouter([
           },
           {
             path: "request/:requestId",
-            element: <AnimatedRoute element={<Request />} />,
+            element: <AnimatedRoute element={<PurchaseRequest />} />,
           },
           {
             path: "edit-request/:requestId",

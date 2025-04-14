@@ -72,7 +72,7 @@ export function Dashboard() {
 
   const travelRequestStats = useMemo(
     () => (travelRequestStatsData?.data as TravelRequestStats) ?? {},
-    [advanceRequestStatsData]
+    [travelRequestStatsData]
   );
 
   // Explicitly type project stats
