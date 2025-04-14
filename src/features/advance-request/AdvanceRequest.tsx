@@ -9,13 +9,14 @@ import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import Swal from "sweetalert2";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
-import FormRow from "../../ui/FormRow";
-import SpinnerMini from "../../ui/SpinnerMini";
-import Select from "../../ui/Select";
-import { AdvanceRequestType } from "../../interfaces";
+
 import { useUpdateAdvanceRequest } from "./Hooks/useUpdateAdvanceRequest";
-import Button from "../../ui/Button";
+
 import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
+import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
+import AdminApprovalSection from "../../ui/AdminApprovalSection";
+import StatusUpdateForm from "../../ui/StatusUpdateForm";
+import StatusBadge from "../../ui/StatusBadge";
 
 const Request = () => {
   // State and hooks initialization
@@ -26,9 +27,7 @@ const Request = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState<Partial<AdvanceRequestType>>({
-    approvedBy: null,
-  });
+  const [formData, setFormData] = useState({ approvedBy: null });
 
   const navigate = useNavigate();
   const param = useParams();
@@ -54,8 +53,9 @@ const Request = () => {
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   // Handle form field changes
-  const handleFormChange = (field: keyof AdvanceRequestType, value: string) => {
-    setFormData({ ...formData, [field]: value });
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   // Handle status change with confirmation dialog
@@ -68,19 +68,13 @@ const Request = () => {
       cancelButtonColor: "#DC3340",
       confirmButtonText: "Yes, update it!",
       customClass: { popup: "custom-style" },
-      animation: false, // Disable animations
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(
-          { status: status, comment: comment },
+          { status, comment },
           {
             onError: (error) => {
-              Swal.fire({
-                title: "Error!",
-                text: error.message,
-                icon: "error",
-                animation: false, // Disable animations for error modal
-              });
+              Swal.fire("Error!", error.message, "error");
             },
           }
         );
@@ -91,15 +85,21 @@ const Request = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    const data = { ...formData };
-    updateAdvanceRequest(data);
+    updateAdvanceRequest(formData);
   };
 
-  // Handle the case where purchaseRequest is null
+  // Handle the case where advanceRequest is null
   if (!advanceRequest) {
     return <div>No purchase request data available.</div>;
   }
+
+  const totalAmount =
+    advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+  const showStatusUpdate =
+    (localStorageUserX.role === "REVIEWER" &&
+      advanceRequest.status === "pending") ||
+    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+      advanceRequest.status === "reviewed");
 
   return (
     <div className="flex flex-col items-center gap-6 pb-16">
@@ -150,31 +150,10 @@ const Request = () => {
                   {advanceRequest.department}
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500">
-                  {moneyFormat(
-                    advanceRequest?.itemGroups!.reduce(
-                      (sum, item) => sum + item.total,
-                      0
-                    ),
-                    "NGN"
-                  )}
+                  {moneyFormat(totalAmount, "NGN")}
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
-                  <div
-                    className={`w-fit h-fit border text-white px-2  whitespace-nowrap  rounded-lg uppercase mb-1
-                      ${
-                        advanceRequest.status === "pending" && "bg-secondary"
-                      } ${
-                      advanceRequest.status === "approved" && "bg-teal-600"
-                    } ${advanceRequest.status === "rejected" && "bg-red-500"} ${
-                      advanceRequest.status === "reviewed" && "bg-buttonColor"
-                    }
-                      `}
-                  >
-                    <p
-                      className={``}
-                      style={{ letterSpacing: "1px" }}
-                    >{`${advanceRequest.status}`}</p>
-                  </div>
+                  <StatusBadge status={advanceRequest.status!} />
                 </td>
                 <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
                   {advanceRequest.requestedBy}
@@ -185,137 +164,29 @@ const Request = () => {
               </tr>
 
               {/* Items Table Section */}
-              <tr
-                key={`${advanceRequest.id}-items`}
-                className="w-full h-10 scale-[98%] "
-              >
-                <td colSpan={6}>
-                  <div className="border border-gray-400 px-6 py-4 rounded-md">
+              {/* Item Table Section */}
+              <tr>
+                <td colSpan={5}>
+                  <div className="border border-gray-300 px-6 py-4 rounded-md h-auto relative">
                     <AdvanceRequestDetails request={advanceRequest} />
 
                     {/* Comments and Actions Section */}
                     {advanceRequest?.reviewedBy &&
                       advanceRequest.status !== "draft" && (
-                        <div className="text-gray-700 mt-4">
-                          <p className="mb-2">
-                            <span className="font-bold mr-1  uppercase">
-                              Reviewed By :
-                            </span>
-                            {`${advanceRequest?.reviewedBy?.first_name} ${advanceRequest?.reviewedBy?.last_name}`}
-                          </p>
-                          {advanceRequest?.approvedBy && (
-                            <p className="mb-2">
-                              <span className="font-bold mr-1  uppercase">
-                                Approval:
-                              </span>
-                              {`${advanceRequest?.approvedBy?.first_name} ${advanceRequest?.approvedBy?.last_name}`}
-                            </p>
+                        <div className="text-gray-700 mt-4 tracking-wide">
+                          <RequestCommentsAndActions request={advanceRequest} />
+
+                          {showStatusUpdate && (
+                            <StatusUpdateForm
+                              requestStatus={advanceRequest.status!}
+                              status={status}
+                              setStatus={setStatus}
+                              comment={comment}
+                              setComment={setComment}
+                              isUpdatingStatus={isUpdatingStatus}
+                              handleStatusChange={handleStatusChange}
+                            />
                           )}
-                          <div className="flex flex-col gap-1">
-                            <span className="font-bold mr-1  uppercase">
-                              Comments :
-                            </span>
-
-                            <div className="flex flex-col gap-2 mb-2">
-                              {advanceRequest?.comments?.map((comment) => (
-                                <div className="w-fit border-2 px-4 py-2 rounded-lg shadow-lg">
-                                  <p className="text-base font-extrabold">
-                                    {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}
-                                  </p>
-                                  <p className="text-sm">{`${comment.text}`}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {
-                            // Condition 1: Render for REVIEWER when status is "pending"
-                            (localStorageUserX.role === "REVIEWER" &&
-                              advanceRequest.status === "pending") ||
-                            // Condition 2: Render for SUPER-ADMIN or ADMIN when status is "reviewed"
-                            ((localStorageUserX.role === "SUPER-ADMIN" ||
-                              localStorageUserX.role === "ADMIN") &&
-                              advanceRequest.status === "reviewed") ? (
-                              <form
-                                className="flex flex-col w-full gap-3"
-                                style={{ letterSpacing: "1px" }}
-                              >
-                                {(localStorageUserX.role === "SUPER-ADMIN" ||
-                                  (advanceRequest?.reviewedBy &&
-                                    localStorageUserX.id ===
-                                      advanceRequest.reviewedBy.id) ||
-                                  (advanceRequest?.approvedBy &&
-                                    localStorageUserX.id ===
-                                      advanceRequest.approvedBy.id)) && (
-                                  <>
-                                    <div className="flex flex-col w-full gap-2">
-                                      <label htmlFor="content">
-                                        <span className="font-bold uppercase">
-                                          Comment
-                                        </span>{" "}
-                                        <em>(Optional)</em>
-                                      </label>
-                                      <textarea
-                                        id="content"
-                                        className="border-2 w-full p-2 min-h-40 text-base rounded-lg shadow-sm focus:outline-none"
-                                        value={comment}
-                                        onChange={(e) =>
-                                          setComment(e.target.value)
-                                        }
-                                        aria-label="Enter your comment"
-                                      />
-                                    </div>
-
-                                    <div className="w-fit border border-gray-700   rounded-md">
-                                      <label
-                                        htmlFor={`status-${advanceRequest?.id}`}
-                                        className="sr-only"
-                                      >
-                                        Select Action
-                                      </label>
-                                      <select
-                                        className="text-xs md:text-sm bg-inherit px-3 py-2 rounded-md"
-                                        id={`status-${advanceRequest?.id}`}
-                                        value={status}
-                                        onChange={(e) =>
-                                          setStatus(e.target.value)
-                                        }
-                                        disabled={isUpdatingStatus}
-                                      >
-                                        <option value="">ACTIONS</option>
-                                        {advanceRequest.status ===
-                                        "reviewed" ? (
-                                          <option value="approved">
-                                            APPROVE REQUEST
-                                          </option>
-                                        ) : (
-                                          <option value="reviewed">
-                                            APPROVE REVIEW
-                                          </option>
-                                        )}
-                                        <option value="rejected">REJECT</option>
-                                      </select>
-                                    </div>
-
-                                    {status && (
-                                      <div className="flex w-full justify-center p-4">
-                                        <Button
-                                          size="medium"
-                                          onClick={handleStatusChange}
-                                        >
-                                          {isUpdatingStatus ? (
-                                            <SpinnerMini />
-                                          ) : (
-                                            "Update Status"
-                                          )}
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                              </form>
-                            ) : null
-                          }
                         </div>
                       )}
 
@@ -323,45 +194,15 @@ const Request = () => {
                     {!advanceRequest.approvedBy && // Check if approvedBy is not set
                       localStorageUserX.role === "STAFF" &&
                       advanceRequest.status === "reviewed" && (
-                        <div>
-                          <FormRow label="Approved By *" type="small">
-                            {isLoadingAmins ? (
-                              <SpinnerMini /> // Show a spinner while loading admins
-                            ) : (
-                              <Select
-                                id="approvedBy"
-                                customLabel="Select an admin"
-                                value={formData.approvedBy || ""} // Use empty string if null
-                                onChange={(value) =>
-                                  handleFormChange("approvedBy", value)
-                                }
-                                options={
-                                  admins
-                                    ? admins
-                                        .filter((admin) => admin.id) // Filter out admins with undefined IDs
-                                        .map((admin) => ({
-                                          id: admin.id as string, // Assert that admin.id is a string
-                                          name: `${admin.first_name} ${admin.last_name}`,
-                                        }))
-                                    : []
-                                }
-                                required
-                              />
-                            )}
-                          </FormRow>
-                          {advanceRequest.status === "reviewed" && (
-                            <div className="flex w-full justify-center p-4">
-                              {formData.approvedBy && (
-                                <Button size="medium" onClick={handleSend}>
-                                  {isUpdating ? (
-                                    <SpinnerMini />
-                                  ) : (
-                                    "Request Approval"
-                                  )}
-                                </Button>
-                              )}
-                            </div>
-                          )}
+                        <div className="relative z-10">
+                          <AdminApprovalSection
+                            formData={formData}
+                            handleFormChange={handleFormChange}
+                            admins={admins}
+                            isLoadingAmins={isLoadingAmins}
+                            isUpdating={isUpdating}
+                            handleSend={handleSend}
+                          />
                         </div>
                       )}
                   </div>

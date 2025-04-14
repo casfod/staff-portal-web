@@ -1,5 +1,5 @@
-import { SlMagnifier } from "react-icons/sl";
-import { dateformat } from "../../utils/dateFormat";
+// import { SlMagnifier } from "react-icons/sl";
+// import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PaymentRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
@@ -9,10 +9,7 @@ interface RequestDetailsProps {
   handleAction?: (request: PaymentRequestType) => void;
 }
 
-const PaymentRequestDetails = ({
-  request,
-  handleAction,
-}: RequestDetailsProps) => {
+const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
   const param = useParams();
 
   const isInspect = param.requestId!;
@@ -81,7 +78,7 @@ const PaymentRequestDetails = ({
             style={{ letterSpacing: "1px" }}
           >
             <div className="w-fit flex flex-col gap-2">
-              {[
+              {/* {[
                 {
                   label: "Reviewed By",
                   value: `${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`,
@@ -104,10 +101,10 @@ const PaymentRequestDetails = ({
                   <p key={label} className="uppercase">
                     <span className="font-bold mr-1">{label}:</span> {value}
                   </p>
-                ))}
+                ))} */}
 
               {/* Comments Section */}
-              {request?.comments?.length! > 0 && (
+              {/* {request?.comments?.length! > 0 && (
                 <div className="flex flex-col gap-2">
                   <span className="font-bold uppercase">Comments:</span>
                   <div className="flex flex-col gap-2">
@@ -124,11 +121,11 @@ const PaymentRequestDetails = ({
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Inspect Button */}
-            {handleAction && request.status !== "draft" && (
+            {/* {handleAction && request.status !== "draft" && (
               <button
                 onClick={() => handleAction(request)}
                 className="self-center inline-flex items-center w-fit px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-3"
@@ -138,7 +135,7 @@ const PaymentRequestDetails = ({
                   <span>Inspect</span>
                 </span>
               </button>
-            )}
+            )} */}
           </div>
         </div>
       )}

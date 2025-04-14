@@ -1,15 +1,14 @@
-import { PaymentRequestType } from "../../interfaces";
+import { AdvanceRequestType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
 import { dateformat } from "../../utils/dateFormat";
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Edit, Trash2 } from "lucide-react";
 import { moneyFormat } from "../../utils/moneyFormat";
-
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import PaymentRequestDetails from "./PaymentRequestDetails";
+import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
 
-const PaymentRequestTableRow = ({
+const AdvanceRequestTableRow = ({
   request,
   visibleItems,
   toggleViewItems,
@@ -17,32 +16,37 @@ const PaymentRequestTableRow = ({
   handleDelete,
   handleAction,
 }: {
-  request: PaymentRequestType;
+  request: AdvanceRequestType;
   visibleItems: { [key: string]: boolean };
   toggleViewItems: (id: string) => void;
-  handleEdit: (request: PaymentRequestType) => void;
+  handleEdit: (request: AdvanceRequestType) => void;
   handleDelete: (id: string) => void;
-  handleAction: (request: PaymentRequestType) => void;
+  handleAction: (request: AdvanceRequestType) => void;
 }) => {
   const localStorageUserX = localStorageUser();
   const isVisible = visibleItems[request.id!];
 
   return (
     <>
-      <tr key={request.id}>
+      <tr key={request.id} className="h-[40px] max-h-[40px]">
         <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
-          {request.requestBy}
+          {request.department}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+          {moneyFormat(
+            request?.itemGroups!.reduce((sum, item) => sum + item.total, 0),
+            "NGN"
+          )}
+        </td>
+        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
           <StatusBadge status={request.status!} />
         </td>
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
-          {moneyFormat(request.amountInFigure, "NGN")}
+        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
+          {request.requestedBy}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
           {dateformat(request.createdAt!)}
         </td>
-
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
           <div className="flex space-x-4">
             <span
@@ -57,7 +61,7 @@ const PaymentRequestTableRow = ({
             </span>
 
             {(request.status === "draft" || request.status === "rejected") &&
-              request?.requestedBy?.id! === localStorageUserX.id && (
+              request?.createdBy?.id! === localStorageUserX.id && (
                 <div className="flex space-x-4">
                   <button
                     className="hover:cursor-pointer"
@@ -84,7 +88,7 @@ const PaymentRequestTableRow = ({
             colSpan={6}
             className={`w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm`}
           >
-            <PaymentRequestDetails request={request} />
+            <AdvanceRequestDetails request={request} />
             <RequestCommentsAndActions
               request={request}
               handleAction={handleAction}
@@ -96,4 +100,4 @@ const PaymentRequestTableRow = ({
   );
 };
 
-export default PaymentRequestTableRow;
+export default AdvanceRequestTableRow;

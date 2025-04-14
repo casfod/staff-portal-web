@@ -29,22 +29,22 @@ const TravelRequestTableRow = ({
   return (
     <>
       <tr key={request.id} className="h-[40px] max-h-[40px]">
-        <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-500 uppercase">
           {request.staffName}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
           {moneyFormat(
             request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0,
             "NGN"
           )}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
           <StatusBadge status={request.status!} />
         </td>
-        <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
           {request.staffName}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
           {dateformat(request.createdAt!)}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
