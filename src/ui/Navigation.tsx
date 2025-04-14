@@ -51,7 +51,7 @@ const Navigation: React.FC = () => {
       ],
     },
     {
-      to: "/payment-Requests",
+      to: "/payment-requests",
       label: "Payment Requests",
       icon: ReceiptTextIcon,
     },

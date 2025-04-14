@@ -1,7 +1,8 @@
 import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import Swal from "sweetalert2";
 
 import { RootState } from "../../store/store";
@@ -37,7 +38,8 @@ const TravelRequest = () => {
     param.requestId!
   );
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
-  const admins = adminsData?.data || [];
+
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   useEffect(() => {
     if (!param || !travelRequest) {

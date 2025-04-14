@@ -9,7 +9,7 @@ interface RequestDetailsProps {
   handleAction?: (request: PaymentRequestType) => void;
 }
 
-export const PaymentRequestDetails = ({
+const PaymentRequestDetails = ({
   request,
   handleAction,
 }: RequestDetailsProps) => {
@@ -145,3 +145,5 @@ export const PaymentRequestDetails = ({
     </div>
   );
 };
+
+export default PaymentRequestDetails;

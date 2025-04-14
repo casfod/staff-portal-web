@@ -7,6 +7,55 @@ interface RequestDetailsProps {
   request: PurChaseRequestType;
 }
 
+const ItemsTable = ({
+  itemGroups,
+}: {
+  itemGroups: PurChaseRequestType["itemGroups"];
+}) => (
+  <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
+    <thead>
+      <tr>
+        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Description
+        </th>
+        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Quantity
+        </th>
+        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Frequency
+        </th>
+        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Unit Cost
+        </th>
+        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Total
+        </th>
+      </tr>
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-200 ">
+      {itemGroups!.map((item) => (
+        <tr key={item.id!}>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {item.description}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {item.quantity}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {item.frequency}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {moneyFormat(item.unitCost, "NGN")}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {moneyFormat(item.total, "NGN")}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
 export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
   const param = useParams();
 
@@ -61,48 +110,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       >
         ITEMS
       </h2>
-      <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
-        <thead>
-          <tr>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description
-            </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Quantity
-            </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Frequency
-            </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Unit Cost
-            </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200 ">
-          {request?.itemGroups!.map((item) => (
-            <tr key={item.id!}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {item.description}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {item.quantity}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {item.frequency}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {moneyFormat(item.unitCost, "NGN")}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {moneyFormat(item.total, "NGN")}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ItemsTable itemGroups={request.itemGroups} />
     </div>
   );
 };
