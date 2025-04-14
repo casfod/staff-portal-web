@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { deleteConceptNote as deleteConceptNoteAPI } from "../../../services/apiConceptNotes";
 import toast from "react-hot-toast";
 
@@ -7,9 +7,7 @@ interface ErrorResponse {
   message: string;
 }
 
-interface FetchError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+type FetchError = AxiosError<ErrorResponse>;
 
 export function useDeleteConceptNote(
   search?: string,
@@ -24,29 +22,23 @@ export function useDeleteConceptNote(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<any, FetchError, string>({
+  } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
       await deleteConceptNoteAPI(userID);
     },
     onSuccess: () => {
       toast.success("Concept Note deleted");
 
-      queryClient.invalidateQueries([
-        "all-concept-notes",
-        search,
-        sort,
-        page,
-        limit,
-      ] as any);
+      queryClient.invalidateQueries({
+        queryKey: ["all-concept-notes", search, sort, page, limit],
+      });
     },
-
     onError: (error) => {
       toast.error("Error deleting Concept Note");
-
       const errorMessage =
         error.response?.data.message ||
         "An error occurred while deleting the Concept Note.";
-      console.error("Delete Purchase Request Error:", errorMessage);
+      console.error("Delete Concept Note Error:", errorMessage);
     },
   });
 

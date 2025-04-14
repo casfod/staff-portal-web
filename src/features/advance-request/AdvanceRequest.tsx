@@ -39,7 +39,7 @@ const Request = () => {
     if (!param || !advanceRequest) {
       navigate("/purchase-requests");
     }
-  }, [advanceRequest, param]);
+  }, [advanceRequest, param, navigate]);
 
   // Custom hooks for updating status and purchase request
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(

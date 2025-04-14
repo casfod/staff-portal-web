@@ -102,6 +102,19 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
+  const frequencies = useMemo(
+    () => itemGroup.map((g) => g.frequency).join(","),
+    [itemGroup]
+  );
+  const quantities = useMemo(
+    () => itemGroup.map((g) => g.quantity).join(","),
+    [itemGroup]
+  );
+  const unitCosts = useMemo(
+    () => itemGroup.map((g) => g.unitCost).join(","),
+    [itemGroup]
+  );
+
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
@@ -114,11 +127,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [
-    itemGroup.map((g) => g.frequency).join(","),
-    itemGroup.map((g) => g.quantity).join(","),
-    itemGroup.map((g) => g.unitCost).join(","),
-  ]);
+  }, [itemGroup, frequencies, quantities, unitCosts]);
 
   const { updatePurchaseRequest, isPending } = useUpdatePurChaseRequest(
     param.requestId!
@@ -175,25 +184,6 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       setFormData({ ...formData, [field]: value });
     }
   };
-
-  // Calculate totals whenever frequency, quantity, or unitCost changes
-  useEffect(() => {
-    const updatedGroups = itemGroup.map((group) => ({
-      ...group,
-      total: parseFloat(
-        (
-          (group.frequency || 1) *
-          (group.quantity || 1) *
-          (group.unitCost || 0)
-        ).toFixed(2)
-      ),
-    }));
-    setItemGroup(updatedGroups);
-  }, [
-    itemGroup.map((g) => g.frequency).join(","),
-    itemGroup.map((g) => g.quantity).join(","),
-    itemGroup.map((g) => g.unitCost).join(","),
-  ]);
 
   // Handle form submission
   const handleUpdate = (e: React.FormEvent) => {

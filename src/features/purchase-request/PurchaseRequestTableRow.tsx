@@ -5,7 +5,6 @@ import { dateformat } from "../../utils/dateFormat";
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Edit, Trash2 } from "lucide-react";
 import { moneyFormat } from "../../utils/moneyFormat";
-// import TravelRequestDetails from "./TravelRequestDetails";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
 
@@ -25,7 +24,20 @@ const PurchaseRequestTableRow = ({
   handleAction: (request: PurChaseRequestType) => void;
 }) => {
   const localStorageUserX = localStorageUser();
-  const isVisible = visibleItems[request.id!];
+
+  const requestId = request.id ?? "";
+  const requestStatus = request.status ?? "pending";
+  const requestCreatedAt = request.createdAt ?? "";
+  const requestedById = request.createdBy?.id;
+
+  const isVisible = !!visibleItems[requestId];
+
+  const isEditable =
+    (requestStatus === "draft" || requestStatus === "rejected") &&
+    requestedById === localStorageUserX?.id;
+
+  const totalAmount =
+    request.itemGroups?.reduce((sum, item) => sum + item.total, 0) ?? 0;
 
   return (
     <>
@@ -34,25 +46,22 @@ const PurchaseRequestTableRow = ({
           {request.department}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
-          {moneyFormat(
-            request?.itemGroups!.reduce((sum, item) => sum + item.total, 0),
-            "NGN"
-          )}
+          {moneyFormat(totalAmount, "NGN")}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
-          <StatusBadge status={request.status!} />
+          <StatusBadge status={requestStatus} />
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
           {request.requestedBy}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
-          {dateformat(request.createdAt!)}
+          {dateformat(requestCreatedAt)}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
           <div className="flex space-x-4">
             <span
               className="hover:cursor-pointer"
-              onClick={() => toggleViewItems(request.id!)}
+              onClick={() => requestId && toggleViewItems(requestId)}
             >
               {visibleItems[request.id!] ? (
                 <HiMiniEyeSlash className="w-5 h-5" />
@@ -61,30 +70,29 @@ const PurchaseRequestTableRow = ({
               )}
             </span>
 
-            {(request.status === "draft" || request.status === "rejected") &&
-              request?.createdBy?.id! === localStorageUserX.id && (
-                <div className="flex space-x-4">
-                  <button
-                    className="hover:cursor-pointer"
-                    onClick={() => handleEdit(request)}
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
+            {isEditable && (
+              <div className="flex space-x-4">
+                <button
+                  className="hover:cursor-pointer"
+                  onClick={() => handleEdit(request)}
+                >
+                  <Edit className="h-5 w-5" />
+                </button>
 
-                  <button
-                    className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                    onClick={() => handleDelete(request.id!)}
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              )}
+                <button
+                  className="text-red-600 hover:text-red-900 hover:cursor-pointer"
+                  onClick={() => handleDelete(request.id!)}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
+            )}
           </div>
         </td>
       </tr>
 
       {isVisible && (
-        <tr key={`${request.id}-details`} className="rounded-lg">
+        <tr key={`${requestId}-details`} className="rounded-lg">
           <td
             colSpan={6}
             className={`w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm`}

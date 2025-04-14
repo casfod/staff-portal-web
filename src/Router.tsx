@@ -14,7 +14,6 @@ import PurchaseRequest from "./features/purchase-request/PurchaseRequest.tsx";
 import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
-import { AnimatePresence, motion } from "framer-motion";
 import CreateRequest from "./features/purchase-request/CreateRequest";
 import { AllProjects } from "./features/project/AllProjects";
 import Project from "./features/project/Project";
@@ -37,34 +36,7 @@ import AllTravelRequests from "./features/travel-request/AllTravelRequests.tsx";
 import CreateTravelRequest from "./features/travel-request/CreateTravelRequest.tsx";
 import TravelRequest from "./features/travel-request/TravelRequest.tsx";
 import EditTravelRequest from "./features/travel-request/EditTravelRequest.tsx";
-
-const pageVariants = {
-  initial: { opacity: 0, y: -20 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] },
-  },
-  exit: {
-    opacity: 0,
-    y: 20,
-    transition: { duration: 0.2, ease: "easeInOut" },
-  },
-};
-
-const AnimatedRoute = ({ element }: { element: React.ReactNode }) => (
-  <AnimatePresence mode="wait">
-    <motion.div
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
-      {element}
-    </motion.div>
-  </AnimatePresence>
-);
+import AnimatedRoute from "./ui/AnimatedRoute.tsx";
 
 const router = createBrowserRouter([
   {

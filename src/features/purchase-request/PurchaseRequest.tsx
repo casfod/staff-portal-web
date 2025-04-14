@@ -47,7 +47,7 @@ const PurchaseRequest = () => {
     if (!param || !purchaseRequest) {
       navigate("/purchase-requests");
     }
-  }, [purchaseRequest, param]);
+  }, [purchaseRequest, param, navigate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

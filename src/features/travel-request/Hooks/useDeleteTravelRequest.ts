@@ -24,20 +24,16 @@ export function useDeleteTravelRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<any, FetchError, string>({
+  } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
       await deleteTravelRequestAPI(userID);
     },
     onSuccess: () => {
       toast.success("Travel Request deleted");
 
-      queryClient.invalidateQueries([
-        "all-travel-requests",
-        search,
-        sort,
-        page,
-        limit,
-      ] as any);
+      queryClient.invalidateQueries({
+        queryKey: ["all-travel-requests", search, sort, page, limit],
+      });
     },
 
     onError: (error) => {

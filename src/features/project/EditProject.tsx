@@ -17,7 +17,7 @@ const EditProject = () => {
     if (!param || !project) {
       navigate("/projects");
     }
-  }, [project, param]);
+  }, [project, param, navigate]);
 
   // Handle the case where purchaseRequest is null
   if (!project) {

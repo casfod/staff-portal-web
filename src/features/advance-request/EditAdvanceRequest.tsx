@@ -20,7 +20,7 @@ const EditAdvanceRequest = () => {
     if (!param || !advanceRequest) {
       navigate("/advance-requests");
     }
-  }, [advanceRequest, param]);
+  }, [advanceRequest, param, navigate]);
 
   // Handle the case where advanceRequest is null
   if (!advanceRequest) {

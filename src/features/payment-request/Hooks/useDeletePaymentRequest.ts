@@ -24,20 +24,16 @@ export function useDeletePaymentRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<any, FetchError, string>({
+  } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
       await deletePaymentRequestAPI(userID);
     },
     onSuccess: () => {
       toast.success("Payment Request deleted");
 
-      queryClient.invalidateQueries([
-        "all-payment-requests",
-        search,
-        sort,
-        page,
-        limit,
-      ] as any);
+      queryClient.invalidateQueries({
+        queryKey: ["all-payment-requests", search, sort, page, limit],
+      });
     },
 
     onError: (error) => {

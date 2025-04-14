@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { deleteAdvanceRequest as deleteAdvanceRequestAPI } from "../../../services/apiAdvanceRequest";
 import toast from "react-hot-toast";
 
@@ -7,9 +7,7 @@ interface ErrorResponse {
   message: string;
 }
 
-interface FetchError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+type FetchError = AxiosError<ErrorResponse>;
 
 export function useDeleteAdvanceRequest(
   search?: string,
@@ -24,22 +22,17 @@ export function useDeleteAdvanceRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<any, FetchError, string>({
+  } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
       await deleteAdvanceRequestAPI(userID);
     },
     onSuccess: () => {
       toast.success("Advance Request deleted");
 
-      queryClient.invalidateQueries([
-        "all-advance-requests",
-        search,
-        sort,
-        page,
-        limit,
-      ] as any);
+      queryClient.invalidateQueries({
+        queryKey: ["all-advance-requests", search, sort, page, limit],
+      });
     },
-
     onError: (error) => {
       toast.error("Error deleting Advance Request");
 

@@ -48,7 +48,7 @@ const PaymentRequest = () => {
     if (!param || !paymentRequest) {
       navigate("/payment-requests");
     }
-  }, [paymentRequest, param]);
+  }, [paymentRequest, param, navigate]);
 
   // Handle form field changes
   const handleFormChange = (field: string, value: string) => {

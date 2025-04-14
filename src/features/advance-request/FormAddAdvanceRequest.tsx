@@ -103,6 +103,19 @@ const FormAddAdvanceRequest: React.FC = () => {
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
+  const frequencies = useMemo(
+    () => itemGroup.map((g) => g.frequency).join(","),
+    [itemGroup]
+  );
+  const quantities = useMemo(
+    () => itemGroup.map((g) => g.quantity).join(","),
+    [itemGroup]
+  );
+  const unitCosts = useMemo(
+    () => itemGroup.map((g) => g.unitCost).join(","),
+    [itemGroup]
+  );
+
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
@@ -115,11 +128,7 @@ const FormAddAdvanceRequest: React.FC = () => {
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [
-    itemGroup.map((g) => g.frequency).join(","),
-    itemGroup.map((g) => g.quantity).join(","),
-    itemGroup.map((g) => g.unitCost).join(","),
-  ]);
+  }, [itemGroup, frequencies, quantities, unitCosts]);
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {

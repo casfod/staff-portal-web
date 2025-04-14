@@ -20,7 +20,7 @@ const EditRequest = () => {
     if (!param || !purchaseRequest) {
       navigate("/purchase-requests");
     }
-  }, [purchaseRequest, param]);
+  }, [purchaseRequest, param, navigate]);
 
   // Handle the case where purchaseRequest is null
   if (!purchaseRequest) {

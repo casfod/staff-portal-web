@@ -18,6 +18,7 @@ import { setConceptNote } from "../../store/conceptNoteSlice";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { SlMagnifier } from "react-icons/sl";
 import { useDeleteConceptNote } from "./Hooks/useDeleteConceptNote";
+import StatusBadge from "../../ui/StatusBadge";
 
 const AllConceptNotes = () => {
   const localStorageUserX = localStorageUser();
@@ -153,26 +154,13 @@ const AllConceptNotes = () => {
                       {note.project_code}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
-                      <div
-                        className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
-                        ${note.status === "draft" && "border border-gray-400"} 
-                        ${
-                          note.status === "pending" && "bg-amber-500 text-white"
-                        } ${
-                          note.status === "approved" && "bg-teal-600 text-white"
-                        } 
-                      ${
-                        note.status === "rejected" && "bg-red-500 text-white"
-                      }  `}
-                      >
-                        {note.status}
-                      </div>
+                      <StatusBadge status={note.status!} />
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                       {note.staff_name}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
-                      {dateformat(note?.createdAt!)}
+                      {note?.createdAt ? dateformat(note.createdAt) : "N/A"}
                     </td>
 
                     <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
@@ -190,7 +178,7 @@ const AllConceptNotes = () => {
 
                         {(note?.status === "draft" ||
                           note.status === "rejected") &&
-                          note?.preparedBy?.id! === localStorageUserX.id && (
+                          note?.preparedBy?.id === localStorageUserX.id && (
                             <div className="flex space-x-4">
                               <button
                                 className="hover:cursor-pointer"

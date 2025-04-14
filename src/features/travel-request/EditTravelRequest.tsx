@@ -20,7 +20,7 @@ const EditTravelRequest = () => {
     if (!param || !travelRequest) {
       navigate("/advance-requests");
     }
-  }, [travelRequest, param]);
+  }, [travelRequest, param, navigate]);
 
   // Handle the case where travelRequest is null
   if (!travelRequest) {

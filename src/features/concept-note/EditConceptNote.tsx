@@ -20,7 +20,7 @@ const EditConceptNote = () => {
     if (!param || !conceptNote) {
       navigate("/concept-notes");
     }
-  }, [conceptNote, param]);
+  }, [conceptNote, param, navigate]);
 
   // Handle the case where purchaseRequest is null
   if (!conceptNote) {

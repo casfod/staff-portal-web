@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import Cookies from "js-cookie";
 import { login as loginApi } from "../../../services/apiAuth";
+import { UserType } from "../../../interfaces";
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -32,7 +33,8 @@ export function useLogin() {
         localStorage.setItem(`token-${userData.id}`, data.token);
 
         // Refetch queries after updating token
-        queryClient.setQueryData([`user-${userData.id}`] as any, userData);
+        queryClient.setQueryData<UserType>([`user-${userData.id}`], userData);
+
         // queryClient.invalidateQueries(["orders"] as any);
 
         toast.success(`Login sucessful`);

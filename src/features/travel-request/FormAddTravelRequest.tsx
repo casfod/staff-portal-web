@@ -132,6 +132,16 @@ const FormAddTravelRequest: React.FC = () => {
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
+  const daysNumber = useMemo(
+    () => itemGroup.map((g) => g.daysNumber).join(","),
+    [itemGroup]
+  );
+
+  const rate = useMemo(
+    () => itemGroup.map((g) => g.rate).join(","),
+    [itemGroup]
+  );
+
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
@@ -140,10 +150,7 @@ const FormAddTravelRequest: React.FC = () => {
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [
-    itemGroup.map((g) => g.daysNumber).join(","),
-    itemGroup.map((g) => g.rate).join(","),
-  ]);
+  }, [daysNumber, rate, itemGroup]);
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {

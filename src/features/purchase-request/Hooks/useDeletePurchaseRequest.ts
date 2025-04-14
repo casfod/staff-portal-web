@@ -24,20 +24,16 @@ export function useDeletePurchaseRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<any, FetchError, string>({
+  } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
       await deletePurchaseRequestAPI(userID);
     },
     onSuccess: () => {
       toast.success("Purchase Request deleted");
 
-      queryClient.invalidateQueries([
-        "all-purchase-requests",
-        search,
-        sort,
-        page,
-        limit,
-      ] as any);
+      queryClient.invalidateQueries({
+        queryKey: ["all-purchase-requests", search, sort, page, limit],
+      });
     },
 
     onError: (error) => {

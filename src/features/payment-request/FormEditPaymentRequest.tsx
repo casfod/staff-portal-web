@@ -54,9 +54,6 @@ const FormEditPaymentRequest = ({
     field: keyof PaymentRequestType,
     value: string | string[] | number
   ) => {
-    if (selectedProject) {
-    }
-
     setFormData({ ...formData, [field]: value });
   };
 

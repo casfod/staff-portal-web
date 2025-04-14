@@ -11,6 +11,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Swal from "sweetalert2";
 import Button from "../../ui/Button";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
+import StatusBadge from "../../ui/StatusBadge";
 
 const ConceptNote = () => {
   const localStorageUserX = localStorageUser();
@@ -29,9 +30,9 @@ const ConceptNote = () => {
     if (!param || !conceptNote) {
       navigate("/concept-notes");
     }
-  }, [conceptNote, param]);
+  }, [conceptNote, param, navigate]);
 
-  const { updateStatus } = useUpdateStatus(param.requestId!);
+  const { updateStatus, isPending } = useUpdateStatus(param.requestId!);
 
   const handleStatusChange = () => {
     Swal.fire({
@@ -116,68 +117,16 @@ const ConceptNote = () => {
                   {conceptNote.project_code}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                  <div
-                    className={`w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1
-                        ${
-                          conceptNote.status === "draft" &&
-                          "border border-gray-400"
-                        } 
-                        ${
-                          conceptNote.status === "pending" &&
-                          "bg-amber-500 text-white"
-                        } ${
-                      conceptNote.status === "approved" &&
-                      "bg-teal-600 text-white"
-                    } 
-                      ${
-                        conceptNote.status === "rejected" &&
-                        "bg-red-500 text-white"
-                      }  `}
-                  >
-                    {conceptNote.status}
-                  </div>
+                  <StatusBadge status={conceptNote.status!} />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
                   {conceptNote.staff_name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
-                  {dateformat(conceptNote?.createdAt!)}
+                  {conceptNote?.createdAt
+                    ? dateformat(conceptNote.createdAt)
+                    : "N/A"}
                 </td>
-
-                {/* <td className="px-6 py-2 whitespace-nowrap  text-gray-500">
-                  <div className="flex space-x-4">
-                    <span
-                      className="hover:cursor-pointer"
-                      onClick={() => toggleViewItems(conceptNote.id!)}
-                    >
-                      {visibleItems[conceptNote.id!] ? (
-                        <HiMiniEyeSlash className="w-5 h-5" />
-                      ) : (
-                        <HiMiniEye className="w-5 h-5" />
-                      )}
-                    </span>
-
-                    {(conceptNote?.status === "draft" ||
-                      conceptNote.status === "rejected") &&
-                      conceptNote?.preparedBy?.id! === localStorageUserX.id && (
-                        <div className="flex space-x-4">
-                          <button
-                            className="hover:cursor-pointer"
-                            onClick={() => handleEdit(conceptNote)}
-                          >
-                            <Edit className="h-5 w-5" />
-                          </button>
-
-                          <button
-                            className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                            onClick={() => handleDelete(conceptNote.id!)}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        </div>
-                      )}
-                  </div>
-                </td> */}
               </tr>
 
               <tr
@@ -361,7 +310,7 @@ const ConceptNote = () => {
             {status && (
               <div className="flex w-full justify-center p-4">
                 <Button size="medium" onClick={handleStatusChange}>
-                  {false ? <SpinnerMini /> : "Update Status"}
+                  {isPending ? <SpinnerMini /> : "Update Status"}
                 </Button>
               </div>
             )}

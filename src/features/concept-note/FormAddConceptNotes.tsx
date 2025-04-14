@@ -47,9 +47,6 @@ const FormAddConceptNotes = () => {
     field: keyof ConceptNote,
     value: string | string[] | number
   ) => {
-    if (selectedProject) {
-    }
-
     setFormData({ ...formData, [field]: value });
   };
 

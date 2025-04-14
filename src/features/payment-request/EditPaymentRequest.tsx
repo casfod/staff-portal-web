@@ -20,7 +20,7 @@ const EditPaymentRequest = () => {
     if (!param || !paymentRequest) {
       navigate("/purchase-requests");
     }
-  }, [paymentRequest, param]);
+  }, [paymentRequest, param, navigate]);
 
   // Handle the case where paymentRequest is null
   if (!paymentRequest) {
