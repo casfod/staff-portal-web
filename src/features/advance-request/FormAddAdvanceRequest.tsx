@@ -128,7 +128,7 @@ const FormAddAdvanceRequest: React.FC = () => {
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [itemGroup, frequencies, quantities, unitCosts]);
+  }, [frequencies, quantities, unitCosts]);
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {

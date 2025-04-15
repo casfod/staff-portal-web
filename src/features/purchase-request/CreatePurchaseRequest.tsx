@@ -2,7 +2,7 @@ import { List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FormAddPurchaseRequest from "./FormAddPurchaseRequest";
 
-const CreateRequest = () => {
+const CreatePurchaseRequest = () => {
   const navigate = useNavigate();
 
   return (
@@ -32,4 +32,4 @@ const CreateRequest = () => {
   );
 };
 
-export default CreateRequest;
+export default CreatePurchaseRequest;

@@ -150,7 +150,7 @@ const FormAddTravelRequest: React.FC = () => {
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [daysNumber, rate, itemGroup]);
+  }, [daysNumber, rate]);
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {

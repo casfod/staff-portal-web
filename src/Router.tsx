@@ -14,7 +14,7 @@ import PurchaseRequest from "./features/purchase-request/PurchaseRequest.tsx";
 import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
-import CreateRequest from "./features/purchase-request/CreateRequest";
+import CreatePurchaseRequest from "./features/purchase-request/CreatePurchaseRequest";
 import { AllProjects } from "./features/project/AllProjects";
 import Project from "./features/project/Project";
 import CreateProject from "./features/project/CreateProject.tsx";
@@ -50,156 +50,287 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <AnimatedRoute element={<Dashboard />} /> },
       {
         path: "projects",
-        element: <AnimatedRoute element={<Projects />} />,
+        element: <AnimatedRoute key="projects" element={<Projects />} />,
         children: [
           { index: true, element: <Navigate to="all-projects" /> },
           {
             path: "all-projects",
-            element: <AnimatedRoute element={<AllProjects />} />,
+            element: (
+              <AnimatedRoute key="all-projects" element={<AllProjects />} />
+            ),
           },
           {
             path: "create-project",
-            element: <AnimatedRoute element={<CreateProject />} />,
+            element: (
+              <AnimatedRoute
+                key="create-purchase"
+                element={<CreateProject />}
+              />
+            ),
           },
           {
             path: "project/:projectId",
-            element: <AnimatedRoute element={<Project />} />,
+            element: (
+              <AnimatedRoute key="project/:projectId" element={<Project />} />
+            ),
           },
           {
             path: "edit-project/:projectId",
-            element: <AnimatedRoute element={<EditProject />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-project/:projectId"
+                element={<EditProject />}
+              />
+            ),
           },
         ],
       },
       {
         path: "concept-notes",
-        element: <AnimatedRoute element={<ConceptNotes />} />,
+        element: (
+          <AnimatedRoute key="concept-notes" element={<ConceptNotes />} />
+        ),
         children: [
           { index: true, element: <Navigate to="concept-notes" /> },
           {
             path: "concept-notes",
-            element: <AnimatedRoute element={<AllConceptNotes />} />,
+            element: (
+              <AnimatedRoute
+                key="concept-notes"
+                element={<AllConceptNotes />}
+              />
+            ),
           },
           {
             path: "create-concept-note",
-            element: <AnimatedRoute element={<CreateConceptNote />} />,
+            element: (
+              <AnimatedRoute
+                key="create-concept-note"
+                element={<CreateConceptNote />}
+              />
+            ),
           },
           {
             path: "concept-note/:requestId",
-            element: <AnimatedRoute element={<ConceptNote />} />,
+            element: (
+              <AnimatedRoute
+                key="concept-note/:requestId"
+                element={<ConceptNote />}
+              />
+            ),
           },
           {
             path: "edit-concept-note/:requestId",
-            element: <AnimatedRoute element={<EditConceptNote />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-concept-note/:requestId"
+                element={<EditConceptNote />}
+              />
+            ),
           },
         ],
       },
       {
         path: "purchase-requests",
-        element: <AnimatedRoute element={<PurchaseRequests />} />,
+        element: (
+          <AnimatedRoute
+            key="purchase-requests"
+            element={<PurchaseRequests />}
+          />
+        ),
         children: [
           { index: true, element: <Navigate to="all-request" /> },
           {
             path: "all-request",
-            element: <AnimatedRoute element={<AllPurchaseRequests />} />,
+            element: (
+              <AnimatedRoute
+                key="all-request"
+                element={<AllPurchaseRequests />}
+              />
+            ),
           },
           {
-            path: "create-request",
-            element: <AnimatedRoute element={<CreateRequest />} />,
+            path: "create-purchase-request",
+            element: (
+              <AnimatedRoute
+                key="create-purchase-request"
+                element={<CreatePurchaseRequest />}
+              />
+            ),
           },
           {
             path: "request/:requestId",
-            element: <AnimatedRoute element={<PurchaseRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="request/:requestId"
+                element={<PurchaseRequest />}
+              />
+            ),
           },
           {
             path: "edit-request/:requestId",
-            element: <AnimatedRoute element={<EditRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-request/:requestId"
+                element={<EditRequest />}
+              />
+            ),
           },
         ],
       },
       {
         path: "advance-requests",
-        element: <AnimatedRoute element={<AdvanceRequests />} />,
+        element: (
+          <AnimatedRoute key="advance-requests" element={<AdvanceRequests />} />
+        ),
         children: [
           { index: true, element: <Navigate to="all-advance-request" /> },
           {
             path: "all-advance-request",
-            element: <AnimatedRoute element={<AllAdvanceRequests />} />,
+            element: (
+              <AnimatedRoute
+                key="all-advance-request"
+                element={<AllAdvanceRequests />}
+              />
+            ),
           },
           {
-            path: "create-request",
-            element: <AnimatedRoute element={<CreateAdvanceRequest />} />,
+            path: "create-advance-request",
+            element: (
+              <AnimatedRoute
+                key="create-advance-request"
+                element={<CreateAdvanceRequest />}
+              />
+            ),
           },
           {
             path: "request/:requestId",
-            element: <AnimatedRoute element={<AdvanceRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="request/:requestId"
+                element={<AdvanceRequest />}
+              />
+            ),
           },
           {
             path: "edit-request/:requestId",
-            element: <AnimatedRoute element={<EditAdvanceRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-request/:requestId"
+                element={<EditAdvanceRequest />}
+              />
+            ),
           },
         ],
       },
       {
         path: "payment-requests",
-        element: <AnimatedRoute element={<PaymentRequests />} />,
+        element: (
+          <AnimatedRoute key="payment-requests" element={<PaymentRequests />} />
+        ),
         children: [
           { index: true, element: <Navigate to="all-payment-request" /> },
           {
             path: "all-payment-request",
-            element: <AnimatedRoute element={<AllPaymentRequests />} />,
+            element: (
+              <AnimatedRoute
+                key="all-payment-request"
+                element={<AllPaymentRequests />}
+              />
+            ),
           },
           {
             path: "create-payment-request",
-            element: <AnimatedRoute element={<CreatePaymentRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="create-payment-request"
+                element={<CreatePaymentRequest />}
+              />
+            ),
           },
           {
             path: "request/:requestId",
-            element: <AnimatedRoute element={<PaymentRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="request/:requestId"
+                element={<PaymentRequest />}
+              />
+            ),
           },
           {
             path: "edit-request/:requestId",
-            element: <AnimatedRoute element={<EditPaymentRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-request/:requestId"
+                element={<EditPaymentRequest />}
+              />
+            ),
           },
         ],
       },
 
       {
         path: "travel-requests",
-        element: <AnimatedRoute element={<TravelRequests />} />,
+        element: (
+          <AnimatedRoute key="travel-requests" element={<TravelRequests />} />
+        ),
         children: [
           { index: true, element: <Navigate to="all-travel-request" /> },
           {
             path: "all-travel-request",
-            element: <AnimatedRoute element={<AllTravelRequests />} />,
+            element: (
+              <AnimatedRoute
+                key="all-travel-request"
+                element={<AllTravelRequests />}
+              />
+            ),
           },
           {
-            path: "create-request",
-            element: <AnimatedRoute element={<CreateTravelRequest />} />,
+            path: "create-travel-request",
+            element: (
+              <AnimatedRoute
+                key="create-travel-request"
+                element={<CreateTravelRequest />}
+              />
+            ),
           },
           {
             path: "request/:requestId",
-            element: <AnimatedRoute element={<TravelRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="request/:requestId"
+                element={<TravelRequest />}
+              />
+            ),
           },
           {
             path: "edit-request/:requestId",
-            element: <AnimatedRoute element={<EditTravelRequest />} />,
+            element: (
+              <AnimatedRoute
+                key="edit-request/:requestId"
+                element={<EditTravelRequest />}
+              />
+            ),
           },
         ],
       },
 
       {
         path: "expense-claims",
-        element: <AnimatedRoute element={<ExpenseClaims />} />,
+        element: (
+          <AnimatedRoute key="expense-claims" element={<ExpenseClaims />} />
+        ),
       },
       {
         path: "user-management",
-        element: <AnimatedRoute element={<UserManagement />} />,
+        element: (
+          <AnimatedRoute key="user-management" element={<UserManagement />} />
+        ),
       },
     ],
   },
-  { path: "login", element: <AnimatedRoute element={<Login />} /> },
-  { path: "*", element: <AnimatedRoute element={<PageNotFound />} /> },
+  { path: "login", element: <AnimatedRoute key="" element={<Login />} /> },
+  { path: "*", element: <AnimatedRoute key="" element={<PageNotFound />} /> },
 ]);
 
 export default router;

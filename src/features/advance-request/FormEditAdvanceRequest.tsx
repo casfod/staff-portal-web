@@ -127,7 +127,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [itemGroup, frequencies, quantities, unitCosts]);
+  }, [frequencies, quantities, unitCosts]);
 
   const { updateAdvanceRequest, isPending } = useUpdateAdvanceRequest(
     param.requestId!

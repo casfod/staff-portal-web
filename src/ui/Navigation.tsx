@@ -47,7 +47,10 @@ const Navigation: React.FC = () => {
       label: "Purchase Requests",
       icon: ShoppingCart,
       dropdown: [
-        { to: "/purchase-requests/create-request", label: "New Request" },
+        {
+          to: "/purchase-requests/create-purchase-request",
+          label: "New Request",
+        },
       ],
     },
     {

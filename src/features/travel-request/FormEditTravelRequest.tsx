@@ -171,7 +171,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [daysNumber, rate, itemGroup]);
+  }, [daysNumber, rate]);
   // Handle form submission
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();

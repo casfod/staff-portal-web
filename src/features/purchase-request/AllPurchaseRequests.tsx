@@ -120,7 +120,7 @@ const AllPurchaseRequests = () => {
           Purchase Requests
         </h1>
         <button
-          onClick={() => navigate("/purchase-requests/create-request")} // Use relative path here
+          onClick={() => navigate("/purchase-requests/create-purchase-request")} // Use relative path here
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <Plus className="h-4 w-4 mr-2" />

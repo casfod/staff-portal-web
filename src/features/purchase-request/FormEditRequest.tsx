@@ -127,7 +127,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       ),
     }));
     setItemGroup(updatedGroups);
-  }, [itemGroup, frequencies, quantities, unitCosts]);
+  }, [frequencies, quantities, unitCosts]);
 
   const { updatePurchaseRequest, isPending } = useUpdatePurChaseRequest(
     param.requestId!

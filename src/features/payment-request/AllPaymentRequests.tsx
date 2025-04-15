@@ -104,8 +104,6 @@ const AllPaymentRequests = () => {
     });
   };
 
-  console.log(paymentRequests);
-
   if (isError) {
     return <NetworkErrorUI />;
   }

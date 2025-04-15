@@ -106,6 +106,7 @@ const FormAddPaymentRequest = () => {
     e.preventDefault();
 
     const data = { ...formData };
+
     sendPaymentRequest(data);
   };
 
@@ -143,19 +144,6 @@ const FormAddPaymentRequest = () => {
           )}
         </FormRow>
 
-        {/* <FormRow label="Grant Code *" type="small">
-          <Input
-            type="text"
-            id="grantCode"
-            required
-            readOnly
-            value={
-              selectedProject
-                ? selectedProject.project_code
-                : formData.grantCode
-            }
-          />
-        </FormRow> */}
         {/* Second Select: Account Code */}
         {selectedProject && (
           <FormRow label="Grant Code *" type="small">
