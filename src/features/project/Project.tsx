@@ -257,7 +257,7 @@ const Project = () => {
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-gray-700">
                       <span className="font-extrabold uppercase">Summary:</span>{" "}
                       {project.project_summary}
                     </p>
