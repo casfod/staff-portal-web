@@ -111,7 +111,7 @@ const AllPurchaseRequests = () => {
   }
 
   return (
-    <div className="flex flex-col space-y-3 pb-16">
+    <div className="max-w-full flex flex-col space-y-3 pb-16">
       <div className="flex justify-between items-center">
         <h1
           className="text-2xl font-semibold text-gray-700"
@@ -190,7 +190,7 @@ const AllPurchaseRequests = () => {
               </tr>
             </tbody>
           ) : (
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="max-w-full bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="py-8">

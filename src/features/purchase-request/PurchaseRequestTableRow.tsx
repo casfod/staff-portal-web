@@ -92,7 +92,7 @@ const PurchaseRequestTableRow = ({
       </tr>
 
       {isVisible && (
-        <tr key={`${requestId}-details`} className="rounded-lg">
+        <tr key={`${requestId}-details`} className="max-w-full rounded-lg">
           <td
             colSpan={6}
             className={`w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm`}

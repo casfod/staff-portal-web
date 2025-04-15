@@ -12,7 +12,7 @@ const ItemsTable = ({
 }: {
   itemGroups: PurChaseRequestType["itemGroups"];
 }) => (
-  <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
+  <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4">
     <thead>
       <tr>
         <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -32,22 +32,22 @@ const ItemsTable = ({
         </th>
       </tr>
     </thead>
-    <tbody className="bg-white divide-y divide-gray-200 ">
+    <tbody className="bg-white divide-y divide-gray-200">
       {itemGroups!.map((item) => (
         <tr key={item.id!}>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
             {item.description}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {item.quantity}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {item.frequency}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {moneyFormat(item.unitCost, "NGN")}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {moneyFormat(item.total, "NGN")}
           </td>
         </tr>
@@ -68,7 +68,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       }`}
     >
       <div
-        className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
+        className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3 break-words"
         style={{ letterSpacing: "1px" }}
       >
         <p>
@@ -105,7 +105,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       <h2
-        className="text-center text-lg text-gray-700 font-semibold"
+        className="text-center text-lg text-gray-700 font-semibold break-words"
         style={{ letterSpacing: "2px" }}
       >
         ITEMS
