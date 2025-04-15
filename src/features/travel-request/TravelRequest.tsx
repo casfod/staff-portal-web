@@ -94,7 +94,7 @@ const TravelRequest = () => {
       travelRequest.status === "reviewed");
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-16">
+    <div className="flex flex-col items-center gap-6 pb-80">
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-700 tracking-wide">
           Travel Request

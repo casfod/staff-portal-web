@@ -69,7 +69,7 @@ const ConceptNote = () => {
   }
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 pb-16">
+    <div className="w-full flex flex-col items-center gap-6 pb-80">
       {/* Header Section */}
       <div className="w-full flex justify-between items-center">
         <h1
