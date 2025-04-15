@@ -34,19 +34,19 @@ const ExpenseTable = ({
     <tbody className="bg-white divide-y divide-gray-200">
       {expenses?.map((expense, index) => (
         <tr key={index}>
-          <td className="px-6 py-4 max-w-xs break-words text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
             {expense.expense}
           </td>
-          <td className="px-6 py-4 max-w-xs break-words text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
             {expense.location}
           </td>
-          <td className="px-6 py-4 max-w-xs break-words text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {expense.daysNumber}
           </td>
-          <td className="px-6 py-4 max-w-xs break-words text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {moneyFormat(expense.rate, "NGN")}
           </td>
-          <td className="px-6 py-4 max-w-xs break-words text-sm text-gray-500">
+          <td className="px-6 py-4 text-sm text-gray-500 break-words">
             {moneyFormat(expense.total, "NGN")}
           </td>
         </tr>
@@ -55,13 +55,17 @@ const ExpenseTable = ({
   </table>
 );
 
-const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
+const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
   const totalAmount =
     request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   return (
-    <div className={`break-words`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-300 pb-6">
+    <div
+      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
+        !isInspect && "bg-[#F8F8F8]"
+      }`}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-300 pb-6 break-words">
         <div className="flex flex-col gap-2 text-gray-700 text-sm tracking-wide">
           <p>
             <span className="font-bold mr-1 uppercase">Staff Name:</span>
@@ -92,7 +96,7 @@ const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
         </div>
       </div>
 
-      <h2 className="text-center text-lg text-gray-700 font-semibold break-words">
+      <h2 className="text-center text-lg text-gray-700 font-semibold tracking-wide my-4 break-words">
         EXPENSES
       </h2>
 

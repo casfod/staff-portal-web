@@ -2,6 +2,7 @@
 import logo from "../assets/logo.png";
 // import { useUser } from "../features/user/userHooks/useUser";
 import { localStorageUser } from "../utils/localStorageUser";
+import RoleBadge from "./RoleBadge";
 
 export function Header() {
   // const { user } = use();
@@ -20,24 +21,27 @@ export function Header() {
           <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
 
           <span
-            className="ml-2 text-lg  font-extrabold text-primary"
+            className="ml-2 font-extrabold text-primary"
             style={{ fontFamily: "Sora", letterSpacing: "5px" }}
           >
             CASFOD POSSIBILITY HUB
           </span>
           <div className="space-x-4 ">
             <div
-              className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm lg:text-base"
+              className="items-center flex flex-col lg:flex-row lg:gap-2 text-sm"
               style={{ fontFamily: "Sora", letterSpacing: "1px" }}
             >
-              <p className="inline-flex gap-1 text-gray-700 font-medium">
-                <span>{user?.first_name.toUpperCase()}</span>
+              <RoleBadge role={user.role}>
+                <div className=" flex items-center gap-1 lg:text-base text-center px-2 py-1 text-gray-50 rounded-md">
+                  <span className="font-extrabold text-sm tracking-[1.5px]">
+                    {user?.first_name.toUpperCase()}
+                  </span>
 
-                <span>{user?.last_name.toUpperCase()}</span>
-              </p>
-              <div className="bg-secondary text-xs lg:text-base text-center px-2  rounded-md">
-                <p className="text-gray-50">{user?.role}</p>
-              </div>
+                  <span className="font-extrabold text-sm tracking-[1.5px]">
+                    {user?.last_name.toUpperCase()}
+                  </span>
+                </div>
+              </RoleBadge>
             </div>
           </div>
         </div>
