@@ -69,7 +69,7 @@ const ConceptNote = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-16">
+    <div className="w-full flex flex-col items-center gap-6 pb-16">
       {/* Header Section */}
       <div className="w-full flex justify-between items-center">
         <h1
@@ -88,7 +88,7 @@ const ConceptNote = () => {
       </div>
 
       {/* Main Table Section */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="w-full bg-white shadow-sm rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
