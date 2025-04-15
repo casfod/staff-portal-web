@@ -255,6 +255,13 @@ const Project = () => {
                       </tbody>
                     </table>
                   </div>
+
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      <span className="font-extrabold uppercase">Summary:</span>{" "}
+                      {project.project_summary}
+                    </p>
+                  </div>
                 </div>
               </td>
             </tr>
