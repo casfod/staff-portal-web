@@ -10,7 +10,7 @@ const RoleBadge = ({
   children: React.ReactNode;
 }) => {
   const baseClasses =
-    "w-fit h-fit px-2 whitespace-nowrap rounded-lg uppercase mb-1";
+    "w-fit h-fit px-2 py-1 whitespace-nowrap rounded-lg uppercase mb-1";
   const roleStyles = {
     STAFF: "border border-gray-400 text-gray-700",
     ADMIN: "bg-secondary text-white",

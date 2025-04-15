@@ -32,7 +32,7 @@ export function Header() {
               style={{ fontFamily: "Sora", letterSpacing: "1px" }}
             >
               <RoleBadge role={user.role}>
-                <div className=" flex items-center gap-1 lg:text-base text-center px-2 py-1 rounded-md">
+                <div className=" flex items-center gap-1 lg:text-base text-center rounded-md">
                   <span className="font-extrabold text-sm tracking-[1.5px]">
                     {user?.first_name.toUpperCase()}
                   </span>
