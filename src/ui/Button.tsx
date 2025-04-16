@@ -13,8 +13,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Base classes
   const baseClasses =
-    " inline-flex items-center px-4 py-2 border border-transparent 
-text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover gap-2";
+    " inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover gap-2";
 
   // Size-specific classes
   const sizeClasses = {
