@@ -58,7 +58,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
-      <div className="mx-auto px-4 py-3 xl:py-2 flex justify-between items-center">
+      <div className="mx-auto pl-6 xl:pl-2 pr-6 py-3 xl:py-2 flex justify-between items-center">
         <img src={logo} alt="CASFOD" className="hidden xl:block w-[190px]" />
 
         <span
