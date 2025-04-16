@@ -10,7 +10,7 @@ const RoleBadge = ({
   children: React.ReactNode;
 }) => {
   const baseClasses =
-    "w-fit h-fit px-2 py-1 whitespace-nowrap rounded-lg uppercase mb-1";
+    "flex items-center w-fit h-fit px-2 py-1.5 bg-gray-500 whitespace-nowrap rounded-lg uppercase mb-1";
   const roleStyles = {
     STAFF: "border border-gray-400 text-gray-700",
     ADMIN: "bg-secondary text-white",
@@ -20,7 +20,7 @@ const RoleBadge = ({
 
   return (
     <div className={`${baseClasses} ${roleStyles[role] || ""}`}>
-      <p style={{ letterSpacing: "1px" }}>{children}</p>
+      <div style={{ letterSpacing: "1px" }}>{children}</div>
     </div>
   );
 };
