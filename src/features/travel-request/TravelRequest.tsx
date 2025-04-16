@@ -108,7 +108,7 @@ const TravelRequest = () => {
         </button>
       </div>
 
-      <div className="w-full bg-white shadow-sm rounded-lg overflow-hidden border ">
+      <div className="w-full bg-inherit shadow-sm rounded-lg overflow-hidden border pb-[200px]">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
