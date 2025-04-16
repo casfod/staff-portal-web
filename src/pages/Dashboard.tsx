@@ -180,7 +180,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-16">
+    <div className="flex flex-col gap-4 pt-6 pb-16">
       <h1
         className="text-2xl font-semibold text-gray-700"
         style={{ letterSpacing: "2px" }}

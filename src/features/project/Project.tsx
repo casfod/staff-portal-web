@@ -47,23 +47,23 @@ const Project = () => {
       </div>
 
       {/* Main Table Section */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              {/* <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th> */}
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Budget
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
                 Created
               </th>
             </tr>

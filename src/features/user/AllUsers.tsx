@@ -83,7 +83,7 @@ export function AllUsers() {
   }
 
   return (
-    <div className="flex flex-col space-y-3">
+    <div className="flex flex-col space-y-3 pt-6">
       {/* Header and Add User Button */}
       <div className="flex justify-between items-center">
         <h1
@@ -154,7 +154,7 @@ export function AllUsers() {
       </div>
 
       {/* User Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

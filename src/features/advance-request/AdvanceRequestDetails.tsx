@@ -15,19 +15,19 @@ const ItemsTable = ({
   <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
     <thead>
       <tr>
-        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
           Description
         </th>
-        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
           Quantity
         </th>
-        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
           Frequency
         </th>
-        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
           Unit Cost
         </th>
-        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
           Total
         </th>
       </tr>

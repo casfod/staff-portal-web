@@ -47,7 +47,7 @@ const TravelRequestTableRow = ({
         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
           {dateformat(request.createdAt!)}
         </td>
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
           <div className="flex space-x-4">
             <button
               onClick={() => toggleViewItems(request.id!)}

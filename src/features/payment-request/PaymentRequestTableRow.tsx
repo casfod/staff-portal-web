@@ -39,20 +39,20 @@ const PaymentRequestTableRow = ({
   return (
     <>
       <tr key={requestId}>
-        <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
           {request.requestBy}
         </td>
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
           <StatusBadge status={request.status!} />
         </td>
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
           {moneyFormat(request.amountInFigure, "NGN")}
         </td>
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
           {dateformat(requestCreatedAt)}
         </td>
 
-        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
           <div className="flex space-x-4">
             <span
               className="hover:cursor-pointer"

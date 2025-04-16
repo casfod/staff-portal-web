@@ -111,42 +111,47 @@ const AllPurchaseRequests = () => {
   }
 
   return (
-    <div className="max-w-full flex flex-col space-y-3 pb-16">
-      <div className="flex justify-between items-center">
-        <h1
-          className="text-2xl font-semibold text-gray-700"
-          style={{ letterSpacing: "2px" }}
-        >
-          Purchase Requests
-        </h1>
-        <button
-          onClick={() => navigate("/purchase-requests/create-purchase-request")} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Request
-        </button>
-      </div>
-
-      {/* Search Bar and Sort Dropdown */}
-      <div className="flex items-center space-x-4">
-        <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-          <span className="p-2 text-gray-400">
-            <BiSearch className="w-5 h-5" />
-          </span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-            className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-            placeholder="Search"
-          />
-          <span
-            className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-            onClick={() => dispatch(setSearchTerm(""))}
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        {/* Header with title and button */}
+        <div className="flex justify-between items-center">
+          <h1
+            className="text-2xl font-semibold text-gray-700"
+            style={{ letterSpacing: "2px" }}
           >
-            <GoXCircle />
-          </span>
+            Purchase Requests
+          </h1>
+          <button
+            onClick={() =>
+              navigate("/purchase-requests/create-purchase-request")
+            }
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Request
+          </button>
+        </div>
+
+        {/* Search Bar and Sort Dropdown */}
+        <div className="flex items-center space-x-4">
+          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
+            <span className="p-2 text-gray-400">
+              <BiSearch className="w-5 h-5" />
+            </span>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+              className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+              placeholder="Search"
+            />
+            <span
+              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
+              onClick={() => dispatch(setSearchTerm(""))}
+            >
+              <GoXCircle />
+            </span>
+          </div>
         </div>
       </div>
 
@@ -154,66 +159,54 @@ const AllPurchaseRequests = () => {
       {/*PURCHASE REQUEST TABLE*/}
       {/* ///////////////////////////// */}
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
+        <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Department
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Requested By
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
 
-          {isLoading ? (
-            <tbody>
+          <tbody className="max-w-full bg-white divide-y divide-gray-200">
+            {isLoading ? (
               <tr>
-                <td colSpan={6}>
-                  <div className="flex justify-center items-center h-96">
+                <td colSpan={6} className="py-8">
+                  <div className="flex justify-center items-center">
                     <Spinner />
                   </div>
                 </td>
               </tr>
-            </tbody>
-          ) : (
-            <tbody className="max-w-full bg-white divide-y divide-gray-200">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-8">
-                    <div className="flex justify-center items-center">
-                      <Spinner />
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                purchaseRequests.map((request) => (
-                  <PurchaseRequestTableRow
-                    key={request.id}
-                    request={request}
-                    visibleItems={visibleItems}
-                    toggleViewItems={toggleViewItems}
-                    handleEdit={handleEdit}
-                    handleDelete={handleDelete}
-                    handleAction={handleAction}
-                  />
-                ))
-              )}
-            </tbody>
-          )}
+            ) : (
+              purchaseRequests.map((request) => (
+                <PurchaseRequestTableRow
+                  key={request.id}
+                  request={request}
+                  visibleItems={visibleItems}
+                  toggleViewItems={toggleViewItems}
+                  handleEdit={handleEdit}
+                  handleDelete={handleDelete}
+                  handleAction={handleAction}
+                />
+              ))
+            )}
+          </tbody>
         </table>
       </div>
 
