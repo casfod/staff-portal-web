@@ -5,7 +5,7 @@ import DesktopNavigation from "./DesktopNavigation";
 export function Layout() {
   return (
     <div
-      className="min-h-screen bg-[#F8F8F8]"
+      className="max-h-screen bg-[#F8F8F8] overflow-y-scroll"
       style={{ fontFamily: "Cabin", letterSpacing: "0.9px" }}
     >
       <Header />

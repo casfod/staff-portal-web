@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import Navlink from "./Navlink";
 import {
   LayoutDashboard,
@@ -14,28 +14,29 @@ import {
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
 import { BiLogOut } from "react-icons/bi";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { localStorageUser } from "../utils/localStorageUser";
 const Navigation: React.FC = () => {
   const localStorageUserX = localStorageUser();
   const { logout, isPending } = useLogout();
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const timeoutRef = useRef<number | null>(null);
+  // const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  // const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  // const timeoutRef = useRef<number | null>(null);
 
   const handleLogout = async () => {
     logout();
   };
 
-  const handleMouseEnter = (itemToOpen: string) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setOpenDropdown(itemToOpen);
-  };
+  // const handleMouseEnter = (itemToOpen: string) => {
+  //   if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  //   setOpenDropdown(itemToOpen);
+  // };
 
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null);
-    }, 300);
-  };
+  // const handleMouseLeave = () => {
+  //   timeoutRef.current = setTimeout(() => {
+  //     setOpenDropdown(null);
+  //   }, 300);
+  // };
 
   // Define the navigation items
   const navigation = [
@@ -82,7 +83,7 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="border-r flex flex-col items-center w-fit"
+      className="flex flex-col items-center w-fit"
       style={{ fontFamily: "Cabin" }}
     >
       <nav className="">
@@ -92,8 +93,8 @@ const Navigation: React.FC = () => {
               className="bg-white border w-full rounded-lg shadow-md relative"
               key={item.to}
               style={{ letterSpacing: "0.5px" }}
-              onMouseEnter={() => handleMouseEnter(item.to)}
-              onMouseLeave={handleMouseLeave}
+              // onMouseEnter={() => handleMouseEnter(item.to)}
+              // onMouseLeave={handleMouseLeave}
             >
               <Navlink to={item.to} label={item.label} icon={item.icon} />
               {/* {item.dropdown && openDropdown === item.to && (
