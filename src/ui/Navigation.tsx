@@ -82,11 +82,11 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="border-r flex flex-col items-center h-full w-fit"
+      className="border-r flex flex-col items-center w-fit"
       style={{ fontFamily: "Cabin" }}
     >
-      <nav>
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-3 px-6 pt-3 xl:pt-6">
+      <nav className="">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 2xl:gap-3 px-6 pt-3 xl:pt-6">
           {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
@@ -96,7 +96,7 @@ const Navigation: React.FC = () => {
               onMouseLeave={handleMouseLeave}
             >
               <Navlink to={item.to} label={item.label} icon={item.icon} />
-              {item.dropdown && openDropdown === item.to && (
+              {/* {item.dropdown && openDropdown === item.to && (
                 <div
                   className="absolute left-full top-0 ml-2 bg-white border rounded-lg shadow-md w-48 z-50"
                   onMouseEnter={() => handleMouseEnter(item.to)}
@@ -107,7 +107,7 @@ const Navigation: React.FC = () => {
                       <li key={dropdownItem.to}>
                         <Link
                           to={dropdownItem.to}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-2 text-xs xl:text-sm text-gray-700 hover:bg-gray-100"
                         >
                           {dropdownItem.label}
                         </Link>
@@ -115,7 +115,7 @@ const Navigation: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-              )}
+              )} */}
             </li>
           ))}
         </ul>

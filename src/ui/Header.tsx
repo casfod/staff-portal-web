@@ -58,9 +58,13 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
-      <div className="mx-auto pl-6 xl:pl-3 pr-6 py-3 xl:py-2 flex justify-between items-center">
+      <div className="mx-auto pl-6 2xl:pl-3 pr-6 py-3 xl:py-2 flex justify-between items-center">
         <div className="hidden xl:block border pl-2 py-2 px-2 rounded-md shadow">
-          <img src={logo} alt="CASFOD" className="w-[200px] h-14" />
+          <img
+            src={logo}
+            alt="CASFOD"
+            className="w-[180px] 2xl:w-[200px] h-10 2xl:h-14"
+          />
         </div>
 
         <span
@@ -72,14 +76,14 @@ export function Header() {
         </span>
 
         <span
-          className="ml-2 font-extrabold text-primary tracking-[5px]"
+          className="ml-2 font-extrabold text-sm 2xl:text-base text-primary tracking-[5px]"
           style={{ fontFamily: "Sora" }}
         >
           CASFOD POSSIBILITY HUB
         </span>
 
         <div
-          className="flex items-center space-x-4 text-sm"
+          className="flex items-center space-x-4 text-xs 2xl:text-sm"
           style={{ fontFamily: "Sora" }}
         >
           <RoleBadge role={user.role}>

@@ -105,7 +105,7 @@ const AllConceptNotes = () => {
         {/* Header with title and button */}
         <div className="flex justify-between items-center">
           <h1
-            className="text-2xl font-semibold text-gray-700"
+            className="text-xl 2xl:text-2xl font-semibold text-gray-700"
             style={{ letterSpacing: "2px" }}
           >
             Concept Notes
@@ -113,7 +113,8 @@ const AllConceptNotes = () => {
 
           <button
             onClick={() => navigate("/concept-notes/create-concept-note")} // Use relative path here
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+            className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
           >
             <Plus className="h-4 w-4 mr-2" />
             New Concept Note
@@ -148,19 +149,19 @@ const AllConceptNotes = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Prepared By
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Actions
               </th>
             </tr>
@@ -180,20 +181,20 @@ const AllConceptNotes = () => {
               {conceptNotes.map((note) => (
                 <>
                   <tr key={note?.id}>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm font-medium text-gray-700">
                       {note.project_code}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       <StatusBadge status={note.status!} />
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {note.staff_name}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {note?.createdAt ? dateformat(note.createdAt) : "N/A"}
                     </td>
 
-                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
@@ -361,7 +362,8 @@ const AllConceptNotes = () => {
                           <div className="flex justify-center w-full">
                             <button
                               onClick={() => handleAction(note)} // Use relative path here
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                              className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
                             >
                               <span className="inline-flex items-center gap-1">
                                 <SlMagnifier />

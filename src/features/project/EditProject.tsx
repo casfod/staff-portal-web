@@ -35,7 +35,8 @@ const EditProject = () => {
         </h1>
         <button
           onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+          className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <List className="h-4 w-4 mr-2" />
           All Requests

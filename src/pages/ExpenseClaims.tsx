@@ -35,7 +35,8 @@ export function ExpenseClaims() {
         </h1>
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+          className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <Plus className="h-4 w-4 mr-2" />
           New Request
@@ -46,19 +47,19 @@ export function ExpenseClaims() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Purpose
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Requested By
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Date
               </th>
             </tr>

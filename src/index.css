@@ -17,7 +17,8 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 8px; /* Adjust the width as needed */
+  width: 3px;
+  z-index: -1000; /* Adjust the width as needed */
 }
 
 ::-webkit-scrollbar-thumb {

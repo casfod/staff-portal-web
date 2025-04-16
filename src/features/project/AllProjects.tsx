@@ -76,7 +76,7 @@ export function AllProjects() {
         {/* Header with title and button */}
         <div className="flex justify-between items-center">
           <h1
-            className="text-2xl font-semibold text-gray-700"
+            className="text-xl 2xl:text-2xl font-semibold text-gray-700"
             style={{ letterSpacing: "2px" }}
           >
             Projects
@@ -85,7 +85,8 @@ export function AllProjects() {
           {localStorageUserX.role === "SUPER-ADMIN" && (
             <button
               onClick={() => navigate("/projects/create-project")}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
+              className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Project
@@ -121,22 +122,22 @@ export function AllProjects() {
         <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50 ">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Name
               </th>
-              {/* <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th> */}
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Budget
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Created
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Actions
               </th>
             </tr>
@@ -157,22 +158,22 @@ export function AllProjects() {
               {projects.map((project) => (
                 <>
                   <tr key={project.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    {/* <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {project.status}
                     </td> */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {project.project_code}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {moneyFormat(Number(project.project_budget), "USD")}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       {dateformat(project.createdAt!)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"
@@ -386,7 +387,8 @@ export function AllProjects() {
                           <div className="flex justify-center w-full">
                             <button
                               onClick={() => handleAction(project)} // Use relative path here
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
+                              className="inline-flex items-center px-4 py-2 border border-transparent 
+text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
                             >
                               <span className="inline-flex items-center gap-1">
                                 <SlMagnifier />

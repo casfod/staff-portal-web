@@ -195,27 +195,31 @@ export function Dashboard() {
         {stats.map((stat) => (
           <div key={stat.name} className={`bg-white rounded-lg shadow-md p-6`}>
             <h3
-              className={`text-base xl:text-lg font-medium text-gray-600 mb-2`}
+              className={`text-sm lg:text-base 2xl:text-lg font-medium text-gray-600 mb-2`}
             >
               {stat.name}
             </h3>
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm xl:text-sm text-gray-500 font-semibold`}>
+                <p
+                  className={`text-xs 2xl:text-sm text-gray-500 font-semibold`}
+                >
                   Total
                 </p>
                 {
-                  <p className={`text-2xl font-semibold text-gray-600  `}>
+                  <p
+                    className={`text-xl 2xl:text-2xl font-semibold text-gray-600  `}
+                  >
                     {stat.total}
                   </p>
                 }
               </div>
               {stat.approved && (
                 <div>
-                  <p className="text-sm text-gray-500 font-semibold">
+                  <p className="text-xs 2xl:text-sm text-gray-500 font-semibold">
                     Approved
                   </p>
-                  <p className="text-2xl font-semibold text-green-600">
+                  <p className="text-xl 2xl:text-2xl font-semibold text-green-600">
                     {stat.approved}
                   </p>
                 </div>
