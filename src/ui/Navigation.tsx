@@ -82,11 +82,11 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="border-r hidden lg:flex flex-col items-center h-full"
+      className="border-r flex flex-col items-center h-full w-fit"
       style={{ fontFamily: "Cabin" }}
     >
       <nav>
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-3 px-6 pt-6">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-3 px-6 pt-3 xl:pt-6">
           {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
@@ -122,7 +122,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[41%]"
+        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[20%] xl:mt-[41%]"
         onClick={handleLogout}
       >
         {isPending ? (
