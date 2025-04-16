@@ -15,6 +15,11 @@ input[type="password"]::-ms-reveal {
 body {
   overflow-y: hidden;
 }
+html,
+body {
+  min-width: 1024px;
+  overflow-x: hidden;
+}
 
 ::-webkit-scrollbar {
   width: 3px;

@@ -17,7 +17,7 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
       <NavLink
         to={to}
         className={({ isActive }) =>
-          `w-full h-full flex items-center justify-center py-1 px-2 transition-colors duration-200 rounded-lg 
+          `w-full h-full flex items-center justify-center py-1.5 px-2 transition-colors duration-200 rounded-lg 
       
          ${
            isActive
