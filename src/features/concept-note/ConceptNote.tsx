@@ -92,19 +92,19 @@ const ConceptNote = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Prepared By
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Date
               </th>
-              {/* <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Actions
               </th> */}
             </tr>
@@ -116,13 +116,13 @@ const ConceptNote = () => {
                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-700 uppercase">
                   {conceptNote.project_code}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                   <StatusBadge status={conceptNote.status!} />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600 uppercase">
                   {conceptNote.staff_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600 uppercase">
                   {conceptNote?.createdAt
                     ? dateformat(conceptNote.createdAt)
                     : "N/A"}
@@ -270,7 +270,7 @@ const ConceptNote = () => {
 
       {conceptNote.status === "pending" &&
         localStorageUserX.id === conceptNote.approvedBy.id && (
-          <div className="w-full text-gray-500">
+          <div className="w-full text-gray-600">
             <div className="flex flex-col w-full gap-2">
               <label htmlFor="content">
                 <span className="font-bold uppercase">Comment</span>{" "}

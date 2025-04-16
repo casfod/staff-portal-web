@@ -205,7 +205,7 @@ const Select: React.FC<SelectProps> = ({
               </div>
             ))
           ) : (
-            <div className="px-4 py-2 text-gray-500 text-center">
+            <div className="px-4 py-2 text-gray-600 text-center">
               No options found
             </div>
           )}

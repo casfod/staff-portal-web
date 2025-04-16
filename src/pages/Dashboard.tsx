@@ -202,7 +202,7 @@ export function Dashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <p
-                  className={`text-xs 2xl:text-sm text-gray-500 font-semibold`}
+                  className={`text-xs 2xl:text-sm text-gray-600 font-semibold`}
                 >
                   Total
                 </p>
@@ -216,7 +216,7 @@ export function Dashboard() {
               </div>
               {stat.approved && (
                 <div>
-                  <p className="text-xs 2xl:text-sm text-gray-500 font-semibold">
+                  <p className="text-xs 2xl:text-sm text-gray-600 font-semibold">
                     Approved
                   </p>
                   <p className="text-xl 2xl:text-2xl font-semibold text-green-600">

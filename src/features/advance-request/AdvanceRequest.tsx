@@ -125,19 +125,19 @@ const Request = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Department
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Requested By
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Date
               </th>
             </tr>
@@ -149,16 +149,16 @@ const Request = () => {
                 <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
                   {advanceRequest.department}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600">
                   {moneyFormat(totalAmount, "NGN")}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   <StatusBadge status={advanceRequest.status!} />
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   {advanceRequest.requestedBy}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   {dateformat(advanceRequest.createdAt!)}
                 </td>
               </tr>

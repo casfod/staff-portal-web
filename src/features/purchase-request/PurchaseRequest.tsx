@@ -120,19 +120,19 @@ const PurchaseRequest = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Department
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Requested By
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
                 Date
               </th>
             </tr>
@@ -144,16 +144,16 @@ const PurchaseRequest = () => {
                 <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
                   {purchaseRequest.department}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600">
                   {moneyFormat(totalAmount, "NGN")}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   <StatusBadge status={purchaseRequest.status!} />
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   {purchaseRequest.requestedBy}
                 </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-500 uppercase">
+                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
                   {dateformat(purchaseRequest.createdAt!)}
                 </td>
               </tr>

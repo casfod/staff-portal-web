@@ -43,22 +43,22 @@ const AdvanceRequestTableRow = ({
   return (
     <>
       <tr key={requestId} className="h-[40px] max-h-[40px]">
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm font-medium text-gray-700 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.department}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {moneyFormat(totalAmount, "NGN")}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <StatusBadge status={requestStatus} />
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.requestedBy}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {dateformat(requestCreatedAt)}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
             <span
               className="hover:cursor-pointer"

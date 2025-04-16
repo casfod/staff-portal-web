@@ -15,19 +15,19 @@ const ItemsTable = ({
   <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4">
     <thead>
       <tr>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Description
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Quantity
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Frequency
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Unit Cost
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Total
         </th>
       </tr>
@@ -35,19 +35,19 @@ const ItemsTable = ({
     <tbody className="bg-white divide-y divide-gray-200">
       {itemGroups!.map((item) => (
         <tr key={item.id!}>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
             {item.description}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {item.quantity}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {item.frequency}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {moneyFormat(item.unitCost, "NGN")}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {moneyFormat(item.total, "NGN")}
           </td>
         </tr>

@@ -51,19 +51,19 @@ const Project = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Name
               </th>
-              {/* <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Status
               </th> */}
-              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Budget
               </th>
-              <th className="px-6 py-2 text-left  font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Created
               </th>
             </tr>
@@ -75,15 +75,15 @@ const Project = () => {
                   ? truncateText(project?.project_title, 35, "...")
                   : "N/A"}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
+              <td className="px-6 py-4 whitespace-nowrap  text-gray-600 uppercase">
                 {project?.project_code}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
+              <td className="px-6 py-4 whitespace-nowrap  text-gray-600 uppercase">
                 {project?.project_budget
                   ? moneyFormat(Number(project?.project_budget), "USD")
                   : "N/A"}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
+              <td className="px-6 py-4 whitespace-nowrap  text-gray-600 uppercase">
                 {project?.createdAt ? dateformat(project?.createdAt) : "N/A"}
               </td>
             </tr>

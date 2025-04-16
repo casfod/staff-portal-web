@@ -14,19 +14,19 @@ const ExpenseTable = ({
   <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4">
     <thead>
       <tr>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Expense
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Location
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Number Of Days
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Rate
         </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
           Total
         </th>
       </tr>
@@ -34,19 +34,19 @@ const ExpenseTable = ({
     <tbody className="bg-white divide-y divide-gray-200">
       {expenses?.map((expense, index) => (
         <tr key={index}>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
             {expense.expense}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words max-w-xs">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
             {expense.location}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {expense.daysNumber}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {moneyFormat(expense.rate, "NGN")}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-500 break-words">
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
             {moneyFormat(expense.total, "NGN")}
           </td>
         </tr>

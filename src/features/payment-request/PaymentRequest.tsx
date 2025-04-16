@@ -119,16 +119,16 @@ const PaymentRequest = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Request
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Budget
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Created
               </th>
             </tr>
@@ -139,13 +139,13 @@ const PaymentRequest = () => {
                 <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700 uppercase">
                   {paymentRequest.requestBy}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
                   <StatusBadge status={paymentRequest.status!} />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
                   {moneyFormat(paymentRequest.amountInFigure, "NGN")}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-500 uppercase">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-600 uppercase">
                   {dateformat(paymentRequest.createdAt!)}
                 </td>
               </tr>

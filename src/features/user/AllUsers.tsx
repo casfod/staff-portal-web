@@ -161,20 +161,20 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Email
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Role
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th>
               {localStorageUserX.role === "SUPER-ADMIN" && (
-                <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase text-xs 2xl:text-text-sm tracking-wider">
+                <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                   Actions
                 </th>
               )}
@@ -197,20 +197,20 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
                   key={user.id}
                   className="h-[40px] max-h-[40px]" // Apply max height to each row
                 >
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm font-medium text-gray-700">
+                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {`${user.first_name} ${user.last_name}`}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600">
                     {user.email}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {user.role}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {user.isDeleted ? "Inactive" : "Active"}
                   </td>
                   {localStorageUserX.role === "SUPER-ADMIN" && (
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       <div className="flex space-x-4">
                         <Modal>
                           <Modal.Open open={`userCog-${user.id}`}>
@@ -237,7 +237,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
         {/* No Results Message */}
         {users.length === 0 && !isLoading && (
           <div className="bg-gray-50 p-8">
-            <p className="text-2xl text-center text-gray-500">No result</p>
+            <p className="text-2xl text-center text-gray-600">No result</p>
           </div>
         )}
       </div>

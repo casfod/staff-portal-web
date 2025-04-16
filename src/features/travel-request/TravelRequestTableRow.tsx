@@ -29,25 +29,25 @@ const TravelRequestTableRow = ({
   return (
     <>
       <tr key={request.id} className="h-[40px] max-h-[40px]">
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.staffName}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {moneyFormat(
             request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0,
             "NGN"
           )}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <StatusBadge status={request.status!} />
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.staffName}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500 uppercase">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {dateformat(request.createdAt!)}
         </td>
-        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-text-sm text-gray-500">
+        <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
             <button
               onClick={() => toggleViewItems(request.id!)}
