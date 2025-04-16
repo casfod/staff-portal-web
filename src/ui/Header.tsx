@@ -59,12 +59,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
       <div className="mx-auto pl-6 xl:pl-3 pr-6 py-3 xl:py-2 flex justify-between items-center">
-        <div className="border pl-2 py-2 px-2 rounded-md shadow">
-          <img
-            src={logo}
-            alt="CASFOD"
-            className="hidden xl:block w-[200px] h-14"
-          />
+        <div className="hidden xl:block border pl-2 py-2 px-2 rounded-md shadow">
+          <img src={logo} alt="CASFOD" className="w-[200px] h-14" />
         </div>
 
         <span
