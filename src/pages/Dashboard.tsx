@@ -189,17 +189,21 @@ export function Dashboard() {
       </h1>
 
       <div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         style={{ fontFamily: "Sora", letterSpacing: "1px" }}
       >
         {stats.map((stat) => (
           <div key={stat.name} className={`bg-white rounded-lg shadow-md p-6`}>
-            <h3 className={`text-lg font-medium text-gray-600 mb-2`}>
+            <h3
+              className={`text-base xl:text-lg font-medium text-gray-600 mb-2`}
+            >
               {stat.name}
             </h3>
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm text-gray-500 font-semibold`}>Total</p>
+                <p className={`text-sm xl:text-sm text-gray-500 font-semibold`}>
+                  Total
+                </p>
                 {
                   <p className={`text-2xl font-semibold text-gray-600  `}>
                     {stat.total}
