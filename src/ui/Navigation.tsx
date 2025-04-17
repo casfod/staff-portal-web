@@ -123,7 +123,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[15%] xl:mt-[30%]"
+        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[15%] xl:mt-[25%]"
         onClick={handleLogout}
       >
         {isPending ? (
