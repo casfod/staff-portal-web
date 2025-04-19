@@ -106,7 +106,7 @@ const Request = () => {
       {/* Header Section */}
       <div className="w-full flex justify-between items-center">
         <h1
-          className="text-2xl font-semibold text-gray-700"
+          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
           Review Request
@@ -115,7 +115,7 @@ const Request = () => {
           onClick={() => navigate(-1)} // Use relative path here
           className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
-          <List className="h-4 w-4 mr-2" />
+          <List className="h-4 w-4 mr-1 md:mr-2" />
           All Requests
         </button>
       </div>

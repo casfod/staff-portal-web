@@ -15,6 +15,7 @@ interface SelectProps {
   required?: boolean;
   customLabel: string;
   optionsHeight?: number | string;
+  optionsWeight?: number | string;
   filterable?: boolean; // New prop to enable/disable filtering
 }
 
@@ -120,7 +121,7 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <div
-      className="text-gray-600 relative w-full"
+      className=" text-gray-600 relative w-full md:w-[250px]"
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >

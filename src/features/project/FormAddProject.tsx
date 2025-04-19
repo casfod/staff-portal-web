@@ -7,14 +7,27 @@ import Button from "../../ui/Button";
 import { FaPlus } from "react-icons/fa";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useAddProject } from "./Hooks/useAddProject";
+import Select from "../../ui/Select";
 
 // Define the sector options
 const sectorOptions = [
-  "Education",
-  "Protection",
-  "WASH",
-  "Nutrition/Health",
-  "Livelihood",
+  { id: "Education", name: "Education" },
+  {
+    id: "Protection",
+    name: "Protection",
+  },
+  {
+    id: "WASH",
+    name: "WASH",
+  },
+  {
+    id: "Nutrition/Health",
+    name: "Nutrition/Health",
+  },
+  {
+    id: "Livelihood",
+    name: "Livelihood",
+  },
 ];
 
 const FormAddProject = () => {
@@ -120,7 +133,7 @@ const FormAddProject = () => {
   return (
     <form className="space-y-6 uppercase">
       {/* Project Title and Donor */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Title *">
           <Input
             type="text"
@@ -143,7 +156,7 @@ const FormAddProject = () => {
       </Row>
 
       {/* Project Partners and  Project Code*/}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Code *">
           <Input
             type="text"
@@ -182,11 +195,12 @@ const FormAddProject = () => {
 
       {/* Account Code */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.account_code.map((account, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+p-3 md:p-6 mb-3 rounded-lg shadow-md"
             >
               <FormRow label={`Account Code ${index + 1} *`} type="wide">
                 <Input
@@ -214,12 +228,12 @@ const FormAddProject = () => {
 
         <div className="flex items-center gap-4 w-full">
           <Button type="button" onClick={addAccountCode}>
-            <FaPlus /> Add Account Code
+            <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add
           </Button>
           <span className="text-gray-700 font-bold">
             {formData.account_code.length > 1
-              ? formData.account_code.length + " Account Codes "
-              : formData.account_code.length + " Account Code "}
+              ? formData.account_code.length + " Accounts "
+              : formData.account_code.length + " Account"}
             Added
           </span>
         </div>
@@ -227,37 +241,36 @@ const FormAddProject = () => {
 
       {/* Sectors */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.sectors.map((sector, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+     p-3 md:p-6 mb-3 rounded-lg shadow-md"
             >
               <h4 className="text-gray-600 text-lg font-semibold">
                 SECTOR {index + 1}
               </h4>
 
               <FormRow label="Sector Name *" type="wide">
-                <select
+                <Select
+                  id="name"
                   value={sector.name}
                   required
-                  onChange={(e) =>
-                    handleSectorChange(index, "name", e.target.value)
+                  customLabel="Select Sector Name"
+                  onChange={(value) => handleSectorChange(index, "name", value)}
+                  options={
+                    sectorOptions
+                      ? sectorOptions.map((option) => ({
+                          id: `${option.name}`,
+                          name: `${option.name}`,
+                        }))
+                      : []
                   }
-                  className="w-full p-2 text-gray-600  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="" disabled>
-                    Select a sector
-                  </option>
-                  {sectorOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                ></Select>
               </FormRow>
 
-              <FormRow label="Percentage *" type="medium">
+              <FormRow label="Percentage *">
                 <Input
                   placeholder=""
                   inputSize={100}
@@ -287,7 +300,7 @@ const FormAddProject = () => {
 
         <div className="flex items-center gap-4 w-full">
           <Button type="button" onClick={addSector}>
-            <FaPlus /> Add Sector
+            <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Sector
           </Button>
           <span className="text-gray-700 font-bold">
             {formData.sectors.length > 1
@@ -346,7 +359,7 @@ const FormAddProject = () => {
         </FormRow>
       </Row>
       {/* Implementation Period */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Implementation Period (From) *">
           <Input
             type="date"

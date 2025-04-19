@@ -41,7 +41,7 @@ function Window({ children, name }: WindowProps) {
   return createPortal(
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur">
       <div
-        className="bg-white z-50 relative transition duration-500 rounded-lg max-h-[90vh] overflow-y-auto"
+        className="bg-white z-50 relative transition duration-500 rounded-lg max-h-[80vh] overflow-y-auto top-6"
         onClick={(e) => e.stopPropagation()} // Prevent click events from propagating to the backdrop
       >
         <button

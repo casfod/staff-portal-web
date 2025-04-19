@@ -7,6 +7,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Button from "../../ui/Button";
 import { FaPlus } from "react-icons/fa";
 import { useUpdateProject } from "./Hooks/useUpdateProject";
+import Select from "../../ui/Select";
 
 interface FormEditProjectProps {
   project: Project;
@@ -14,11 +15,23 @@ interface FormEditProjectProps {
 
 // Define the sector options
 const sectorOptions = [
-  "Education",
-  "Protection",
-  "WASH",
-  "Nutrition/Health",
-  "Livelihood",
+  { id: "Education", name: "Education" },
+  {
+    id: "Protection",
+    name: "Protection",
+  },
+  {
+    id: "WASH",
+    name: "WASH",
+  },
+  {
+    id: "Nutrition/Health",
+    name: "Nutrition/Health",
+  },
+  {
+    id: "Livelihood",
+    name: "Livelihood",
+  },
 ];
 
 const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
@@ -132,7 +145,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
   return (
     <form className="space-y-6 uppercase">
       {/* Project Title and Donor */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Title *">
           <Input
             type="text"
@@ -155,7 +168,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       </Row>
 
       {/* Project Partners and  Project Code*/}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Code *">
           <Input
             type="text"
@@ -179,62 +192,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </FormRow>
       </Row>
 
-      {/* Account code*/}
-      {/* <Row>
-          <FormRow label="Account Name *">
-            <Input
-              type="text"
-              min="0"
-              required
-              value={formData.account_code.name}
-              onChange={(e) =>
-                handleNestedChange("account_code", "name", e.target.value)
-              }
-            />
-          </FormRow>
-          <FormRow label="Account code *">
-            <Input
-              type="text"
-              min="0"
-              required
-              value={formData.account_code.code}
-              onChange={(e) =>
-                handleNestedChange("account_code", "code", e.target.value)
-              }
-            />
-          </FormRow>
-        </Row> */}
-
-      {/* Implementation Period */}
-      <Row>
-        <FormRow label="Implementation Period (From) *">
-          <Input
-            type="date"
-            id="implementation_period_from"
-            required
-            value={formData.implementation_period.from}
-            onChange={(e) =>
-              handleNestedChange(
-                "implementation_period",
-                "from",
-                e.target.value
-              )
-            }
-          />
-        </FormRow>
-        <FormRow label="Implementation Period (To) *">
-          <Input
-            type="date"
-            id="implementation_period_to"
-            required
-            value={formData.implementation_period.to}
-            onChange={(e) =>
-              handleNestedChange("implementation_period", "to", e.target.value)
-            }
-          />
-        </FormRow>
-      </Row>
-
       {/* Project Budget */}
       <Row>
         <FormRow label="Project Budget *">
@@ -250,16 +207,13 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
 
       {/* Account Code */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.account_code.map((account, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+p-3 md:p-6 mb-3 rounded-lg shadow-md"
             >
-              {/* <h4 className="text-gray-600 text-lg font-semibold">
-                  ACCOUNT {index + 1}
-                </h4> */}
-
               <FormRow label={`Account Code ${index + 1} *`} type="wide">
                 <Input
                   type="text"
@@ -270,17 +224,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
                   }
                 />
               </FormRow>
-
-              {/* <FormRow label="Account Code *" type="wide">
-                  <Input
-                    type="text"
-                    required
-                    value={account.code}
-                    onChange={(e) =>
-                      handleAccountCodeChange(index, "code", e.target.value)
-                    }
-                  />
-                </FormRow> */}
 
               <div className="flex gap-2 mt-4">
                 <button
@@ -297,12 +240,12 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
 
         <div className="flex items-center gap-4 w-full">
           <Button type="button" onClick={addAccountCode}>
-            <FaPlus /> Add Account Code
+            <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add
           </Button>
           <span className="text-gray-700 font-bold">
             {formData.account_code.length > 1
-              ? formData.account_code.length + " Account Codes "
-              : formData.account_code.length + " Account Code "}
+              ? formData.account_code.length + " Accounts "
+              : formData.account_code.length + " Account"}
             Added
           </span>
         </div>
@@ -310,37 +253,36 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
 
       {/* Sectors */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.sectors.map((sector, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[32%] p-3 mb-3 rounded-lg shadow-md"
+              className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+     p-3 md:p-6 mb-3 rounded-lg shadow-md"
             >
               <h4 className="text-gray-600 text-lg font-semibold">
                 SECTOR {index + 1}
               </h4>
 
               <FormRow label="Sector Name *" type="wide">
-                <select
+                <Select
+                  id="name"
                   value={sector.name}
                   required
-                  onChange={(e) =>
-                    handleSectorChange(index, "name", e.target.value)
+                  customLabel="Select Sector Name"
+                  onChange={(value) => handleSectorChange(index, "name", value)}
+                  options={
+                    sectorOptions
+                      ? sectorOptions.map((option) => ({
+                          id: `${option.name}`,
+                          name: `${option.name}`,
+                        }))
+                      : []
                   }
-                  className="w-full p-2 text-gray-600  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="" disabled>
-                    Select a sector
-                  </option>
-                  {sectorOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                ></Select>
               </FormRow>
 
-              <FormRow label="Percentage *" type="medium">
+              <FormRow label="Percentage *">
                 <Input
                   placeholder=""
                   inputSize={100}
@@ -370,7 +312,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
 
         <div className="flex items-center gap-4 w-full">
           <Button type="button" onClick={addSector}>
-            <FaPlus /> Add Sector
+            <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Sector
           </Button>
           <span className="text-gray-700 font-bold">
             {formData.sectors.length > 1
@@ -396,74 +338,10 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
         </FormRow>
       </Row>
 
-      {/* Target Beneficiaries */}
-      {/* <Row>
-          <FormRow label="Women *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.women}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "women",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Girls *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.girls}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "girls",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Boys *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.boys}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "boys",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-          <FormRow label="Men *" type="small">
-            <Input
-              type="number"
-              min="0"
-              required
-              value={formData.target_beneficiaries.men}
-              onChange={(e) =>
-                handleNestedChange(
-                  "target_beneficiaries",
-                  "men",
-                  e.target.value
-                )
-              }
-            />
-          </FormRow>
-        </Row> */}
-
       <Row>
         <FormRow label="Target Beneficiaries *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
             id="target_beneficiaries"
             required
             value={formData.target_beneficiaries.join(", ")}
@@ -480,8 +358,9 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       {/* Project Objectives */}
       <Row>
         <FormRow label="Project Objectives *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
             id="project_objectives"
             required
             value={formData.project_objectives}
@@ -491,9 +370,8 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
           />
         </FormRow>
       </Row>
-
       {/* Implementation Period */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Implementation Period (From) *">
           <Input
             type="date"
@@ -525,8 +403,9 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       {/* Project Summary */}
       <Row>
         <FormRow label="Project Summary *" type="wide">
-          <Input
-            type="text"
+          <textarea
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            maxLength={4000}
             id="project_summary"
             required
             value={formData.project_summary}

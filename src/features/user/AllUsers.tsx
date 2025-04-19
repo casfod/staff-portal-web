@@ -23,6 +23,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useEffect, useMemo } from "react";
+import Button from "../../ui/Button";
 
 export function AllUsers() {
   const localStorageUserX = localStorageUser();
@@ -87,7 +88,7 @@ export function AllUsers() {
       {/* Header and Add User Button */}
       <div className="flex justify-between items-center">
         <h1
-          className="text-2xl font-semibold text-gray-700"
+          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
           User Management
@@ -95,20 +96,17 @@ export function AllUsers() {
         {localStorageUserX.role === "SUPER-ADMIN" && (
           <Modal>
             <Modal.Open open="addUser">
-              <button
-                className="inline-flex items-center px-4 py-2 border border-transparent 
-text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
-              >
-                <Plus className="h-4 w-4 mr-2" />
+              <Button>
+                <Plus className="h-4 w-4 mr-1 md:mr-2" />
                 Add User
-              </button>
+              </Button>
             </Modal.Open>
           </Modal>
         )}
       </div>
 
       {/* Search Bar and Sort Dropdown */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap gap-2 items-center space-x-4">
         <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
           <span className="p-2 text-gray-400">
             <BiSearch className="w-5 h-5" />
@@ -252,6 +250,8 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
       )}
 
       {/* Modals */}
+
+      {/* <div></div> */}
       <Modal>
         <Modal.Window name="addUser">
           <AddUserForm />

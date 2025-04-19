@@ -5,6 +5,7 @@ import { RootState } from "../../store/store";
 import { useEffect } from "react";
 
 import FormEditConceptNotes from "./FormEditConceptNotes";
+import Button from "../../ui/Button";
 
 const EditConceptNote = () => {
   const navigate = useNavigate();
@@ -28,26 +29,24 @@ const EditConceptNote = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-80">
+    <div className="flex flex-col items-center gap-6 pt-4 pb-80">
       <div className="w-full flex justify-between items-center">
         <h1
-          className="text-2xl font-semibold text-gray-700"
+          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
           Update Concept Note
         </h1>
-        <button
+        <Button
           onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent 
-text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
-          <List className="h-4 w-4 mr-2" />
-          All Requests
-        </button>
+          <List className="h-4 w-4 mr-1 md:mr-2" />
+          List
+        </Button>
       </div>
 
       <div className="border w-full rounded-lg">
-        <div className="bg-white bg-opacity-90 py-10 px-12 w-full rounded-lg">
+        <div className="bg-white bg-opacity-90 py-4 md:py-6 py-10 px-2 md:px-6 px-12 w-full rounded-lg">
           <FormEditConceptNotes conceptNote={conceptNote} />
         </div>
       </div>

@@ -123,7 +123,7 @@ const FormEditPaymentRequest = ({
   return (
     <form className="space-y-6">
       <Row>
-        <FormRow label="Projects" type="small">
+        <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -150,7 +150,7 @@ const FormEditPaymentRequest = ({
           )}
         </FormRow>
 
-        <FormRow label="Grant Code *" type="small">
+        <FormRow label="Grant Code *">
           <Input
             type="text"
             id="grantCode"
@@ -191,7 +191,7 @@ const FormEditPaymentRequest = ({
       </Row>
 
       <Row>
-        <FormRow label="Amount In Figure *" type="small">
+        <FormRow label="Amount In Figure *">
           <Input
             type="number"
             id="amountInFigure"
@@ -234,7 +234,7 @@ const FormEditPaymentRequest = ({
         </FormRow>
       </Row>
       <Row>
-        <FormRow label="Bank Name *" type="small">
+        <FormRow label="Bank Name *">
           <Select
             id="bankName"
             customLabel="Select a Bank"
@@ -273,7 +273,7 @@ const FormEditPaymentRequest = ({
       </Row>
 
       <Row>
-        <FormRow label="Reviewed By *" type="small">
+        <FormRow label="Reviewed By *">
           {isLoading ? (
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (

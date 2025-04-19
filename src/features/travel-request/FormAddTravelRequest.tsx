@@ -19,8 +19,6 @@ import { expenses } from "../../assets/expenses";
 
 const FormAddTravelRequest: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  // State for the main form fields
   const [formData, setFormData] = useState<TravelRequestType>({
     travelReason: "",
     travelRequest: { from: "", to: "" },
@@ -32,104 +30,14 @@ const FormAddTravelRequest: React.FC = () => {
     reviewedBy: null,
   });
 
-  // State for the item groups
   const [itemGroup, setItemGroup] = useState<TravelRequestItemGroup[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
-
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
-
-  const handelProjectsChange = (value: string) => {
-    if (value) {
-      const selectedProject = projects?.find(
-        (project) =>
-          `${project.project_title} - ${project.project_code}` === value
-      );
-      if (selectedProject) {
-        setSelectedProject(selectedProject);
-        // Update formData with the combined string
-        setFormData((prev) => ({
-          ...prev,
-          project: `${selectedProject.project_code}`,
-        }));
-      }
-    } else {
-      setSelectedProject(null);
-      setFormData((prev) => ({
-        ...prev,
-        project: "",
-      }));
-    }
-  };
-  // Add a new item group
-  const addItem = () => {
-    setItemGroup([
-      ...itemGroup,
-      {
-        location: "",
-        daysNumber: 0,
-        rate: 0,
-        expense: "",
-        total: 0,
-      },
-    ]);
-    setDisabledStates([...disabledStates, false]);
-  };
-
-  const { saveTravelRequest, isPending } = useSaveTravelRequest();
-  const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
-
-  const { data, isLoading } = useReviewers();
-
-  const reviewers = useMemo(() => data?.data ?? [], [data]);
-
-  // Update item group fields
-  const handleItemChange = (
-    index: number,
-    field: keyof TravelRequestItemGroup,
-    value: string | number
-  ) => {
-    const newItems = [...itemGroup];
-    newItems[index][field] = value as never;
-    setItemGroup(newItems);
-  };
-
-  const handleNestedChange = (
-    parentField: keyof TravelRequestType,
-    field: string,
-    value: string | number
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
-      },
-    }));
-  };
-
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates);
-  };
-
-  // Toggle edit mode for an item group
-  const handleEdit = (index: number) => {
-    const newDisabledStates = [...disabledStates];
-    newDisabledStates[index] = !newDisabledStates[index];
-    setDisabledStates(newDisabledStates);
-  };
-
-  const handleFormChange = (field: keyof TravelRequestType, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
   const daysNumber = useMemo(
@@ -142,37 +50,123 @@ const FormAddTravelRequest: React.FC = () => {
     [itemGroup]
   );
 
+  // Calculate totals whenever itemGroup changes
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
       total: parseFloat(
-        ((group.daysNumber || 1) * (group.rate || 1)).toFixed(2)
+        ((group.daysNumber || 0) * (group.rate || 0)).toFixed(2)
       ),
     }));
+
+    const grandtotal = updatedGroups.reduce(
+      (sum, item) => sum + (item.total || 0),
+      0
+    );
+
     setItemGroup(updatedGroups);
+    setFormData((prev) => ({ ...prev, budget: grandtotal }));
   }, [daysNumber, rate]);
 
-  // Handle form submission
+  const handleProjectsChange = (value: string) => {
+    if (value) {
+      const selected = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
+      if (selected) {
+        setSelectedProject(selected);
+        setFormData((prev) => ({
+          ...prev,
+          project: `${selected.project_code}`,
+        }));
+      }
+    } else {
+      setSelectedProject(null);
+      setFormData((prev) => ({ ...prev, project: "" }));
+    }
+  };
+
+  const addItem = () => {
+    const newItem = {
+      location: "",
+      daysNumber: 0,
+      rate: 0,
+      expense: "",
+      total: 0,
+    };
+    setItemGroup((prev) => [...prev, newItem]);
+    setDisabledStates((prev) => [...prev, false]);
+  };
+
+  const handleItemChange = (
+    index: number,
+    field: keyof TravelRequestItemGroup,
+    value: string | number
+  ) => {
+    setItemGroup((prev) => {
+      const newItems = [...prev];
+      newItems[index] = { ...newItems[index], [field]: value };
+      return newItems;
+    });
+  };
+
+  const handleNestedChange = (
+    parentField: keyof TravelRequestType,
+    field: string,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [parentField]: {
+        ...(prev[parentField] as object),
+        [field]: value,
+      },
+    }));
+  };
+
+  const removeItem = (index: number) => {
+    setItemGroup((prev) => prev.filter((_, i) => i !== index));
+    setDisabledStates((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEdit = (index: number) => {
+    setDisabledStates((prev) => {
+      const newStates = [...prev];
+      newStates[index] = !newStates[index];
+      return newStates;
+    });
+  };
+
+  const handleFormChange = (field: keyof TravelRequestType, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const { saveTravelRequest, isPending } = useSaveTravelRequest();
+  const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
+  const { data, isLoading } = useReviewers();
+  const reviewers = useMemo(() => data?.data ?? [], [data]);
+
   const handleSave = (e: React.FormEvent) => {
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
-    console.log("Is form valid?", isFormValid);
-    if (formData.reviewedBy === "") {
-      formData.reviewedBy = null;
-    }
+    if (!isFormValid) return;
 
-    if (!isFormValid) return; // Stop if form is invalid
     e.preventDefault();
-    const data = { ...formData, expenses: [...itemGroup] };
+    const data = {
+      ...formData,
+      expenses: [...itemGroup],
+      reviewedBy: formData.reviewedBy === "" ? null : formData.reviewedBy,
+    };
     saveTravelRequest(data);
   };
-  // Handle form submission
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const data = { ...formData, expenses: [...itemGroup] };
-
-    // console.log(data);
-
+    const data = {
+      ...formData,
+      expenses: [...itemGroup],
+      reviewedBy: formData.reviewedBy === "" ? null : formData.reviewedBy,
+    };
     sendTravelRequest(data);
   };
 
@@ -180,7 +174,7 @@ const FormAddTravelRequest: React.FC = () => {
     <form className="space-y-6">
       {/* Static inputs */}
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Day Of Departure *">
           <Input
             type="date"
@@ -242,29 +236,17 @@ const FormAddTravelRequest: React.FC = () => {
       </Row>
 
       {/* Dynamic itemGroup */}
-      <div className="flex flex-wrap justify-center gap-4 max-h-[500px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
         {itemGroup.map((group, index) => (
           <div
             key={index}
-            className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[48%] p-6 mb-3 rounded-lg shadow-md"
+            className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
             <h4 className="text-gray-600 text-lg font-semibold">
               EXPENSE {index + 1}
             </h4>
             <Row>
-              {/* <FormRow label="Expense *" type="wide">
-                <Input
-                  className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
-                  placeholder=""
-                  disabled={disabledStates[index]}
-                  required
-                  value={group.expense}
-                  onChange={(e) =>
-                    handleItemChange(index, "expense", e.target.value)
-                  }
-                />
-              </FormRow> */}
-
               <FormRow label="Expense *" type="wide">
                 <Select
                   id="expense"
@@ -301,8 +283,8 @@ const FormAddTravelRequest: React.FC = () => {
               </FormRow>
             </Row>
 
-            <Row>
-              <FormRow label="Days Number *" type="small">
+            <Row cols="grid-cols-1 md:grid-cols-2">
+              <FormRow label="Days Number *">
                 <Input
                   placeholder=""
                   inputSize={100}
@@ -316,13 +298,14 @@ const FormAddTravelRequest: React.FC = () => {
                   }
                 />
               </FormRow>
-              <FormRow label="Rate *" type="small">
+              <FormRow label="Rate *">
                 <Input
                   placeholder=""
                   inputSize={100}
                   type="number"
                   min="0"
                   disabled={disabledStates[index]}
+                  required
                   value={group.rate}
                   onChange={(e) =>
                     handleItemChange(index, "rate", e.target.value)
@@ -332,7 +315,7 @@ const FormAddTravelRequest: React.FC = () => {
             </Row>
 
             <Row>
-              <FormRow label="Total (₦) *" type="medium">
+              <FormRow label="Total (₦) *">
                 <Input
                   type="number"
                   disabled={disabledStates[index]}
@@ -347,14 +330,14 @@ const FormAddTravelRequest: React.FC = () => {
             <div className="flex gap-2 mt-4">
               <button
                 type="button"
-                className="text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
+                className="text-xs 2xl:text-sm text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
                 onClick={() => removeItem(index)}
               >
-                Delete Expense {index + 1}
+                Delete item {index + 1}
               </button>
               <button
                 type="button"
-                className="text-white px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
+                className="text-xs 2xl:text-sm text-white px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
                 onClick={() => handleEdit(index)}
               >
                 {disabledStates[index] ? "Edit Item" : "Done"}
@@ -366,7 +349,7 @@ const FormAddTravelRequest: React.FC = () => {
 
       <div className="flex items-center gap-4 w-full">
         <Button type="button" onClick={addItem}>
-          <FaPlus /> Add Item
+          <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
         <span className="text-gray-700 font-bold">
           {itemGroup.length > 1
@@ -377,20 +360,20 @@ const FormAddTravelRequest: React.FC = () => {
       </div>
 
       <Row>
-        <FormRow label="Budget *" type="small">
+        <FormRow label="Budget *">
           <Input
             placeholder=""
             inputSize={100}
             type="number"
-            min="0"
             value={formData.budget}
-            onChange={(e) => handleFormChange("budget", e.target.value)}
+            readOnly
+            required
           />
         </FormRow>
       </Row>
 
-      <Row>
-        <FormRow label="Projects" type="small">
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -399,7 +382,7 @@ const FormAddTravelRequest: React.FC = () => {
               id="projects"
               customLabel="Select Project"
               value={formData.project} // Now uses the combined string from formData
-              onChange={(value) => handelProjectsChange(value)}
+              onChange={(value) => handleProjectsChange(value)}
               options={
                 projects
                   ? projects
@@ -415,7 +398,7 @@ const FormAddTravelRequest: React.FC = () => {
           )}
         </FormRow>
 
-        <FormRow label="Project Code *" type="small">
+        <FormRow label="Project Code *">
           <Input
             type="text"
             id="project"
@@ -427,7 +410,7 @@ const FormAddTravelRequest: React.FC = () => {
       </Row>
 
       <Row>
-        <FormRow label="Reviewed By *" type="small">
+        <FormRow label="Reviewed By *">
           {isLoading ? (
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (

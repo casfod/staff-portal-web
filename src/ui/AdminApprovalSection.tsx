@@ -20,7 +20,7 @@ const AdminApprovalSection = ({
   handleSend: (e: React.FormEvent) => void;
 }) => (
   <div className="relative z-10 mt-4">
-    <FormRow label="Approved By *" type="small">
+    <FormRow label="Approved By *">
       {isLoadingAmins ? (
         <SpinnerMini />
       ) : (

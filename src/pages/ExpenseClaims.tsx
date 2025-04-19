@@ -35,7 +35,8 @@ export function ExpenseClaims() {
         </h1>
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent 
+          className="inline-flex items-center 
+px-2 py-1 md:px-4 md:py-2 border border-transparent 
 text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <Plus className="h-4 w-4 mr-2" />

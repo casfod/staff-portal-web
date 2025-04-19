@@ -16,7 +16,7 @@ const FormRow: React.FC<FormRowProps> = ({
   lebelColor,
 }) => {
   // Base classes
-  const baseClasses = "flex flex-col gap-1";
+  const baseClasses = "flex flex-col gap-1 text-sm";
 
   // Type-specific width classes
   const widthClasses = {
@@ -27,13 +27,15 @@ const FormRow: React.FC<FormRowProps> = ({
   };
 
   // Determine the width class based on the `type` prop
-  const widthClass = type ? widthClasses[type] : "w-2/5"; // Default width (40%)
+  // const widthClass = type ? widthClasses[type] : "w-2/5"; // Default width (40%)
+  const widthClass = type ? widthClasses[type] : "w-full"; // Default width (40%)
 
   return (
     <div className={`${baseClasses} ${widthClass}`}>
       {label && (
         <label
           htmlFor={children.props.id}
+          // className={`border min-w-[150px] ${
           className={`${
             lebelColor ? `text-[${lebelColor}]` : "text-gray-600"
           } font-extrabold`}

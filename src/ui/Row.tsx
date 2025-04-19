@@ -1,21 +1,15 @@
 import React from "react";
 
-interface RowProps {
-  type?: "horizontal" | "vertical";
+type RowProps = {
   children: React.ReactNode;
-}
-
-const Row: React.FC<RowProps> = ({ type = "horizontal", children }) => {
-  // Base classes
-  const baseClasses = "flex";
-
-  // Type-specific classes
-  const typeClasses =
-    type === "horizontal"
-      ? "justify-between items-center gap-2" // Horizontal layout
-      : "flex-col"; // Vertical layout
-
-  return <div className={`${baseClasses} ${typeClasses}`}>{children}</div>;
+  cols?: string;
 };
 
+const Row: React.FC<RowProps> = ({ cols, children }) => {
+  return (
+    <div className={`w-full grid ${cols ? cols : "grid-cols-1"} gap-3`}>
+      {children}
+    </div>
+  );
+};
 export default Row;

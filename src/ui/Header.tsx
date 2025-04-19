@@ -2,15 +2,13 @@
 import { Menu } from "lucide-react";
 import logo from "../assets/logo.png";
 // import { useUser } from "../features/user/userHooks/useUser";
-import { localStorageUser } from "../utils/localStorageUser";
-import RoleBadge from "./RoleBadge";
 import { useEffect, useRef, useState } from "react";
 import MobileNavigation from "./MobileNavigation";
+import Profile from "./Profile";
+import useMediaQuery from "../hooks/useMediaQuery";
 
 export function Header() {
   const [isNavigation, setIsNavigation] = useState<boolean>(false);
-  const localStorageUserX = localStorageUser();
-  const user = localStorageUserX;
   const navRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLSpanElement>(null);
 
@@ -33,28 +31,12 @@ export function Header() {
     };
   }, []);
 
-  // Close navigation when viewport reaches xl (1280px)
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
-
-    const handleResize = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        setIsNavigation(false);
-      }
-    };
-
-    // Initial check
-    if (mediaQuery.matches) {
+  // Use the custom hook to handle xl viewport
+  useMediaQuery("(min-width: 1280px)", (matches) => {
+    if (matches) {
       setIsNavigation(false);
     }
-
-    // Listen for changes
-    mediaQuery.addEventListener("change", handleResize);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleResize);
-    };
-  }, []);
+  });
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
@@ -75,26 +57,18 @@ export function Header() {
           <Menu />
         </span>
 
-        <span
-          className="ml-2 font-extrabold text-sm 2xl:text-base text-primary tracking-[5px]"
-          style={{ fontFamily: "Sora" }}
-        >
-          CASFOD POSSIBILITY HUB
-        </span>
-
         <div
-          className="flex items-center space-x-4 text-xs 2xl:text-sm"
+          className="ml-2 font-extrabold text-xs md:text-sm 2xl:text-base text-primary tracking-[5px]"
           style={{ fontFamily: "Sora" }}
         >
-          <RoleBadge role={user.role}>
-            <div className="flex items-center gap-1 font-extrabold tracking-[1.5px]">
-              <span>{user.first_name.toUpperCase()}</span>
-              <span>{user.last_name.toUpperCase()}</span>
-            </div>
-          </RoleBadge>
+          <span className="hidden sm:block">CASFOD POSSIBILITY HUB</span>
+          <span className="sm:hidden">POSSIBILITY HUB</span>
         </div>
+
+        <Profile />
       </div>
 
+      {/* MOBILE NAVIGATION */}
       {isNavigation && (
         <div
           ref={navRef}

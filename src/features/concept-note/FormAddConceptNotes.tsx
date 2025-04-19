@@ -129,7 +129,7 @@ const FormAddConceptNotes = () => {
   return (
     <form className="space-y-6">
       <Row>
-        <FormRow label="Projects" type="small">
+        <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -154,7 +154,7 @@ const FormAddConceptNotes = () => {
           )}
         </FormRow>
 
-        <FormRow label="Project Code *" type="small">
+        <FormRow label="Project Code *">
           <Input
             type="text"
             id="project_code"
@@ -218,7 +218,7 @@ const FormAddConceptNotes = () => {
       </Row>
 
       <Row>
-        <FormRow label="Activity Budget *" type="small">
+        <FormRow label="Activity Budget *">
           <Input
             type="number"
             id="activity_budget"
@@ -322,7 +322,7 @@ const FormAddConceptNotes = () => {
       {!isLoadingAmins && (
         <Row>
           <div className="w-full">
-            <FormRow label="Approved By *" type="small">
+            <FormRow label="Approved By *">
               {isLoadingAmins ? (
                 <SpinnerMini /> // Show a spinner while loading admins
               ) : (

@@ -149,7 +149,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   return (
     <form className="space-y-6">
       <Row>
-        <FormRow label="Projects" type="small">
+        <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -174,7 +174,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
           )}
         </FormRow>
 
-        <FormRow label="Project Code *" type="small">
+        <FormRow label="Project Code *">
           <Input
             type="text"
             id="project_code"
@@ -238,7 +238,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       </Row>
 
       <Row>
-        <FormRow label="Activity Budget *" type="small">
+        <FormRow label="Activity Budget *">
           <Input
             type="number"
             id="activity_budget"
@@ -342,7 +342,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       {!isLoadingAmins && (
         <Row>
           <div className="w-full">
-            <FormRow label="Approved By *" type="small">
+            <FormRow label="Approved By *">
               {isLoadingAmins ? (
                 <SpinnerMini /> // Show a spinner while loading admins
               ) : (

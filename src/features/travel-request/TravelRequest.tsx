@@ -103,7 +103,7 @@ const TravelRequest = () => {
           onClick={() => navigate(-1)}
           className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
         >
-          <List className="h-4 w-4 mr-2" />
+          <List className="h-4 w-4 mr-1 md:mr-2" />
           All Requests
         </button>
       </div>

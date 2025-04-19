@@ -19,6 +19,8 @@ import { Project } from "../../interfaces";
 import { setProject } from "../../store/projectSlice";
 import Spinner from "../../ui/Spinner";
 import { localStorageUser } from "../../utils/localStorageUser";
+import TextHeader from "../../ui/TextHeader";
+import Button from "../../ui/Button";
 
 export function AllProjects() {
   const localStorageUserX = localStorageUser();
@@ -75,22 +77,13 @@ export function AllProjects() {
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
         {/* Header with title and button */}
         <div className="flex justify-between items-center">
-          <h1
-            className="text-xl 2xl:text-2xl font-semibold text-gray-700"
-            style={{ letterSpacing: "2px" }}
-          >
-            Projects
-          </h1>
+          <TextHeader>Projects</TextHeader>
 
           {localStorageUserX.role === "SUPER-ADMIN" && (
-            <button
-              onClick={() => navigate("/projects/create-project")}
-              className="inline-flex items-center px-4 py-2 border border-transparent 
-text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </button>
+            <Button onClick={() => navigate("/projects/create-project")}>
+              <Plus className="h-4 w-4 mr-1 md:mr-2" />
+              New
+            </Button>
           )}
         </div>
 

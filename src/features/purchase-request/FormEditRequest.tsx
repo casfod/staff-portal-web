@@ -225,7 +225,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       </Row>
 
       {/* Static inputs */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Department *">
           <Input
             type="text"
@@ -249,7 +249,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Address *">
           <Input
             placeholder=""
@@ -272,7 +272,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="City *">
           <Input
             placeholder=""
@@ -311,11 +311,12 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
       </Row>
 
       {/* Dynamic itemGroup */}
-      <div className="flex flex-wrap justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-6 py-8 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
         {itemGroup.map((group, index) => (
           <div
             key={index}
-            className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2 w-[48%] p-6 mb-3 rounded-lg shadow-md"
+            className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
+p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
             <h4 className="text-gray-600 text-lg font-semibold">
               ITEM {index + 1}
@@ -334,11 +335,10 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
               />
             </FormRow>
 
-            <Row>
-              <FormRow label="Frequency *" type="small">
+            <Row cols="grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
+              <FormRow label="Frequency *">
                 <Input
                   placeholder=""
-                  inputSize={100}
                   type="number"
                   min="0"
                   disabled={disabledStates[index]}
@@ -349,10 +349,9 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
                   }
                 />
               </FormRow>
-              <FormRow label="Quantity *" type="small">
+              <FormRow label="Quantity *">
                 <Input
                   placeholder=""
-                  inputSize={100}
                   type="number"
                   min="0"
                   disabled={disabledStates[index]}
@@ -362,7 +361,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
                   }
                 />
               </FormRow>
-              <FormRow label="Unit" type="small">
+              <FormRow label="Unit">
                 <Input
                   disabled={disabledStates[index]}
                   value={group.unit}
@@ -374,8 +373,8 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
               </FormRow>
             </Row>
 
-            <Row>
-              <FormRow label="Unit Cost (₦) *" type="medium">
+            <Row cols="grid-cols-1 md:grid-cols-2">
+              <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"
                   min="0"
@@ -387,7 +386,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
                   }
                 />
               </FormRow>
-              <FormRow label="Total (₦) *" type="medium">
+              <FormRow label="Total (₦) *">
                 <Input
                   type="number"
                   disabled={disabledStates[index]}
@@ -402,14 +401,14 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
             <div className="flex gap-2 mt-4">
               <button
                 type="button"
-                className="text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
+                className="text-xs 2xl:text-sm text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
                 onClick={() => removeItem(index)}
               >
                 Delete Item {index + 1}
               </button>
               <button
                 type="button"
-                className="text-white px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
+                className="text-xs 2xl:text-sm text-white px-3 py-1 rounded-md bg-buttonColor hover:bg-buttonColorHover transition-all"
                 onClick={() => handleEdit(index)}
               >
                 {disabledStates[index] ? "Edit Item" : "Done"}
@@ -421,7 +420,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
 
       <div className="flex items-center gap-4 w-full">
         <Button type="button" onClick={addItem}>
-          <FaPlus /> Add Item
+          <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
         <span className="text-gray-700 font-bold">
           {itemGroup.length > 1
@@ -431,33 +430,9 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </span>
       </div>
 
-      {/* <Row>
-        <FormRow label="Expense Charged To *" type="medium">
-          <Input
-            type="text"
-            required
-            id="expenseChargedTo"
-            value={formData.expenseChargedTo}
-            onChange={(e) =>
-              handleFormChange("expenseChargedTo", e.target.value)
-            }
-          />
-        </FormRow>
-        <FormRow label="Account Code *" type="small">
-          <Input
-            type="text"
-            required
-            placeholder=""
-            id="accountCode"
-            value={formData.accountCode}
-            onChange={(e) => handleFormChange("accountCode", e.target.value)}
-          />
-        </FormRow>
-      </Row> */}
-
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         {/* First Select: Projects */}
-        <FormRow label="Expense Charged To *" type="small">
+        <FormRow label="Expense Charged To *">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -485,7 +460,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
 
         {/* Second Select: Account Code */}
         {selectedProject && (
-          <FormRow label="Account Code *" type="small">
+          <FormRow label="Account Code *">
             {isLoadingProjects ? (
               <SpinnerMini />
             ) : (
@@ -535,7 +510,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </div>
       ) : purchaseRequest.status === "reviewed" ? (
         <Row>
-          <FormRow label="Approved By *" type="small">
+          <FormRow label="Approved By *">
             {isLoadingAmins ? (
               <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
@@ -561,7 +536,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         </Row>
       ) : (
         <Row>
-          <FormRow label="Reviewed By *" type="small">
+          <FormRow label="Reviewed By *">
             {isLoadingReviewers ? (
               <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
