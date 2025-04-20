@@ -16,8 +16,10 @@ import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchase
 import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
 import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
 import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
+import { useNavigate } from "react-router-dom";
 
 export function Dashboard() {
+  const navigate = useNavigate();
   // Fetch purchase request stats
   const {
     data: purchaseRequestStatsData,
@@ -87,9 +89,8 @@ export function Dashboard() {
     [conceptNotesStatsData]
   );
 
-  console.log(paymentRequestStatsData);
-
   // Define stats array
+
   const stats = [
     {
       name: "Total Projects",
@@ -98,6 +99,7 @@ export function Dashboard() {
       ) : (
         projectsStats?.totalProjects ?? 0
       ),
+      to: "/projects",
     },
     {
       name: "Purchase Requests",
@@ -111,6 +113,7 @@ export function Dashboard() {
       ) : (
         purchaseRequestStats?.totalApprovedRequests ?? 0
       ),
+      to: "/purchase-requests",
     },
     {
       name: "Concept Notes",
@@ -124,6 +127,8 @@ export function Dashboard() {
       ) : (
         conceptNotesStats.totalApprovedConceptNotes ?? 0
       ),
+
+      to: "/concept-notes",
     },
     {
       name: "Payment Requests",
@@ -137,6 +142,7 @@ export function Dashboard() {
       ) : (
         paymentRequestStats?.totalApprovedRequests ?? 0
       ),
+      to: "/payment-requests",
     },
     {
       name: "Advance Requests",
@@ -150,6 +156,7 @@ export function Dashboard() {
       ) : (
         advanceRequestStats?.totalApprovedRequests ?? 0
       ),
+      to: "/advance-requests",
     },
     {
       name: "Travel Requests",
@@ -163,9 +170,10 @@ export function Dashboard() {
       ) : (
         travelRequestStats?.totalApprovedRequests ?? 0
       ),
+      to: "/travel-requests",
     },
 
-    { name: "Expense Claims", total: 10, approved: 13 },
+    { name: "Expense Claims", total: 10, approved: 13, to: "/expense-claims" },
   ];
 
   if (
@@ -193,7 +201,11 @@ export function Dashboard() {
         style={{ fontFamily: "Sora", letterSpacing: "1px" }}
       >
         {stats.map((stat) => (
-          <div key={stat.name} className={`bg-white rounded-lg shadow-md p-6`}>
+          <div
+            key={stat.name}
+            className={`bg-white rounded-lg shadow-md p-6`}
+            onClick={() => navigate(stat.to)}
+          >
             <h3
               className={`text-sm lg:text-base 2xl:text-lg font-medium text-gray-600 mb-2`}
             >
