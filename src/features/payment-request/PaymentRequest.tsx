@@ -115,7 +115,7 @@ const PaymentRequest = () => {
         </button>
       </div>
 
-      <div className="w-full bg-inherit shadow-sm rounded-lg overflow-hidden border pb-[200px]">
+      <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
