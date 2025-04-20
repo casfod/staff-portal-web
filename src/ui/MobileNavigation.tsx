@@ -3,12 +3,12 @@ import logo from "../assets/logo.png";
 
 const MobileNavigation = () => {
   return (
-    <div className="fixed flex flex-col items-center top-[62px] left-0 right-0 z-40 bg-white shadow-lg min-h-screen w-[230px]  pt-3 border-r ">
-      <div className="flex justify-center border border-gray-200 w-[170px] px-3 py-1 rounded-md shadow-md">
+    <div className="fixed flex flex-col items-center top-[57px] left-0 right-0 z-40 bg-white shadow-lg min-h-screen w-[200px] sm:w-[230px]  pt-3 border-r ">
+      <div className="flex justify-center border border-gray-200 w-[170px] sm:w-[190px] px-3 py-1 rounded-md shadow-md">
         <img src={logo} alt="CASFOD" className="self-center w-full h-15" />
       </div>
 
-      <div className="absolute scale-[90%] top-[50px]">
+      <div className="absolute scale-[90%] sm:scale-[100%] top-[50px] sm:top-[78px] ">
         <Navigation />
       </div>
     </div>

@@ -203,7 +203,7 @@ export function Dashboard() {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className={`bg-white rounded-lg shadow-md p-6`}
+            className={`bg-white rounded-lg shadow-md p-6 hover:cursor-pointer`}
             onClick={() => navigate(stat.to)}
           >
             <h3

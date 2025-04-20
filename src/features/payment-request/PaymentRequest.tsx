@@ -97,7 +97,7 @@ const PaymentRequest = () => {
       paymentRequest.status === "reviewed");
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-80">
+    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
       {/* Header Section */}
       <div className="w-full flex justify-between items-center">
         <h1
@@ -111,7 +111,7 @@ const PaymentRequest = () => {
           className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <List className="h-4 w-4 mr-1 md:mr-2" />
-          All Requests
+          List
         </button>
       </div>
 
@@ -153,7 +153,7 @@ const PaymentRequest = () => {
               {/* Item Table Section */}
               <tr>
                 <td colSpan={5}>
-                  <div className="border border-gray-300 px-6 py-4 rounded-md h-auto relative">
+                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                     <PaymentRequestDetails request={paymentRequest} />
 
                     {/* Comments and Actions Section */}

@@ -15,7 +15,9 @@ import StatusBadge from "../../ui/StatusBadge";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
+import Button from "../../ui/Button";
 
+const tableHead = ["Requested By", "Status", "Department", "Amount", "Date"];
 const PurchaseRequest = () => {
   const localStorageUserX = localStorageUser();
   const purchaseRequest = useSelector(
@@ -96,8 +98,16 @@ const PurchaseRequest = () => {
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
       purchaseRequest.status === "reviewed");
 
+  const tableRowData = [
+    purchaseRequest?.requestedBy,
+    <StatusBadge status={purchaseRequest?.status!} />,
+    purchaseRequest?.department,
+    moneyFormat(totalAmount, "NGN"),
+    dateformat(purchaseRequest?.createdAt!),
+  ];
+
   return (
-    <div className="flex flex-col items-center gap-6 pb-80">
+    <div className="flex flex-col items-center overflow-x-hidden gap-6 pt-6 pb-80">
       {/* Header Section */}
       <div className="w-full flex justify-between items-center">
         <h1
@@ -106,62 +116,48 @@ const PurchaseRequest = () => {
         >
           Review Request
         </h1>
-        <button
+        <Button
           onClick={() => navigate(-1)} // Use relative path here
           className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
         >
           <List className="h-4 w-4 mr-1 md:mr-2" />
-          All Requests
-        </button>
+          List
+        </Button>
       </div>
 
       {/* Main Table Section */}
-      <div className="w-full bg-inherit shadow-sm rounded-lg overflow-hidden border pb-[200px]">
+      <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 ">
             <tr>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                Department
-              </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                Amount
-              </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                Requested By
-              </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                Date
-              </th>
+              {tableHead.map((title, index) => (
+                <th
+                  key={index}
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
-              <tr key={purchaseRequest.id} className="h-[40px] max-h-[40px]">
-                <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
-                  {purchaseRequest.department}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600">
-                  {moneyFormat(totalAmount, "NGN")}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  <StatusBadge status={purchaseRequest.status!} />
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  {purchaseRequest.requestedBy}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  {dateformat(purchaseRequest.createdAt!)}
-                </td>
+              <tr key={purchaseRequest.id} className="h-[40px] max-h-[40px] ">
+                {tableRowData.map((data, index) => (
+                  <td
+                    key={index}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data}
+                  </td>
+                ))}
               </tr>
 
               {/* Item Table Section */}
               <tr>
                 <td colSpan={5}>
-                  <div className="border border-gray-300 px-6 py-4 rounded-md h-auto relative">
+                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                     <PurchaseRequestDetails request={purchaseRequest} />
 
                     {/* Comments and Actions Section */}

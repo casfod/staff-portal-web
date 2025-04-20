@@ -32,7 +32,7 @@ const RequestCommentsAndActions = ({
           {request.comments?.map((comment: any, index: any) => (
             <div
               key={index}
-              className="border-2 px-4 py-2 rounded-lg shadow-lg bg-white"
+              className="w-full max-max-w-md md:max-w-full border-2 px-4 py-2 rounded-lg shadow-lg bg-white mb-4"
             >
               <p className="text-base font-extrabold">
                 {`${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`}

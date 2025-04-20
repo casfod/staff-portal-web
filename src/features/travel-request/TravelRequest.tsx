@@ -94,7 +94,7 @@ const TravelRequest = () => {
       travelRequest.status === "reviewed");
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-80">
+    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-700 tracking-wide">
           Travel Request
@@ -104,7 +104,7 @@ const TravelRequest = () => {
           className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
         >
           <List className="h-4 w-4 mr-1 md:mr-2" />
-          All Requests
+          List
         </button>
       </div>
 
@@ -112,19 +112,19 @@ const TravelRequest = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Requested By
               </th>
-              <th className="px-6 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Date
               </th>
             </tr>
@@ -151,7 +151,7 @@ const TravelRequest = () => {
             {/* Item Table Section */}
             <tr>
               <td colSpan={5}>
-                <div className="border border-gray-300 px-6 py-4 rounded-md h-auto relative">
+                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                   <TravelRequestDetails request={travelRequest} />
 
                   {travelRequest.reviewedBy &&

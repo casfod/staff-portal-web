@@ -34,7 +34,7 @@ const StatusUpdateForm = ({
         />
       </div>
 
-      <div className="w-fit border border-gray-700 rounded-md">
+      <div className="w-fit max-max-w-md md:max-w-fit border border-gray-700 rounded-md">
         <select
           className="text-xs md:text-sm bg-inherit px-3 py-2 rounded-md"
           value={status}
