@@ -195,20 +195,20 @@ export function AllUsers() {
                   key={user.id}
                   className="h-[40px] max-h-[40px]" // Apply max height to each row
                 >
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                  <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {`${user.first_name} ${user.last_name}`}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600">
+                  <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600">
                     {user.email}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                  <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {user.role}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                  <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {user.isDeleted ? "Inactive" : "Active"}
                   </td>
                   {localStorageUserX.role === "SUPER-ADMIN" && (
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       <div className="flex space-x-4">
                         <Modal>
                           <Modal.Open open={`userCog-${user.id}`}>

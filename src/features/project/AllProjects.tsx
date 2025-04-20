@@ -151,22 +151,22 @@ export function AllProjects() {
               {projects.map((project) => (
                 <>
                   <tr key={project.id}>
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
-                    {/* <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    {/* <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {project.status}
                     </td> */}
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {project.project_code}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {moneyFormat(Number(project.project_budget), "USD")}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {dateformat(project.createdAt!)}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       <div className="flex space-x-4">
                         <span
                           className="hover:cursor-pointer"

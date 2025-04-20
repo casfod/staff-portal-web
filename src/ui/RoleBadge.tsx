@@ -15,7 +15,7 @@ const RoleBadge = ({
     STAFF: "border border-gray-400 text-gray-700",
     ADMIN: "bg-secondary text-white",
     "SUPER-ADMIN": "bg-secondary text-white",
-    REVIEWER: "bg-buttonColor text-white",
+    REVIEWER: "bg-[#1373B0] text-white",
   };
 
   return (

@@ -1,5 +1,6 @@
 import Button from "./Button";
 import SpinnerMini from "./SpinnerMini";
+import { FormEvent } from "react";
 
 const StatusUpdateForm = ({
   requestStatus,
@@ -9,6 +10,7 @@ const StatusUpdateForm = ({
   setComment,
   isUpdatingStatus,
   handleStatusChange,
+  directApproval = false,
 }: {
   requestStatus: string;
   status: string;
@@ -16,10 +18,19 @@ const StatusUpdateForm = ({
   comment: string;
   setComment: (value: string) => void;
   isUpdatingStatus: boolean;
+  directApproval?: boolean;
   handleStatusChange: () => void;
 }) => {
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    handleStatusChange();
+  };
+
   return (
-    <form className="flex flex-col w-full gap-3 tracking-wide">
+    <form
+      className="flex flex-col w-full gap-3 tracking-wide"
+      onSubmit={handleSubmit} // Use proper form submission
+    >
       <div className="flex flex-col w-full gap-2">
         <label htmlFor="content">
           <span className="font-bold uppercase">Comment</span>{" "}
@@ -42,19 +53,33 @@ const StatusUpdateForm = ({
           disabled={isUpdatingStatus}
         >
           <option value="">ACTIONS</option>
-          {requestStatus === "pending" && (
-            <option value="reviewed">APPROVE REVIEW</option>
+
+          {directApproval ? (
+            <div>
+              <option value="approved">APPROVE REQUEST</option>
+              <option value="rejected">REJECT</option>
+            </div>
+          ) : (
+            <div>
+              {requestStatus === "pending" && (
+                <option value="reviewed">APPROVE REVIEW</option>
+              )}
+              {requestStatus === "reviewed" && (
+                <option value="approved">APPROVE REQUEST</option>
+              )}
+              <option value="rejected">REJECT</option>
+            </div>
           )}
-          {requestStatus === "reviewed" && (
-            <option value="approved">APPROVE REQUEST</option>
-          )}
-          <option value="rejected">REJECT</option>
         </select>
       </div>
 
       {status && (
         <div className="flex w-full justify-center p-4">
-          <Button size="medium" onClick={handleStatusChange}>
+          <Button
+            type="submit" // Make it a submit button
+            size="medium"
+            disabled={isUpdatingStatus}
+          >
             {isUpdatingStatus ? <SpinnerMini /> : "Update Status"}
           </Button>
         </div>

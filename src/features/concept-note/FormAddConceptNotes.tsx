@@ -128,7 +128,7 @@ const FormAddConceptNotes = () => {
 
   return (
     <form className="space-y-6">
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
@@ -168,7 +168,7 @@ const FormAddConceptNotes = () => {
           />
         </FormRow>
       </Row>
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Title *">
           <Input
             type="text"
@@ -191,8 +191,7 @@ const FormAddConceptNotes = () => {
           />
         </FormRow>
       </Row>
-
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Period (From) *">
           <Input
             type="date"
@@ -321,42 +320,40 @@ const FormAddConceptNotes = () => {
       {/* Approver Selection */}
       {!isLoadingAmins && (
         <Row>
-          <div className="w-full">
-            <FormRow label="Approved By *">
-              {isLoadingAmins ? (
-                <SpinnerMini /> // Show a spinner while loading admins
-              ) : (
-                <Select
-                  id="approvedBy"
-                  customLabel="Select an admin"
-                  value={formData.approvedBy || ""} // Use empty string if null
-                  onChange={(value) => handleFormChange("approvedBy", value)}
-                  options={
-                    admins
-                      ? admins
-                          .filter((admin) => admin.id) // Filter out admins with undefined IDs
-                          .map((admin) => ({
-                            id: admin.id as string, // Assert that admin.id is a string
-                            name: `${admin.first_name} ${admin.last_name}`,
-                          }))
-                      : []
-                  }
-                  required
-                />
-              )}
-            </FormRow>
-            <div className="flex justify-center w-full gap-4">
-              {!formData.approvedBy && (
-                <Button size="medium" onClick={handleSave}>
-                  {isSaving ? <SpinnerMini /> : "Save"}
-                </Button>
-              )}
-              {formData.approvedBy && (
-                <Button size="medium" onClick={handleSend}>
-                  {isSending ? <SpinnerMini /> : "Save And Send"}
-                </Button>
-              )}
-            </div>
+          <FormRow label="Approved By *">
+            {isLoadingAmins ? (
+              <SpinnerMini /> // Show a spinner while loading admins
+            ) : (
+              <Select
+                id="approvedBy"
+                customLabel="Select an admin"
+                value={formData.approvedBy || ""} // Use empty string if null
+                onChange={(value) => handleFormChange("approvedBy", value)}
+                options={
+                  admins
+                    ? admins
+                        .filter((admin) => admin.id) // Filter out admins with undefined IDs
+                        .map((admin) => ({
+                          id: admin.id as string, // Assert that admin.id is a string
+                          name: `${admin.first_name} ${admin.last_name}`,
+                        }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+          <div className="flex justify-center w-full gap-4">
+            {!formData.approvedBy && (
+              <Button size="medium" onClick={handleSave}>
+                {isSaving ? <SpinnerMini /> : "Save"}
+              </Button>
+            )}
+            {formData.approvedBy && (
+              <Button size="medium" onClick={handleSend}>
+                {isSending ? <SpinnerMini /> : "Save And Send"}
+              </Button>
+            )}
           </div>
         </Row>
       )}
