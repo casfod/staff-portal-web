@@ -1,6 +1,6 @@
 // import { Heart } from "lucide-react";
 import { Menu } from "lucide-react";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.webp";
 // import { useUser } from "../features/user/userHooks/useUser";
 import { useEffect, useRef, useState } from "react";
 import MobileNavigation from "./MobileNavigation";

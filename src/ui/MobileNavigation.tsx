@@ -1,5 +1,5 @@
 import Navigation from "./Navigation";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.webp";
 
 const MobileNavigation = () => {
   return (
