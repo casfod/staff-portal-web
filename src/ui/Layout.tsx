@@ -5,17 +5,14 @@ import DesktopNavigation from "./DesktopNavigation";
 export function Layout() {
   return (
     <div
-      className="bg-[#F8F8F8]"
+      className="max-h-screen bg-[#F8F8F8] overflow-y-scroll"
       style={{ fontFamily: "Cabin", letterSpacing: "0.9px" }}
     >
-      {/* Make header sticky/fixed */}
-      <div className="sticky top-0 z-50 bg-[#F8F8F8]">
-        <Header />
-      </div>
+      <Header />
 
       <div className="flex">
         <DesktopNavigation />
-        <main className="flex-1 px-4 md:px-6 pb-8 md:pb-24 overflow-y-auto h-[calc(100vh-header-height)]">
+        <main className="flex-1 px-4 md:px-6 pb-8 md:pb-24 overflow-y-auto h-screen">
           <Outlet />
         </main>
       </div>
