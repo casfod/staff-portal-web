@@ -122,7 +122,7 @@ const AllTravelRequests = () => {
 
   return (
     <div className="flex flex-col space-y-4 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 border-b">
         {/* Header with title and button */}
         <div className="flex justify-between items-center">
           <TextHeader>Travel Requests</TextHeader>

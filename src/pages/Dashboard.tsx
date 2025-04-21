@@ -17,6 +17,7 @@ import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePay
 import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
 import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
 import { useNavigate } from "react-router-dom";
+import TextHeader from "../ui/TextHeader";
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -188,13 +189,12 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-4 pt-6 pb-80">
-      <h1
-        className="text-2xl font-semibold text-gray-600"
-        style={{ letterSpacing: "2px" }}
-      >
-        Dashboard
-      </h1>
+    <div className="flex flex-col space-y-4 pb-80">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 border-b">
+        <div className="flex justify-between items-center">
+          <TextHeader>Dashboard</TextHeader>
+        </div>
+      </div>
 
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
