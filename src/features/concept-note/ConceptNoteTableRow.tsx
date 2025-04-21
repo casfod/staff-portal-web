@@ -43,20 +43,20 @@ const ConceptNoteTableRow = ({
         className="h-[40px] max-h-[40px]"
         onClick={() => requestId && toggleViewItems(requestId)}
       >
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.staff_name}
         </td>
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <StatusBadge status={request.status!} />
         </td>
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.project_code}
         </td>
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {dateformat(requestCreatedAt)}
         </td>
 
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
             <span
               className="hover:cursor-pointer"
