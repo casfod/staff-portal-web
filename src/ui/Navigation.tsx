@@ -85,11 +85,11 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col gap-3 items-center w-fit pt-3 "
+      className="flex flex-col gap-2 items-center w-fit pt-2 "
       style={{ fontFamily: "Cabin" }}
     >
       <div className="border item-center justify-center py-2 px-2 rounded-full shadow-md ">
-        <img src={logo} alt="CASFOD" className="pt-0.5 h-11" />
+        <img src={logo} alt="CASFOD" className="pt-0.5 h-10" />
       </div>
 
       <nav className="">
