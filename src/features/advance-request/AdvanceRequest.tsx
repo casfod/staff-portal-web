@@ -99,9 +99,9 @@ const Request = () => {
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
   const showStatusUpdate =
     (localStorageUserX.role === "REVIEWER" &&
-      advanceRequest.status === "pending") ||
+      advanceRequest?.status === "pending") ||
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      advanceRequest.status === "reviewed");
+      advanceRequest?.status === "reviewed");
 
   const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
 
@@ -146,7 +146,7 @@ const Request = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
-              <tr key={advanceRequest.id} className="h-[40px] max-h-[40px] ">
+              <tr key={advanceRequest?.id} className="h-[40px] max-h-[40px] ">
                 {tableRowData.map((data, index) => (
                   <td
                     key={index}
@@ -165,13 +165,13 @@ const Request = () => {
 
                     {/* Comments and Actions Section */}
                     {advanceRequest?.reviewedBy &&
-                      advanceRequest.status !== "draft" && (
+                      advanceRequest?.status !== "draft" && (
                         <div className="text-gray-600 mt-4 tracking-wide">
                           <RequestCommentsAndActions request={advanceRequest} />
 
                           {showStatusUpdate && (
                             <StatusUpdateForm
-                              requestStatus={advanceRequest.status!}
+                              requestStatus={advanceRequest?.status!}
                               status={status}
                               setStatus={setStatus}
                               comment={comment}
@@ -184,9 +184,9 @@ const Request = () => {
                       )}
 
                     {/* Admin Approval Section (for STAFF role) */}
-                    {!advanceRequest.approvedBy && // Check if approvedBy is not set
+                    {!advanceRequest?.approvedBy && // Check if approvedBy is not set
                       localStorageUserX.role === "STAFF" &&
-                      advanceRequest.status === "reviewed" && (
+                      advanceRequest?.status === "reviewed" && (
                         <div className="relative z-10">
                           <AdminApprovalSection
                             formData={formData}
