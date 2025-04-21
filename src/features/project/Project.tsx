@@ -91,7 +91,7 @@ const Project = () => {
               <td colSpan={5}>
                 <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-white">
                   {/* Project Details Section */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 gap-4 mb-6">
                     <div className="flex flex-col gap-3">
                       <p className="text-gray-600">
                         <span className="font-extrabold uppercase">
