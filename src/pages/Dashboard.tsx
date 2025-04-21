@@ -1,8 +1,16 @@
 import { useMemo } from "react";
-import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchaseStats";
-
+// import { useNavigate } from "react-router-dom";
 import NetworkErrorUI from "../ui/NetworkErrorUI";
-import {
+import SpinnerMini from "../ui/SpinnerMini";
+import TextHeader from "../ui/TextHeader";
+// Import all your hooks
+import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchaseStats";
+import { useProjectStats } from "../features/project/Hooks/useProjectStats";
+import { useConceptNotesStats } from "../features/concept-note/Hooks/useConceptNotesStats";
+import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
+import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
+import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
+import type {
   AdvanceRequestStats,
   ConceptNoteStats,
   PaymentRequestStats,
@@ -10,181 +18,139 @@ import {
   PurchaseRequestStats,
   TravelRequestStats,
 } from "../interfaces";
-import { useProjectStats } from "../features/project/Hooks/useProjectStats";
-import SpinnerMini from "../ui/SpinnerMini";
-import { useConceptNotesStats } from "../features/concept-note/Hooks/usePurchaseStats";
-import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
-import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequestStats";
-import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
-import { useNavigate } from "react-router-dom";
-import TextHeader from "../ui/TextHeader";
 
 export function Dashboard() {
-  const navigate = useNavigate();
-  // Fetch purchase request stats
-  const {
-    data: purchaseRequestStatsData,
-    isLoading: isLoadingPurchaseRequestStats,
-    isError: isErrorPurchaseRequestStats,
-  } = usePurchaseStats();
+  // Combine all stats hooks into a single object for better organization
+  const statsQueries = {
+    purchaseRequest: usePurchaseStats(),
+    project: useProjectStats(),
+    conceptNote: useConceptNotesStats(),
+    paymentRequest: usePaymentRequestStats(),
+    advanceRequest: useAdvanceRequestStats(),
+    travelRequest: useTravelRequestStats(),
+  };
 
-  // Fetch project stats
-  const {
-    data: projectsStatsData,
-    isLoading: isLoadingProjectsStats,
-    isError: isErrorProjectsStats,
-  } = useProjectStats(); // Use the correct hook
-  // Fetch project stats
-  const {
-    data: conceptNotesStatsData,
-    isLoading: isLoadingConceptNotesStats,
-    isError: isErrorConceptNotesStats,
-  } = useConceptNotesStats(); // Use the correct hook
-  const {
-    data: paymentRequestStatsData,
-    isLoading: isLoadingPaymentRequestStats,
-    isError: isErrorPaymentRequestStats,
-  } = usePaymentRequestStats(); // Use the correct hook
-  const {
-    data: advanceRequestStatsData,
-    isLoading: isLoadingAdvanceRequestStats,
-    isError: isErrorAdvanceRequestStats,
-  } = useAdvanceRequestStats(); // Use the correct hook
-  const {
-    data: travelRequestStatsData,
-    isLoading: isLoadingTravelRequestStats,
-    isError: isErrorTravelRequestStats,
-  } = useTravelRequestStats(); // Use the correct hook
+  // Check for any errors
+  const hasError = Object.values(statsQueries).some((query) => query.isError);
 
-  // Explicitly type purchase request stats
-  const purchaseRequestStats = useMemo(
-    () => (purchaseRequestStatsData?.data as PurchaseRequestStats) ?? {},
-    [purchaseRequestStatsData]
-  );
-  // Explicitly type payment request stats
-  const paymentRequestStats = useMemo(
-    () => (paymentRequestStatsData?.data as PaymentRequestStats) ?? {},
-    [paymentRequestStatsData]
+  // Memoize all stats data with proper typing
+  const statsData = useMemo(
+    () => ({
+      purchaseRequest:
+        (statsQueries.purchaseRequest.data?.data as PurchaseRequestStats) ??
+        null,
+      project: (statsQueries.project.data?.data as ProjectStats) ?? null,
+      conceptNote:
+        (statsQueries.conceptNote.data?.data as ConceptNoteStats) ?? null,
+      paymentRequest:
+        (statsQueries.paymentRequest.data?.data as PaymentRequestStats) ?? null,
+      advanceRequest:
+        (statsQueries.advanceRequest.data?.data as AdvanceRequestStats) ?? null,
+      travelRequest:
+        (statsQueries.travelRequest.data?.data as TravelRequestStats) ?? null,
+    }),
+    [
+      statsQueries.purchaseRequest.data,
+      statsQueries.project.data,
+      statsQueries.conceptNote.data,
+      statsQueries.paymentRequest.data,
+      statsQueries.advanceRequest.data,
+      statsQueries.travelRequest.data,
+    ]
   );
 
-  // Explicitly type advance request stats
-  const advanceRequestStats = useMemo(
-    () => (advanceRequestStatsData?.data as AdvanceRequestStats) ?? {},
-    [advanceRequestStatsData]
+  console.log(statsData.conceptNote);
+
+  // Helper component to render stats values
+  const renderStatValue = (value: number | undefined, isLoading: boolean) => {
+    if (isLoading) return <SpinnerMini />;
+    if (value === undefined || value === null) return "-"; // Show dash when no data
+    return value;
+  };
+
+  // Stats configuration
+  const stats = useMemo(
+    () => [
+      {
+        name: "Total Projects",
+        total: renderStatValue(
+          statsData.project?.totalProjects,
+          statsQueries.project.isLoading
+        ),
+        approved: null, // Projects might not have approved count
+        to: "/projects",
+      },
+      {
+        name: "Purchase Requests",
+        total: renderStatValue(
+          statsData.purchaseRequest?.totalRequests,
+          statsQueries.purchaseRequest.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.purchaseRequest?.totalApprovedRequests,
+          statsQueries.purchaseRequest.isLoading
+        ),
+        to: "/purchase-requests",
+      },
+      {
+        name: "Concept Notes",
+        total: renderStatValue(
+          statsData.conceptNote?.totalRequests,
+          statsQueries.conceptNote.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.conceptNote?.totalApprovedRequests,
+          statsQueries.conceptNote.isLoading
+        ),
+        to: "/concept-notes",
+      },
+      {
+        name: "Payment Requests",
+        total: renderStatValue(
+          statsData.paymentRequest?.totalRequests,
+          statsQueries.paymentRequest.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.paymentRequest?.totalApprovedRequests,
+          statsQueries.paymentRequest.isLoading
+        ),
+        to: "/payment-requests",
+      },
+      {
+        name: "Advance Requests",
+        total: renderStatValue(
+          statsData.advanceRequest?.totalRequests,
+          statsQueries.advanceRequest.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.advanceRequest?.totalApprovedRequests,
+          statsQueries.advanceRequest.isLoading
+        ),
+        to: "/advance-requests",
+      },
+      {
+        name: "Travel Requests",
+        total: renderStatValue(
+          statsData.travelRequest?.totalRequests,
+          statsQueries.travelRequest.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.travelRequest?.totalApprovedRequests,
+          statsQueries.travelRequest.isLoading
+        ),
+        to: "/travel-requests",
+      },
+      {
+        name: "Expense Claims",
+        total: 10,
+        approved: 13,
+        to: "/expense-claims",
+      },
+    ],
+    [statsData, statsQueries]
   );
 
-  const travelRequestStats = useMemo(
-    () => (travelRequestStatsData?.data as TravelRequestStats) ?? {},
-    [travelRequestStatsData]
-  );
-
-  // Explicitly type project stats
-  const projectsStats = useMemo(
-    () => (projectsStatsData?.data as ProjectStats) ?? {},
-    [projectsStatsData]
-  );
-
-  // Explicitly type concept note stats
-  const conceptNotesStats = useMemo(
-    () => (conceptNotesStatsData?.data as ConceptNoteStats) ?? {},
-    [conceptNotesStatsData]
-  );
-
-  // Define stats array
-
-  const stats = [
-    {
-      name: "Total Projects",
-      total: isLoadingProjectsStats ? (
-        <SpinnerMini />
-      ) : (
-        projectsStats?.totalProjects ?? 0
-      ),
-      to: "/projects",
-    },
-    {
-      name: "Purchase Requests",
-      total: isLoadingPurchaseRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        purchaseRequestStats?.totalRequests ?? 0
-      ),
-      approved: isLoadingPurchaseRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        purchaseRequestStats?.totalApprovedRequests ?? 0
-      ),
-      to: "/purchase-requests",
-    },
-    {
-      name: "Concept Notes",
-      total: isLoadingConceptNotesStats ? (
-        <SpinnerMini />
-      ) : (
-        conceptNotesStats.totalConceptNotes ?? 0
-      ),
-      approved: isLoadingConceptNotesStats ? (
-        <SpinnerMini />
-      ) : (
-        conceptNotesStats.totalApprovedConceptNotes ?? 0
-      ),
-
-      to: "/concept-notes",
-    },
-    {
-      name: "Payment Requests",
-      total: isLoadingPaymentRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        paymentRequestStats?.totalRequests ?? 0
-      ),
-      approved: isLoadingPaymentRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        paymentRequestStats?.totalApprovedRequests ?? 0
-      ),
-      to: "/payment-requests",
-    },
-    {
-      name: "Advance Requests",
-      total: isLoadingAdvanceRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        advanceRequestStats?.totalRequests ?? 0
-      ),
-      approved: isLoadingAdvanceRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        advanceRequestStats?.totalApprovedRequests ?? 0
-      ),
-      to: "/advance-requests",
-    },
-    {
-      name: "Travel Requests",
-      total: isLoadingTravelRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        travelRequestStats?.totalRequests ?? 0
-      ),
-      approved: isLoadingTravelRequestStats ? (
-        <SpinnerMini />
-      ) : (
-        travelRequestStats?.totalApprovedRequests ?? 0
-      ),
-      to: "/travel-requests",
-    },
-
-    { name: "Expense Claims", total: 10, approved: 13, to: "/expense-claims" },
-  ];
-
-  if (
-    isErrorPurchaseRequestStats ||
-    isErrorProjectsStats ||
-    isErrorConceptNotesStats ||
-    isErrorPaymentRequestStats ||
-    isErrorAdvanceRequestStats ||
-    isErrorTravelRequestStats
-  ) {
+  if (hasError) {
     return <NetworkErrorUI />;
   }
 
@@ -200,45 +166,59 @@ export function Dashboard() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         style={{ fontFamily: "Sora", letterSpacing: "1px" }}
       >
-        {stats.map((stat) => (
-          <div
-            key={stat.name}
-            className={`bg-white rounded-lg shadow-md p-6 hover:cursor-pointer`}
-            onClick={() => navigate(stat.to)}
-          >
-            <h3
-              className={`text-sm lg:text-base 2xl:text-lg font-medium text-gray-600 mb-2`}
+        {stats.map((stat) => {
+          // For debugging - remove in production
+          // console.log(stat);
+
+          return (
+            <div
+              key={stat.name}
+              className="bg-white rounded-lg shadow-md p-6 hover:cursor-pointer hover:shadow-lg transition-shadow"
+              // onClick={(e) => {
+              //   // Check if mobile navigation is open
+              //   const mobileNav = document.querySelector('.min-h-screen.w-fit.bg-white.absolute');
+              //   if (!mobileNav) {
+              //     navigate(stat.to);
+              //   }
+              // }}
+              // onKeyDown={(e) => {
+              //   // Add keyboard accessibility
+              //   if (e.key === 'Enter' || e.key === ' ') {
+              //     const mobileNav = document.querySelector('.min-h-screen.w-fit.bg-white.absolute');
+              //     if (!mobileNav) {
+              //       navigate(stat.to);
+              //     }
+              //   }
+              // }}
+              // role="button"
+              tabIndex={0}
             >
-              {stat.name}
-            </h3>
-            <div className="flex justify-between items-center">
-              <div>
-                <p
-                  className={`text-xs 2xl:text-sm text-gray-600 font-semibold`}
-                >
-                  Total
-                </p>
-                {
-                  <p
-                    className={`text-xl 2xl:text-2xl font-semibold text-gray-600  `}
-                  >
-                    {stat.total}
-                  </p>
-                }
-              </div>
-              {stat.approved && (
+              <h3 className="text-sm lg:text-base 2xl:text-lg font-medium text-gray-600 mb-2">
+                {stat.name}
+              </h3>
+              <div className="flex justify-between items-center">
                 <div>
                   <p className="text-xs 2xl:text-sm text-gray-600 font-semibold">
-                    Approved
+                    Total
                   </p>
-                  <p className="text-xl 2xl:text-2xl font-semibold text-green-600">
-                    {stat.approved}
+                  <p className="text-xl 2xl:text-2xl font-semibold text-gray-600">
+                    {stat.total}
                   </p>
                 </div>
-              )}
+                {stat.approved !== null && (
+                  <div>
+                    <p className="text-xs 2xl:text-sm text-gray-600 font-semibold">
+                      Approved
+                    </p>
+                    <p className="text-xl 2xl:text-2xl font-semibold text-green-600">
+                      {stat.approved}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

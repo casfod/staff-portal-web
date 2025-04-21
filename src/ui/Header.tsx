@@ -2,20 +2,21 @@
 import { Menu } from "lucide-react";
 import logo from "../assets/logo.webp";
 // import { useUser } from "../features/user/userHooks/useUser";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import MobileNavigation from "./MobileNavigation";
 import Profile from "./Profile";
 import useMediaQuery from "../hooks/useMediaQuery";
+import { useNavigation } from "../contexts/NavigationContext";
 
 export function Header() {
-  const [isNavigation, setIsNavigation] = useState<boolean>(false);
+  const { isOpen: isNavigation, setIsOpen: setIsNavigation } = useNavigation();
   const navRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLSpanElement>(null);
 
   // Close navigation when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      event.stopPropagation();
+      event.preventDefault();
 
       if (
         navRef.current &&

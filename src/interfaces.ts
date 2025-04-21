@@ -339,6 +339,28 @@ export interface TargetBeneficiaries {
 ///////////////////////
 //ConceptNote //
 ///////////////////////
+export interface ConceptNoteStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UseConceptNoteStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: ConceptNoteStats;
+}
+
+export interface UseConceptNoteType {
+  status: number;
+  message: string;
+  data: {
+    conceptNotes: ConceptNote[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
 
 export interface ConceptNote {
   id?: string;
@@ -371,29 +393,6 @@ export interface ConceptNote {
   status?: "pending" | "approved" | "rejected" | "draft";
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface UseConceptNoteType {
-  status: number;
-  message: string;
-  data: {
-    conceptNotes: ConceptNote[];
-    totalConceptNotes: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface ConceptNoteStats {
-  totalConceptNotes: number;
-  totalApprovedConceptNotes: number;
-}
-
-export interface UseConceptNoteStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: ConceptNoteStats;
 }
 
 ///////////////////////

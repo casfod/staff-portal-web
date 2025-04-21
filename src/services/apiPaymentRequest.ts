@@ -107,6 +107,7 @@ export const getPaymentRequestStats = async function () {
     return handleError(err);
   }
 };
+
 export const savePaymentRequests = async function (
   data: Partial<PaymentRequestType>
 ) {
