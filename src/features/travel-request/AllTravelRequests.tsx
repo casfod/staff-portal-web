@@ -131,7 +131,7 @@ const AllTravelRequests = () => {
             onClick={() => navigate("/travel-requests/create-travel-request")}
           >
             <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            New
+            Add
           </Button>
         </div>
 

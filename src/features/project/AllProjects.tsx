@@ -82,7 +82,7 @@ export function AllProjects() {
           {localStorageUserX.role === "SUPER-ADMIN" && (
             <Button onClick={() => navigate("/projects/create-project")}>
               <Plus className="h-4 w-4 mr-1 md:mr-2" />
-              New
+              Add
             </Button>
           )}
         </div>

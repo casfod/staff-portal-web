@@ -112,7 +112,7 @@ const AllConceptNotes = () => {
             onClick={() => navigate("/concept-notes/create-concept-note")} // Use relative path here
           >
             <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            New
+            Add
           </Button>
         </div>
 
