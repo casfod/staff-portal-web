@@ -9,8 +9,8 @@ const MobileNavigation = () => {
         <img src={logo} alt="CASFOD" className="self-center w-full h-15" />
       </div> */}
 
-      <div className="border item-center justify-center py-2 px-2 rounded-full shadow">
-        <img src={logo} alt="CASFOD" className="pt-0.5 h-9 2xl:h-14" />
+      <div className="flex item-center justify-center p-1.5 rounded-full border-2 shadow-md">
+        <img src={logo} alt="CASFOD" className="pt-0.5 h-11" />
       </div>
 
       <div className="absolute scale-[90%] sm:scale-[100%] top-[50px] sm:top-[64px] ">

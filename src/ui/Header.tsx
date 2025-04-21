@@ -45,7 +45,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
-      <div className="mx-auto pl-4 md:pl-6 2xl:pl-3 pr-4 md:pr-6 py-3 xl:py-2 flex justify-between items-center">
+      <div className="mx-auto px-4 md:px-6 py-3 xl:py-2 flex justify-between items-center">
         {/* <div className="hidden xl:block border pl-2 py-2 px-2 rounded-md shadow">
           <img
             src={logo}
@@ -53,8 +53,8 @@ export function Header() {
             className="w-[180px] 2xl:w-[200px] h-10 2xl:h-14"
           />
         </div> */}
-        <div className="border hidden xl:flex item-center justify-center pl-2 py-2 px-2 rounded-full shadow">
-          <img src={logo} alt="CASFOD" className="pt-0.5 h-9 2xl:h-14" />
+        <div className="hidden xl:flex item-center justify-center p-1.5 rounded-full border-2 shadow-md">
+          <img src={logo} alt="CASFOD" className="pt-1 h-11" />
         </div>
 
         <span
