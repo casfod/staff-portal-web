@@ -336,7 +336,7 @@ export function AllProjects() {
                             </div>
                           </div>
 
-                          <div className="flex justify-center w-full">
+                          <div className="flex justify-center w-full mt-4">
                             <button
                               onClick={() => handleAction(project)} // Use relative path here
                               className="inline-flex items-center px-4 py-2 border border-transparent 
