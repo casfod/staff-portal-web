@@ -199,7 +199,7 @@ export function AllProjects() {
                       <td colSpan={5}>
                         <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
                           {/* Project Details Section */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                          <div className="grid grid-cols-1  gap-4 mb-6">
                             <div className="flex flex-col gap-3">
                               <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
@@ -231,26 +231,6 @@ export function AllProjects() {
                                 </span>{" "}
                                 {project.target_beneficiaries.join(", ")}
                               </p>
-
-                              {/* <div className="text-sm text-gray-600">
-                                <p className="font-extrabold uppercase">
-                                  Locations:
-                                </p>{" "}
-                                {project.project_locations.map(
-                                  (location, index) => (
-                                    <ul key={index}>
-                                      {" "}
-                                      <li className="inline-flex items-center">
-                                        {" "}
-                                        <span className="mb-auto ">
-                                          <Dot />
-                                        </span>{" "}
-                                        {location}
-                                      </li>
-                                    </ul>
-                                  )
-                                )}
-                              </div> */}
 
                               <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
@@ -312,31 +292,6 @@ export function AllProjects() {
                               </p>
                             </div>
                           </div>
-
-                          {/* Target Beneficiaries Section */}
-                          {/* <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-600 uppercase mb-2">
-                              Target Beneficiaries
-                            </h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold">Men:</span>{" "}
-                                {project.target_beneficiaries.men}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold">Women:</span>{" "}
-                                {project.target_beneficiaries.women}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold">Boys:</span>{" "}
-                                {project.target_beneficiaries.boys}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold">Girls:</span>{" "}
-                                {project.target_beneficiaries.girls}
-                              </div>
-                            </div>
-                          </div> */}
 
                           {/* Sectors Table */}
                           <div className="border border-gray-300 w-[50%]  mb-4 rounded-md">
