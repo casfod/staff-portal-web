@@ -179,7 +179,7 @@ const PurchaseRequest = () => {
                     {/* Comments and Actions Section */}
                     {purchaseRequest?.reviewedBy &&
                       purchaseRequest.status !== "draft" && (
-                        <div className="text-gray-700 mt-4 tracking-wide">
+                        <div className="text-gray-600 mt-4 tracking-wide">
                           <RequestCommentsAndActions
                             request={purchaseRequest}
                           />

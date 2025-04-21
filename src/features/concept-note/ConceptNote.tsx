@@ -124,7 +124,7 @@ const ConceptNote = () => {
                   <ConceptNoteDetails request={conceptNote} />
 
                   {conceptNote.status !== "draft" && (
-                    <div className="text-gray-700 mt-4 tracking-wide">
+                    <div className="text-gray-600 mt-4 tracking-wide">
                       <RequestCommentsAndActions request={conceptNote} />
 
                       {showStatusUpdate && (

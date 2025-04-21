@@ -366,7 +366,7 @@ const FormAddAdvanceRequest: React.FC = () => {
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-700 font-bold">
+        <span className="text-gray-600 font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}

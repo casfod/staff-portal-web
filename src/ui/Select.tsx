@@ -129,7 +129,7 @@ const Select: React.FC<SelectProps> = ({
       {label && (
         <label
           htmlFor={id}
-          className="block mb-1 font-bold text-sm text-gray-700"
+          className="block mb-1 font-bold text-sm text-gray-600"
         >
           {label}
         </label>
@@ -140,7 +140,7 @@ const Select: React.FC<SelectProps> = ({
         id={id}
         className={`w-full h-10 px-4 py-2 rounded-md border ${
           isOpen ? "border-primary" : "border-gray-300"
-        } focus:outline-none shadow-sm text-gray-700 flex items-center justify-between cursor-pointer bg-white`}
+        } focus:outline-none shadow-sm text-gray-600 flex items-center justify-between cursor-pointer bg-white`}
         onClick={() => {
           setIsOpen(!isOpen);
           setSearchTerm("");

@@ -66,7 +66,7 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
       }`}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-300 pb-6 break-words">
-        <div className="flex flex-col gap-2 text-gray-700 text-sm tracking-wide">
+        <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
           <p>
             <span className="font-bold mr-1 uppercase">Staff Name:</span>
             {request.staffName}
@@ -80,7 +80,7 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
             {request.dayOfReturn}
           </p>
         </div>
-        <div className="flex flex-col gap-2 text-gray-700 text-sm tracking-wide">
+        <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
           <p>
             <span className="font-bold uppercase">Travel Request:</span>{" "}
             {request.travelRequest.from} - {request.travelRequest.to}
@@ -96,7 +96,7 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
         </div>
       </div>
 
-      <h2 className="text-center text-lg text-gray-700 font-semibold tracking-wide my-4 break-words">
+      <h2 className="text-center text-lg text-gray-600 font-semibold tracking-wide my-4 break-words">
         EXPENSES
       </h2>
 

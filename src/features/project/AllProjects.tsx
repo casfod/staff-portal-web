@@ -97,7 +97,7 @@ export function AllProjects() {
               type="text"
               value={searchTerm}
               onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2 text-gray-700 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
+              className="w-full h-full px-2 text-gray-600 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
               placeholder="Search"
             />
             <span
@@ -201,38 +201,38 @@ export function AllProjects() {
                           {/* Project Details Section */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div className="flex flex-col gap-3">
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Project Code:
                                 </span>{" "}
                                 {project.project_code}
                               </p>
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Project Name:
                                 </span>{" "}
                                 {project.project_title}
                               </p>
-                              <p className="text-sm text-gray-700 whitespace-pre-line">
+                              <p className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Donor:
                                 </span>{" "}
                                 {project.donor}
                               </p>
-                              <p className="text-sm text-gray-700 whitespace-pre-line">
+                              <p className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase ">
                                   Objectives:
                                 </span>{" "}
                                 {project.project_objectives}
                               </p>
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Target Beneficiaries:
                                 </span>{" "}
                                 {project.target_beneficiaries.join(", ")}
                               </p>
 
-                              {/* <div className="text-sm text-gray-700">
+                              {/* <div className="text-sm text-gray-600">
                                 <p className="font-extrabold uppercase">
                                   Locations:
                                 </p>{" "}
@@ -252,14 +252,14 @@ export function AllProjects() {
                                 )}
                               </div> */}
 
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Locations:
                                 </span>{" "}
                                 {project.project_locations.join(", ")}
                               </p>
 
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Budget:
                                 </span>{" "}
@@ -271,7 +271,7 @@ export function AllProjects() {
                             </div>
 
                             <div className="flex flex-col gap-3">
-                              <div className=" text-gray-700">
+                              <div className=" text-gray-600">
                                 <h2 className="text-sm font-extrabold uppercase">
                                   Account Codes:
                                 </h2>{" "}
@@ -289,14 +289,14 @@ export function AllProjects() {
                                 ))}
                               </div>
 
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Partners:
                                 </span>{" "}
                                 {project.project_partners.join(", ")}
                               </p>
 
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-600">
                                 <span className="font-extrabold uppercase">
                                   Implementation Period:
                                 </span>{" "}
@@ -311,23 +311,23 @@ export function AllProjects() {
 
                           {/* Target Beneficiaries Section */}
                           {/* <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">
+                            <h3 className="text-sm font-semibold text-gray-600 uppercase mb-2">
                               Target Beneficiaries
                             </h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="text-sm text-gray-700">
+                              <div className="text-sm text-gray-600">
                                 <span className="font-semibold">Men:</span>{" "}
                                 {project.target_beneficiaries.men}
                               </div>
-                              <div className="text-sm text-gray-700">
+                              <div className="text-sm text-gray-600">
                                 <span className="font-semibold">Women:</span>{" "}
                                 {project.target_beneficiaries.women}
                               </div>
-                              <div className="text-sm text-gray-700">
+                              <div className="text-sm text-gray-600">
                                 <span className="font-semibold">Boys:</span>{" "}
                                 {project.target_beneficiaries.boys}
                               </div>
-                              <div className="text-sm text-gray-700">
+                              <div className="text-sm text-gray-600">
                                 <span className="font-semibold">Girls:</span>{" "}
                                 {project.target_beneficiaries.girls}
                               </div>
@@ -336,7 +336,7 @@ export function AllProjects() {
 
                           {/* Sectors Table */}
                           <div className="border border-gray-300 w-[50%]  mb-4 rounded-md">
-                            <h3 className="text-center font-semibold text-gray-700 uppercase py-2">
+                            <h3 className="text-center font-semibold text-gray-600 uppercase py-2">
                               Sectors
                             </h3>
                             <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
@@ -356,10 +356,10 @@ export function AllProjects() {
                                     key={index}
                                     className="hover:bg-gray-50 transition-colors"
                                   >
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                       {sector.name}
                                     </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                       {sector.percentage}%
                                     </td>
                                   </tr>
@@ -369,7 +369,7 @@ export function AllProjects() {
                           </div>
 
                           <div>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm text-gray-600">
                               <span className="font-extrabold uppercase">
                                 Summary:
                               </span>{" "}

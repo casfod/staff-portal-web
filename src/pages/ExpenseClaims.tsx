@@ -28,7 +28,7 @@ export function ExpenseClaims() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1
-          className="text-2xl font-semibold text-gray-700"
+          className="text-2xl font-semibold text-gray-600"
           style={{ letterSpacing: "2px" }}
         >
           Expense Claims
@@ -68,7 +68,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
           <tbody className="bg-white divide-y divide-gray-200">
             {requests.map((request) => (
               <tr key={request.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">
                   {request.purpose}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -92,14 +92,14 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
       {showModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-medium text-gray-700 mb-4">
+            <h2 className="text-lg font-medium text-gray-600 mb-4">
               Create Advance Request
             </h2>
             <form className="space-y-4">
               <div>
                 <label
                   htmlFor="purpose"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-600"
                 >
                   Purpose
                 </label>
@@ -112,7 +112,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
               <div>
                 <label
                   htmlFor="amount"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-600"
                 >
                   Amount
                 </label>
@@ -125,7 +125,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
               <div>
                 <label
                   htmlFor="justification"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-600"
                 >
                   Justification
                 </label>
@@ -139,7 +139,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 "
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 "
                 >
                   Cancel
                 </button>

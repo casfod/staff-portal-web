@@ -32,7 +32,7 @@ const EditConceptNote = () => {
     <div className="flex flex-col items-center gap-6 pt-4 pb-80">
       <div className="w-full flex justify-between items-center">
         <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
+          className=" md:text-lg lg:text-2xl font-semibold text-gray-600"
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
           Update Concept Note

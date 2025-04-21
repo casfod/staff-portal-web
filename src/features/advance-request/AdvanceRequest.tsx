@@ -166,7 +166,7 @@ const Request = () => {
                     {/* Comments and Actions Section */}
                     {advanceRequest?.reviewedBy &&
                       advanceRequest.status !== "draft" && (
-                        <div className="text-gray-700 mt-4 tracking-wide">
+                        <div className="text-gray-600 mt-4 tracking-wide">
                           <RequestCommentsAndActions request={advanceRequest} />
 
                           {showStatusUpdate && (

@@ -18,12 +18,12 @@ const PasswordInput = ({
   errorMessage?: string;
 }) => (
   <div>
-    <label htmlFor={id} className="block mb-1 font-bold text-sm text-gray-700">
+    <label htmlFor={id} className="block mb-1 font-bold text-sm text-gray-600">
       {label}
     </label>
     <div className="relative w-full">
       <input
-        className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+        className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
         id={id}
         type={showPassword ? "text" : "password"}
         placeholder={`Enter your ${label.toLowerCase()}`}

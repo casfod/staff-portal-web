@@ -53,7 +53,7 @@ const AddUserForm = () => {
 
   return (
     <div className="w-[300px] md:w-[350px] flex flex-col items-center justify-center py-4 rounded-lg">
-      <h2 className="text-center font-medium text-gray-700 mb-2">
+      <h2 className="text-center font-medium text-gray-600 mb-2">
         Add New User
       </h2>
       <form
@@ -64,12 +64,12 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="first_name"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               First Name
             </label>
             <input
-              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
               id="first_name"
               type="text"
               placeholder="Enter your name"
@@ -81,12 +81,12 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="last_name"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               Last Name
             </label>
             <input
-              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
               id="last_name"
               type="text"
               placeholder="Enter your name"
@@ -98,12 +98,12 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="email"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               Email
             </label>
             <input
-              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -115,12 +115,12 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="role"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               Roles
             </label>
             <select
-              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+              className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
               id="role"
               value={formData.role}
               onChange={handleInputChange}
@@ -138,13 +138,13 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="password"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               Password
             </label>
             <div className="relative w-full">
               <input
-                className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+                className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
@@ -174,13 +174,13 @@ const AddUserForm = () => {
           <div>
             <label
               htmlFor="passwordConfirm"
-              className="block mb-0.5 font-bold text-sm text-gray-700"
+              className="block mb-0.5 font-bold text-sm text-gray-600"
             >
               Confirm Password
             </label>
             <div className="relative w-full">
               <input
-                className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-700"
+                className="w-full h-8  px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm text-gray-600"
                 id="passwordConfirm"
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirm your password"

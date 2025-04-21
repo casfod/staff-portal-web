@@ -22,14 +22,16 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
          ${
            isActive
              ? "text-gray-50  bg-buttonColor"
-             : "text-gray-700 hover:text-gray-50 hover:bg-buttonColor hover:bg-opacity-65"
+             : "text-gray-600 hover:text-gray-50 hover:bg-buttonColor hover:bg-opacity-65"
          }
           `
         }
         style={{ lineHeight: "24px", fontWeight: "500" }}
       >
         <Icon className="mr-2 h-5 2xl:h-7 w-7" />
-        <span className="w-full text-xs md:text-sm 2xl:text-base">{label}</span>
+        <span className="w-full tracking-[0.8px] text-sm 2xl:text-base">
+          {label}
+        </span>
       </NavLink>
     </div>
   );

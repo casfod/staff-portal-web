@@ -68,7 +68,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       }`}
     >
       <div
-        className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3 break-words"
+        className="flex flex-col gap-2 w-full text-gray-600 text-sm mb-3 break-words"
         style={{ letterSpacing: "1px" }}
       >
         <p>
@@ -105,7 +105,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       <h2
-        className="text-center text-lg text-gray-700 font-semibold break-words"
+        className="text-center text-lg text-gray-600 font-semibold break-words"
         style={{ letterSpacing: "2px" }}
       >
         ITEMS

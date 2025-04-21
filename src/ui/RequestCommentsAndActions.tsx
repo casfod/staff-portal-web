@@ -15,7 +15,7 @@ const RequestCommentsAndActions = ({
 
   return (
     <div
-      className="flex flex-col gap-4 mt-4 text-gray-700 text-sm"
+      className="flex flex-col gap-4 mt-4 text-gray-600 text-sm"
       style={{ letterSpacing: "1px" }}
     >
       {/* Show approval chain */}

@@ -51,14 +51,14 @@ export function Login() {
             <div>
               <label
                 htmlFor="email"
-                className="block mb-1 font-bold text-gray-700"
+                className="block mb-1 font-bold text-gray-600"
               >
                 Email
               </label>
               <input
                 className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                 focus:border-[#052859] focus:outline-none shadow-lg 
-                text-gray-700"
+                text-gray-600"
                 id="email"
                 type="email"
                 placeholder="Enter your email"
@@ -72,7 +72,7 @@ export function Login() {
             <div>
               <label
                 htmlFor="password"
-                className="block mb-1 font-bold text-gray-700"
+                className="block mb-1 font-bold text-gray-600"
               >
                 Password
               </label>
@@ -80,7 +80,7 @@ export function Login() {
                 <input
                   className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                   focus:border-[#052859] focus:outline-none shadow-lg 
-                  text-gray-700"
+                  text-gray-600"
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"

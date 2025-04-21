@@ -351,7 +351,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-700 font-bold">
+        <span className="text-gray-600 font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}

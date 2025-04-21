@@ -50,7 +50,7 @@ const TravelRequestTableRow = ({
         </td>
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
-            <button className="hover:text-gray-700">
+            <button className="hover:text-gray-600">
               {isVisible ? (
                 <HiMiniEyeSlash className="w-5 h-5" />
               ) : (

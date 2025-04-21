@@ -40,7 +40,7 @@ export function Pagination({
               className={`px-3 py-1 ${
                 currentPage === pageNumber
                   ? "bg-buttonColor hover:bg-buttonColorHover text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-buttonColor hover:bg-opacity-65 hover:text-white"
+                  : "bg-gray-200 text-gray-600 hover:bg-buttonColor hover:bg-opacity-65 hover:text-white"
               } rounded-lg`}
             >
               {pageNumber}

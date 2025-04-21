@@ -64,7 +64,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
               className="w-24 h-24 rounded-full object-cover border"
             />
             <div>
-              <h2 className="text-lg font-semibold text-gray-700">
+              <h2 className="text-lg font-semibold text-gray-600">
                 {`${user?.first_name} ${user?.last_name}`}
               </h2>
               <p className="text-sm text-gray-600">{user?.role}</p>

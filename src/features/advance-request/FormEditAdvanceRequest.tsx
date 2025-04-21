@@ -194,12 +194,12 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     <form className="space-y-6 uppercase ">
       <Row>
         <p
-          className="text-gray-700"
+          className="text-gray-600"
           style={{ letterSpacing: "1px" }}
         >{`Status : ${advanceRequest.status}`}</p>
 
         <p
-          className="text-gray-700"
+          className="text-gray-600"
           style={{ letterSpacing: "1px" }}
         >{`Request : ${advanceRequest.requestedBy}`}</p>
       </Row>
@@ -456,7 +456,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-700 font-bold">
+        <span className="text-gray-600 font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}
@@ -489,7 +489,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
       </Row> */}
 
       {advanceRequest.reviewedBy ? (
-        <div className="text-gray-700">
+        <div className="text-gray-600">
           <p className="mb-2">
             <span className="font-bold mr-1  uppercase">Reviewed By :</span>
             {`${advanceRequest?.reviewedBy?.first_name} ${advanceRequest?.reviewedBy?.last_name}`}

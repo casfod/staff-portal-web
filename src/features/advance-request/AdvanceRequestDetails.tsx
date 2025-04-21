@@ -72,10 +72,10 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !isInspect && "text-sm"
-        } text-gray-700 mb-3 border-b border-gray-300 pb-6`}
+        } text-gray-600 mb-3 border-b border-gray-300 pb-6`}
       >
         <div
-          className="flex flex-col gap-2 w-full text-gray-700 text-sm mb-3"
+          className="flex flex-col gap-2 w-full text-gray-600 text-sm mb-3"
           style={{ letterSpacing: "1px" }}
         >
           <p>
@@ -95,7 +95,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
             {request.finalDeliveryPoint}
           </p>
 
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-600">
             <span className="font-extrabold uppercase">
               Period Of Activity:
             </span>{" "}
@@ -132,7 +132,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       <h2
-        className="text-center text-lg text-gray-700 font-semibold"
+        className="text-center text-lg text-gray-600 font-semibold"
         style={{ letterSpacing: "2px" }}
       >
         ITEMS

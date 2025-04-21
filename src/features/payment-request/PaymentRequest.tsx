@@ -160,7 +160,7 @@ const PaymentRequest = () => {
                     {/* Comments and Actions Section */}
                     {paymentRequest?.reviewedBy &&
                       paymentRequest.status !== "draft" && (
-                        <div className="text-gray-700 mt-4 tracking-wide">
+                        <div className="text-gray-600 mt-4 tracking-wide">
                           <RequestCommentsAndActions request={paymentRequest} />
 
                           {showStatusUpdate && (

@@ -24,7 +24,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !isInspect && "text-sm"
-        } text-gray-700`}
+        } text-gray-600`}
       >
         {/* Left Column */}
         <div className="space-y-3">
@@ -74,7 +74,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       {request?.reviewedBy && request.status !== "draft" && (
         <div className="flex justify-center w-full mt-3">
           <div
-            className="flex flex-col w-full text-gray-700 text-sm mb-2"
+            className="flex flex-col w-full text-gray-600 text-sm mb-2"
             style={{ letterSpacing: "1px" }}
           >
             <div className="w-fit flex flex-col gap-2">

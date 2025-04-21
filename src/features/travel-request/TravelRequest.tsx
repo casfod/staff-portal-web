@@ -151,7 +151,7 @@ const TravelRequest = () => {
 
                   {travelRequest.reviewedBy &&
                     travelRequest.status !== "draft" && (
-                      <div className="text-gray-700 mt-4 tracking-wide">
+                      <div className="text-gray-600 mt-4 tracking-wide">
                         <RequestCommentsAndActions request={travelRequest} />
 
                         {showStatusUpdate && (

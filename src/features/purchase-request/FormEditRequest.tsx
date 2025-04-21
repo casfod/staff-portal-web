@@ -214,12 +214,12 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     <form className="space-y-6 uppercase ">
       <Row>
         <p
-          className="text-gray-700"
+          className="text-gray-600"
           style={{ letterSpacing: "1px" }}
         >{`Status : ${purchaseRequest.status}`}</p>
 
         <p
-          className="text-gray-700"
+          className="text-gray-600"
           style={{ letterSpacing: "1px" }}
         >{`Request : ${purchaseRequest.requestedBy}`}</p>
       </Row>
@@ -422,7 +422,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-700 font-bold">
+        <span className="text-gray-600 font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}
@@ -487,7 +487,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       </Row>
 
       {purchaseRequest.reviewedBy ? (
-        <div className="text-gray-700">
+        <div className="text-gray-600">
           <p className="mb-2">
             <span className="font-bold mr-1  uppercase">Reviewed By :</span>
             {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
