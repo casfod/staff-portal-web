@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useEffect } from "react";
 import Button from "../../ui/Button";
+import TextHeader from "../../ui/TextHeader";
 
 const EditRequest = () => {
   const navigate = useNavigate();
@@ -29,20 +30,18 @@ const EditRequest = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 pt-4 pb-80">
-      <div className="w-full flex justify-between items-center">
-        <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-600"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
-        >
-          Update Purchase Request
-        </h1>
-        <Button
-          onClick={() => navigate(-1)} // Use relative path here
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          List
-        </Button>
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          <TextHeader>Update Purchase Request</TextHeader>
+
+          <Button
+            onClick={() => navigate(-1)} // Use relative path here
+          >
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            List
+          </Button>
+        </div>
       </div>
 
       <div className="border w-full rounded-lg">
