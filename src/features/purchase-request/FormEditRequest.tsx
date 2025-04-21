@@ -221,7 +221,7 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
         <p
           className="text-gray-700"
           style={{ letterSpacing: "1px" }}
-        >{`Requested by : ${purchaseRequest.requestedBy}`}</p>
+        >{`Request : ${purchaseRequest.requestedBy}`}</p>
       </Row>
 
       {/* Static inputs */}

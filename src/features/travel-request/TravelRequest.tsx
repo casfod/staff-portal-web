@@ -18,6 +18,8 @@ import StatusBadge from "../../ui/StatusBadge";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
+import TextHeader from "../../ui/TextHeader";
+import Button from "../../ui/Button";
 
 const TravelRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -85,67 +87,60 @@ const TravelRequest = () => {
     );
   }
 
-  const totalAmount =
-    travelRequest.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
+  // const totalAmount =
+  //   travelRequest.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
   const showStatusUpdate =
     (localStorageUserX.role === "REVIEWER" &&
       travelRequest.status === "pending") ||
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
       travelRequest.status === "reviewed");
 
-  return (
-    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
-      <div className="w-full flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-700 tracking-wide">
-          Travel Request
-        </h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          List
-        </button>
-      </div>
+  const tableHeadData = ["Request", "Status", "Budget", "Date"];
 
+  const tableRowData = [
+    `${travelRequest?.staffName}`,
+    <StatusBadge status={travelRequest?.status!} key="status-badge" />,
+    moneyFormat(travelRequest?.budget!, "NGN"),
+    dateformat(travelRequest?.createdAt!),
+  ];
+
+  return (
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          <TextHeader>Travel Request</TextHeader>
+
+          <Button onClick={() => navigate(-1)}>
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            List
+          </Button>
+        </div>
+      </div>
       <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 ">
             <tr>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Name
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Amount
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Requested By
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Date
-              </th>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
-                {travelRequest.staffName}
-              </td>
-              <td className="px-6 py-2 whitespace-nowrap text-gray-600">
-                {moneyFormat(totalAmount, "NGN")}
-              </td>
-              <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                <StatusBadge status={travelRequest.status!} />
-              </td>
-              <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                {travelRequest.staffName}
-              </td>
-              <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                {dateformat(travelRequest.createdAt!)}
-              </td>
+            <tr key={travelRequest.id} className="h-[40px] max-h-[40px] ">
+              {tableRowData.map((data, index) => (
+                <td
+                  key={index}
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-sm 2xl:text-text-base tracking-wider"
+                >
+                  {data}
+                </td>
+              ))}
             </tr>
 
             {/* Item Table Section */}

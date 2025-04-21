@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import { truncateText } from "../../utils/truncateText";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { dateformat } from "../../utils/dateFormat";
+import TextHeader from "../../ui/TextHeader";
+import Button from "../../ui/Button";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -28,35 +30,28 @@ const Project = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
-      {/* Header Section */}
-      <div className="w-full flex justify-between items-center">
-        <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
-        >
-          Review Project
-        </h1>
-        <button
-          onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          All Projects
-        </button>
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          <TextHeader>Project</TextHeader>
+
+          <Button
+            onClick={() => navigate(-1)} // Use relative path here
+          >
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            All Projects
+          </Button>
+        </div>
       </div>
 
       {/* Main Table Section */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Name
               </th>
-              {/* <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
-                Status
-              </th> */}
               <th className="px-6 py-2 text-left  font-medium text-gray-600 uppercase tracking-wider">
                 Project Code
               </th>

@@ -7,6 +7,14 @@ interface RequestDetailsProps {
   request: AdvanceRequestType;
 }
 
+const tableHeadData = [
+  "Description",
+  "Quantity",
+  "Frequency",
+  "Unit Cost",
+  "Total",
+];
+
 const ItemsTable = ({
   itemGroups,
 }: {
@@ -15,21 +23,14 @@ const ItemsTable = ({
   <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
     <thead>
       <tr>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Description
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Quantity
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Frequency
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Unit Cost
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Total
-        </th>
+        {tableHeadData.map((data, index) => (
+          <th
+            key={index}
+            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider"
+          >
+            {data}
+          </th>
+        ))}
       </tr>
     </thead>
     <tbody className="bg-white divide-y divide-gray-200 ">

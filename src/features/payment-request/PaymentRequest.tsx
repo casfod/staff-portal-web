@@ -18,6 +18,8 @@ import StatusBadge from "../../ui/StatusBadge";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
+import Button from "../../ui/Button";
+import TextHeader from "../../ui/TextHeader";
 
 const PaymentRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -96,58 +98,57 @@ const PaymentRequest = () => {
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
       paymentRequest.status === "reviewed");
 
+  const tableHeadData = ["Request", "Status", "Budget", "Date"];
+
+  const tableRowData = [
+    `${paymentRequest?.requestedBy?.first_name} ${paymentRequest?.requestedBy?.last_name}`,
+    <StatusBadge status={paymentRequest?.status!} key="status-badge" />,
+
+    moneyFormat(paymentRequest?.amountInFigure!, "NGN"),
+    dateformat(paymentRequest?.createdAt!),
+  ];
+
   return (
-    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
-      {/* Header Section */}
-      <div className="w-full flex justify-between items-center">
-        <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
-        >
-          Review Request
-        </h1>
-        <button
-          onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          List
-        </button>
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          <TextHeader>Payment Request</TextHeader>
+
+          <Button
+            onClick={() => navigate(-1)} // Use relative path here
+          >
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            List
+          </Button>
+        </div>
       </div>
 
       <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 ">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Request
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Budget
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Created
-              </th>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             <>
-              <tr key={paymentRequest.id}>
-                <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-700 uppercase">
-                  {paymentRequest.requestBy}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                  <StatusBadge status={paymentRequest.status!} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                  {moneyFormat(paymentRequest.amountInFigure, "NGN")}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap  text-gray-600 uppercase">
-                  {dateformat(paymentRequest.createdAt!)}
-                </td>
+              <tr key={paymentRequest.id} className="h-[40px] max-h-[40px] ">
+                {tableRowData.map((data, index) => (
+                  <td
+                    key={index}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data}
+                  </td>
+                ))}
               </tr>
 
               {/* Item Table Section */}

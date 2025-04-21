@@ -111,7 +111,7 @@ export function AllProjects() {
       </div>
 
       {/* Projects Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50 ">
             <tr>

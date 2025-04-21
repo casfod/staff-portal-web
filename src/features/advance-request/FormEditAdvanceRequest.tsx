@@ -201,11 +201,11 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         <p
           className="text-gray-700"
           style={{ letterSpacing: "1px" }}
-        >{`Requested by : ${advanceRequest.requestedBy}`}</p>
+        >{`Request : ${advanceRequest.requestedBy}`}</p>
       </Row>
 
       {/* Static inputs */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Department *">
           <Input
             type="text"
@@ -229,7 +229,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Address *">
           <Input
             placeholder=""
@@ -264,7 +264,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Period Of Activity (From) *">
           <Input
             type="date"
@@ -367,7 +367,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
               </FormRow>
             </Row>
 
-            <Row>
+            <Row cols="grid-cols-1 md:grid-cols-2">
               <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"

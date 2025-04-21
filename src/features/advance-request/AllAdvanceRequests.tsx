@@ -116,6 +116,15 @@ const AllAdvanceRequests = () => {
     return <NetworkErrorUI />;
   }
 
+  const tableHeadData = [
+    "Request",
+    "Status",
+    "Department",
+    "Amount",
+    "Date",
+    "Actions",
+  ];
+
   return (
     <div className="flex flex-col space-y-4 pb-16">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
@@ -158,28 +167,18 @@ const AllAdvanceRequests = () => {
       {/*Advance REQUEST TABLE*/}
       {/* ///////////////////////////// */}
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Department
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Amount
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Requested By
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Date
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Actions
-              </th>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
 

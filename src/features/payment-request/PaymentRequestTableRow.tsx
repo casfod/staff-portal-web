@@ -38,7 +38,7 @@ const PaymentRequestTableRow = ({
 
   return (
     <>
-      <tr key={requestId}>
+      <tr key={requestId} onClick={() => toggleViewItems(requestId!)}>
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.requestBy}
         </td>
@@ -56,7 +56,7 @@ const PaymentRequestTableRow = ({
           <div className="flex space-x-4">
             <span
               className="hover:cursor-pointer"
-              onClick={() => toggleViewItems(requestId!)}
+              // onClick={() => toggleViewItems(requestId!)}
             >
               {visibleItems[requestId!] ? (
                 <HiMiniEyeSlash className="w-5 h-5" />

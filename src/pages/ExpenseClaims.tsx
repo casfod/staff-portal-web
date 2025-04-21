@@ -44,7 +44,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
         </button>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border ">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -58,7 +58,7 @@ text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor h
                 Status
               </th>
               <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Requested By
+                Request
               </th>
               <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Date

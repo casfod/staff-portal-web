@@ -28,9 +28,16 @@ const TravelRequestTableRow = ({
 
   return (
     <>
-      <tr key={request.id} className="h-[40px] max-h-[40px]">
+      <tr
+        key={request.id}
+        className="h-[40px] max-h-[40px]"
+        onClick={() => toggleViewItems(request.id!)}
+      >
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.staffName}
+        </td>
+        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+          <StatusBadge status={request.status!} />
         </td>
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {moneyFormat(
@@ -39,20 +46,11 @@ const TravelRequestTableRow = ({
           )}
         </td>
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          <StatusBadge status={request.status!} />
-        </td>
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {request.staffName}
-        </td>
-        <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {dateformat(request.createdAt!)}
         </td>
         <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
-            <button
-              onClick={() => toggleViewItems(request.id!)}
-              className="hover:text-gray-700"
-            >
+            <button className="hover:text-gray-700">
               {isVisible ? (
                 <HiMiniEyeSlash className="w-5 h-5" />
               ) : (

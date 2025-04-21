@@ -17,6 +17,8 @@ import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import StatusBadge from "../../ui/StatusBadge";
+import Button from "../../ui/Button";
+import TextHeader from "../../ui/TextHeader";
 
 const Request = () => {
   // State and hooks initialization
@@ -101,70 +103,61 @@ const Request = () => {
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
       advanceRequest.status === "reviewed");
 
+  const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+
+  const tableRowData = [
+    advanceRequest?.requestedBy,
+    <StatusBadge status={advanceRequest?.status!} />,
+    advanceRequest?.department,
+    moneyFormat(totalAmount, "NGN"),
+    dateformat(advanceRequest?.createdAt!),
+  ];
+
   return (
-    <div className="flex flex-col items-center gap-6 pt-6 pb-80">
-      {/* Header Section */}
-      <div className="w-full flex justify-between items-center">
-        <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
-        >
-          Review Request
-        </h1>
-        <button
-          onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          List
-        </button>
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          <TextHeader>Advance Request</TextHeader>
+          <Button
+            onClick={() => navigate(-1)} // Use relative path here
+          >
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            List
+          </Button>
+        </div>
       </div>
 
       {/* Main Table Section */}
-      <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Department
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Amount
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Requested By
-              </th>
-              <th className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Date
-              </th>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
-              <tr key={advanceRequest.id} className="h-[40px] max-h-[40px]">
-                <td className="px-6 py-2 whitespace-nowrap font-medium text-gray-700 uppercase">
-                  {advanceRequest.department}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600">
-                  {moneyFormat(totalAmount, "NGN")}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  <StatusBadge status={advanceRequest.status!} />
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  {advanceRequest.requestedBy}
-                </td>
-                <td className="px-6 py-2 whitespace-nowrap text-gray-600 uppercase">
-                  {dateformat(advanceRequest.createdAt!)}
-                </td>
+              <tr key={advanceRequest.id} className="h-[40px] max-h-[40px] ">
+                {tableRowData.map((data, index) => (
+                  <td
+                    key={index}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data}
+                  </td>
+                ))}
               </tr>
 
               {/* Items Table Section */}
-              {/* Item Table Section */}
               <tr>
                 <td colSpan={5}>
                   <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">

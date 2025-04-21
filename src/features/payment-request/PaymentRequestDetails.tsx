@@ -39,7 +39,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
             { label: "Purpose Of Expense", value: request.purposeOfExpense },
             { label: "Special Instruction", value: request.specialInstruction },
             {
-              label: "Requested By",
+              label: "Request",
               value: `${request.requestedBy?.first_name} ${request.requestedBy?.last_name}`,
             },
           ].map(({ label, value }) => (

@@ -27,15 +27,6 @@ import PurchaseRequestTableRow from "./PurchaseRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 
-const tableHead = [
-  "Requested By",
-  "Status",
-  "Department",
-  "Amount",
-  "Date",
-  "Actions",
-];
-
 const AllPurchaseRequests = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -121,6 +112,14 @@ const AllPurchaseRequests = () => {
     return <NetworkErrorUI />;
   }
 
+  const tableHeadData = [
+    "Request",
+    "Status",
+    "Department",
+    "Amount",
+    "Date",
+    "Actions",
+  ];
   return (
     <div className="flex flex-col space-y-4 pb-16">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
@@ -169,7 +168,7 @@ const AllPurchaseRequests = () => {
         <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50">
             <tr>
-              {tableHead.map((title, index) => (
+              {tableHeadData.map((title, index) => (
                 <th
                   key={index}
                   className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"

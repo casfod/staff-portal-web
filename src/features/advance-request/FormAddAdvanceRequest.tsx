@@ -154,7 +154,7 @@ const FormAddAdvanceRequest: React.FC = () => {
   return (
     <form className="space-y-6">
       {/* Static inputs */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Department *">
           <Input
             type="text"
@@ -177,7 +177,7 @@ const FormAddAdvanceRequest: React.FC = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Address *">
           <Input
             placeholder=""
@@ -212,7 +212,7 @@ const FormAddAdvanceRequest: React.FC = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Period Of Activity (From) *">
           <Input
             type="date"
@@ -374,7 +374,7 @@ const FormAddAdvanceRequest: React.FC = () => {
         </span>
       </div>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Account Number*">
           <Input
             type="text"

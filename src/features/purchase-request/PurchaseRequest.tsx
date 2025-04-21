@@ -16,8 +16,8 @@ import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import Button from "../../ui/Button";
+import TextHeader from "../../ui/TextHeader";
 
-const tableHead = ["Requested By", "Status", "Department", "Amount", "Date"];
 const PurchaseRequest = () => {
   const localStorageUserX = localStorageUser();
   const purchaseRequest = useSelector(
@@ -96,32 +96,6 @@ const PurchaseRequest = () => {
     updateStatus({ status: "approved", comment: "ok" });
   }, [status, comment, updateStatus]);
 
-  // const handleStatusChange = useCallback(
-  //   (e?: FormEvent) => {
-  //     e?.preventDefault(); // Optional prevention if called directly
-  //     Swal.fire({
-  //       // ... existing dialog config
-  //     }).then((result) => {
-  //       if (result.isConfirmed) {
-  //         updateStatus(
-  //           { status, comment },
-  //           {
-  //             onSuccess: () => {
-  //               // Clear form after success if needed
-  //               setStatus("");
-  //               setComment("");
-  //             },
-  //             onError: (error) => {
-  //               Swal.fire("Error!", error.message, "error");
-  //             },
-  //           }
-  //         );
-  //       }
-  //     });
-  //   },
-  //   [status, comment, updateStatus]
-  // );
-
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +115,8 @@ const PurchaseRequest = () => {
     (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
       purchaseRequest.status === "reviewed");
 
+  const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+
   const tableRowData = [
     purchaseRequest?.requestedBy,
     <StatusBadge status={purchaseRequest?.status!} />,
@@ -150,22 +126,18 @@ const PurchaseRequest = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center overflow-x-hidden gap-6 pt-6 pb-80">
-      {/* Header Section */}
-      <div className="w-full flex justify-between items-center">
-        <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-700"
-          style={{ fontFamily: "Lato", letterSpacing: "2px" }}
-        >
-          Review Request
-        </h1>
-        <Button
-          onClick={() => navigate(-1)} // Use relative path here
-          className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-        >
-          <List className="h-4 w-4 mr-1 md:mr-2" />
-          List
-        </Button>
+    <div className="flex flex-col space-y-4 pb-16">
+      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
+        <div className="flex justify-between items-center">
+          {" "}
+          <TextHeader>Purchase Request</TextHeader>
+          <Button
+            onClick={() => navigate(-1)} // Use relative path here
+          >
+            <List className="h-4 w-4 mr-1 md:mr-2" />
+            List
+          </Button>
+        </div>
       </div>
 
       {/* Main Table Section */}
@@ -173,7 +145,7 @@ const PurchaseRequest = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 ">
             <tr>
-              {tableHead.map((title, index) => (
+              {tableHeadData.map((title, index) => (
                 <th
                   key={index}
                   className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
@@ -183,6 +155,7 @@ const PurchaseRequest = () => {
               ))}
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
