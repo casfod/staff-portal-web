@@ -30,7 +30,7 @@ const EditConceptNote = () => {
   }
 
   return (
-    <div className="flex flex-col space-y-4 pb-16">
+    <div className="flex flex-col space-y-4 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 md:pb-4 space-y-4 shadow-sm ">
         <div className="flex justify-between items-center">
           <TextHeader> Update Concept Note</TextHeader>
