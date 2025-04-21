@@ -8,6 +8,7 @@ import { FaPlus } from "react-icons/fa";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useAddProject } from "./Hooks/useAddProject";
 import Select from "../../ui/Select";
+import DatePicker from "../../ui/DatePicker";
 
 // Define the sector options
 const sectorOptions = [
@@ -36,7 +37,7 @@ const FormAddProject = () => {
     donor: "",
     project_partners: [],
     project_code: "",
-    implementation_period: { from: "", to: "" },
+    implementation_period: { from: null, to: null },
     account_code: [],
     project_budget: 0,
     sectors: [],
@@ -61,13 +62,13 @@ const FormAddProject = () => {
   const handleNestedChange = (
     parentField: keyof Project,
     field: string,
-    value: string | number
+    value: Date | string | number | null
   ) => {
     setFormData((prev) => ({
       ...prev,
       [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
       },
     }));
   };
@@ -361,29 +362,40 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       {/* Implementation Period */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Implementation Period (From) *">
-          <Input
-            type="date"
-            id="implementation_period_from"
-            required
-            value={formData.implementation_period.from}
-            onChange={(e) =>
+          <DatePicker
+            selected={
+              formData.implementation_period.from
+                ? new Date(formData.implementation_period.from)
+                : null
+            }
+            onChange={(date) =>
               handleNestedChange(
                 "implementation_period",
                 "from",
-                e.target.value
+                date ? date.toISOString() : null
               )
             }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
+
         <FormRow label="Implementation Period (To) *">
-          <Input
-            type="date"
-            id="implementation_period_to"
-            required
-            value={formData.implementation_period.to}
-            onChange={(e) =>
-              handleNestedChange("implementation_period", "to", e.target.value)
+          <DatePicker
+            selected={
+              formData.implementation_period.to
+                ? new Date(formData.implementation_period.to)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "implementation_period",
+                "to",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
       </Row>

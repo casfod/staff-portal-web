@@ -14,6 +14,7 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { bankNames } from "../../assets/Banks";
+import DatePicker from "../../ui/DatePicker";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface FormEditPaymentRequestProps {
@@ -166,12 +167,18 @@ const FormEditPaymentRequest = ({
       </Row>
       <Row>
         <FormRow label="Date Of Expense*">
-          <Input
-            type="date"
-            id="dateOfExpense"
-            required
-            value={formData.dateOfExpense}
-            onChange={(e) => handleFormChange("dateOfExpense", e.target.value)}
+          <DatePicker
+            selected={
+              formData.dateOfExpense ? new Date(formData.dateOfExpense) : null
+            }
+            onChange={(date) =>
+              handleFormChange("dateOfExpense", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md" // or "sm"/"lg" based on your form size
+            placeholder="Select date"
+            // className="custom-class-if-needed"
+            clearable={true}
           />
         </FormRow>
       </Row>

@@ -15,6 +15,8 @@ export function Header() {
   // Close navigation when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      event.stopPropagation();
+
       if (
         navRef.current &&
         !navRef.current.contains(event.target as Node) &&

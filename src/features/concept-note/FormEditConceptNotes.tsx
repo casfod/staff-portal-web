@@ -14,6 +14,7 @@ import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { resetConceptNote } from "../../store/conceptNoteSlice";
+import DatePicker from "../../ui/DatePicker";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 interface FormEditConceptNotesProps {
   conceptNote: ConceptNote;
@@ -64,13 +65,13 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   const handleNestedChange = (
     parentField: keyof ConceptNote,
     field: string,
-    value: string | number
+    value: Date | string | number | null
   ) => {
     setFormData((prev) => ({
       ...prev,
       [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
       },
     }));
   };
@@ -211,27 +212,42 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
           />
         </FormRow>
       </Row>
+
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Period (From) *">
-          <Input
-            type="date"
-            id="activity_period_from"
-            required
-            value={formData.activity_period?.from}
-            onChange={(e) =>
-              handleNestedChange("activity_period", "from", e.target.value)
+          <DatePicker
+            selected={
+              formData?.activity_period?.from
+                ? new Date(formData.activity_period.from)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "activity_period",
+                "from",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
         <FormRow label="Activity Period (To) *">
-          <Input
-            type="date"
-            id="activity_period_to"
-            required
-            value={formData.activity_period?.to}
-            onChange={(e) =>
-              handleNestedChange("activity_period", "to", e.target.value)
+          <DatePicker
+            selected={
+              formData?.activity_period?.to
+                ? new Date(formData.activity_period.to)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "activity_period",
+                "to",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
       </Row>

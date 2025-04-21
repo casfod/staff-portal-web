@@ -115,22 +115,22 @@ export function AllProjects() {
         <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50 ">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Name
               </th>
-              {/* <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              {/* <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Status
               </th> */}
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Project Code
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Budget
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Created
               </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                 Actions
               </th>
             </tr>
@@ -150,7 +150,10 @@ export function AllProjects() {
             <tbody className="bg-white divide-y divide-gray-200">
               {projects.map((project) => (
                 <>
-                  <tr key={project.id}>
+                  <tr
+                    key={project.id}
+                    onClick={() => toggleViewItems(project.id!)}
+                  >
                     <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
@@ -168,10 +171,7 @@ export function AllProjects() {
                     </td>
                     <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       <div className="flex space-x-4">
-                        <span
-                          className="hover:cursor-pointer"
-                          onClick={() => toggleViewItems(project.id!)}
-                        >
+                        <span className="hover:cursor-pointer">
                           {visibleItems[project.id!] ? (
                             <HiMiniEyeSlash className="w-5 h-5" />
                           ) : (
@@ -301,10 +301,14 @@ export function AllProjects() {
                                   Implementation Period:
                                 </span>{" "}
                                 <span>
-                                  {project.implementation_period.from}
+                                  {dateformat(
+                                    project.implementation_period.from
+                                  )}
                                 </span>{" "}
                                 -{" "}
-                                <span>{project.implementation_period.to}</span>
+                                <span>
+                                  {dateformat(project.implementation_period.to)}
+                                </span>
                               </p>
                             </div>
                           </div>

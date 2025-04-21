@@ -187,8 +187,13 @@ const Project = () => {
                         <span className="font-extrabold uppercase">
                           Implementation Period:
                         </span>{" "}
-                        <span>{project.implementation_period.from}</span> -{" "}
-                        <span>{project.implementation_period.to}</span>
+                        <span>
+                          {dateformat(project.implementation_period.from)}
+                        </span>{" "}
+                        -{" "}
+                        <span>
+                          {dateformat(project.implementation_period.to)}
+                        </span>
                       </p>
                     </div>
                   </div>

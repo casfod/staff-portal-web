@@ -2,6 +2,7 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { ConceptNote } from "../../interfaces";
 import { useParams } from "react-router-dom";
+import { dateformat } from "../../utils/dateFormat";
 
 interface RequestDetailsProps {
   request: ConceptNote;
@@ -67,6 +68,13 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
               Detailed Activity Description:
             </h2>{" "}
             <p>{request.detailed_activity_description}</p>
+          </div>
+          <div className="text-sm text-gray-600 whitespace-pre-line">
+            <h2 className="font-extrabold uppercase mb-1">Activity Period:</h2>{" "}
+            <p className="text-sm text-gray-600">
+              <span>{dateformat(request.activity_period.from)}</span> -{" "}
+              <span>{dateformat(request.activity_period.to)}</span>
+            </p>
           </div>
           <div className="text-sm text-gray-600 whitespace-pre-line">
             <h2 className="font-extrabold uppercase mb-1">

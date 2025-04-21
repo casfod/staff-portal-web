@@ -16,6 +16,7 @@ import Select from "../../ui/Select";
 import { useSendTravelRequest } from "./Hooks/useSendTravelRequest";
 import { useProjects } from "../project/Hooks/useProjects";
 import { expenses } from "../../assets/expenses";
+import DatePicker from "../../ui/DatePicker";
 
 const FormAddTravelRequest: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -176,21 +177,33 @@ const FormAddTravelRequest: React.FC = () => {
 
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Day Of Departure *">
-          <Input
-            type="date"
-            id="dayOfDeparture"
-            required
-            value={formData.dayOfDeparture}
-            onChange={(e) => handleFormChange("dayOfDeparture", e.target.value)}
+          <DatePicker
+            selected={
+              formData.dayOfDeparture ? new Date(formData.dayOfDeparture) : null
+            }
+            onChange={(date) =>
+              handleFormChange("dayOfDeparture", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md" // or "sm"/"lg" based on your form size
+            placeholder="Select date"
+            // className="custom-class-if-needed"
+            clearable={true}
           />
         </FormRow>
         <FormRow label="Day Of Return *">
-          <Input
-            type="date"
-            id="dayOfReturn"
-            required
-            value={formData.dayOfReturn}
-            onChange={(e) => handleFormChange("dayOfReturn", e.target.value)}
+          <DatePicker
+            selected={
+              formData.dayOfReturn ? new Date(formData.dayOfReturn) : null
+            }
+            onChange={(date) =>
+              handleFormChange("dayOfReturn", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md" // or "sm"/"lg" based on your form size
+            placeholder="Select date"
+            // className="custom-class-if-needed"
+            clearable={true}
           />
         </FormRow>
       </Row>

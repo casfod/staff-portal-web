@@ -14,6 +14,7 @@ import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { useSendAdvanceRequest } from "./Hooks/useSendAdvanceRequest";
 import { bankNames } from "../../assets/Banks";
+import DatePicker from "../../ui/DatePicker";
 
 const FormAddAdvanceRequest: React.FC = () => {
   // State for the main form fields
@@ -72,13 +73,13 @@ const FormAddAdvanceRequest: React.FC = () => {
   const handleNestedChange = (
     parentField: keyof AdvanceRequestType,
     field: string,
-    value: string | number
+    value: Date | string | number | null
   ) => {
     setFormData((prev) => ({
       ...prev,
       [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
       },
     }));
   };
@@ -214,25 +215,39 @@ const FormAddAdvanceRequest: React.FC = () => {
 
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Period Of Activity (From) *">
-          <Input
-            type="date"
-            id="periodOfActivity_from"
-            required
-            value={formData.periodOfActivity.from}
-            onChange={(e) =>
-              handleNestedChange("periodOfActivity", "from", e.target.value)
+          <DatePicker
+            selected={
+              formData?.periodOfActivity?.from
+                ? new Date(formData.periodOfActivity.from)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "periodOfActivity",
+                "from",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
         <FormRow label="Period Of Activity (To) *">
-          <Input
-            type="date"
-            id="periodOfActivity_to"
-            required
-            value={formData.periodOfActivity.to}
-            onChange={(e) =>
-              handleNestedChange("periodOfActivity", "to", e.target.value)
+          <DatePicker
+            selected={
+              formData?.periodOfActivity?.to
+                ? new Date(formData.periodOfActivity.to)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "periodOfActivity",
+                "to",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
       </Row>

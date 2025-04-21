@@ -3,6 +3,7 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PaymentRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
+import { dateformat } from "../../utils/dateFormat";
 
 interface RequestDetailsProps {
   request: PaymentRequestType;
@@ -37,6 +38,10 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
             { label: "Amount In Words", value: request.amountInWords },
 
             { label: "Purpose Of Expense", value: request.purposeOfExpense },
+            {
+              label: "Date Of Expense",
+              value: dateformat(request?.dateOfExpense),
+            },
             { label: "Special Instruction", value: request.specialInstruction },
             {
               label: "Request",

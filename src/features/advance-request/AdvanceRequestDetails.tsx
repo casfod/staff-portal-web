@@ -2,6 +2,7 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { AdvanceRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
+import { dateformat } from "../../utils/dateFormat";
 
 interface RequestDetailsProps {
   request: AdvanceRequestType;
@@ -99,8 +100,8 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
             <span className="font-extrabold uppercase">
               Period Of Activity:
             </span>{" "}
-            <span>{request.periodOfActivity.from}</span> -{" "}
-            <span>{request.periodOfActivity.to}</span>
+            <span>{dateformat(request.periodOfActivity.from)}</span> -{" "}
+            <span>{dateformat(request.periodOfActivity.to)}</span>
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">

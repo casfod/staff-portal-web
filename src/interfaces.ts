@@ -128,8 +128,8 @@ export interface AdvanceRequestType {
   finalDeliveryPoint: string;
   city: string;
   periodOfActivity: {
-    from: string;
-    to: string;
+    from: Date | string | null;
+    to: Date | string | null;
   };
   activityDescription: string;
   accountNumber: string;
@@ -200,8 +200,8 @@ export interface TravelRequestType {
   project: string;
   budget: number;
   travelReason: string;
-  dayOfDeparture: string;
-  dayOfReturn: string;
+  dayOfDeparture: Date | string | null;
+  dayOfReturn: Date | string | null;
   expenses: TravelRequestItemGroup[];
 
   comments?: [{ user: Partial<UserType>; text: string }];
@@ -247,7 +247,7 @@ export interface PaymentRequestType {
   amountInWords: string;
   purposeOfExpense: string;
   grantCode: string;
-  dateOfExpense: string;
+  dateOfExpense: Date | string | null;
   specialInstruction: string;
   accountNumber: string;
   accountName: string;
@@ -316,8 +316,8 @@ export interface Project {
 }
 
 export interface ImplementationPeriod {
-  from: string;
-  to: string;
+  from: Date | string | null;
+  to: Date | string | null;
 }
 
 export interface AccountCode {
@@ -348,8 +348,8 @@ export interface ConceptNote {
   activity_title: string;
   activity_location: string;
   activity_period: {
-    from: string;
-    to: string;
+    from: Date | string | null;
+    to: Date | string | null;
   };
   background_context: string;
   // objectives_purpose: string[];

@@ -14,6 +14,7 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { bankNames } from "../../assets/Banks";
+import DatePicker from "../../ui/DatePicker";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 const FormAddPaymentRequest = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -23,7 +24,7 @@ const FormAddPaymentRequest = () => {
     amountInWords: "",
     amountInFigure: 0,
     grantCode: "", // Initialize as empty string
-    dateOfExpense: "",
+    dateOfExpense: null,
     specialInstruction: "",
     accountNumber: "",
     accountName: "",
@@ -83,10 +84,6 @@ const FormAddPaymentRequest = () => {
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
-
-    if (!isFormValid) return;
-
     if (formData.approvedBy === "") {
       formData.approvedBy = null;
     }
@@ -94,12 +91,26 @@ const FormAddPaymentRequest = () => {
     // Make sure grantCode is included
     const data = {
       ...formData,
-      // grantCode: selectedProject?.grantCode || formData.grantCode,
     };
+    console.log("Submitting data:", data);
 
-    console.log("Submitting data:", data); // Verify grantCode is included
     savePaymentRequest(data);
   };
+
+  // const handleSave = (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   // Convert Date to ISO string if it's a Date object
+  //   const processedData = {
+  //     ...formData,
+  //     dateOfExpense:
+  //       formData.dateOfExpense instanceof Date
+  //         ? formData.dateOfExpense.toISOString()
+  //         : formData.dateOfExpense,
+  //   };
+
+  //   savePaymentRequest(processedData);
+  // };
 
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
@@ -177,12 +188,18 @@ const FormAddPaymentRequest = () => {
       {/* /////////////////////// */}
       <Row>
         <FormRow label="Date Of Expense*">
-          <Input
-            type="date"
-            id="dateOfExpense"
-            required
-            value={formData.dateOfExpense}
-            onChange={(e) => handleFormChange("dateOfExpense", e.target.value)}
+          <DatePicker
+            selected={
+              formData.dateOfExpense ? new Date(formData.dateOfExpense) : null
+            }
+            onChange={(date) =>
+              handleFormChange("dateOfExpense", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md" // or "sm"/"lg" based on your form size
+            placeholder="Select date"
+            // className="custom-class-if-needed"
+            clearable={true}
           />
         </FormRow>
       </Row>
