@@ -1,17 +1,17 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Define the shape of your context value
 interface NavigationContextType {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobileOpen: boolean;
+  setIsMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isDesktopOpen: boolean;
+  setIsDesktopOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleDesktop: () => void;
 }
 
-// Create the context with an initial dummy value for type inference
 const NavigationContext = createContext<NavigationContextType | undefined>(
   undefined
 );
 
-// Custom hook to consume the context
 export const useNavigation = (): NavigationContextType => {
   const context = useContext(NavigationContext);
   if (!context) {
@@ -20,14 +20,38 @@ export const useNavigation = (): NavigationContextType => {
   return context;
 };
 
-// Context provider component
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDesktopOpen, setIsDesktopOpen] = useState(true); // Default to open on desktop
+
+  // Optionally add media query listener to auto-close mobile when desktop size
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)"); // Tailwind xl breakpoint
+    const handler = () => {
+      if (mediaQuery.matches) {
+        setIsMobileOpen(false);
+      }
+    };
+    mediaQuery.addListener(handler);
+    return () => mediaQuery.removeListener(handler);
+  }, []);
+
+  const toggleDesktop = () => {
+    setIsDesktopOpen((prev) => !prev);
+  };
 
   return (
-    <NavigationContext.Provider value={{ isOpen, setIsOpen }}>
+    <NavigationContext.Provider
+      value={{
+        isMobileOpen,
+        setIsMobileOpen,
+        isDesktopOpen,
+        setIsDesktopOpen,
+        toggleDesktop,
+      }}
+    >
       {children}
     </NavigationContext.Provider>
   );

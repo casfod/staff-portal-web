@@ -1,7 +1,6 @@
 // import { Heart } from "lucide-react";
 import { Menu } from "lucide-react";
 // import logo from "../assets/logo.webp";
-import logo from "../assets/small-logo.webp";
 
 // import { useUser } from "../features/user/userHooks/useUser";
 import { useEffect, useRef } from "react";
@@ -11,7 +10,8 @@ import useMediaQuery from "../hooks/useMediaQuery";
 import { useNavigation } from "../contexts/NavigationContext";
 
 export function Header() {
-  const { isOpen: isNavigation, setIsOpen: setIsNavigation } = useNavigation();
+  const { isMobileOpen, setIsMobileOpen, isDesktopOpen, setIsDesktopOpen } =
+    useNavigation();
   const navRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLSpanElement>(null);
 
@@ -26,7 +26,7 @@ export function Header() {
         menuButtonRef.current &&
         !menuButtonRef.current.contains(event.target as Node)
       ) {
-        setIsNavigation(false);
+        setIsMobileOpen(false);
       }
     };
 
@@ -39,7 +39,7 @@ export function Header() {
   // Use the custom hook to handle xl viewport
   useMediaQuery("(min-width: 1280px)", (matches) => {
     if (matches) {
-      setIsNavigation(false);
+      setIsMobileOpen(false);
     }
   });
 
@@ -53,14 +53,20 @@ export function Header() {
             className="w-[180px] 2xl:w-[200px] h-10 2xl:h-14"
           />
         </div> */}
-        <div className="hidden xl:flex item-center justify-center p-1.5 rounded-full border-2 shadow-md">
+        {/* <div className="hidden xl:flex item-center justify-center p-1.5 rounded-full border-2 shadow-md">
           <img src={logo} alt="CASFOD" className="pt-1 h-11" />
-        </div>
+        </div> */}
 
+        <span
+          className="hidden xl:flex cursor-pointer"
+          onClick={() => setIsDesktopOpen(!isDesktopOpen)}
+        >
+          <Menu />
+        </span>
         <span
           ref={menuButtonRef}
           className="xl:hidden cursor-pointer"
-          onClick={() => setIsNavigation(!isNavigation)}
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
         >
           <Menu />
         </span>
@@ -77,7 +83,7 @@ export function Header() {
       </div>
 
       {/* MOBILE NAVIGATION */}
-      {isNavigation && (
+      {isMobileOpen && (
         <div
           ref={navRef}
           className="min-h-screen w-fit bg-white absolute top-0 left-0 right-0 bg-white shadow-lg z-40"

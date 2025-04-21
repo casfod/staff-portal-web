@@ -16,6 +16,8 @@ import { useLogout } from "../features/authentication/authHooks/useLogout";
 import { BiLogOut } from "react-icons/bi";
 // import { Link } from "react-router-dom";
 import { localStorageUser } from "../utils/localStorageUser";
+import logo from "../assets/small-logo.webp";
+
 const Navigation: React.FC = () => {
   const localStorageUserX = localStorageUser();
   const { logout, isPending } = useLogout();
@@ -83,11 +85,15 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col items-center w-fit"
+      className="flex flex-col gap-3 items-center w-fit pt-3 "
       style={{ fontFamily: "Cabin" }}
     >
+      <div className="border item-center justify-center py-2 px-2 rounded-full shadow-md ">
+        <img src={logo} alt="CASFOD" className="pt-0.5 h-11" />
+      </div>
+
       <nav className="">
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-2.5 2xl:gap-3 px-6 pt-3 xl:pt-6">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-2.5 2xl:gap-3 px-6 ">
           {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
@@ -123,7 +129,7 @@ const Navigation: React.FC = () => {
       </nav>
 
       <button
-        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[15%] xl:mt-[25%]"
+        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[10%] xl:mt-[20%]"
         onClick={handleLogout}
       >
         {isPending ? (
