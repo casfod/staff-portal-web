@@ -201,45 +201,45 @@ export function AllProjects() {
                           {/* Project Details Section */}
                           <div className="grid grid-cols-1  gap-4 mb-6">
                             <div className="flex flex-col gap-3">
-                              <p className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Project Code:
                                 </span>{" "}
                                 {project.project_code}
-                              </p>
-                              <p className="text-sm text-gray-600">
+                              </div>
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Project Name:
                                 </span>{" "}
                                 {project.project_title}
-                              </p>
-                              <p className="text-sm text-gray-600 whitespace-pre-line">
+                              </div>
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Donor:
                                 </span>{" "}
                                 {project.donor}
-                              </p>
-                              <p className="text-sm text-gray-600 whitespace-pre-line">
+                              </div>
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase ">
                                   Objectives:
                                 </span>{" "}
                                 {project.project_objectives}
-                              </p>
-                              <p className="text-sm text-gray-600">
+                              </div>
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Target Beneficiaries:
                                 </span>{" "}
                                 {project.target_beneficiaries.join(", ")}
-                              </p>
+                              </div>
 
-                              <p className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Locations:
                                 </span>{" "}
                                 {project.project_locations.join(", ")}
-                              </p>
+                              </div>
 
-                              <p className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Budget:
                                 </span>{" "}
@@ -247,7 +247,7 @@ export function AllProjects() {
                                   Number(project.project_budget),
                                   "USD"
                                 )}
-                              </p>
+                              </div>
                             </div>
 
                             <div className="flex flex-col gap-3">
@@ -269,14 +269,14 @@ export function AllProjects() {
                                 ))}
                               </div>
 
-                              <p className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Partners:
                                 </span>{" "}
                                 {project.project_partners.join(", ")}
-                              </p>
+                              </div>
 
-                              <p className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 whitespace-pre-line">
                                 <span className="font-extrabold uppercase">
                                   Implementation Period:
                                 </span>{" "}
@@ -289,7 +289,7 @@ export function AllProjects() {
                                 <span>
                                   {dateformat(project.implementation_period.to)}
                                 </span>
-                              </p>
+                              </div>
                             </div>
                           </div>
 
@@ -328,12 +328,12 @@ export function AllProjects() {
                           </div>
 
                           <div>
-                            <p className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-600 whitespace-pre-line">
                               <span className="font-extrabold uppercase">
                                 Summary:
                               </span>{" "}
                               {project.project_summary}
-                            </p>
+                            </div>
                           </div>
 
                           <div className="flex justify-center w-full">

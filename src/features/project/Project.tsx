@@ -93,39 +93,39 @@ const Project = () => {
                   {/* Project Details Section */}
                   <div className="grid grid-cols-1 gap-4 mb-6">
                     <div className="flex flex-col gap-3">
-                      <p className="text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Project Code:
                         </span>{" "}
                         {project.project_code}
-                      </p>
-                      <p className="text-gray-600">
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Project Name:
                         </span>{" "}
                         {project.project_title}
-                      </p>
-                      <p className="text-gray-600">
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">Donor:</span>{" "}
                         {project.donor}
-                      </p>
-                      <p className="text-gray-600">
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Objectives:
                         </span>{" "}
                         {project.project_objectives}
-                      </p>
-                      <p className="text-gray-600">
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Target Beneficiaries:
                         </span>{" "}
                         {project.target_beneficiaries.join(", ")}
-                      </p>
+                      </div>
 
                       {/* <div className="text-gray-600">
-                                <p className="font-extrabold uppercase">
+                                <div className="font-extrabold uppercase">
                                   Locations:
-                                </p>{" "}
+                                </div>{" "}
                                 {project.project_locations.map(
                                   (location, index) => (
                                     <ul key={index}>
@@ -142,19 +142,19 @@ const Project = () => {
                                 )}
                               </div> */}
 
-                      <p className="text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Locations:
                         </span>{" "}
                         {project.project_locations.join(", ")}
-                      </p>
+                      </div>
 
-                      <p className="text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Budget:
                         </span>{" "}
                         {moneyFormat(Number(project.project_budget), "USD")}
-                      </p>
+                      </div>
                     </div>
 
                     <div className="flex flex-col gap-3">
@@ -176,14 +176,14 @@ const Project = () => {
                         ))}
                       </div>
 
-                      <p className="text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Partners:
                         </span>{" "}
                         {project.project_partners.join(", ")}
-                      </p>
+                      </div>
 
-                      <p className="text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
                         <span className="font-extrabold uppercase">
                           Implementation Period:
                         </span>{" "}
@@ -194,7 +194,7 @@ const Project = () => {
                         <span>
                           {dateformat(project.implementation_period.to)}
                         </span>
-                      </p>
+                      </div>
                     </div>
                   </div>
                   {/* Target Beneficiaries Section */}
@@ -257,10 +257,10 @@ const Project = () => {
                   </div>
 
                   <div>
-                    <p className="text-gray-600">
+                    <div className="text-sm text-gray-600 whitespace-pre-line">
                       <span className="font-extrabold uppercase">Summary:</span>{" "}
                       {project.project_summary}
-                    </p>
+                    </div>
                   </div>
                 </div>
               </td>
