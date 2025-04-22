@@ -46,24 +46,24 @@ const PurchaseRequestTableRow = ({
         className="h-[40px] max-h-[40px]"
         onClick={() => requestId && toggleViewItems(requestId)}
       >
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.requestedBy}
         </td>
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <StatusBadge status={requestStatus} />
         </td>
 
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.department}
         </td>
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {moneyFormat(totalAmount, "NGN")}
         </td>
 
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {dateformat(requestCreatedAt)}
         </td>
-        <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           <div className="flex space-x-4">
             <span className="hover:cursor-pointer">
               {visibleItems[request.id!] ? (

@@ -154,22 +154,22 @@ export function AllProjects() {
                     key={project.id}
                     onClick={() => toggleViewItems(project.id!)}
                   >
-                    <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
-                    {/*  <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    {/*  <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {project.status}
                     </td> */}
-                    <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {project.project_code}
                     </td>
-                    <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {moneyFormat(Number(project.project_budget), "USD")}
                     </td>
-                    <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {dateformat(project.createdAt!)}
                     </td>
-                    <td className="px-3 py-2 md:px-6 md:py-2.5 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       <div className="flex space-x-4">
                         <span className="hover:cursor-pointer">
                           {visibleItems[project.id!] ? (
