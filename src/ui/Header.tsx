@@ -86,7 +86,7 @@ export function Header() {
       {isMobileOpen && (
         <div
           ref={navRef}
-          className="min-h-screen w-fit bg-white absolute top-0 left-0 right-0 bg-white shadow-lg z-40"
+          className="min-h-screen w-fit absolute top-0 left-0 right-0 shadow-lg z-40"
         >
           <MobileNavigation />
         </div>
