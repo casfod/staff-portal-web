@@ -39,7 +39,7 @@ export function Pagination({
               onClick={() => onPageChange(pageNumber)}
               className={`px-3 py-1 ${
                 currentPage === pageNumber
-                  ? "bg-buttonColor hover:bg-buttonColorHover text-white"
+                  ? "bg-gradient-to-br from-buttonColor to-[#08527A] hover:bg-buttonColorHover text-white"
                   : "bg-gray-200 text-gray-600 hover:bg-buttonColor hover:bg-opacity-65 hover:text-white"
               } rounded-lg`}
             >
@@ -63,7 +63,7 @@ export function Pagination({
       {currentPage !== totalPages && (
         <button
           onClick={() => onPageChange(currentPage + 1)}
-          className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
+          className="px-3 py-1 bg-gradient-to-br from-buttonColor to-[#08527A] hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
         >
           Next
         </button>
