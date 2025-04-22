@@ -76,7 +76,7 @@ export function Header() {
           style={{ fontFamily: "Sora" }}
         >
           <span className="hidden sm:block">CASFOD POSSIBILITY HUB</span>
-          <span className="sm:hidden">POSSIBILITY HUB</span>
+          <span className="sm:hidden">CASFOD HUB</span>
         </div>
 
         <Profile />
