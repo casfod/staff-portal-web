@@ -86,15 +86,15 @@ const Navigation: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col gap-2 items-center w-fit pt-2 "
+      className="flex flex-col gap-1.5 xl:gap-2 items-center w-fit pt-2 "
       style={{ fontFamily: "Cabin" }}
     >
-      <div className="flex item-center justify-center bg-white py-2 px-2 border-2 rounded-full shadow-lg ">
-        <img src={logo} alt="CASFOD" className="pt-0.5 h-10" />
+      <div className="flex item-center justify-center h-11 xl:h-12 w-11 xl:w-12  bg-white py-1.5 px-1.5 border-2 rounded-full shadow-lg ">
+        <img src={logo} alt="CASFOD" className="pt-0.5" />
       </div>
 
       <nav className="">
-        <ul className="flex flex-col items-center w-60 shadow-sm gap-2.5 2xl:gap-3 px-6 ">
+        <ul className="flex flex-col items-center w-60 shadow-sm gap-2 2xl:gap-3 px-6 ">
           {filteredNavigation.map((item) => (
             <li
               className="bg-white border w-full rounded-lg shadow-md relative"
@@ -129,7 +129,7 @@ const Navigation: React.FC = () => {
         </ul>
       </nav>
 
-      <div className="mt-[10%]">
+      <div className="mt-[5%] xl:mt-[10%]">
         <Button onClick={handleLogout}>
           {isPending ? (
             <SpinnerMini />

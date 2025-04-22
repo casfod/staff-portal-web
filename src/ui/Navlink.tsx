@@ -17,7 +17,7 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
       <NavLink
         to={to}
         className={({ isActive }) =>
-          `w-full h-full flex items-center justify-center py-1.5 px-2 transition-colors duration-200 rounded-lg 
+          `w-full h-full flex items-center justify-center py-1 xl:py-1.5 px-2 transition-colors duration-200 rounded-lg 
       
          ${
            isActive
@@ -29,7 +29,7 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
         style={{ lineHeight: "24px", fontWeight: "500" }}
       >
         <Icon className="mr-2 h-5 2xl:h-7 w-7" />
-        <span className="w-full tracking-[0.8px] text-sm 2xl:text-base">
+        <span className="w-full tracking-[0.8px] text-xs lg:text-sm 2xl:text-base">
           {label}
         </span>
       </NavLink>
