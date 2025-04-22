@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         primary: "#082D73",
-        buttonColor: "#1373B0",
+        buttonColor: "#0E89CB",
         buttonColorHover: "#1168A0",
         secondary: "#F56505",
       },

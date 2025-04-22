@@ -21,8 +21,8 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
       
          ${
            isActive
-             ? "text-gray-50  bg-buttonColor"
-             : "text-gray-600 hover:text-gray-50 hover:bg-buttonColor hover:bg-opacity-65"
+             ? "text-gray-50  bg-gradient-to-br from-buttonColor to-[#08527A]"
+             : "text-gray-600 hover:text-gray-50 hover:bg-[#0077b6] hover:bg-opacity-[90%]"
          }
           `
         }

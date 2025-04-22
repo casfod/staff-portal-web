@@ -17,6 +17,7 @@ import { BiLogOut } from "react-icons/bi";
 // import { Link } from "react-router-dom";
 import { localStorageUser } from "../utils/localStorageUser";
 import logo from "../assets/small-logo.webp";
+import Button from "./Button";
 
 const Navigation: React.FC = () => {
   const localStorageUserX = localStorageUser();
@@ -88,7 +89,7 @@ const Navigation: React.FC = () => {
       className="flex flex-col gap-2 items-center w-fit pt-2 "
       style={{ fontFamily: "Cabin" }}
     >
-      <div className="border item-center justify-center py-2 px-2 rounded-full shadow-md ">
+      <div className="flex item-center justify-center bg-white py-2 px-2 border-2 rounded-full shadow-lg ">
         <img src={logo} alt="CASFOD" className="pt-0.5 h-10" />
       </div>
 
@@ -128,19 +129,18 @@ const Navigation: React.FC = () => {
         </ul>
       </nav>
 
-      <button
-        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover mt-[10%]"
-        onClick={handleLogout}
-      >
-        {isPending ? (
-          <SpinnerMini />
-        ) : (
-          <span className="inline-flex gap-1 items-center">
-            <BiLogOut />
-            Log out
-          </span>
-        )}
-      </button>
+      <div className="mt-[10%]">
+        <Button onClick={handleLogout}>
+          {isPending ? (
+            <SpinnerMini />
+          ) : (
+            <span className="inline-flex gap-1 items-center">
+              <BiLogOut />
+              Log out
+            </span>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

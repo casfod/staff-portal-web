@@ -11,7 +11,7 @@ const Button: React.FC<ButtonProps> = ({ children, ...Props }) => {
       {...Props}
       className="inline-flex items-center 
       px-2 py-1 md:px-4 md:py-2 border border-transparent 
-      text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover"
+      text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-br from-buttonColor to-[#08527A] hover:bg-buttonColorHover"
     >
       {children}
     </button>
