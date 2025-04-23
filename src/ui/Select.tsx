@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { truncateText } from "../utils/truncateText";
+import { X } from "lucide-react"; // Import an icon for the clear button
 
 interface Option {
   id: string;
@@ -16,7 +17,8 @@ interface SelectProps {
   customLabel: string;
   optionsHeight?: number | string;
   optionsWeight?: number | string;
-  filterable?: boolean; // New prop to enable/disable filtering
+  filterable?: boolean;
+  clearable?: boolean; // New prop to enable/disable clear button
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -25,13 +27,13 @@ const Select: React.FC<SelectProps> = ({
   value,
   onChange,
   options,
-  // required = false,
   customLabel,
   optionsHeight = "auto",
-  filterable = false, // Default to false
+  filterable = false,
+  clearable = true, // Default to true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value);
+  const [selectedValue, setSelectedValue] = useState<any>(value);
   const [searchTerm, setSearchTerm] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -84,6 +86,14 @@ const Select: React.FC<SelectProps> = ({
     setSearchTerm("");
   };
 
+  // New reset function
+  const handleReset = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the select open/close
+    setSelectedValue(null);
+    onChange("");
+    setSearchTerm("");
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!isOpen) return;
 
@@ -108,10 +118,9 @@ const Select: React.FC<SelectProps> = ({
         setSearchTerm("");
         break;
       default:
-        // Handle typing for filtering
         if (filterable && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
           setSearchTerm((prev) => prev + e.key);
-          setFocusedIndex(0); // Reset focus to first item when filtering
+          setFocusedIndex(0);
         }
         break;
     }
@@ -121,7 +130,7 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <div
-      className=" text-gray-600 relative w-full md:w-[250px]"
+      className="text-gray-600 relative w-full md:w-[250px]"
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
@@ -154,13 +163,27 @@ const Select: React.FC<SelectProps> = ({
             ? truncateText(selectedOption.name, 70, "...")
             : customLabel}
         </span>
-        <span
-          className={`transform transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        >
-          ▼
-        </span>
+
+        <div className="flex items-center gap-1">
+          {/* Clear button (only shown when there's a selected value and clearable is true) */}
+          {clearable && selectedValue && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Clear selection"
+            >
+              <X size={16} />
+            </button>
+          )}
+          <span
+            className={`transform transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          >
+            ▼
+          </span>
+        </div>
       </div>
 
       {/* Options Dropdown */}
@@ -185,7 +208,7 @@ const Select: React.FC<SelectProps> = ({
                 placeholder="Type to filter..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()} // <- Prevents parent onKeyDown from firing
+                onKeyDown={(e) => e.stopPropagation()}
                 autoFocus
               />
             </div>

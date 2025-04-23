@@ -25,6 +25,7 @@ const AdminApprovalSection = ({
         <SpinnerMini />
       ) : (
         <Select
+          clearable={true}
           id="approvedBy"
           customLabel="Select an admin"
           value={formData.approvedBy || ""}

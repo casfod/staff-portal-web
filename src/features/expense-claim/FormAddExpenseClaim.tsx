@@ -21,7 +21,7 @@ import DatePicker from "../../ui/DatePicker";
 const FormAddExpenseClaim: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<ExpenseClaimType>({
-    travelReason: "",
+    expenseReason: "",
     expenseClaim: { from: "", to: "" },
     dayOfDeparture: "",
     dayOfReturn: "",
@@ -226,14 +226,14 @@ const FormAddExpenseClaim: React.FC = () => {
       </Row>
 
       <Row>
-        <FormRow label="Travel Reason *" type="wide">
+        <FormRow label="Expense Reason *" type="wide">
           <textarea
             className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
             maxLength={4000}
             placeholder=""
-            id="travelReason"
-            value={formData.travelReason}
-            onChange={(e) => handleFormChange("travelReason", e.target.value)}
+            id="expenseReason"
+            value={formData.expenseReason}
+            onChange={(e) => handleFormChange("expenseReason", e.target.value)}
           />
         </FormRow>
       </Row>
@@ -280,6 +280,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             <Row>
               <FormRow label="Expense *" type="wide">
                 <Select
+                  clearable={true}
                   id="expense"
                   customLabel="Select an Expense"
                   required
@@ -409,6 +410,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length}
               id="projects"
               customLabel="Select Project"
@@ -446,6 +448,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
+              clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null

@@ -129,6 +129,7 @@ const FormEditPaymentRequest = ({
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length}
               id="projects"
               customLabel="Select Project"
@@ -243,6 +244,7 @@ const FormEditPaymentRequest = ({
       <Row>
         <FormRow label="Bank Name *">
           <Select
+            clearable={true}
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
@@ -285,6 +287,7 @@ const FormEditPaymentRequest = ({
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
+              clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null

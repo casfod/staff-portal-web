@@ -51,7 +51,12 @@ const AllAdvanceRequests = () => {
     limit
   );
 
-  const { deleteAdvanceRequest } = useDeleteAdvanceRequest();
+  const { deleteAdvanceRequest } = useDeleteAdvanceRequest(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
 
   // Add null checks for `data` and `data.data`
   const advanceRequests = useMemo(

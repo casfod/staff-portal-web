@@ -261,6 +261,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
 
               <FormRow label="Sector Name *" type="wide">
                 <Select
+                  clearable={true}
                   id="name"
                   value={sector.name}
                   required

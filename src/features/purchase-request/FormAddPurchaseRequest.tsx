@@ -387,6 +387,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length} // Force re-render when projects change
               id="expenseChargedTo"
               customLabel="Select Project"
@@ -415,6 +416,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
               <SpinnerMini />
             ) : (
               <Select
+                clearable={true}
                 id="accountCode"
                 customLabel="Select Account Code"
                 value={formData.accountCode || ""}
@@ -439,6 +441,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
+              clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null

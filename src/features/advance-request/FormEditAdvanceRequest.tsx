@@ -482,6 +482,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length} // Force re-render when projects change
               id="expenseChargedTo"
               customLabel="Select Project"
@@ -510,6 +511,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
               <SpinnerMini />
             ) : (
               <Select
+                clearable={true}
                 id="accountCode"
                 customLabel="Select Account Code"
                 value={formData.accountCode || ""}
@@ -554,6 +556,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
       <Row>
         <FormRow label="Bank Name *">
           <Select
+            clearable={true}
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
@@ -600,6 +603,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
               <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
               <Select
+                clearable={true}
                 id="approvedBy"
                 customLabel="Select an admin"
                 value={formData.approvedBy || ""} // Use empty string if null
@@ -626,6 +630,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
               <SpinnerMini /> // Show a spinner while loading Reviewers
             ) : (
               <Select
+                clearable={true}
                 id="reviewedBy"
                 customLabel="Select Reviewer"
                 value={formData.reviewedBy || ""} // Use empty string if null

@@ -439,6 +439,7 @@ const FormAddAdvanceRequest: React.FC = () => {
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length} // Force re-render when projects change
               id="expenseChargedTo"
               customLabel="Select Project"
@@ -467,6 +468,7 @@ const FormAddAdvanceRequest: React.FC = () => {
               <SpinnerMini />
             ) : (
               <Select
+                clearable={true}
                 id="accountCode"
                 customLabel="Select Account Code"
                 value={formData.accountCode || ""}
@@ -509,6 +511,7 @@ const FormAddAdvanceRequest: React.FC = () => {
       <Row>
         <FormRow label="Bank Name *">
           <Select
+            clearable={true}
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""}
@@ -534,6 +537,7 @@ const FormAddAdvanceRequest: React.FC = () => {
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
+              clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null

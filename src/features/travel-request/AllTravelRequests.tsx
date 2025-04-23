@@ -53,7 +53,12 @@ const AllTravelRequests = () => {
     limit
   );
 
-  const { deleteTravelRequest } = useDeleteTravelRequest();
+  const { deleteTravelRequest } = useDeleteTravelRequest(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
 
   const travelRequests = useMemo(
     () => data?.data?.travelRequests ?? [],

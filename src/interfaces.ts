@@ -265,7 +265,7 @@ export interface ExpenseClaimType {
   };
   project: string;
   budget: number;
-  travelReason: string;
+  expenseReason: string;
   dayOfDeparture: Date | string | null;
   dayOfReturn: Date | string | null;
   expenses: ExpenseClaimItemGroup[];

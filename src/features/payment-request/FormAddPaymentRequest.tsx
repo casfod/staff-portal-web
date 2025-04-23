@@ -133,6 +133,7 @@ const FormAddPaymentRequest = () => {
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length}
               id="projects"
               customLabel="Select Project"
@@ -162,6 +163,7 @@ const FormAddPaymentRequest = () => {
               <SpinnerMini />
             ) : (
               <Select
+                clearable={true}
                 id="grantCode"
                 customLabel="Select Grant Code"
                 value={formData.grantCode || ""}
@@ -264,6 +266,7 @@ const FormAddPaymentRequest = () => {
       <Row>
         <FormRow label="Bank Name *">
           <Select
+            clearable={true}
             id="bankName"
             customLabel="Select a Bank"
             value={formData.bankName || ""} // Use empty string if null
@@ -306,6 +309,7 @@ const FormAddPaymentRequest = () => {
             <SpinnerMini /> // Show a spinner while loading reviewers
           ) : (
             <Select
+              clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""} // Use empty string if null

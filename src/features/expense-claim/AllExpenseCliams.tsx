@@ -53,7 +53,12 @@ const AllExpenseClaims = () => {
     limit
   );
 
-  const { deleteExpenseClaim } = useDeleteExpenseClaim();
+  const { deleteExpenseClaim } = useDeleteExpenseClaim(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
 
   const expenseClaims = useMemo(() => data?.data?.expenseClaims ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
@@ -115,7 +120,7 @@ const AllExpenseClaims = () => {
     return <NetworkErrorUI />;
   }
 
-  const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
+  const tableHeadData = ["Claim", "Status", "Budget", "Date", "Actions"];
 
   return (
     <div className="flex flex-col space-y-3 pb-80">

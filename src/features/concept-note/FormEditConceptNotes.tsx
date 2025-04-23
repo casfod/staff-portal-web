@@ -155,6 +155,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
             <SpinnerMini />
           ) : (
             <Select
+              clearable={true}
               key={projects.length}
               id="projects"
               customLabel="Select Project"
@@ -361,6 +362,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
               <SpinnerMini /> // Show a spinner while loading admins
             ) : (
               <Select
+                clearable={true}
                 id="approvedBy"
                 customLabel="Select an admin"
                 value={formData.approvedBy || ""} // Use empty string if null
