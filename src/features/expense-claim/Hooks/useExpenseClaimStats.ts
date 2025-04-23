@@ -7,7 +7,7 @@ export function useExpenseClaimStats(
   options?: UseQueryOptions<UseExpenseClaimStatsType, Error> // Add options parameter
 ) {
   return useQuery<UseExpenseClaimStatsType, Error>({
-    queryKey: ["travel-requests-stats"],
+    queryKey: ["expense-claim-stats"],
     queryFn: () => getExpenseClaimStats(),
     staleTime: 0,
     ...options, // Spread the options to include onError

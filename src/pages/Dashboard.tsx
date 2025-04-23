@@ -13,11 +13,13 @@ import { useTravelRequestStats } from "../features/travel-request/Hooks/useTrave
 import type {
   AdvanceRequestStats,
   ConceptNoteStats,
+  ExpenseClaimStats,
   PaymentRequestStats,
   ProjectStats,
   PurchaseRequestStats,
   TravelRequestStats,
 } from "../interfaces";
+import { useExpenseClaimStats } from "../features/expense-claim/Hooks/useExpenseClaimStats";
 
 export function Dashboard() {
   // Combine all stats hooks into a single object for better organization
@@ -28,6 +30,7 @@ export function Dashboard() {
     paymentRequest: usePaymentRequestStats(),
     advanceRequest: useAdvanceRequestStats(),
     travelRequest: useTravelRequestStats(),
+    expenseClaim: useExpenseClaimStats(),
   };
 
   // Check for any errors
@@ -48,6 +51,8 @@ export function Dashboard() {
         (statsQueries.advanceRequest.data?.data as AdvanceRequestStats) ?? null,
       travelRequest:
         (statsQueries.travelRequest.data?.data as TravelRequestStats) ?? null,
+      expenseClaim:
+        (statsQueries.expenseClaim.data?.data as ExpenseClaimStats) ?? null,
     }),
     [
       statsQueries.purchaseRequest.data,
@@ -56,6 +61,7 @@ export function Dashboard() {
       statsQueries.paymentRequest.data,
       statsQueries.advanceRequest.data,
       statsQueries.travelRequest.data,
+      statsQueries.expenseClaim.data,
     ]
   );
 
@@ -142,8 +148,14 @@ export function Dashboard() {
       },
       {
         name: "Expense Claims",
-        total: 10,
-        approved: 13,
+        total: renderStatValue(
+          statsData.expenseClaim?.totalRequests,
+          statsQueries.expenseClaim.isLoading
+        ),
+        approved: renderStatValue(
+          statsData.expenseClaim?.totalApprovedRequests,
+          statsQueries.expenseClaim.isLoading
+        ),
         to: "/expense-claims",
       },
     ],
