@@ -205,6 +205,7 @@ export interface TravelRequestType {
   };
   project: string;
   budget: number;
+  amountInWords: string;
   travelReason: string;
   dayOfDeparture: Date | string | null;
   dayOfReturn: Date | string | null;
@@ -265,6 +266,7 @@ export interface ExpenseClaimType {
   };
   project: string;
   budget: number;
+  amountInWords: string;
   expenseReason: string;
   dayOfDeparture: Date | string | null;
   dayOfReturn: Date | string | null;

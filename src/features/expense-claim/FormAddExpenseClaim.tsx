@@ -28,6 +28,7 @@ const FormAddExpenseClaim: React.FC = () => {
     expenses: [],
     project: "",
     budget: 0,
+    amountInWords: "",
     reviewedBy: null,
   });
 
@@ -400,6 +401,18 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             value={formData.budget}
             readOnly
             required
+          />
+        </FormRow>
+      </Row>
+
+      <Row>
+        <FormRow label="Amount In Words*">
+          <Input
+            type="text"
+            id="amountInWords"
+            required
+            value={formData.amountInWords}
+            onChange={(e) => handleFormChange("amountInWords", e.target.value)}
           />
         </FormRow>
       </Row>
