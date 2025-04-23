@@ -80,6 +80,14 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
           style={{ letterSpacing: "1px" }}
         >
           <p>
+            <span className="font-bold mr-1 uppercase">Account Code : </span>{" "}
+            {request.accountCode}
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">Charged To : </span>
+            {request.expenseChargedTo}
+          </p>
+          <p>
             <span className="font-bold mr-1 uppercase">Department : </span>{" "}
             {request.department}
           </p>

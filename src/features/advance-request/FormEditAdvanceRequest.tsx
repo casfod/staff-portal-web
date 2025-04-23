@@ -5,8 +5,10 @@ import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import {
+  AccountCode,
   AdvanceRequesItemGroupType,
   AdvanceRequestType,
+  Project,
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
@@ -20,6 +22,7 @@ import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
+import { useProjects } from "../project/Hooks/useProjects";
 
 interface FormEditAdavanceRequestProps {
   advanceRequest: AdvanceRequestType;
@@ -33,6 +36,8 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
 
   // State for the main form fields
   const [formData, setFormData] = useState<AdvanceRequestType>({
+    accountCode: advanceRequest.accountCode,
+    expenseChargedTo: advanceRequest.expenseChargedTo,
     department: advanceRequest.department,
     suggestedSupplier: advanceRequest.suggestedSupplier,
     address: advanceRequest.address,
@@ -46,9 +51,9 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     reviewedBy: advanceRequest?.reviewedBy?.id,
     approvedBy: advanceRequest?.approvedBy?.id,
   });
-  // const [selectedProject, setSelectedProject] = useState<Project | any>(
-  //   purchaseRequest?.project!
-  // );
+  const [selectedProject, setSelectedProject] = useState<Project | any>(
+    advanceRequest?.project!
+  );
 
   // Initialize itemGroup with purchaseRequest.itemGroups or an empty array
   const [itemGroup, setItemGroup] = useState<AdvanceRequesItemGroupType[]>(
@@ -59,37 +64,6 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   const [disabledStates, setDisabledStates] = useState<boolean[]>(
     Array(itemGroup.length).fill(false)
   );
-
-  // Add a new item group
-  const addItem = () => {
-    setItemGroup([
-      ...itemGroup,
-      {
-        description: "",
-        frequency: 0,
-        quantity: 0,
-        unit: "",
-        unitCost: 0,
-        total: 0,
-      },
-    ]);
-    setDisabledStates([...disabledStates, false]); // Add a new disabled state
-  };
-
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates); // Remove the corresponding disabled state
-  };
-
-  // Toggle edit mode for an item group
-  const handleEdit = (index: number) => {
-    const newDisabledStates = [...disabledStates];
-    newDisabledStates[index] = !newDisabledStates[index];
-    setDisabledStates(newDisabledStates);
-  };
 
   // Update item group fields
   const handleItemChange = (
@@ -130,15 +104,51 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     setItemGroup(updatedGroups);
   }, [frequencies, quantities, unitCosts]);
 
+  // Add a new item group
+  const addItem = () => {
+    setItemGroup([
+      ...itemGroup,
+      {
+        description: "",
+        frequency: 0,
+        quantity: 0,
+        unit: "",
+        unitCost: 0,
+        total: 0,
+      },
+    ]);
+    setDisabledStates([...disabledStates, false]);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
+  };
+
+  // Toggle edit mode for an item group
+  const handleEdit = (index: number) => {
+    const newDisabledStates = [...disabledStates];
+    newDisabledStates[index] = !newDisabledStates[index];
+    setDisabledStates(newDisabledStates);
+  };
+
   const { updateAdvanceRequest, isPending } = useUpdateAdvanceRequest(
     param.requestId!
   );
   const { sendAdvanceRequest, isPending: isSending } = useSendAdvanceRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  const projects = useMemo(
+    () => projectData?.data?.projects ?? [],
+    [projectData]
+  );
 
   // Update main form fields
   // const handleFormChange = (
@@ -149,9 +159,34 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   // };
 
   const handleFormChange = (field: keyof AdvanceRequestType, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
+    if (field === "expenseChargedTo") {
+      // Find the selected project
+      const selectedProject = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
 
+      formData.project = selectedProject?.id;
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
+    }
+  };
   const handleNestedChange = (
     parentField: keyof AdvanceRequestType,
     field: string,
@@ -265,7 +300,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      <Row cols="grid-cols-1 md:grid-cols-4">
         <FormRow label="Period Of Activity (From) *">
           <DatePicker
             selected={
@@ -428,6 +463,74 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         ))}
       </div>
 
+      <div className="flex items-center gap-4 w-full">
+        <Button type="button" onClick={addItem}>
+          <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
+        </Button>
+        <span className="text-gray-600 font-bold">
+          {itemGroup.length > 1
+            ? itemGroup.length + " Items "
+            : itemGroup.length + " Item "}
+          Added
+        </span>
+      </div>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *">
+          {isLoadingProjects ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
+              customLabel="Select Project"
+              value={formData.expenseChargedTo || ""}
+              onChange={(value) => handleFormChange("expenseChargedTo", value)}
+              options={
+                projects
+                  ? projects
+                      .filter((project) => project.id)
+                      .map((project) => ({
+                        id: `${project.project_title} - ${project.project_code}`,
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
+        </FormRow>
+
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(value) => handleFormChange("accountCode", value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map(
+                        (account: AccountCode) => ({
+                          id: `${account.name}`,
+                          name: `${account.name}`,
+                        })
+                      )
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
+      </Row>
+
       <Row>
         <FormRow label="Account Number*">
           <Input
@@ -467,42 +570,6 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
           />
         </FormRow>
       </Row>
-
-      <div className="flex items-center gap-4 w-full">
-        <Button type="button" onClick={addItem}>
-          <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
-        </Button>
-        <span className="text-gray-600 font-bold">
-          {itemGroup.length > 1
-            ? itemGroup.length + " Items "
-            : itemGroup.length + " Item "}
-          Added
-        </span>
-      </div>
-
-      {/* <Row>
-        <FormRow label="Expense Charged To *" >
-          <Input
-            type="text"
-            required
-            id="expenseChargedTo"
-            value={formData.expenseChargedTo}
-            onChange={(e) =>
-              handleFormChange("expenseChargedTo", e.target.value)
-            }
-          />
-        </FormRow>
-        <FormRow label="Account Code *" >
-          <Input
-            type="text"
-            required
-            placeholder=""
-            id="accountCode"
-            value={formData.accountCode}
-            onChange={(e) => handleFormChange("accountCode", e.target.value)}
-          />
-        </FormRow>
-      </Row> */}
 
       {advanceRequest.reviewedBy ? (
         <div className="text-gray-600">

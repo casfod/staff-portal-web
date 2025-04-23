@@ -1,4 +1,4 @@
-import { useNavigation } from "../contexts/NavigationContext";
+import { useNavigation } from "../hooks/useNavigation";
 import Navigation from "./Navigation";
 
 const DesktopNavigation = () => {

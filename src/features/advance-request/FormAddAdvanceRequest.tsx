@@ -7,6 +7,7 @@ import Row from "../../ui/Row";
 import {
   AdvanceRequesItemGroupType,
   AdvanceRequestType,
+  Project,
 } from "../../interfaces";
 import { useSaveAdvanceRequest } from "./Hooks/useSaveAdvanceRequest";
 import SpinnerMini from "../../ui/SpinnerMini";
@@ -15,10 +16,14 @@ import Select from "../../ui/Select";
 import { useSendAdvanceRequest } from "./Hooks/useSendAdvanceRequest";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
+import { useProjects } from "../project/Hooks/useProjects";
 
 const FormAddAdvanceRequest: React.FC = () => {
   // State for the main form fields
   const [formData, setFormData] = useState<AdvanceRequestType>({
+    project: null,
+    accountCode: "",
+    expenseChargedTo: "",
     department: "",
     suggestedSupplier: "",
     address: "",
@@ -36,28 +41,18 @@ const FormAddAdvanceRequest: React.FC = () => {
   const [itemGroup, setItemGroup] = useState<AdvanceRequesItemGroupType[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
 
-  // Add a new item group
-  const addItem = () => {
-    setItemGroup([
-      ...itemGroup,
-      {
-        description: "",
-        frequency: 0,
-        quantity: 0,
-        unit: "",
-        unitCost: 0,
-        total: 0,
-      },
-    ]);
-    setDisabledStates([...disabledStates, false]);
-  };
-
   const { saveAdvanceRequest, isPending } = useSaveAdvanceRequest();
   const { sendAdvanceRequest, isPending: isSending } = useSendAdvanceRequest();
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const { data, isLoading } = useReviewers();
+  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
   const reviewers = useMemo(() => data?.data ?? [], [data]);
+  const projects = useMemo(
+    () => projectData?.data?.projects ?? [],
+    [projectData]
+  );
 
   // Update item group fields
   const handleItemChange = (
@@ -84,23 +79,34 @@ const FormAddAdvanceRequest: React.FC = () => {
     }));
   };
 
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates);
-  };
-
-  // Toggle edit mode for an item group
-  const handleEdit = (index: number) => {
-    const newDisabledStates = [...disabledStates];
-    newDisabledStates[index] = !newDisabledStates[index];
-    setDisabledStates(newDisabledStates);
-  };
-
   const handleFormChange = (field: keyof AdvanceRequestType, value: string) => {
-    setFormData({ ...formData, [field]: value });
+    if (field === "expenseChargedTo") {
+      // Find the selected project
+      const selectedProject = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
+
+      formData.project = selectedProject?.id;
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
@@ -130,6 +136,37 @@ const FormAddAdvanceRequest: React.FC = () => {
     }));
     setItemGroup(updatedGroups);
   }, [frequencies, quantities, unitCosts]);
+
+  // Add a new item group
+  const addItem = () => {
+    setItemGroup([
+      ...itemGroup,
+      {
+        description: "",
+        frequency: 0,
+        quantity: 0,
+        unit: "",
+        unitCost: 0,
+        total: 0,
+      },
+    ]);
+    setDisabledStates([...disabledStates, false]);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
+  };
+
+  // Toggle edit mode for an item group
+  const handleEdit = (index: number) => {
+    const newDisabledStates = [...disabledStates];
+    newDisabledStates[index] = !newDisabledStates[index];
+    setDisabledStates(newDisabledStates);
+  };
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
@@ -213,7 +250,7 @@ const FormAddAdvanceRequest: React.FC = () => {
         </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      <Row cols="grid-cols-1 md:grid-cols-4">
         <FormRow label="Period Of Activity (From) *">
           <DatePicker
             selected={
@@ -248,6 +285,12 @@ const FormAddAdvanceRequest: React.FC = () => {
             }
             variant="secondary"
             placeholder="Select date"
+            minDate={
+              formData.periodOfActivity.to
+                ? new Date(formData.periodOfActivity.to)
+                : null
+            }
+            dependsOn={formData.periodOfActivity?.to}
           />
         </FormRow>
       </Row>
@@ -388,6 +431,60 @@ const FormAddAdvanceRequest: React.FC = () => {
           Added
         </span>
       </div>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *">
+          {isLoadingProjects ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
+              customLabel="Select Project"
+              value={formData.expenseChargedTo || ""}
+              onChange={(value) => handleFormChange("expenseChargedTo", value)}
+              options={
+                projects
+                  ? projects
+                      .filter((project) => project.id)
+                      .map((project) => ({
+                        id: `${project.project_title} - ${project.project_code}`,
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
+        </FormRow>
+
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(value) => handleFormChange("accountCode", value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name}`,
+                        name: `${account.name}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
+      </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Account Number*">

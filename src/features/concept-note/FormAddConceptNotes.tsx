@@ -193,7 +193,7 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      <Row cols="grid-cols-1 md:grid-cols-4">
         <FormRow label="Activity Period (From) *">
           <DatePicker
             selected={
@@ -232,7 +232,7 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Budget *">
           <Input
             type="number"

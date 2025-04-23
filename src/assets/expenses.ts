@@ -20,4 +20,8 @@ export const expenses = [
     id: "Accommodation",
     name: "Accommodation",
   },
+  {
+    id: "Program Advances",
+    name: "Program Advances",
+  },
 ];

@@ -41,33 +41,44 @@ const FormAddTravelRequest: React.FC = () => {
   );
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
-  const daysNumber = useMemo(
-    () => itemGroup.map((g) => g.daysNumber).join(","),
+  const frequencies = useMemo(
+    () => itemGroup.map((g) => g.frequency).join(","),
+    [itemGroup]
+  );
+  const quantities = useMemo(
+    () => itemGroup.map((g) => g.quantity).join(","),
+    [itemGroup]
+  );
+  const unitCosts = useMemo(
+    () => itemGroup.map((g) => g.unitCost).join(","),
     [itemGroup]
   );
 
-  const rate = useMemo(
-    () => itemGroup.map((g) => g.rate).join(","),
-    [itemGroup]
-  );
-
-  // Calculate totals whenever itemGroup changes
   useEffect(() => {
     const updatedGroups = itemGroup.map((group) => ({
       ...group,
       total: parseFloat(
-        ((group.daysNumber || 0) * (group.rate || 0)).toFixed(2)
+        (
+          (group.frequency || 1) *
+          (group.quantity || 1) *
+          (group.unitCost || 0)
+        ).toFixed(2)
       ),
     }));
+    setItemGroup(updatedGroups);
+  }, [frequencies, quantities, unitCosts]);
 
-    const grandtotal = updatedGroups.reduce(
+  // Calculate budget whenever itemGroup changes
+  useEffect(() => {
+    const totalBudget = itemGroup.reduce(
       (sum, item) => sum + (item.total || 0),
       0
     );
-
-    setItemGroup(updatedGroups);
-    setFormData((prev) => ({ ...prev, budget: grandtotal }));
-  }, [daysNumber, rate]);
+    setFormData((prev) => ({
+      ...prev,
+      budget: parseFloat(totalBudget.toFixed(2)), // Round to 2 decimal places
+    }));
+  }, [itemGroup]);
 
   const handleProjectsChange = (value: string) => {
     if (value) {
@@ -89,15 +100,26 @@ const FormAddTravelRequest: React.FC = () => {
   };
 
   const addItem = () => {
-    const newItem = {
-      location: "",
-      daysNumber: 0,
-      rate: 0,
-      expense: "",
-      total: 0,
-    };
-    setItemGroup((prev) => [...prev, newItem]);
-    setDisabledStates((prev) => [...prev, false]);
+    setItemGroup([
+      ...itemGroup,
+      {
+        expense: "",
+        frequency: 0,
+        quantity: 0,
+        unit: "",
+        unitCost: 0,
+        total: 0,
+      },
+    ]);
+    setDisabledStates([...disabledStates, false]);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
   };
 
   const handleItemChange = (
@@ -124,11 +146,6 @@ const FormAddTravelRequest: React.FC = () => {
         [field]: value,
       },
     }));
-  };
-
-  const removeItem = (index: number) => {
-    setItemGroup((prev) => prev.filter((_, i) => i !== index));
-    setDisabledStates((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleEdit = (index: number) => {
@@ -175,7 +192,7 @@ const FormAddTravelRequest: React.FC = () => {
     <form className="space-y-6">
       {/* Static inputs */}
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      <Row cols="grid-cols-1 md:grid-cols-4">
         <FormRow label="Day Of Departure *">
           <DatePicker
             selected={
@@ -256,6 +273,7 @@ const FormAddTravelRequest: React.FC = () => {
             className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
 p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
+            {" "}
             <h4 className="text-gray-600 text-lg font-semibold">
               EXPENSE {index + 1}
             </h4>
@@ -280,54 +298,56 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
                 />
               </FormRow>
             </Row>
-
-            <Row>
-              <FormRow label="Location *" type="wide">
-                <input
-                  className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
+            <Row cols="grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
+              <FormRow label="Frequency *">
+                <Input
                   placeholder=""
+                  type="number"
+                  min="0"
                   disabled={disabledStates[index]}
-                  value={group.location}
                   required
+                  value={group.frequency}
                   onChange={(e) =>
-                    handleItemChange(index, "location", e.target.value)
+                    handleItemChange(index, "frequency", e.target.value)
+                  }
+                />
+              </FormRow>
+              <FormRow label="Quantity *">
+                <Input
+                  placeholder=""
+                  type="number"
+                  min="0"
+                  disabled={disabledStates[index]}
+                  value={group.quantity}
+                  onChange={(e) =>
+                    handleItemChange(index, "quantity", e.target.value)
+                  }
+                />
+              </FormRow>
+              <FormRow label="Unit">
+                <Input
+                  disabled={disabledStates[index]}
+                  value={group.unit}
+                  placeholder=""
+                  onChange={(e) =>
+                    handleItemChange(index, "unit", e.target.value)
                   }
                 />
               </FormRow>
             </Row>
-
             <Row cols="grid-cols-1 md:grid-cols-2">
-              <FormRow label="Days Number *">
+              <FormRow label="Unit Cost (₦) *">
                 <Input
-                  placeholder=""
-                  inputSize={100}
                   type="number"
                   min="0"
                   disabled={disabledStates[index]}
-                  required
-                  value={group.daysNumber}
+                  value={group.unitCost}
+                  placeholder="123..."
                   onChange={(e) =>
-                    handleItemChange(index, "daysNumber", e.target.value)
+                    handleItemChange(index, "unitCost", e.target.value)
                   }
                 />
               </FormRow>
-              <FormRow label="Rate *">
-                <Input
-                  placeholder=""
-                  inputSize={100}
-                  type="number"
-                  min="0"
-                  disabled={disabledStates[index]}
-                  required
-                  value={group.rate}
-                  onChange={(e) =>
-                    handleItemChange(index, "rate", e.target.value)
-                  }
-                />
-              </FormRow>
-            </Row>
-
-            <Row>
               <FormRow label="Total (₦) *">
                 <Input
                   type="number"
@@ -339,14 +359,13 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
                 />
               </FormRow>
             </Row>
-
             <div className="flex gap-2 mt-4">
               <button
                 type="button"
                 className="text-xs 2xl:text-sm text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 transition-all"
                 onClick={() => removeItem(index)}
               >
-                Delete item {index + 1}
+                Delete Item {index + 1}
               </button>
               <button
                 type="button"
@@ -376,7 +395,6 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <FormRow label="Budget *">
           <Input
             placeholder=""
-            inputSize={100}
             type="number"
             value={formData.budget}
             readOnly

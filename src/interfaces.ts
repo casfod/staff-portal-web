@@ -132,6 +132,10 @@ export interface AdvanceRequestType {
     to: Date | string | null;
   };
   activityDescription: string;
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<Project> | string | null;
+
   accountNumber: string;
   accountName: string;
   bankName: string;
@@ -183,10 +187,12 @@ export interface useTravelRequestType {
 }
 
 export interface TravelRequestItemGroup {
+  id?: string;
   expense: string;
-  location: string;
-  daysNumber: number;
-  rate: number;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
   total: number;
 }
 

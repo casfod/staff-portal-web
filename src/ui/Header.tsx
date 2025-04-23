@@ -1,13 +1,9 @@
-// import { Heart } from "lucide-react";
 import { Menu } from "lucide-react";
-// import logo from "../assets/logo.webp";
-
-// import { useUser } from "../features/user/userHooks/useUser";
 import { useEffect, useRef } from "react";
 import MobileNavigation from "./MobileNavigation";
 import Profile from "./Profile";
 import useMediaQuery from "../hooks/useMediaQuery";
-import { useNavigation } from "../contexts/NavigationContext";
+import { useNavigation } from "../hooks/useNavigation";
 
 export function Header() {
   const { isMobileOpen, setIsMobileOpen, isDesktopOpen, setIsDesktopOpen } =
@@ -18,8 +14,6 @@ export function Header() {
   // Close navigation when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      event.preventDefault();
-
       if (
         navRef.current &&
         !navRef.current.contains(event.target as Node) &&
@@ -36,6 +30,20 @@ export function Header() {
     };
   }, []);
 
+  // Close navigation when scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMobileOpen) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isMobileOpen]); // Only run when isMobileOpen changes
+
   // Use the custom hook to handle xl viewport
   useMediaQuery("(min-width: 1280px)", (matches) => {
     if (matches) {
@@ -46,17 +54,6 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
       <div className="mx-auto px-4 md:px-6 py-3 xl:py-2 flex justify-between items-center">
-        {/* <div className="hidden xl:block border pl-2 py-2 px-2 rounded-md shadow">
-          <img
-            src={logo}
-            alt="CASFOD"
-            className="w-[180px] 2xl:w-[200px] h-10 2xl:h-14"
-          />
-        </div> */}
-        {/* <div className="hidden xl:flex item-center justify-center p-1.5 rounded-full border-2 shadow-md">
-          <img src={logo} alt="CASFOD" className="pt-1 h-11" />
-        </div> */}
-
         <span
           className="hidden xl:flex cursor-pointer"
           onClick={() => setIsDesktopOpen(!isDesktopOpen)}

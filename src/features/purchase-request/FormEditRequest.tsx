@@ -59,30 +59,6 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     Array(itemGroup.length).fill(false)
   );
 
-  // Add a new item group
-  const addItem = () => {
-    setItemGroup([
-      ...itemGroup,
-      {
-        description: "",
-        frequency: 0,
-        quantity: 0,
-        unit: "",
-        unitCost: 0,
-        total: 0,
-      },
-    ]);
-    setDisabledStates([...disabledStates, false]); // Add a new disabled state
-  };
-
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates); // Remove the corresponding disabled state
-  };
-
   // Toggle edit mode for an item group
   const handleEdit = (index: number) => {
     const newDisabledStates = [...disabledStates];
@@ -128,6 +104,30 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     }));
     setItemGroup(updatedGroups);
   }, [frequencies, quantities, unitCosts]);
+
+  // Add a new item group
+  const addItem = () => {
+    setItemGroup([
+      ...itemGroup,
+      {
+        description: "",
+        frequency: 0,
+        quantity: 0,
+        unit: "",
+        unitCost: 0,
+        total: 0,
+      },
+    ]);
+    setDisabledStates([...disabledStates, false]);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
+  };
 
   const { updatePurchaseRequest, isPending } = useUpdatePurChaseRequest(
     param.requestId!

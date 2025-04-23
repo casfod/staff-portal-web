@@ -182,7 +182,7 @@ const FormAddProject = () => {
       </Row>
 
       {/* Project Budget */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Budget *">
           <Input
             type="number"

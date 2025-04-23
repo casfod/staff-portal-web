@@ -1,4 +1,5 @@
 import { TravelRequestType } from "../../interfaces";
+import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 
 interface RequestDetailsProps {
@@ -6,48 +7,49 @@ interface RequestDetailsProps {
   isInspect?: boolean;
 }
 
+const ItemsTableData = [
+  "Expense",
+  "Quantity",
+  "Frequency",
+  "Unit Cost",
+  "Total",
+];
+
 const ExpenseTable = ({
   expenses,
 }: {
   expenses: TravelRequestType["expenses"];
 }) => (
-  <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4">
+  <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4 overflow-x-scroll">
     <thead>
       <tr>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Expense
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Location
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Number Of Days
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Rate
-        </th>
-        <th className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-          Total
-        </th>
+        {ItemsTableData.map((data, index) => (
+          <th
+            key={index}
+            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider"
+          >
+            {data}
+          </th>
+        ))}
       </tr>
     </thead>
     <tbody className="bg-white divide-y divide-gray-200">
-      {expenses?.map((expense, index) => (
-        <tr key={index}>
+      {expenses!.map((item) => (
+        <tr key={item.id!}>
           <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
-            {expense.expense}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
-            {expense.location}
+            {item.expense ?? "N/A"}
           </td>
           <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {expense.daysNumber}
+            {item.quantity ?? "N/A"}
           </td>
           <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {moneyFormat(expense.rate, "NGN")}
+            {item.frequency ?? "N/A"}
           </td>
           <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {moneyFormat(expense.total, "NGN")}
+            {item.unitCost ? moneyFormat(item.unitCost, "NGN") : "N/A"}
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-600 break-words">
+            {item.total ? moneyFormat(item.total, "NGN") : "N/A"}
           </td>
         </tr>
       ))}
@@ -73,11 +75,11 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">Day Of Departure:</span>
-            {request.dayOfDeparture}
+            {dateformat(request.dayOfDeparture)}
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">Day Of Return:</span>
-            {request.dayOfReturn}
+            {dateformat(request.dayOfReturn)}
           </p>
         </div>
         <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">

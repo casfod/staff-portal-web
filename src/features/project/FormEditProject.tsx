@@ -8,6 +8,7 @@ import Button from "../../ui/Button";
 import { FaPlus } from "react-icons/fa";
 import { useUpdateProject } from "./Hooks/useUpdateProject";
 import Select from "../../ui/Select";
+import DatePicker from "../../ui/DatePicker";
 
 interface FormEditProjectProps {
   project: Project;
@@ -49,12 +50,6 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
     sectors: [...project.sectors],
     project_locations: [...project.project_locations],
     target_beneficiaries: [...project.target_beneficiaries],
-    // target_beneficiaries: {
-    //   women: project.target_beneficiaries.women,
-    //   girls: project.target_beneficiaries.girls,
-    //   boys: project.target_beneficiaries.boys,
-    //   men: project.target_beneficiaries.men,
-    // },
     project_objectives: project.project_objectives,
     project_summary: project.project_summary,
   });
@@ -71,13 +66,13 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
   const handleNestedChange = (
     parentField: keyof Project,
     field: string,
-    value: string | number
+    value: Date | string | number | null
   ) => {
     setFormData((prev) => ({
       ...prev,
       [parentField]: {
-        ...(prev[parentField] as object), // Explicitly cast to object
-        [field]: value,
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
       },
     }));
   };
@@ -193,7 +188,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
       </Row>
 
       {/* Project Budget */}
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Project Budget *">
           <Input
             type="number"
@@ -373,29 +368,40 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       {/* Implementation Period */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Implementation Period (From) *">
-          <Input
-            type="date"
-            id="implementation_period_from"
-            required
-            value={formData.implementation_period.from}
-            onChange={(e) =>
+          <DatePicker
+            selected={
+              formData.implementation_period.from
+                ? new Date(formData.implementation_period.from)
+                : null
+            }
+            onChange={(date) =>
               handleNestedChange(
                 "implementation_period",
                 "from",
-                e.target.value
+                date ? date.toISOString() : null
               )
             }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
+
         <FormRow label="Implementation Period (To) *">
-          <Input
-            type="date"
-            id="implementation_period_to"
-            required
-            value={formData.implementation_period.to}
-            onChange={(e) =>
-              handleNestedChange("implementation_period", "to", e.target.value)
+          <DatePicker
+            selected={
+              formData.implementation_period.to
+                ? new Date(formData.implementation_period.to)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "implementation_period",
+                "to",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
           />
         </FormRow>
       </Row>

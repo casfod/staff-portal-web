@@ -37,22 +37,6 @@ const FormAddPurchaseRequest: React.FC = () => {
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Add a new item group
-  const addItem = () => {
-    setItemGroup([
-      ...itemGroup,
-      {
-        description: "",
-        frequency: 0,
-        quantity: 0,
-        unit: "",
-        unitCost: 0,
-        total: 0,
-      },
-    ]);
-    setDisabledStates([...disabledStates, false]);
-  };
-
   const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
@@ -75,14 +59,6 @@ const FormAddPurchaseRequest: React.FC = () => {
     const newItems = [...itemGroup];
     newItems[index][field] = value as never;
     setItemGroup(newItems);
-  };
-
-  // Remove an item group
-  const removeItem = (index: number) => {
-    const newItems = itemGroup.filter((_, i) => i !== index);
-    setItemGroup(newItems);
-    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
-    setDisabledStates(newDisabledStates);
   };
 
   // Toggle edit mode for an item group
@@ -152,6 +128,30 @@ const FormAddPurchaseRequest: React.FC = () => {
     }));
     setItemGroup(updatedGroups);
   }, [frequencies, quantities, unitCosts]);
+
+  // Add a new item group
+  const addItem = () => {
+    setItemGroup([
+      ...itemGroup,
+      {
+        description: "",
+        frequency: 0,
+        quantity: 0,
+        unit: "",
+        unitCost: 0,
+        total: 0,
+      },
+    ]);
+    setDisabledStates([...disabledStates, false]);
+  };
+
+  // Remove an item group
+  const removeItem = (index: number) => {
+    const newItems = itemGroup.filter((_, i) => i !== index);
+    setItemGroup(newItems);
+    const newDisabledStates = disabledStates.filter((_, i) => i !== index);
+    setDisabledStates(newDisabledStates);
+  };
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
