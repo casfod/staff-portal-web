@@ -220,6 +220,66 @@ export interface TravelRequestType {
 }
 
 ///////////////////////
+//ExpenseClaim
+///////////////////////
+
+export interface ExpenseClaimStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export interface UseExpenseClaimStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: ExpenseClaimStats;
+}
+
+export interface useExpenseClaimType {
+  status: number;
+  message: string;
+  data: {
+    expenseClaims: ExpenseClaimType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface ExpenseClaimItemGroup {
+  id?: string;
+  expense: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
+
+export interface ExpenseClaimType {
+  id?: string;
+  staffName?: string;
+  expenseClaim: {
+    from: string;
+    to: string;
+  };
+  project: string;
+  budget: number;
+  travelReason: string;
+  dayOfDeparture: Date | string | null;
+  dayOfReturn: Date | string | null;
+  expenses: ExpenseClaimItemGroup[];
+
+  comments?: [{ user: Partial<UserType>; text: string }];
+  status?: string;
+  createdBy?: Partial<UserType>;
+  createdAt?: string;
+  updatedAt?: string;
+  reviewedBy?: any;
+  approvedBy?: any;
+}
+
+///////////////////////
 //PaymentRequest
 ///////////////////////
 

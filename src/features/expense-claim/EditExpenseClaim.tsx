@@ -3,37 +3,37 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useEffect } from "react";
-import FormEditTravelRequest from "./FormEditTravelRequest";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import FormEditExpenseClaim from "./FormEditExpenseClaim";
 
-const EditTravelRequest = () => {
+const EditExpenseClaim = () => {
   const navigate = useNavigate();
 
   const param = useParams();
 
   // Access the purchaseRequest state from Redux
 
-  const travelRequest = useSelector(
-    (state: RootState) => state.travelRequest.travelRequest
+  const expenseClaim = useSelector(
+    (state: RootState) => state.expenseClaim.expenseClaim
   );
 
   useEffect(() => {
-    if (!param || !travelRequest) {
-      navigate("/travel-requests");
+    if (!param || !expenseClaim) {
+      navigate("/expense-claim");
     }
-  }, [travelRequest, param, navigate]);
+  }, [expenseClaim, param, navigate]);
 
-  // Handle the case where travelRequest is null
-  if (!travelRequest) {
-    return <div>No Travel request data available.</div>;
+  // Handle the case where expenseClaim is null
+  if (!expenseClaim) {
+    return <div>No Expense Claim data available.</div>;
   }
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
-          <TextHeader>Update Travel Request</TextHeader>
+          <TextHeader>Update Expense Claim</TextHeader>
 
           <Button
             onClick={() => navigate(-1)} // Use relative path here
@@ -46,11 +46,11 @@ const EditTravelRequest = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-4 md:py-6 py-10 px-2 md:px-6 px-12 w-full rounded-lg">
-          <FormEditTravelRequest travelRequest={travelRequest} />
+          <FormEditExpenseClaim expenseClaim={expenseClaim} />
         </div>
       </div>
     </div>
   );
 };
 
-export default EditTravelRequest;
+export default EditExpenseClaim;

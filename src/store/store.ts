@@ -21,6 +21,7 @@ import travelRequestReducer from "./travelRequestSlice";
 import paymentRequestReducer from "./paymentRequestSlice";
 import genericQuerySliceReducer from "./genericQuerySlice";
 import navigationSliceReducer from "./navigationSlice";
+import expenseClaimReducer from "./expenseClaimSlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   paymentRequest: paymentRequestReducer,
   genericQuerySlice: genericQuerySliceReducer,
   navigationSlice: navigationSliceReducer,
+  expenseClaim: expenseClaimReducer,
 });
 
 // Create persist config

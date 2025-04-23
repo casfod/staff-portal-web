@@ -37,6 +37,10 @@ import CreateTravelRequest from "./features/travel-request/CreateTravelRequest.t
 import TravelRequest from "./features/travel-request/TravelRequest.tsx";
 import EditTravelRequest from "./features/travel-request/EditTravelRequest.tsx";
 import AnimatedRoute from "./ui/AnimatedRoute.tsx";
+import AllExpenseClaims from "./features/expense-claim/AllExpenseCliams.tsx";
+import CreateExpenseClaim from "./features/expense-claim/CreateExpenseClaim.tsx";
+import ExpenseClaim from "./features/expense-claim/ExpenseClaim.tsx";
+import EditExpenseClaim from "./features/expense-claim/EditExpenseClaim.tsx";
 
 const router = createBrowserRouter([
   {
@@ -320,7 +324,47 @@ const router = createBrowserRouter([
         element: (
           <AnimatedRoute key="expense-claims" element={<ExpenseClaims />} />
         ),
+        children: [
+          { index: true, element: <Navigate to="all-expense-claim" /> },
+          {
+            path: "all-expense-claim",
+            element: (
+              <AnimatedRoute
+                key="all-expense-claim"
+                element={<AllExpenseClaims />}
+              />
+            ),
+          },
+          {
+            path: "create-expense-claim",
+            element: (
+              <AnimatedRoute
+                key="create-expense-claim"
+                element={<CreateExpenseClaim />}
+              />
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <AnimatedRoute
+                key="request/:requestId"
+                element={<ExpenseClaim />}
+              />
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <AnimatedRoute
+                key="edit-request/:requestId"
+                element={<EditExpenseClaim />}
+              />
+            ),
+          },
+        ],
       },
+
       {
         path: "user-management",
         element: (
