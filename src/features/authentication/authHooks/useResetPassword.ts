@@ -3,14 +3,10 @@ import { resetPassword as resetPasswordApi } from "../../../services/apiAuth.ts"
 import { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { UserType } from "../../../interfaces.ts";
+import { PasswordResetTypes } from "../../../interfaces.ts";
 
 interface ErrorResponse {
   message: string;
-}
-
-interface UseResetPasswordType {
-  data: UserType;
 }
 
 interface LoginError extends AxiosError {
@@ -25,8 +21,8 @@ export function useResetPassword(token: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ data }: UseResetPasswordType) =>
-      resetPasswordApi(token, data),
+    mutationFn: ({ password, confirm_password }: PasswordResetTypes) =>
+      resetPasswordApi(token, { password, confirm_password }),
 
     onSuccess: (data) => {
       if (data.status === 200) {

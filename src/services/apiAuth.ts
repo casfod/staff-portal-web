@@ -1,12 +1,6 @@
 import axios from "axios";
 
-import {
-  // PasswordForgotTypes,
-  // PasswordResetTypes,
-  // // UpdateUserType,
-  UserType,
-} from "../interfaces.ts";
-// import Cookies from "js-cookie";
+import { PasswordResetTypes, UserType } from "../interfaces.ts";
 import { generalApiHeader } from "../utils/generalApiHeader.ts";
 import { baseUrl } from "./baseUrl.ts";
 
@@ -89,11 +83,11 @@ export const logout = async function () {
   }
 };
 
-export const forgotPassword = async function (data: UserType) {
+export const forgotPassword = async function (email: string) {
   try {
     const response = await axios.post<UserType>(
       `${apiURL}/users/forgotPassword`,
-      data
+      { email: email }
     );
     console.log(response.data);
 
@@ -108,7 +102,10 @@ export const forgotPassword = async function (data: UserType) {
     }
   }
 };
-export const resetPassword = async function (token: string, data: UserType) {
+export const resetPassword = async function (
+  token: string,
+  data: PasswordResetTypes
+) {
   try {
     const response = await axios.patch<UserType>(
       `${apiURL}/users/resetPassword/${token}`,

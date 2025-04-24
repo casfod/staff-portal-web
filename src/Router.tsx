@@ -41,6 +41,8 @@ import ExpenseClaim from "./features/expense-claim/ExpenseClaim.tsx";
 import EditExpenseClaim from "./features/expense-claim/EditExpenseClaim.tsx";
 import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 import EditPurchaseRequest from "./features/purchase-request/EditRequest";
+import ForgotPasswordForm from "./features/authentication/ForgotPasswordForm.tsx";
+import ResetPasswordForm from "./features/authentication/ResetPasswordForm.tsx";
 
 const router = createBrowserRouter([
   {
@@ -374,6 +376,14 @@ const router = createBrowserRouter([
     ],
   },
   { path: "login", element: <AnimatedRoute key="" element={<Login />} /> },
+  {
+    path: "forgot-password",
+    element: <AnimatedRoute key="" element={<ForgotPasswordForm />} />,
+  },
+  {
+    path: "reset-password/:token",
+    element: <AnimatedRoute key="" element={<ResetPasswordForm />} />,
+  },
   { path: "*", element: <AnimatedRoute key="" element={<PageNotFound />} /> },
 ]);
 

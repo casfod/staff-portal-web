@@ -35,6 +35,14 @@ export interface UserType {
   passwordConfirm?: string;
 }
 
+export interface PasswordResetTypes {
+  password: string;
+  confirm_password: string;
+}
+export interface PasswordForgotTypes {
+  email: string;
+}
+
 ///////////////////////
 //PurChaseRequest
 ///////////////////////

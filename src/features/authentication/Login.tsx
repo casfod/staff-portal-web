@@ -3,6 +3,7 @@ import { useLogin } from "./authHooks/useLogin";
 import SpinnerMini from "../../ui/SpinnerMini";
 import logo from "../../assets/logo.webp";
 import ShowPasswordIcon from "../../ui/ShowPasswordIcon";
+import { NavLink } from "react-router-dom";
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -109,6 +110,14 @@ export function Login() {
         </form>
       </div>
 
+      <div className="flex justify-center md:w-[450px] text-sm  text-gray-50 font-semibold text-center mt-3 ">
+        <p>
+          Forgot password?{" "}
+          <span className="underline">
+            <NavLink to={"/forgot-password"}>Click here.</NavLink>{" "}
+          </span>
+        </p>
+      </div>
       <p className="inline-flex items-center gap-1 text-sm md:text-base text-gray-50 font-semibold text-center mt-8 ">
         <span>&copy; 2025 Casfod Possibility Hub. All rights reserved.</span>
       </p>
