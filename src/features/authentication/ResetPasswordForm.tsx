@@ -10,7 +10,7 @@ import logo from "../../assets/logo.webp";
 const ResetPasswordForm: React.FC = () => {
   const [formData, setFormData] = useState<PasswordResetTypes>({
     password: "",
-    confirm_password: "",
+    passwordConfirm: "",
   });
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const { token } = useParams<{ token: string }>();
@@ -25,8 +25,8 @@ const ResetPasswordForm: React.FC = () => {
     e.preventDefault();
 
     resetPassword({
-      password: formData.confirm_password,
-      confirm_password: formData.confirm_password,
+      password: formData.passwordConfirm,
+      passwordConfirm: formData.passwordConfirm,
     });
   };
   const handleShowPassword = () => {
@@ -103,10 +103,10 @@ const ResetPasswordForm: React.FC = () => {
                   className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                   focus:border-[#052859] focus:outline-none shadow-lg 
                   text-gray-600"
-                  id="confirm_password"
+                  id="passwordConfirm"
                   type={showPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  value={formData.confirm_password}
+                  value={formData.passwordConfirm}
                   onChange={handleInputChange}
                   required
                 />{" "}

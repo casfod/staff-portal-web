@@ -37,7 +37,7 @@ export interface UserType {
 
 export interface PasswordResetTypes {
   password: string;
-  confirm_password: string;
+  passwordConfirm: string;
 }
 export interface PasswordForgotTypes {
   email: string;

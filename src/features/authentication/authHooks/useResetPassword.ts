@@ -21,8 +21,8 @@ export function useResetPassword(token: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ password, confirm_password }: PasswordResetTypes) =>
-      resetPasswordApi(token, { password, confirm_password }),
+    mutationFn: ({ password, passwordConfirm }: PasswordResetTypes) =>
+      resetPasswordApi(token, { password, passwordConfirm }),
 
     onSuccess: (data) => {
       if (data.status === 200) {
