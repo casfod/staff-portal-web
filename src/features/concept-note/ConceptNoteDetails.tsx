@@ -20,7 +20,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
       }`}
     >
       <div
-        className="flex flex-col gap-2 w-full text-gray-600 text-sm mb-3 break-words"
+        className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3 break-words"
         style={{ letterSpacing: "1px" }}
       >
         <p className="text-sm text-gray-600">

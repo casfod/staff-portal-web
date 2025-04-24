@@ -123,7 +123,7 @@ const FormEditPaymentRequest = ({
 
   return (
     <form className="space-y-6">
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
@@ -146,7 +146,6 @@ const FormEditPaymentRequest = ({
                   : []
               }
               optionsHeight={220}
-              filterable={true}
               required
             />
           )}
@@ -198,7 +197,7 @@ const FormEditPaymentRequest = ({
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Amount In Figure *">
           <Input
             type="number"
@@ -221,7 +220,7 @@ const FormEditPaymentRequest = ({
           />
         </FormRow>
       </Row>
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Account Number*">
           <Input
             type="text"
@@ -312,12 +311,12 @@ const FormEditPaymentRequest = ({
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
           <Button size="medium" onClick={handleSave}>
-            {isSaving ? <SpinnerMini /> : "Save"}
+            {isSaving ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
-            {isSending ? <SpinnerMini /> : "Save And Send"}
+            {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>
         )}
       </div>

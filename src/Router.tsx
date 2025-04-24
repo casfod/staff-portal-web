@@ -12,7 +12,6 @@ import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
 import PurchaseRequest from "./features/purchase-request/PurchaseRequest.tsx";
 import { PaymentRequests } from "./pages/PaymentRequests";
-import EditRequest from "./features/purchase-request/EditRequest";
 import CreatePurchaseRequest from "./features/purchase-request/CreatePurchaseRequest";
 import { AllProjects } from "./features/project/AllProjects";
 import Project from "./features/project/Project";
@@ -41,6 +40,7 @@ import CreateExpenseClaim from "./features/expense-claim/CreateExpenseClaim.tsx"
 import ExpenseClaim from "./features/expense-claim/ExpenseClaim.tsx";
 import EditExpenseClaim from "./features/expense-claim/EditExpenseClaim.tsx";
 import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
+import EditPurchaseRequest from "./features/purchase-request/EditRequest";
 
 const router = createBrowserRouter([
   {
@@ -176,7 +176,7 @@ const router = createBrowserRouter([
             element: (
               <AnimatedRoute
                 key="edit-request/:requestId"
-                element={<EditRequest />}
+                element={<EditPurchaseRequest />}
               />
             ),
           },

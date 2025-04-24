@@ -128,8 +128,8 @@ export interface AdvanceRequestType {
   finalDeliveryPoint: string;
   city: string;
   periodOfActivity: {
-    from: Date | string | null;
-    to: Date | string | null;
+    from: any;
+    to: any;
   };
   activityDescription: string;
   expenseChargedTo: string;
@@ -261,8 +261,8 @@ export interface ExpenseClaimType {
   id?: string;
   staffName?: string;
   expenseClaim: {
-    from: string;
-    to: string;
+    from: any;
+    to: any;
   };
   project: string;
   budget: number;

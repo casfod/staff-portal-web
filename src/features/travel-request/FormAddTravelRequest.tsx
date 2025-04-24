@@ -77,7 +77,7 @@ const FormAddTravelRequest: React.FC = () => {
     );
     setFormData((prev) => ({
       ...prev,
-      budget: parseFloat(totalBudget.toFixed(2)), // Round to 2 decimal places
+      budget: totalBudget, // Round to 2 decimal places
     }));
   }, [itemGroup]);
 
@@ -207,7 +207,7 @@ const FormAddTravelRequest: React.FC = () => {
             placeholder="Select date"
             // className="custom-class-if-needed"
             clearable={true}
-            maxDate={new Date()}
+            minDate={new Date()}
           />
         </FormRow>
         {formData.dayOfDeparture && (
@@ -224,7 +224,7 @@ const FormAddTravelRequest: React.FC = () => {
               placeholder="Select date"
               // className="custom-class-if-needed"
               clearable={true}
-              maxDate={new Date()}
+              minDate={formData.dayOfDeparture}
               requiredTrigger={!!formData.dayOfDeparture}
             />
           </FormRow>

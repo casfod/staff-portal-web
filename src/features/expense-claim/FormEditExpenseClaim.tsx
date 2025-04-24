@@ -14,7 +14,8 @@ import Select from "../../ui/Select";
 import { useDispatch } from "react-redux";
 
 import { useReviewers } from "../user/Hooks/useReviewers";
-import { useUpdateExpenseClaim } from "./Hooks/useUpdateExpenseClaim";
+import { useSaveExpenseClaim } from "./Hooks/useSaveExpenseClaim";
+
 import { useSendExpenseClaim } from "./Hooks/useSendExpenseClaim";
 import { resetExpenseClaim } from "../../store/expenseClaimSlice";
 import { useProjects } from "../project/Hooks/useProjects";
@@ -180,9 +181,8 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const { updateExpenseClaim, isPending } = useUpdateExpenseClaim(
-    expenseClaim.id!
-  );
+  const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
+
   const { sendExpenseClaim, isPending: isSending } = useSendExpenseClaim();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
@@ -190,23 +190,17 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
   const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
   // Handle form submission
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
-
     formData.reviewedBy = null;
 
     const data = { ...formData, expenses: [...itemGroup] };
-    updateExpenseClaim(data);
+    saveExpenseClaim(data);
     // dispatch(resetExpenseClaim());
   };
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
-
     const data = { ...formData, expenses: [...itemGroup] };
     sendExpenseClaim(data);
 
@@ -248,6 +242,7 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
               placeholder="Select date"
               // className="custom-class-if-needed"
               clearable={true}
+              minDate={formData.dayOfDeparture!}
               maxDate={new Date()}
               requiredTrigger={!!formData.dayOfDeparture}
             />
@@ -568,9 +563,11 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleUpdate}>
-          {isPending ? <SpinnerMini /> : "Update"}
-        </Button>
+        {!formData.reviewedBy && (
+          <Button size="medium" onClick={handleSave}>
+            {isPending ? <SpinnerMini /> : "Update And Save"}
+          </Button>
+        )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}

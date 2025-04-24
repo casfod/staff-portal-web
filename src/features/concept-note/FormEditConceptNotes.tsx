@@ -122,18 +122,8 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       ...formData,
       project_code: selectedProject?.project_code || formData.project_code,
     };
-
-    console.log("Submitting data:", data); // Verify project_code is included
     saveConceptNote(data);
   };
-
-  // Handle form submission
-  // const handleUpdate = (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   const data = { ...formData };
-  //   sendConceptNote(data);
-  // };
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -389,12 +379,12 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
           <div className="flex justify-center w-full gap-4">
             {!formData.approvedBy && (
               <Button size="medium" onClick={handleSave}>
-                {isSaving ? <SpinnerMini /> : "update"}
+                {isSaving ? <SpinnerMini /> : "Update And Save"}
               </Button>
             )}
             {formData.approvedBy && (
               <Button size="medium" onClick={handleUpdate}>
-                {isUpdating ? <SpinnerMini /> : "update And Send"}
+                {isUpdating ? <SpinnerMini /> : "Update And Send"}
               </Button>
             )}
           </div>

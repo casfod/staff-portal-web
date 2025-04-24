@@ -76,7 +76,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         } text-gray-600 mb-3 border-b border-gray-300 pb-6`}
       >
         <div
-          className="flex flex-col gap-2 w-full text-gray-600 text-sm mb-3"
+          className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3"
           style={{ letterSpacing: "1px" }}
         >
           <p>

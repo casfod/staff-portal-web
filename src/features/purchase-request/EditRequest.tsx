@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
-import FormEditRequest from "./FormEditRequest";
 import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useEffect } from "react";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import FormEditPurchaseRequest from "./FormEditPurchaseRequest";
 
-const EditRequest = () => {
+const EditPurchaseRequest = () => {
   const navigate = useNavigate();
 
   const param = useParams();
@@ -46,11 +46,11 @@ const EditRequest = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-4 md:py-6 py-10 px-2 md:px-6 px-12 w-full rounded-lg">
-          <FormEditRequest purchaseRequest={purchaseRequest} />
+          <FormEditPurchaseRequest purchaseRequest={purchaseRequest} />
         </div>
       </div>
     </div>
   );
 };
 
-export default EditRequest;
+export default EditPurchaseRequest;

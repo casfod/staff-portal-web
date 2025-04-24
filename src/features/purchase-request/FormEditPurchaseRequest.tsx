@@ -15,8 +15,8 @@ import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 import { useDispatch } from "react-redux";
 
 import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
-import { useUpdatePurChaseRequest } from "./Hooks/useUpdatePurChaseRequest";
-import { useParams } from "react-router-dom";
+
+import { useSavePurchaseRequest } from "./Hooks/useSavePurchaseRequest";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
@@ -25,11 +25,10 @@ interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;
 }
 
-const FormEditRequest: React.FC<FormEditRequestProps> = ({
+const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
   purchaseRequest,
 }) => {
   const dispatch = useDispatch();
-  const param = useParams();
 
   // State for the main form fields
   const [formData, setFormData] = useState<PurChaseRequestType>({
@@ -129,9 +128,8 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
     setDisabledStates(newDisabledStates);
   };
 
-  const { updatePurchaseRequest, isPending } = useUpdatePurChaseRequest(
-    param.requestId!
-  );
+  const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
+
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
@@ -186,13 +184,13 @@ const FormEditRequest: React.FC<FormEditRequestProps> = ({
   };
 
   // Handle form submission
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
     formData.reviewedBy = null;
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    updatePurchaseRequest(data);
+    savePurchaseRequest(data);
     // dispatch(resetPurchaseRequest());
   };
   // Handle form submission
@@ -564,8 +562,8 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleUpdate}>
-          {isPending ? <SpinnerMini /> : "Update"}
+        <Button size="medium" onClick={handleSave}>
+          {isPending ? <SpinnerMini /> : "Update And Save"}
         </Button>
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
@@ -577,4 +575,4 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
   );
 };
 
-export default FormEditRequest;
+export default FormEditPurchaseRequest;

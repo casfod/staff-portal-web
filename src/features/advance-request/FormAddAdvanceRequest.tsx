@@ -265,32 +265,32 @@ const FormAddAdvanceRequest: React.FC = () => {
             }
             variant="secondary"
             placeholder="Select date"
+            minDate={new Date()}
           />
         </FormRow>
-        <FormRow label="Period Of Activity (To) *">
-          <DatePicker
-            selected={
-              formData?.periodOfActivity?.to
-                ? new Date(formData.periodOfActivity.to)
-                : null
-            }
-            onChange={(date) =>
-              handleNestedChange(
-                "periodOfActivity",
-                "to",
-                date ? date.toISOString() : null
-              )
-            }
-            variant="secondary"
-            placeholder="Select date"
-            minDate={
-              formData.periodOfActivity.to
-                ? new Date(formData.periodOfActivity.to)
-                : null
-            }
-            dependsOn={formData.periodOfActivity?.to}
-          />
-        </FormRow>
+
+        {formData.periodOfActivity?.from && (
+          <FormRow label="Period Of Activity (To) *">
+            <DatePicker
+              selected={
+                formData?.periodOfActivity?.to
+                  ? new Date(formData.periodOfActivity.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "periodOfActivity",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData?.periodOfActivity?.from}
+              requiredTrigger={formData.periodOfActivity?.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       <Row>

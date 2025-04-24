@@ -224,6 +224,7 @@ const FormAddExpenseClaim: React.FC = () => {
               placeholder="Select date"
               // className="custom-class-if-needed"
               clearable={true}
+              minDate={formData.dayOfDeparture!}
               maxDate={new Date()}
               requiredTrigger={!!formData.dayOfDeparture}
             />

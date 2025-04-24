@@ -16,8 +16,7 @@ import { useSendAdvanceRequest } from "./Hooks/useSendAdvanceRequest";
 import { useDispatch } from "react-redux";
 
 import { resetAdvanceRequest } from "../../store/advanceRequestSlice";
-import { useUpdateAdvanceRequest } from "./Hooks/useUpdateAdvanceRequest";
-import { useParams } from "react-router-dom";
+import { useSaveAdvanceRequest } from "./Hooks/useSaveAdvanceRequest";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { bankNames } from "../../assets/Banks";
@@ -32,7 +31,6 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   advanceRequest,
 }) => {
   const dispatch = useDispatch();
-  const param = useParams();
 
   // State for the main form fields
   const [formData, setFormData] = useState<AdvanceRequestType>({
@@ -135,9 +133,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     setDisabledStates(newDisabledStates);
   };
 
-  const { updateAdvanceRequest, isPending } = useUpdateAdvanceRequest(
-    param.requestId!
-  );
+  const { saveAdvanceRequest, isPending } = useSaveAdvanceRequest();
   const { sendAdvanceRequest, isPending: isSending } = useSendAdvanceRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
@@ -202,14 +198,15 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   };
 
   // Handle form submission
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (e: React.FormEvent) => {
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
     formData.reviewedBy = null;
 
+    if (!isFormValid) return; // Stop if form is invalid
+    e.preventDefault();
     const data = { ...formData, itemGroups: [...itemGroup] };
-    updateAdvanceRequest(data);
-    // dispatch(resetAdvanceRequest());
+    saveAdvanceRequest(data);
   };
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
@@ -314,26 +311,32 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
             }
             variant="secondary"
             placeholder="Select date"
+            minDate={new Date()}
           />
         </FormRow>
-        <FormRow label="Period Of Activity (To) *">
-          <DatePicker
-            selected={
-              formData?.periodOfActivity?.to
-                ? new Date(formData.periodOfActivity.to)
-                : null
-            }
-            onChange={(date) =>
-              handleNestedChange(
-                "periodOfActivity",
-                "to",
-                date ? date.toISOString() : null
-              )
-            }
-            variant="secondary"
-            placeholder="Select date"
-          />
-        </FormRow>
+
+        {formData.periodOfActivity?.from && (
+          <FormRow label="Period Of Activity (To) *">
+            <DatePicker
+              selected={
+                formData?.periodOfActivity?.to
+                  ? new Date(formData.periodOfActivity.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "periodOfActivity",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData?.periodOfActivity?.from}
+              requiredTrigger={formData.periodOfActivity?.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       <Row>
@@ -514,14 +517,14 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
                 value={formData.accountCode || ""}
                 onChange={(value) => handleFormChange("accountCode", value)}
                 options={
-                  selectedProject
+                  selectedProject?.account_code // Add optional chaining
                     ? selectedProject.account_code.map(
                         (account: AccountCode) => ({
                           id: `${account.name}`,
                           name: `${account.name}`,
                         })
                       )
-                    : []
+                    : [] // Fallback to empty array
                 }
                 required
               />
@@ -530,7 +533,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         )}
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Account Number*">
           <Input
             type="text"
@@ -650,9 +653,11 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
       )}
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleUpdate}>
-          {isPending ? <SpinnerMini /> : "Update"}
-        </Button>
+        {!formData.reviewedBy && (
+          <Button size="medium" onClick={handleSave}>
+            {isPending ? <SpinnerMini /> : "Update And Save"}
+          </Button>
+        )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}

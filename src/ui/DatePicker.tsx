@@ -11,8 +11,10 @@ interface DatePickerProps {
   variant?: "primary" | "secondary";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
-  minDate?: Date | undefined; // Changed from Date | null to just Date
-  maxDate?: Date | undefined; // Changed from Date | null to just Date
+  minDate?: any; // Changed from Date | null to just Date
+  maxDate?: any; // Changed from Date | null to just Date
+  // minDate?: Date | undefined; // Changed from Date | null to just Date
+  // maxDate?: Date | undefined; // Changed from Date | null to just Date
   requiredTrigger?: boolean;
 }
 

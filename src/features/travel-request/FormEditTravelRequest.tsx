@@ -14,8 +14,8 @@ import Select from "../../ui/Select";
 import { useDispatch } from "react-redux";
 
 import { useReviewers } from "../user/Hooks/useReviewers";
-import { useUpdateTravelRequest } from "./Hooks/useUpdateTravelRequest";
 import { useSendTravelRequest } from "./Hooks/useSendTravelRequest";
+import { useSaveTravelRequest } from "./Hooks/useSaveTravelRequest";
 import { resetTravelRequest } from "../../store/travelRequestSlice";
 import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
@@ -97,7 +97,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     );
     setFormData((prev) => ({
       ...prev,
-      budget: parseFloat(totalBudget.toFixed(2)), // Round to 2 decimal places
+      budget: totalBudget, // Round to 2 decimal places
     }));
   }, [itemGroup]);
 
@@ -180,9 +180,8 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const { updateTravelRequest, isPending } = useUpdateTravelRequest(
-    travelRequest.id!
-  );
+  const { saveTravelRequest, isPending } = useSaveTravelRequest();
+
   const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
@@ -196,7 +195,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     formData.reviewedBy = null;
 
     const data = { ...formData, expenses: [...itemGroup] };
-    updateTravelRequest(data);
+    saveTravelRequest(data);
     // dispatch(resetTravelRequest());
   };
   // Handle form submission
@@ -229,7 +228,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
             placeholder="Select date"
             // className="custom-class-if-needed"
             clearable={true}
-            maxDate={new Date()}
+            minDate={new Date()}
           />
         </FormRow>
         {formData.dayOfDeparture && (
@@ -246,7 +245,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
               placeholder="Select date"
               // className="custom-class-if-needed"
               clearable={true}
-              maxDate={new Date()}
+              minDate={formData.dayOfDeparture}
               requiredTrigger={!!formData.dayOfDeparture}
             />
           </FormRow>
@@ -566,7 +565,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
 
       <div className="flex justify-center w-full gap-4">
         <Button size="medium" onClick={handleUpdate}>
-          {isPending ? <SpinnerMini /> : "Update"}
+          {isPending ? <SpinnerMini /> : "Update And Save"}
         </Button>
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>

@@ -127,7 +127,7 @@ const FormAddPaymentRequest = () => {
 
   return (
     <form className="space-y-6">
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Projects">
           {isLoadingProjects ? (
             <SpinnerMini />
@@ -150,7 +150,6 @@ const FormAddPaymentRequest = () => {
                   : []
               }
               optionsHeight={220}
-              filterable={true}
               required
             />
           )}
@@ -177,7 +176,6 @@ const FormAddPaymentRequest = () => {
                     : []
                 }
                 optionsHeight={220}
-                filterable={true}
                 required
               />
             )}
@@ -220,7 +218,7 @@ const FormAddPaymentRequest = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Amount In Figure *">
           <Input
             type="number"
@@ -243,7 +241,7 @@ const FormAddPaymentRequest = () => {
           />
         </FormRow>
       </Row>
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Account Number*">
           <Input
             type="text"
