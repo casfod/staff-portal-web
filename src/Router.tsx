@@ -375,14 +375,21 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "login", element: <AnimatedRoute key="" element={<Login />} /> },
+  { path: "login", element: <AnimatedRoute key="login" element={<Login />} /> },
   {
     path: "forgot-password",
-    element: <AnimatedRoute key="" element={<ForgotPasswordForm />} />,
+    element: (
+      <AnimatedRoute key="forgot-password" element={<ForgotPasswordForm />} />
+    ),
   },
   {
     path: "reset-password/:token",
-    element: <AnimatedRoute key="" element={<ResetPasswordForm />} />,
+    element: (
+      <AnimatedRoute
+        key="reset-password/:token"
+        element={<ResetPasswordForm />}
+      />
+    ),
   },
   { path: "*", element: <AnimatedRoute key="" element={<PageNotFound />} /> },
 ]);

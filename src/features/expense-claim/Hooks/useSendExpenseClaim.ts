@@ -31,7 +31,7 @@ export function useSendExpenseClaim() {
 
         // Invalidate the users query to refetch data
         queryClient.invalidateQueries({ queryKey: ["all-expense-claims"] });
-        navigate("/expense-claims");
+        navigate(-1);
       } else {
         // Handle unexpected response
         toast.error(data.message);
