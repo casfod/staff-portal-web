@@ -207,25 +207,29 @@ const FormAddExpenseClaim: React.FC = () => {
             placeholder="Select date"
             // className="custom-class-if-needed"
             clearable={true}
+            maxDate={new Date()}
           />
         </FormRow>
-        <FormRow label="Day Of Return *">
-          <DatePicker
-            selected={
-              formData.dayOfReturn ? new Date(formData.dayOfReturn) : null
-            }
-            onChange={(date) =>
-              handleFormChange("dayOfReturn", date ? date.toISOString() : "")
-            }
-            variant="secondary"
-            size="md" // or "sm"/"lg" based on your form size
-            placeholder="Select date"
-            // className="custom-class-if-needed"
-            clearable={true}
-          />
-        </FormRow>
+        {formData.dayOfDeparture && (
+          <FormRow label="Day Of Return *">
+            <DatePicker
+              selected={
+                formData.dayOfReturn ? new Date(formData.dayOfReturn) : null
+              }
+              onChange={(date) =>
+                handleFormChange("dayOfReturn", date ? date.toISOString() : "")
+              }
+              variant="secondary"
+              size="md" // or "sm"/"lg" based on your form size
+              placeholder="Select date"
+              // className="custom-class-if-needed"
+              clearable={true}
+              maxDate={new Date()}
+              requiredTrigger={!!formData.dayOfDeparture}
+            />
+          </FormRow>
+        )}
       </Row>
-
       <Row>
         <FormRow label="Expense Reason *" type="wide">
           <textarea

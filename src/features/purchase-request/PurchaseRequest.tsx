@@ -92,8 +92,6 @@ const PurchaseRequest = () => {
         );
       }
     });
-
-    updateStatus({ status: "approved", comment: "ok" });
   }, [status, comment, updateStatus]);
 
   // Handle form submission
@@ -109,11 +107,19 @@ const PurchaseRequest = () => {
 
   const totalAmount =
     purchaseRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+
+  const isCreator = purchaseRequest!.createdBy!.id === localStorageUserX.id;
+
+  const isReviewerUpdatingPending =
+    localStorageUserX.role === "REVIEWER" &&
+    purchaseRequest.status === "pending";
+
+  const isAdminUpdatingReviewed =
+    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+    purchaseRequest.status === "reviewed";
+
   const showStatusUpdate =
-    (localStorageUserX.role === "REVIEWER" &&
-      purchaseRequest.status === "pending") ||
-    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      purchaseRequest.status === "reviewed");
+    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
 
   const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
 
@@ -177,6 +183,7 @@ const PurchaseRequest = () => {
                     <PurchaseRequestDetails request={purchaseRequest} />
 
                     {/* Comments and Actions Section */}
+
                     {purchaseRequest?.reviewedBy &&
                       purchaseRequest.status !== "draft" && (
                         <div className="text-gray-600 mt-4 tracking-wide">
@@ -202,7 +209,6 @@ const PurchaseRequest = () => {
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!purchaseRequest.approvedBy && // Check if approvedBy is not set
-                      localStorageUserX.role === "STAFF" &&
                       purchaseRequest.status === "reviewed" && (
                         <div className="relative z-10">
                           <AdminApprovalSection

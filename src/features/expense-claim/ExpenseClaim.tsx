@@ -89,11 +89,23 @@ const ExpenseClaim = () => {
 
   // const totalAmount =
   //   expenseClaim.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
+  // const showStatusUpdate =
+  //   (localStorageUserX.role === "REVIEWER" &&
+  //     expenseClaim.status === "pending") ||
+  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+  //     expenseClaim.status === "reviewed");
+
+  const isCreator = expenseClaim!.createdBy!.id === localStorageUserX.id;
+
+  const isReviewerUpdatingPending =
+    localStorageUserX.role === "REVIEWER" && expenseClaim.status === "pending";
+
+  const isAdminUpdatingReviewed =
+    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+    expenseClaim.status === "reviewed";
+
   const showStatusUpdate =
-    (localStorageUserX.role === "REVIEWER" &&
-      expenseClaim.status === "pending") ||
-    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      expenseClaim.status === "reviewed");
+    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
 
   const tableHeadData = ["Request", "Status", "Budget", "Date"];
 
@@ -169,7 +181,6 @@ const ExpenseClaim = () => {
                     )}
 
                   {!expenseClaim.approvedBy &&
-                    localStorageUserX.role === "STAFF" &&
                     expenseClaim.status === "reviewed" && (
                       <div className="relative z-10">
                         <AdminApprovalSection

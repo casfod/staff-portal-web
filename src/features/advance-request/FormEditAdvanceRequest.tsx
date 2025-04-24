@@ -204,11 +204,8 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   // Handle form submission
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
-    if (formData.reviewedBy === "") {
-      formData.reviewedBy = null;
-    }
+
+    formData.reviewedBy = null;
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     updateAdvanceRequest(data);

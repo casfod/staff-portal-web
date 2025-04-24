@@ -156,10 +156,8 @@ const FormAddPurchaseRequest: React.FC = () => {
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
-    console.log("Is form valid?", isFormValid);
-    if (formData.reviewedBy === "") {
-      formData.reviewedBy = null;
-    }
+
+    formData.reviewedBy = null;
 
     if (!isFormValid) return; // Stop if form is invalid
     e.preventDefault();

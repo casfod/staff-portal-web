@@ -108,6 +108,8 @@ const AllPurchaseRequests = () => {
     });
   };
 
+  console.log(purchaseRequests);
+
   if (isError) {
     return <NetworkErrorUI />;
   }

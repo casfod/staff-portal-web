@@ -11,7 +11,6 @@ import { UserManagement } from "./pages/UserManagement";
 import PageNotFound from "./pages/PageNotFound";
 import { Layout } from "./ui/Layout";
 import PurchaseRequest from "./features/purchase-request/PurchaseRequest.tsx";
-import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 import { PaymentRequests } from "./pages/PaymentRequests";
 import EditRequest from "./features/purchase-request/EditRequest";
 import CreatePurchaseRequest from "./features/purchase-request/CreatePurchaseRequest";
@@ -41,6 +40,7 @@ import AllExpenseClaims from "./features/expense-claim/AllExpenseCliams.tsx";
 import CreateExpenseClaim from "./features/expense-claim/CreateExpenseClaim.tsx";
 import ExpenseClaim from "./features/expense-claim/ExpenseClaim.tsx";
 import EditExpenseClaim from "./features/expense-claim/EditExpenseClaim.tsx";
+import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests.tsx";
 
 const router = createBrowserRouter([
   {

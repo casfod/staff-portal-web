@@ -97,11 +97,24 @@ const Request = () => {
 
   const totalAmount =
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+  // const showStatusUpdate =
+  //   (localStorageUserX.role === "REVIEWER" &&
+  //     advanceRequest?.status === "pending") ||
+  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+  //     advanceRequest?.status === "reviewed");
+
+  const isCreator = advanceRequest!.createdBy!.id === localStorageUserX.id;
+
+  const isReviewerUpdatingPending =
+    localStorageUserX.role === "REVIEWER" &&
+    advanceRequest.status === "pending";
+
+  const isAdminUpdatingReviewed =
+    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+    advanceRequest.status === "reviewed";
+
   const showStatusUpdate =
-    (localStorageUserX.role === "REVIEWER" &&
-      advanceRequest?.status === "pending") ||
-    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      advanceRequest?.status === "reviewed");
+    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
 
   const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
 
@@ -185,7 +198,6 @@ const Request = () => {
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!advanceRequest?.approvedBy && // Check if approvedBy is not set
-                      localStorageUserX.role === "STAFF" &&
                       advanceRequest?.status === "reviewed" && (
                         <div className="relative z-10">
                           <AdminApprovalSection

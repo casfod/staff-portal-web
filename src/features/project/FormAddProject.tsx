@@ -37,7 +37,7 @@ const FormAddProject = () => {
     donor: "",
     project_partners: [],
     project_code: "",
-    implementation_period: { from: null, to: null },
+    implementation_period: { from: undefined, to: "" },
     account_code: [],
     project_budget: 0,
     sectors: [],
@@ -378,27 +378,32 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             }
             variant="secondary"
             placeholder="Select date"
+            minDate={new Date()} // Required to be Date, not null
           />
         </FormRow>
 
-        <FormRow label="Implementation Period (To) *">
-          <DatePicker
-            selected={
-              formData.implementation_period.to
-                ? new Date(formData.implementation_period.to)
-                : null
-            }
-            onChange={(date) =>
-              handleNestedChange(
-                "implementation_period",
-                "to",
-                date ? date.toISOString() : null
-              )
-            }
-            variant="secondary"
-            placeholder="Select date"
-          />
-        </FormRow>
+        {formData.implementation_period.from && (
+          <FormRow label="Implementation Period (To) *">
+            <DatePicker
+              selected={
+                formData.implementation_period.to
+                  ? new Date(formData.implementation_period.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "implementation_period",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData.implementation_period.from}
+              requiredTrigger={!!formData.implementation_period.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       {/* Project Summary */}

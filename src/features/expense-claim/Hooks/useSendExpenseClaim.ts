@@ -27,11 +27,11 @@ export function useSendExpenseClaim() {
     onSuccess: (data) => {
       if (data.status === 201) {
         // Show success toast
-        toast.success("ExpenseClaim sent successfully");
+        toast.success("Expense Claim sent successfully");
 
         // Invalidate the users query to refetch data
         queryClient.invalidateQueries({ queryKey: ["all-expense-claims"] });
-        navigate(-1);
+        navigate("/expense-claims");
       } else {
         // Handle unexpected response
         toast.error(data.message);

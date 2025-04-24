@@ -231,26 +231,31 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
             }
             variant="secondary"
             placeholder="Select date"
+            minDate={new Date()}
           />
         </FormRow>
-        <FormRow label="Activity Period (To) *">
-          <DatePicker
-            selected={
-              formData?.activity_period?.to
-                ? new Date(formData.activity_period.to)
-                : null
-            }
-            onChange={(date) =>
-              handleNestedChange(
-                "activity_period",
-                "to",
-                date ? date.toISOString() : null
-              )
-            }
-            variant="secondary"
-            placeholder="Select date"
-          />
-        </FormRow>
+        {formData.activity_period?.from && (
+          <FormRow label="Activity Period (To) *">
+            <DatePicker
+              selected={
+                formData?.activity_period?.to
+                  ? new Date(formData.activity_period.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "activity_period",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData.activity_period?.from}
+              requiredTrigger={formData.activity_period?.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">

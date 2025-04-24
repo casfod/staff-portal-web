@@ -87,13 +87,17 @@ const TravelRequest = () => {
     );
   }
 
-  // const totalAmount =
-  //   travelRequest.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
+  const isCreator = travelRequest!.createdBy!.id === localStorageUserX.id;
+
+  const isReviewerUpdatingPending =
+    localStorageUserX.role === "REVIEWER" && travelRequest.status === "pending";
+
+  const isAdminUpdatingReviewed =
+    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+    travelRequest.status === "reviewed";
+
   const showStatusUpdate =
-    (localStorageUserX.role === "REVIEWER" &&
-      travelRequest.status === "pending") ||
-    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      travelRequest.status === "reviewed");
+    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
 
   const tableHeadData = ["Request", "Status", "Budget", "Date"];
 
@@ -169,7 +173,6 @@ const TravelRequest = () => {
                     )}
 
                   {!travelRequest.approvedBy &&
-                    localStorageUserX.role === "STAFF" &&
                     travelRequest.status === "reviewed" && (
                       <div className="relative z-10">
                         <AdminApprovalSection

@@ -92,11 +92,24 @@ const PaymentRequest = () => {
     return <div>No payment request data available.</div>;
   }
 
+  // const showStatusUpdate =
+  //   (localStorageUserX.role === "REVIEWER" &&
+  //     paymentRequest.status === "pending") ||
+  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+  //     paymentRequest.status === "reviewed");
+
+  const isCreator = paymentRequest!.requestedBy!.id === localStorageUserX.id;
+
+  const isReviewerUpdatingPending =
+    localStorageUserX.role === "REVIEWER" &&
+    paymentRequest.status === "pending";
+
+  const isAdminUpdatingReviewed =
+    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+    paymentRequest.status === "reviewed";
+
   const showStatusUpdate =
-    (localStorageUserX.role === "REVIEWER" &&
-      paymentRequest.status === "pending") ||
-    (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-      paymentRequest.status === "reviewed");
+    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
 
   const tableHeadData = ["Request", "Status", "Budget", "Date"];
 
@@ -178,7 +191,6 @@ const PaymentRequest = () => {
                       )}
                     {/* Admin Approval Section (for STAFF role) */}
                     {!paymentRequest.approvedBy && // Check if approvedBy is not set
-                      localStorageUserX.role === "STAFF" &&
                       paymentRequest.status === "reviewed" && (
                         <div className="relative z-10">
                           <AdminApprovalSection

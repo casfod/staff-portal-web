@@ -207,7 +207,7 @@ export interface TravelRequestType {
   budget: number;
   amountInWords: string;
   travelReason: string;
-  dayOfDeparture: Date | string | null;
+  dayOfDeparture: Date | undefined;
   dayOfReturn: Date | string | null;
   expenses: TravelRequestItemGroup[];
 
@@ -384,8 +384,8 @@ export interface Project {
 }
 
 export interface ImplementationPeriod {
-  from: Date | string | null;
-  to: Date | string | null;
+  from: any;
+  to: any;
 }
 
 export interface AccountCode {
@@ -438,8 +438,8 @@ export interface ConceptNote {
   activity_title: string;
   activity_location: string;
   activity_period: {
-    from: Date | string | null;
-    to: Date | string | null;
+    from: any;
+    to: any;
   };
   background_context: string;
   // objectives_purpose: string[];
