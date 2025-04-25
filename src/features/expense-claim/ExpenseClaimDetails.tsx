@@ -83,7 +83,7 @@ const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
           </p>
 
           <p>
-            <span className="font-bold mr-1 uppercase">Project:</span>
+            <span className="font-bold mr-1 uppercase">Amount In Words:</span>
             {request.amountInWords}
           </p>
         </div>
