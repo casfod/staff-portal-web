@@ -42,7 +42,7 @@ const persistConfig = {
   key: "root",
   storage,
   // Optionally blacklist or whitelist slices
-  // blacklist: ['modal'], // if you don’t want to persist this
+  blacklist: ["genericQuerySlice"], // if you don’t want to persist this
   // whitelist: ['purchaseRequest'] // only persist these
 };
 
