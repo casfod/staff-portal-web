@@ -75,13 +75,18 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">Day Of Departure:</span>
-            {dateformat(request.dayOfDeparture)}
+            {dateformat(request.dayOfDeparture!)}
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">Day Of Return:</span>
             {dateformat(request.dayOfReturn)}
           </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">Project:</span>
+            {request.amountInWords}
+          </p>
         </div>
+
         <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
           <p>
             <span className="font-bold uppercase">Travel Request:</span>{" "}
