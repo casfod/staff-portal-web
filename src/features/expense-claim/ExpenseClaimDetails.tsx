@@ -94,8 +94,12 @@ const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
             {request.expenseClaim.from} - {request.expenseClaim.to}
           </p>
           <p>
-            <span className="font-bold mr-1 uppercase">Project:</span>
-            {request.project}
+            <span className="font-bold mr-1 uppercase">Account Code : </span>{" "}
+            {request.accountCode}
+          </p>
+          <p>
+            <span className="font-bold mr-1 uppercase">Charged To : </span>
+            {request.expenseChargedTo}
           </p>
           <p>
             <span className="font-bold mr-1 uppercase">Total Amount:</span>

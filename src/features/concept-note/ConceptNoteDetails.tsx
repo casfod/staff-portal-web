@@ -23,9 +23,13 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
         className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3 break-words"
         style={{ letterSpacing: "1px" }}
       >
-        <p className="text-sm text-gray-600">
-          <span className="font-extrabold uppercase">Project Code:</span>{" "}
-          {request.project_code}
+        <p>
+          <span className="font-bold mr-1 uppercase">Account Code : </span>{" "}
+          {request.account_Code}
+        </p>
+        <p>
+          <span className="font-bold mr-1 uppercase">Charged To : </span>
+          {request.expense_Charged_To}
         </p>
         <div className="text-sm text-gray-600">
           <h2 className="font-extrabold uppercase mb-1">Activity Title:</h2>{" "}

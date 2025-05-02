@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import FormAddPurchaseRequest from "./FormAddPurchaseRequest";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import UploadFiles from "../../hooks/UploadFiles";
 
 const CreatePurchaseRequest = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ const CreatePurchaseRequest = () => {
           <FormAddPurchaseRequest />
         </div>
       </div>
+
+      <UploadFiles />
     </div>
   );
 };

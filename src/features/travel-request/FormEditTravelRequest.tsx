@@ -43,7 +43,8 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     dayOfDeparture: travelRequest.dayOfDeparture,
     dayOfReturn: travelRequest.dayOfReturn,
     expenses: [...travelRequest.expenses],
-    project: travelRequest.project,
+    expenseChargedTo: travelRequest.expenseChargedTo,
+    accountCode: travelRequest.accountCode,
     budget: travelRequest.budget,
     amountInWords: travelRequest.amountInWords,
     reviewedBy: travelRequest.reviewedBy,
@@ -101,24 +102,24 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     }));
   }, [itemGroup]);
 
-  const handleProjectsChange = (value: string) => {
-    if (value) {
-      const selected = projects.find(
-        (project) =>
-          `${project.project_title} - ${project.project_code}` === value
-      );
-      if (selected) {
-        setSelectedProject(selected);
-        setFormData((prev) => ({
-          ...prev,
-          project: `${selected.project_code}`,
-        }));
-      }
-    } else {
-      setSelectedProject(null);
-      setFormData((prev) => ({ ...prev, project: "" }));
-    }
-  };
+  // const handleProjectsChange = (value: string) => {
+  //   if (value) {
+  //     const selected = projects.find(
+  //       (project) =>
+  //         `${project.project_title} - ${project.project_code}` === value
+  //     );
+  //     if (selected) {
+  //       setSelectedProject(selected);
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         project: `${selected.project_code}`,
+  //       }));
+  //     }
+  //   } else {
+  //     setSelectedProject(null);
+  //     setFormData((prev) => ({ ...prev, project: "" }));
+  //   }
+  // };
   const addItem = () => {
     setItemGroup([
       ...itemGroup,
@@ -177,9 +178,34 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
   };
 
   const handleFormChange = (field: keyof TravelRequestType, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+    if (field === "expenseChargedTo") {
+      // Find the selected project
+      const selectedProject = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
 
+      formData.project = selectedProject?.id;
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
+    }
+  };
   const { saveTravelRequest, isPending } = useSaveTravelRequest();
 
   const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
@@ -442,26 +468,27 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           />
         </FormRow>
       </Row>
-
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Projects">
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              key={projects.length}
-              id="projects"
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
               customLabel="Select Project"
-              value={formData.project} // Now uses the combined string from formData
-              onChange={(value) => handleProjectsChange(value)}
+              value={formData.expenseChargedTo || ""}
+              onChange={(value) => handleFormChange("expenseChargedTo", value)}
               options={
                 projects
                   ? projects
                       .filter((project) => project.id)
                       .map((project) => ({
                         id: `${project.project_title} - ${project.project_code}`,
-                        name: `${project.project_title} - ${project.project_code}`, // Show full format in dropdown
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -470,19 +497,31 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
 
-        <FormRow label="Project Code *">
-          <Input
-            type="text"
-            id="project"
-            required
-            readOnly
-            value={
-              selectedProject
-                ? selectedProject?.project_code
-                : travelRequest.project || ""
-            } // Still shows just the code
-          />
-        </FormRow>
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(value) => handleFormChange("accountCode", value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name}`,
+                        name: `${account.name}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
 
       {travelRequest.reviewedBy ? (

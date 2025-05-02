@@ -211,7 +211,10 @@ export interface TravelRequestType {
     from: string;
     to: string;
   };
-  project: string;
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<Project> | string | null;
+
   budget: number;
   amountInWords: string;
   travelReason: string;
@@ -272,7 +275,9 @@ export interface ExpenseClaimType {
     from: any;
     to: any;
   };
-  project: string;
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<Project> | string | null;
   budget: number;
   amountInWords: string;
   expenseReason: string;
@@ -287,6 +292,7 @@ export interface ExpenseClaimType {
   updatedAt?: string;
   reviewedBy?: any;
   approvedBy?: any;
+  files?: [];
 }
 
 ///////////////////////
@@ -442,9 +448,12 @@ export interface ConceptNote {
   id?: string;
   staff_name?: string;
   staff_role?: string;
-  project_code: string;
+  // project_code: string;
   activity_title: string;
   activity_location: string;
+  expense_Charged_To: string;
+  account_Code: string;
+  project?: Partial<Project> | string | null;
   activity_period: {
     from: any;
     to: any;

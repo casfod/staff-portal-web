@@ -27,8 +27,10 @@ const FormAddConceptNotes = () => {
     strategic_plan: "",
     benefits_of_project: "",
     means_of_verification: "",
+    project: null,
     activity_budget: 0,
-    project_code: "", // Initialize as empty string
+    expense_Charged_To: "", // Initialize as empty string
+    account_Code: "", // Initialize as empty string
     approvedBy: null,
   });
 
@@ -44,12 +46,12 @@ const FormAddConceptNotes = () => {
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   // Handle changes for top-level fields
-  const handleFormChange = (
-    field: keyof ConceptNote,
-    value: string | string[] | number
-  ) => {
-    setFormData({ ...formData, [field]: value });
-  };
+  // const handleFormChange = (
+  //   field: keyof ConceptNote,
+  //   value: string | string[] | number
+  // ) => {
+  //   setFormData({ ...formData, [field]: value });
+  // };
 
   const handleNestedChange = (
     parentField: keyof ConceptNote,
@@ -65,22 +67,52 @@ const FormAddConceptNotes = () => {
     }));
   };
 
-  const handelProjectsChange = (value: string) => {
-    if (value) {
-      const selectedProject = projects?.find(
+  const handleFormChange = (field: keyof ConceptNote, value: string) => {
+    if (field === "expense_Charged_To") {
+      // Find the selected project
+      const selectedProject = projects.find(
         (project) =>
           `${project.project_title} - ${project.project_code}` === value
       );
-      if (selectedProject) {
-        setSelectedProject(selectedProject);
-        // Update both the selected project AND the form data
-        setFormData((prev) => ({
-          ...prev,
-          project_code: selectedProject.project_code,
-        }));
-      }
+
+      formData.project = selectedProject?.id;
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expense_Charged_To: value,
+        account_Code: "", // Reset account code when project changes
+      });
+    } else if (field === "account_Code") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        account_Code: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
     }
   };
+
+  // const handelProjectsChange = (value: string) => {
+  //   if (value) {
+  //     const selectedProject = projects?.find(
+  //       (project) =>
+  //         `${project.project_title} - ${project.project_code}` === value
+  //     );
+  //     if (selectedProject) {
+  //       setSelectedProject(selectedProject);
+  //       // Update both the selected project AND the form data
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         project_code: selectedProject.project_code,
+  //       }));
+  //     }
+  //   }
+  // };
   const {
     saveConceptNote,
     isPending: isSaving,
@@ -108,7 +140,7 @@ const FormAddConceptNotes = () => {
     // Make sure project_code is included
     const data = {
       ...formData,
-      project_code: selectedProject?.project_code || formData.project_code,
+      // project: selectedProject?.project_code || formData.project_code,
     };
 
     console.log("Submitting data:", data); // Verify project_code is included
@@ -130,17 +162,20 @@ const FormAddConceptNotes = () => {
   return (
     <form className="space-y-6">
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Projects">
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              key={projects.length}
-              id="projects"
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
               customLabel="Select Project"
-              value={""}
-              onChange={(value) => handelProjectsChange(value)}
+              value={formData.expense_Charged_To || ""}
+              onChange={(value) =>
+                handleFormChange("expense_Charged_To", value)
+              }
               options={
                 projects
                   ? projects
@@ -148,6 +183,7 @@ const FormAddConceptNotes = () => {
                       .map((project) => ({
                         id: `${project.project_title} - ${project.project_code}`,
                         name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -156,19 +192,31 @@ const FormAddConceptNotes = () => {
           )}
         </FormRow>
 
-        <FormRow label="Project Code *">
-          <Input
-            type="text"
-            id="project_code"
-            required
-            readOnly
-            value={
-              selectedProject
-                ? selectedProject.project_code
-                : formData.project_code
-            }
-          />
-        </FormRow>
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.account_Code || ""}
+                onChange={(value) => handleFormChange("account_Code", value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name}`,
+                        name: `${account.name}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Title *">

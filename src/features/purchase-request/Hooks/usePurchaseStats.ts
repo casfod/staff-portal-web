@@ -9,7 +9,10 @@ export function usePurchaseStats(
   return useQuery<UsePurchaseStatsType, Error>({
     queryKey: ["purchase-requests-stats"],
     queryFn: () => getPurchaseRequestStats(),
-    staleTime: 0,
+    // staleTime: 0,
+    staleTime: 5 * 60 * 1000, // 5 minutes before data becomes stale
+    // cacheTime: 15 * 60 * 1000, // 15 minutes before cache is garbage collected
+
     ...options, // Spread the options to include onError
   });
 }

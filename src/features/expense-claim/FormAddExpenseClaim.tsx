@@ -26,11 +26,14 @@ const FormAddExpenseClaim: React.FC = () => {
     dayOfDeparture: "",
     dayOfReturn: "",
     expenses: [],
-    project: "",
+    project: null,
+    expenseChargedTo: "",
+    accountCode: "",
     budget: 0,
     amountInWords: "",
     reviewedBy: null,
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const [itemGroup, setItemGroup] = useState<ExpenseClaimItemGroup[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
@@ -77,28 +80,9 @@ const FormAddExpenseClaim: React.FC = () => {
     );
     setFormData((prev) => ({
       ...prev,
-      budget: parseFloat(totalBudget.toFixed(2)), // Round to 2 decimal places
+      budget: totalBudget, // Round to 2 decimal places
     }));
   }, [itemGroup]);
-
-  const handleProjectsChange = (value: string) => {
-    if (value) {
-      const selected = projects.find(
-        (project) =>
-          `${project.project_title} - ${project.project_code}` === value
-      );
-      if (selected) {
-        setSelectedProject(selected);
-        setFormData((prev) => ({
-          ...prev,
-          project: `${selected.project_code}`,
-        }));
-      }
-    } else {
-      setSelectedProject(null);
-      setFormData((prev) => ({ ...prev, project: "" }));
-    }
-  };
 
   const addItem = () => {
     setItemGroup([
@@ -158,7 +142,38 @@ const FormAddExpenseClaim: React.FC = () => {
   };
 
   const handleFormChange = (field: keyof ExpenseClaimType, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "expenseChargedTo") {
+      // Find the selected project
+      const selectedProject = projects.find(
+        (project) =>
+          `${project.project_title} - ${project.project_code}` === value
+      );
+
+      formData.project = selectedProject?.id;
+      // Update the selected project state
+      setSelectedProject(selectedProject || null);
+
+      // Update the form data with the selected project title and code
+      setFormData({
+        ...formData,
+        expenseChargedTo: value,
+        accountCode: "", // Reset account code when project changes
+      });
+    } else if (field === "accountCode") {
+      // Update the selected account code
+      setFormData({
+        ...formData,
+        accountCode: value,
+      });
+    } else {
+      // Handle other fields
+      setFormData({ ...formData, [field]: value });
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedFiles(files);
   };
 
   const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
@@ -176,7 +191,9 @@ const FormAddExpenseClaim: React.FC = () => {
       expenses: [...itemGroup],
       reviewedBy: formData.reviewedBy === "" ? null : formData.reviewedBy,
     };
-    saveExpenseClaim(data);
+    // saveExpenseClaim(data);
+
+    saveExpenseClaim({ data, files: selectedFiles });
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -186,7 +203,7 @@ const FormAddExpenseClaim: React.FC = () => {
       expenses: [...itemGroup],
       reviewedBy: formData.reviewedBy === "" ? null : formData.reviewedBy,
     };
-    sendExpenseClaim(data);
+    sendExpenseClaim({ data, files: selectedFiles });
   };
 
   return (
@@ -423,24 +440,26 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Projects">
+        {/* First Select: Projects */}
+        <FormRow label="Expense Charged To *">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              key={projects.length}
-              id="projects"
+              key={projects.length} // Force re-render when projects change
+              id="expenseChargedTo"
               customLabel="Select Project"
-              value={formData.project} // Now uses the combined string from formData
-              onChange={(value) => handleProjectsChange(value)}
+              value={formData.expenseChargedTo || ""}
+              onChange={(value) => handleFormChange("expenseChargedTo", value)}
               options={
                 projects
                   ? projects
                       .filter((project) => project.id)
                       .map((project) => ({
                         id: `${project.project_title} - ${project.project_code}`,
-                        name: `${project.project_title} - ${project.project_code}`, // Show full format in dropdown
+                        name: `${project.project_code}`,
+                        // name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -449,15 +468,31 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
 
-        <FormRow label="Project Code *">
-          <Input
-            type="text"
-            id="project"
-            required
-            readOnly
-            value={selectedProject?.project_code || ""} // Still shows just the code
-          />
-        </FormRow>
+        {/* Second Select: Account Code */}
+        {selectedProject && (
+          <FormRow label="Account Code *">
+            {isLoadingProjects ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="accountCode"
+                customLabel="Select Account Code"
+                value={formData.accountCode || ""}
+                onChange={(value) => handleFormChange("accountCode", value)}
+                options={
+                  selectedProject
+                    ? selectedProject.account_code.map((account) => ({
+                        id: `${account.name}`,
+                        name: `${account.name}`,
+                      }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
 
       <Row>
@@ -488,6 +523,14 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
       </Row>
+
+      <input
+        type="file"
+        name="files"
+        multiple
+        accept=".jpg,.png,.pdf,.doc,.docx,.xlsx"
+        onChange={handleFileChange}
+      />
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
