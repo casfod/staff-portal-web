@@ -151,15 +151,16 @@ export function AllProjects() {
               {projects.map((project) => (
                 <>
                   <tr
+                    className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
                     key={project.id}
-                    onClick={() => toggleViewItems(project.id!)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleViewItems(project.id!);
+                    }}
                   >
                     <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {truncateText(project.project_title, 40, "...")}
                     </td>
-                    {/*  <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      {project.status}
-                    </td> */}
                     <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                       {project.project_code}
                     </td>

@@ -598,9 +598,11 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleUpdate}>
-          {isPending ? <SpinnerMini /> : "Update And Save"}
-        </Button>
+        {!formData.reviewedBy && (
+          <Button size="medium" onClick={handleUpdate}>
+            {isPending ? <SpinnerMini /> : "Update And Save"}
+          </Button>
+        )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}

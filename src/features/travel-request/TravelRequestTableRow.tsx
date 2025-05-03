@@ -30,7 +30,7 @@ const TravelRequestTableRow = ({
     <>
       <tr
         key={request.id}
-        className="h-[40px] max-h-[40px]"
+        className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
         onClick={() => toggleViewItems(request.id!)}
       >
         <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
@@ -62,13 +62,19 @@ const TravelRequestTableRow = ({
               request.createdBy?.id === localStorageUserX.id && (
                 <>
                   <button
-                    onClick={() => handleEdit(request)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent event from bubbling up to the row
+                      handleEdit(request);
+                    }}
                     className="hover:text-blue-600"
                   >
                     <Edit className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(request.id!)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent event from bubbling up to the row
+                      handleDelete(request.id!);
+                    }}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 className="h-5 w-5" />

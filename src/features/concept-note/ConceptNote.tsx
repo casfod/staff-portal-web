@@ -107,7 +107,10 @@ const ConceptNote = () => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            <tr key={conceptNote.id} className="h-[40px] max-h-[40px]">
+            <tr
+              key={conceptNote.id}
+              className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
+            >
               {tableRowData.map((data, index) => (
                 <td
                   key={index}

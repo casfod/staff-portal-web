@@ -193,7 +193,7 @@ export function AllUsers() {
               {users.map((user) => (
                 <tr
                   key={user.id}
-                  className="h-[40px] max-h-[40px]" // Apply max height to each row
+                  className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]" // Apply max height to each row
                 >
                   <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                     {`${user.first_name} ${user.last_name}`}

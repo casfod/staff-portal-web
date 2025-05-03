@@ -38,7 +38,11 @@ const PaymentRequestTableRow = ({
 
   return (
     <>
-      <tr key={requestId} onClick={() => toggleViewItems(requestId!)}>
+      <tr
+        className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
+        key={requestId}
+        onClick={() => toggleViewItems(requestId!)}
+      >
         <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
           {request.requestBy}
         </td>
@@ -69,14 +73,20 @@ const PaymentRequestTableRow = ({
               <div className="flex space-x-4">
                 <button
                   className="hover:cursor-pointer"
-                  onClick={() => handleEdit(request)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent event from bubbling up to the row
+                    handleEdit(request);
+                  }}
                 >
                   <Edit className="h-5 w-5" />
                 </button>
 
                 <button
                   className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                  onClick={() => handleDelete(requestId!)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(requestId!);
+                  }}
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
