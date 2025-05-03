@@ -1,4 +1,5 @@
 import { ExpenseClaimType } from "../../interfaces";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 
@@ -57,6 +58,8 @@ const ExpenseTable = ({
   </table>
 );
 
+// Then update your FileAttachment component
+
 const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
   const totalAmount =
     request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
@@ -113,6 +116,11 @@ const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
       </h2>
 
       <ExpenseTable expenses={request.expenses} />
+
+      {/* File Attachments Section */}
+      {request.files && request.files.length > 0 && (
+        <FileAttachmentContainer files={request.files} />
+      )}
     </div>
   );
 };

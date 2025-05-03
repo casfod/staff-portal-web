@@ -17,6 +17,7 @@ import { useSendExpenseClaim } from "./Hooks/useSendExpenseClaim";
 import { useProjects } from "../project/Hooks/useProjects";
 import { expenses } from "../../assets/expenses";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 const FormAddExpenseClaim: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -171,10 +172,10 @@ const FormAddExpenseClaim: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setSelectedFiles(files);
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = Array.from(e.target.files || []);
+  //   setSelectedFiles(files);
+  // };
 
   const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
   const { sendExpenseClaim, isPending: isSending } = useSendExpenseClaim();
@@ -193,7 +194,7 @@ const FormAddExpenseClaim: React.FC = () => {
     };
     // saveExpenseClaim(data);
 
-    saveExpenseClaim({ data, files: selectedFiles });
+    saveExpenseClaim(data);
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -523,14 +524,14 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
       </Row>
-
-      <input
-        type="file"
-        name="files"
-        multiple
-        accept=".jpg,.png,.pdf,.doc,.docx,.xlsx"
-        onChange={handleFileChange}
-      />
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

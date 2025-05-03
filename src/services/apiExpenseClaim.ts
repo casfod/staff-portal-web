@@ -110,48 +110,13 @@ export const getExpenseClaimStats = async function () {
 };
 
 export const saveExpenseClaims = async function (
-  data: Partial<ExpenseClaimType>,
-  files: File[]
+  data: Partial<ExpenseClaimType>
 ) {
   try {
-    const formData = new FormData();
-
-    // Send JSON as strings (not blobs)
-    formData.append("expenseClaim", JSON.stringify(data.expenseClaim));
-    formData.append("expenses", JSON.stringify(data.expenses));
-
-    // Append standard fields
-    const simpleFields: (keyof ExpenseClaimType)[] = [
-      "expenseReason",
-      "dayOfDeparture",
-      "dayOfReturn",
-      "expenseChargedTo",
-      "accountCode",
-      "budget",
-      "amountInWords",
-      "reviewedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    // Send request
-    const response = await axiosInstance.post(
-      "/expense-claims/save",
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await axiosInstance.post<ExpenseClaimType>(
+      `/expense-claims/save`,
+      data
     );
-
     return response.data;
   } catch (err) {
     return handleError(err);

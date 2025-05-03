@@ -20,7 +20,7 @@ const EditExpenseClaim = () => {
 
   useEffect(() => {
     if (!param || !expenseClaim) {
-      navigate("/expense-claim");
+      navigate("/expense-claims");
     }
   }, [expenseClaim, param, navigate]);
 

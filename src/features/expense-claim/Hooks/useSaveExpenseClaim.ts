@@ -22,13 +22,7 @@ export function useSaveExpenseClaim() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<ExpenseClaimType>;
-      files: File[];
-    }) => saveExpenseClaimsApi(data, files),
+    mutationFn: (data: Partial<ExpenseClaimType>) => saveExpenseClaimsApi(data),
 
     onSuccess: (data) => {
       if (data.status === 201) {

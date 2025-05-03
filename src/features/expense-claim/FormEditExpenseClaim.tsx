@@ -22,6 +22,7 @@ import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { expenses } from "../../assets/expenses";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 interface FormEditExpenseClaimProps {
   expenseClaim: ExpenseClaimType;
@@ -49,6 +50,7 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
     budget: expenseClaim.budget,
     amountInWords: expenseClaim.amountInWords,
     reviewedBy: expenseClaim.reviewedBy,
+    // files: [],
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -210,11 +212,6 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setSelectedFiles(files);
-  };
-
   const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
 
   const { sendExpenseClaim, isPending: isSending } = useSendExpenseClaim();
@@ -229,13 +226,14 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
     formData.reviewedBy = null;
 
     const data = { ...formData, expenses: [...itemGroup] };
-    saveExpenseClaim({ data, files: selectedFiles });
-    // dispatch(resetExpenseClaim());
+    saveExpenseClaim(data);
+    dispatch(resetExpenseClaim());
   };
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = { ...formData, expenses: [...itemGroup] };
+    let data = { ...formData, expenses: [...itemGroup] };
+
     sendExpenseClaim({ data, files: selectedFiles });
 
     dispatch(resetExpenseClaim());
@@ -609,14 +607,14 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           </FormRow>
         </Row>
       )}
-
-      <input
-        type="file"
-        name="files"
-        multiple
-        accept=".jpg,.png,.pdf,.doc,.docx,.xlsx"
-        onChange={handleFileChange}
-      />
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

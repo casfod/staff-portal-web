@@ -5,6 +5,23 @@
 // }
 
 ///////////////////////
+//File
+///////////////////////
+
+// First, define a type for your file object
+export interface FileType {
+  name: string;
+  url: string;
+  cloudinaryId: string;
+  mimeType: string;
+  size: number;
+  fileType: string;
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+}
+
+///////////////////////
 //User
 ///////////////////////
 
