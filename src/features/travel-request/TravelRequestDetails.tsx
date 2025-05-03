@@ -1,4 +1,5 @@
 import { TravelRequestType } from "../../interfaces";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 
@@ -112,6 +113,11 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
       </h2>
 
       <ExpenseTable expenses={request.expenses} />
+
+      {/* File Attachments Section */}
+      {request.files && request.files.length > 0 && (
+        <FileAttachmentContainer files={request.files} />
+      )}
     </div>
   );
 };

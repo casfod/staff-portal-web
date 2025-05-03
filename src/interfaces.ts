@@ -246,6 +246,7 @@ export interface TravelRequestType {
   updatedAt?: string;
   reviewedBy?: any;
   approvedBy?: any;
+  files?: [];
 }
 
 ///////////////////////

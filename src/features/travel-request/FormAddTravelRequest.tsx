@@ -17,6 +17,7 @@ import { useSendTravelRequest } from "./Hooks/useSendTravelRequest";
 import { useProjects } from "../project/Hooks/useProjects";
 import { expenses } from "../../assets/expenses";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 const FormAddTravelRequest: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -33,6 +34,8 @@ const FormAddTravelRequest: React.FC = () => {
     amountInWords: "",
     reviewedBy: null,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const [itemGroup, setItemGroup] = useState<TravelRequestItemGroup[]>([]);
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
@@ -82,25 +85,6 @@ const FormAddTravelRequest: React.FC = () => {
       budget: totalBudget, // Round to 2 decimal places
     }));
   }, [itemGroup]);
-
-  // const handleProjectsChange = (value: string) => {
-  //   if (value) {
-  //     const selected = projects.find(
-  //       (project) =>
-  //         `${project.project_title} - ${project.project_code}` === value
-  //     );
-  //     if (selected) {
-  //       setSelectedProject(selected);
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         project: `${selected.project_code}`,
-  //       }));
-  //     }
-  //   } else {
-  //     setSelectedProject(null);
-  //     setFormData((prev) => ({ ...prev, project: "" }));
-  //   }
-  // };
 
   const addItem = () => {
     setItemGroup([
@@ -214,7 +198,7 @@ const FormAddTravelRequest: React.FC = () => {
       expenses: [...itemGroup],
       reviewedBy: formData.reviewedBy === "" ? null : formData.reviewedBy,
     };
-    sendTravelRequest(data);
+    sendTravelRequest({ data, files: selectedFiles });
   };
 
   return (
@@ -531,6 +515,15 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
       </Row>
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

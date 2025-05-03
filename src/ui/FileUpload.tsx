@@ -1,4 +1,5 @@
 import React, { useState, DragEvent } from "react";
+import Row from "./Row";
 
 interface FileUploadProps {
   onFilesSelected?: (files: File[]) => void; // Optional callback
@@ -136,13 +137,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
           <ul className="space-y-2">
-            {selectedFiles.map((file, index) => (
-              <FileItem
-                key={index}
-                file={file}
-                onRemove={() => removeFile(index)}
-              />
-            ))}
+            <Row cols="grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
+              {selectedFiles.map((file, index) => (
+                <FileItem
+                  key={index}
+                  file={file}
+                  onRemove={() => removeFile(index)}
+                />
+              ))}
+            </Row>
           </ul>
         </div>
       )}

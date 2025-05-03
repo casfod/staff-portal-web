@@ -22,8 +22,13 @@ export function useSendTravelRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<TravelRequestType>) =>
-      sendTravelRequestsApi(data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<TravelRequestType>;
+      files: File[];
+    }) => sendTravelRequestsApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {

@@ -123,13 +123,47 @@ export const saveTravelRequests = async function (
 };
 
 export const sendTravelRequests = async function (
-  data: Partial<TravelRequestType>
+  data: Partial<TravelRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    // Send JSON as strings (not blobs)
+    formData.append("travelRequest", JSON.stringify(data.travelRequest));
+    formData.append("expenses", JSON.stringify(data.expenses));
+
+    // Append standard fields
+    const simpleFields: (keyof TravelRequestType)[] = [
+      "travelReason",
+      "dayOfDeparture",
+      "dayOfReturn",
+      "expenseChargedTo",
+      "accountCode",
+      "budget",
+      "amountInWords",
+      "reviewedBy",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<TravelRequestType>(
       `/travel-requests/save-and-send`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
+
     return response.data;
   } catch (err) {
     return handleError(err);

@@ -21,6 +21,7 @@ import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { expenses } from "../../assets/expenses";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 interface FormEditTravelRequestProps {
   travelRequest: TravelRequestType;
@@ -49,6 +50,9 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     amountInWords: travelRequest.amountInWords,
     reviewedBy: travelRequest.reviewedBy,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   // State for the item groups
   const [itemGroup, setItemGroup] = useState<TravelRequestItemGroup[]>([
     ...travelRequest.expenses,
@@ -102,24 +106,6 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     }));
   }, [itemGroup]);
 
-  // const handleProjectsChange = (value: string) => {
-  //   if (value) {
-  //     const selected = projects.find(
-  //       (project) =>
-  //         `${project.project_title} - ${project.project_code}` === value
-  //     );
-  //     if (selected) {
-  //       setSelectedProject(selected);
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         project: `${selected.project_code}`,
-  //       }));
-  //     }
-  //   } else {
-  //     setSelectedProject(null);
-  //     setFormData((prev) => ({ ...prev, project: "" }));
-  //   }
-  // };
   const addItem = () => {
     setItemGroup([
       ...itemGroup,
@@ -231,7 +217,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
     console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, expenses: [...itemGroup] };
-    sendTravelRequest(data);
+    sendTravelRequest({ data, files: selectedFiles });
 
     dispatch(resetTravelRequest());
   };
@@ -600,6 +586,15 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             )}
           </FormRow>
         </Row>
+      )}
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
       )}
 
       <div className="flex justify-center w-full gap-4">

@@ -172,11 +172,6 @@ const FormAddExpenseClaim: React.FC = () => {
     }
   };
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const files = Array.from(e.target.files || []);
-  //   setSelectedFiles(files);
-  // };
-
   const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
   const { sendExpenseClaim, isPending: isSending } = useSendExpenseClaim();
   const { data, isLoading } = useReviewers();
@@ -528,7 +523,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
-          accept=".jpg,.png,.pdf"
+          accept=".jpg,.png,.pdf,.xlsx"
           multiple={true}
         />
       )}
