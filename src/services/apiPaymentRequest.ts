@@ -123,19 +123,49 @@ export const savePaymentRequests = async function (
 };
 
 export const sendPaymentRequests = async function (
-  data: Partial<PaymentRequestType>
+  data: Partial<PaymentRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    // Append standard fields
+    const simpleFields: (keyof PaymentRequestType)[] = [
+      "purposeOfExpense",
+      "amountInWords",
+      "amountInFigure",
+      "grantCode",
+      "dateOfExpense",
+      "specialInstruction",
+      "accountNumber",
+      "accountName",
+      "bankName",
+      "reviewedBy",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<PaymentRequestType>(
       `/payment-requests/save-and-send`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
-
 export const updatePaymentRequest = async function (
   requestId: string,
   data: Partial<PaymentRequestType>

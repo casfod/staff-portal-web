@@ -22,8 +22,13 @@ export function useSendPaymentRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PaymentRequestType>) =>
-      sendPaymentRequestsApi(data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<PaymentRequestType>;
+      files: File[];
+    }) => sendPaymentRequestsApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {

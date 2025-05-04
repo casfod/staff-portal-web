@@ -15,6 +15,7 @@ import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface FormEditPaymentRequestProps {
@@ -36,8 +37,10 @@ const FormEditPaymentRequest = ({
     accountNumber: paymentRequest.accountNumber,
     accountName: paymentRequest.accountName,
     bankName: paymentRequest.bankName,
-    approvedBy: paymentRequest.approvedBy || null,
+    // approvedBy: paymentRequest.approvedBy || null,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
@@ -114,7 +117,7 @@ const FormEditPaymentRequest = ({
     e.preventDefault();
 
     const data = { ...formData };
-    sendPaymentRequest(data);
+    sendPaymentRequest({ data, files: selectedFiles });
   };
 
   if (isErrorSave || isErrorSend) {
@@ -307,6 +310,15 @@ const FormEditPaymentRequest = ({
           )}
         </FormRow>
       </Row>
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

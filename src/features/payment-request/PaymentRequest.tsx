@@ -92,12 +92,6 @@ const PaymentRequest = () => {
     return <div>No payment request data available.</div>;
   }
 
-  // const showStatusUpdate =
-  //   (localStorageUserX.role === "REVIEWER" &&
-  //     paymentRequest.status === "pending") ||
-  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-  //     paymentRequest.status === "reviewed");
-
   const isCreator = paymentRequest!.requestedBy!.id === localStorageUserX.id;
 
   const isReviewerUpdatingPending =

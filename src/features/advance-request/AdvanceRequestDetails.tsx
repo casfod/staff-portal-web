@@ -36,25 +36,28 @@ const ItemsTable = ({
       </tr>
     </thead>
     <tbody className="bg-white divide-y divide-gray-200 ">
-      {itemGroups!.map((item) => (
-        <tr key={item.id!}>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-            {item.description}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-            {item.quantity}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-            {item.frequency}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-            {moneyFormat(item.unitCost, "NGN")}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-            {moneyFormat(item.total, "NGN")}
-          </td>
-        </tr>
-      ))}
+      {itemGroups!.map((item) => {
+        const rowData = [
+          { id: "description", content: item.description },
+          { id: "quantity", content: item.quantity },
+          { id: "frequency", content: item.frequency },
+          { id: "unitCost", content: moneyFormat(item.unitCost, "NGN") },
+          { id: "total", content: moneyFormat(item.total, "NGN") },
+        ];
+
+        return (
+          <tr key={item.id!}>
+            {rowData.map((data) => (
+              <td
+                key={data.id}
+                className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs"
+              >
+                {data.content}
+              </td>
+            ))}
+          </tr>
+        );
+      })}
     </tbody>
   </table>
 );
@@ -63,6 +66,52 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
   const param = useParams();
 
   const isInspect = param.requestId!;
+
+  const rowData = [
+    {
+      id: "accountCode",
+      label: "Account Code :",
+      content: request.accountCode,
+    },
+    {
+      id: "expenseChargedTo",
+      label: "Charged To :",
+      content: request.expenseChargedTo,
+    },
+    {
+      id: "address",
+      label: "Address :",
+      content: request.address,
+    },
+    {
+      id: "city",
+      label: "City :",
+      content: request.city,
+    },
+    {
+      id: "finalDeliveryPoint",
+      label: "Delivery Point",
+      content: request.finalDeliveryPoint,
+    },
+    {
+      id: "periodOfActivity",
+      label: "Period Of Activity :",
+      content: `${dateformat(request.periodOfActivity.from)} - ${dateformat(
+        request.periodOfActivity.to
+      )}`,
+    },
+    {
+      id: "activityDescription",
+      label: "Activity Description :",
+      content: request.activityDescription,
+    },
+  ];
+
+  const accCardData = [
+    { label: "Account Name", value: request.accountName },
+    { label: "Account Number", value: request.accountNumber },
+    { label: "Bank Name", value: request.bankName },
+  ];
 
   return (
     <div
@@ -80,54 +129,21 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
           className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3"
           style={{ letterSpacing: "1px" }}
         >
-          <p>
-            <span className="font-bold mr-1 uppercase">Account Code : </span>{" "}
-            {request.accountCode}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Charged To : </span>
-            {request.expenseChargedTo}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Department : </span>{" "}
-            {request.department}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Address : </span>{" "}
-            {request.address}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">City : </span>{" "}
-            {request.city}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Delivery Point : </span>
-            {request.finalDeliveryPoint}
-          </p>
-
-          <p className="text-sm text-gray-600">
-            <span className="font-extrabold uppercase">
-              Period Of Activity:
-            </span>{" "}
-            <span>{dateformat(request.periodOfActivity.from)}</span> -{" "}
-            <span>{dateformat(request.periodOfActivity.to)}</span>
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">
-              Activity Description :{" "}
-            </span>
-            {request.activityDescription}
-          </p>
+          {rowData.map((data) => (
+            <p>
+              <span key={data.id} className="font-bold mr-1 uppercase">
+                {" "}
+                {data.label}
+              </span>
+              {data.content}
+            </p>
+          ))}
         </div>
 
         <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
           <h2 className="font-bold">RECIPIENTS INFORMATION</h2>
 
-          {[
-            { label: "Account Name", value: request.accountName },
-            { label: "Account Number", value: request.accountNumber },
-            { label: "Bank Name", value: request.bankName },
-          ].map(({ label, value }) => (
+          {accCardData.map(({ label, value }) => (
             <div key={label} className="whitespace-pre-line ">
               <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
               <p>{value}</p>

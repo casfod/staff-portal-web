@@ -35,25 +35,28 @@ const ExpenseTable = ({
       </tr>
     </thead>
     <tbody className="bg-white divide-y divide-gray-200">
-      {expenses!.map((item) => (
-        <tr key={item.id!}>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs">
-            {item.expense ?? "N/A"}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {item.quantity ?? "N/A"}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {item.frequency ?? "N/A"}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {item.unitCost ? moneyFormat(item.unitCost, "NGN") : "N/A"}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-600 break-words">
-            {item.total ? moneyFormat(item.total, "NGN") : "N/A"}
-          </td>
-        </tr>
-      ))}
+      {expenses!.map((item) => {
+        const rowData = [
+          { id: "expense", content: item.expense },
+          { id: "quantity", content: item.quantity },
+          { id: "frequency", content: item.frequency },
+          { id: "unitCost", content: moneyFormat(item.unitCost, "NGN") },
+          { id: "total", content: moneyFormat(item.total, "NGN") },
+        ];
+
+        return (
+          <tr key={item.id!}>
+            {rowData.map((data) => (
+              <td
+                key={data.id}
+                className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs"
+              >
+                {data.content}
+              </td>
+            ))}
+          </tr>
+        );
+      })}
     </tbody>
   </table>
 );
@@ -61,6 +64,63 @@ const ExpenseTable = ({
 const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
   const totalAmount =
     request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
+
+  // Helper function to format content safely
+  const formatContent = (content: any): React.ReactNode => {
+    if (content instanceof Date) {
+      return dateformat(content); // or any other date formatting you prefer
+    }
+    if (content === null || content === undefined) {
+      return "-"; // or any other placeholder you prefer
+    }
+    return content;
+  };
+
+  const rowData = [
+    {
+      id: "staffName",
+      label: "Staff Name :",
+      content: request.staffName,
+    },
+    {
+      id: "dayOfDeparture",
+      label: "Day Of Departure :",
+      content: request.dayOfDeparture,
+    },
+    {
+      id: "dayOfReturn",
+      label: "Day Of Return :",
+      content: request.dayOfReturn,
+    },
+    {
+      id: "amountInWords",
+      label: "Amount In Words :",
+      content: request.amountInWords,
+    },
+  ];
+
+  const rowData2 = [
+    {
+      id: "accountCode",
+      label: "Account Code :",
+      content: request.accountCode,
+    },
+    {
+      id: "Travel Reason",
+      label: "Travel Reason:",
+      content: request.travelReason,
+    },
+    {
+      id: "expenseChargedTo",
+      label: "Charged To :",
+      content: `${request.travelRequest.from} - ${request.travelRequest.to}`,
+    },
+    {
+      id: "totalAmount",
+      label: "Total Amount:",
+      content: moneyFormat(totalAmount, "NGN"),
+    },
+  ];
 
   return (
     <div
@@ -70,41 +130,21 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-300 pb-6 break-words">
         <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
-          <p>
-            <span className="font-bold mr-1 uppercase">Staff Name:</span>
-            {request.staffName}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Day Of Departure:</span>
-            {dateformat(request.dayOfDeparture!)}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Day Of Return:</span>
-            {dateformat(request.dayOfReturn)}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Amount In Words:</span>
-            {request.amountInWords}
-          </p>
+          {rowData.map((data) => (
+            <p key={data.id}>
+              <span className="font-bold mr-1 uppercase">{data.label}</span>
+              {formatContent(data.content)}
+            </p>
+          ))}
         </div>
 
         <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
-          <p>
-            <span className="font-bold uppercase">Travel Request:</span>{" "}
-            {request.travelRequest.from} - {request.travelRequest.to}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Account Code : </span>{" "}
-            {request.accountCode}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Charged To : </span>
-            {request.expenseChargedTo}
-          </p>
-          <p>
-            <span className="font-bold mr-1 uppercase">Total Amount:</span>
-            {moneyFormat(totalAmount, "NGN")}
-          </p>
+          {rowData2.map((data) => (
+            <p key={data.id}>
+              <span className="font-bold mr-1 uppercase">{data.label}</span>
+              {formatContent(data.content)}
+            </p>
+          ))}
         </div>
       </div>
 

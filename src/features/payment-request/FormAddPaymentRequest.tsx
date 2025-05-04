@@ -15,6 +15,7 @@ import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 const FormAddPaymentRequest = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -29,8 +30,9 @@ const FormAddPaymentRequest = () => {
     accountNumber: "",
     accountName: "",
     bankName: "",
-    approvedBy: null,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
@@ -97,28 +99,13 @@ const FormAddPaymentRequest = () => {
     savePaymentRequest(data);
   };
 
-  // const handleSave = (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   // Convert Date to ISO string if it's a Date object
-  //   const processedData = {
-  //     ...formData,
-  //     dateOfExpense:
-  //       formData.dateOfExpense instanceof Date
-  //         ? formData.dateOfExpense.toISOString()
-  //         : formData.dateOfExpense,
-  //   };
-
-  //   savePaymentRequest(processedData);
-  // };
-
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
 
     const data = { ...formData };
 
-    sendPaymentRequest(data);
+    sendPaymentRequest({ data, files: selectedFiles });
   };
 
   if (isErrorSave || isErrorSend) {
@@ -329,6 +316,15 @@ const FormAddPaymentRequest = () => {
           )}
         </FormRow>
       </Row>
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
