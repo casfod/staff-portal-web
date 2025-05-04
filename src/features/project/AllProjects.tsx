@@ -1,10 +1,8 @@
-import { Dot, Edit, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { dateformat } from "../../utils/dateFormat";
-import { truncateText } from "../../utils/truncateText";
+
 import { useProjects } from "./Hooks/useProjects";
-import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { RootState } from "../../store/store";
@@ -13,14 +11,13 @@ import { setSearchTerm, setPage } from "../../store/genericQuerySlice";
 import { GoXCircle } from "react-icons/go";
 import { Pagination } from "../../ui/Pagination";
 import { useDebounce } from "use-debounce";
-import { moneyFormat } from "../../utils/moneyFormat";
-import { SlMagnifier } from "react-icons/sl";
 import { Project } from "../../interfaces";
 import { setProject } from "../../store/projectSlice";
 import Spinner from "../../ui/Spinner";
 import { localStorageUser } from "../../utils/localStorageUser";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import ProjectTableRow from "./ProjectTableRow";
 
 export function AllProjects() {
   const localStorageUserX = localStorageUser();
@@ -72,6 +69,8 @@ export function AllProjects() {
     return <NetworkErrorUI />;
   }
 
+  const tableHeadData = ["Project Code", "Budget", "Date", "Actions"];
+
   return (
     <div className="flex flex-col space-y-3 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
@@ -115,248 +114,39 @@ export function AllProjects() {
         <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-50 ">
             <tr>
-              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Name
-              </th>
-              {/* <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th> */}
-              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Project Code
-              </th>
-              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Budget
-              </th>
-              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Created
-              </th>
-              <th className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Actions
-              </th>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
 
-          {isLoading ? (
-            <tbody>
+          <tbody className="max-w-full bg-white divide-y divide-gray-200">
+            {isLoading ? (
               <tr>
-                <td colSpan={6}>
-                  <div className="flex justify-center items-center h-96">
+                <td colSpan={6} className="py-8">
+                  <div className="flex justify-center items-center">
                     <Spinner />
                   </div>
                 </td>
               </tr>
-            </tbody>
-          ) : (
-            <tbody className="bg-white divide-y divide-gray-200">
-              {projects.map((project) => (
-                <>
-                  <tr
-                    className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
-                    key={project.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleViewItems(project.id!);
-                    }}
-                  >
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      {truncateText(project.project_title, 40, "...")}
-                    </td>
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      {project.project_code}
-                    </td>
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      {moneyFormat(Number(project.project_budget), "USD")}
-                    </td>
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      {dateformat(project.createdAt!)}
-                    </td>
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      <div className="flex space-x-4">
-                        <span className="hover:cursor-pointer">
-                          {visibleItems[project.id!] ? (
-                            <HiMiniEyeSlash className="w-5 h-5" />
-                          ) : (
-                            <HiMiniEye className="w-5 h-5" />
-                          )}
-                        </span>
-                        {localStorageUserX.role === "SUPER-ADMIN" && (
-                          <button
-                            className="hover:cursor-pointer"
-                            onClick={() => handleEdit(project)}
-                          >
-                            <Edit className="h-5 w-5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-
-                  {visibleItems[project.id!] && (
-                    <tr
-                      key={`${project.id}-details`}
-                      className="w-full h-10 scale-[95%]"
-                      style={{ letterSpacing: "1px" }}
-                    >
-                      <td colSpan={5}>
-                        <div className="border border-gray-300 px-6 py-4 rounded-lg shadow-sm bg-[#F8F8F8]">
-                          {/* Project Details Section */}
-                          <div className="grid grid-cols-1  gap-4 mb-6">
-                            <div className="flex flex-col gap-3">
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Project Code:
-                                </span>{" "}
-                                {project.project_code}
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Project Name:
-                                </span>{" "}
-                                {project.project_title}
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Donor:
-                                </span>{" "}
-                                {project.donor}
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase ">
-                                  Objectives:
-                                </span>{" "}
-                                {project.project_objectives}
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Target Beneficiaries:
-                                </span>{" "}
-                                {project.target_beneficiaries.join(", ")}
-                              </div>
-
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Locations:
-                                </span>{" "}
-                                {project.project_locations.join(", ")}
-                              </div>
-
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Budget:
-                                </span>{" "}
-                                {moneyFormat(
-                                  Number(project.project_budget),
-                                  "USD"
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3">
-                              <div className=" text-gray-600">
-                                <h2 className="text-sm font-extrabold uppercase">
-                                  Account Codes:
-                                </h2>{" "}
-                                {project?.account_code.map((account, index) => (
-                                  <ul key={index}>
-                                    {" "}
-                                    <li className="inline-flex items-center">
-                                      {" "}
-                                      <span className="mb-auto ">
-                                        <Dot />
-                                      </span>{" "}
-                                      {account.name}
-                                    </li>
-                                  </ul>
-                                ))}
-                              </div>
-
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Partners:
-                                </span>{" "}
-                                {project.project_partners.join(", ")}
-                              </div>
-
-                              <div className="text-sm text-gray-600 whitespace-pre-line">
-                                <span className="font-extrabold uppercase">
-                                  Implementation Period:
-                                </span>{" "}
-                                <span>
-                                  {dateformat(
-                                    project.implementation_period.from
-                                  )}
-                                </span>{" "}
-                                -{" "}
-                                <span>
-                                  {dateformat(project.implementation_period.to)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Sectors Table */}
-                          <div className="border border-gray-300 w-[50%]  mb-4 rounded-md">
-                            <h3 className="text-center font-semibold text-gray-600 uppercase py-2">
-                              Sectors
-                            </h3>
-                            <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                              <thead className="bg-gray-100">
-                                <tr>
-                                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                                    Sector
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                                    Percentage
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                {project.sectors?.map((sector, index) => (
-                                  <tr
-                                    key={index}
-                                    className="hover:bg-gray-50 transition-colors"
-                                  >
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                      {sector.name}
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                      {sector.percentage}%
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          <div>
-                            <div className="text-sm text-gray-600 whitespace-pre-line">
-                              <span className="font-extrabold uppercase">
-                                Summary:
-                              </span>{" "}
-                              {project.project_summary}
-                            </div>
-                          </div>
-
-                          <div className="flex justify-center w-full mt-4">
-                            <button
-                              onClick={() => handleAction(project)} // Use relative path here
-                              className="inline-flex items-center px-4 py-2 border border-transparent 
-text-xs 2xl:text-sm font-medium rounded-md shadow-sm text-white bg-buttonColor hover:bg-buttonColorHover "
-                            >
-                              <span className="inline-flex items-center gap-1">
-                                <SlMagnifier />
-                                <span>Inspect</span>
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
-              ))}
-            </tbody>
-          )}
+            ) : (
+              projects.map((project) => (
+                <ProjectTableRow
+                  key={project.id}
+                  request={project}
+                  visibleItems={visibleItems}
+                  toggleViewItems={toggleViewItems}
+                  handleEdit={handleEdit}
+                  handleAction={handleAction}
+                />
+              ))
+            )}
+          </tbody>
         </table>
       </div>
 

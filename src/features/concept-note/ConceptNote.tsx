@@ -73,7 +73,7 @@ const ConceptNote = () => {
   const tableRowData = [
     `${conceptNote.preparedBy.first_name} ${conceptNote.preparedBy.last_name}`,
     <StatusBadge status={conceptNote.status!} key="status-badge" />,
-    conceptNote.project_code,
+    conceptNote.account_Code,
     dateformat(conceptNote.createdAt!),
   ];
 

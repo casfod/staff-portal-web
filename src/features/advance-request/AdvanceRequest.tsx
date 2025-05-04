@@ -97,11 +97,6 @@ const Request = () => {
 
   const totalAmount =
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
-  // const showStatusUpdate =
-  //   (localStorageUserX.role === "REVIEWER" &&
-  //     advanceRequest?.status === "pending") ||
-  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-  //     advanceRequest?.status === "reviewed");
 
   const isCreator = advanceRequest!.createdBy!.id === localStorageUserX.id;
 
