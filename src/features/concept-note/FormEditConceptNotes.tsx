@@ -10,11 +10,12 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
-import { useParams } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
 import { resetConceptNote } from "../../store/conceptNoteSlice";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
+import { useSendConceptNote } from "./Hooks/useSendConceptNotes";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 interface FormEditConceptNotesProps {
   conceptNote: ConceptNote;
@@ -41,7 +42,9 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
     expense_Charged_To: conceptNote.expense_Charged_To, // Initialize as empty string
     approvedBy: null,
   });
-  const param = useParams();
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const dispatch = useDispatch();
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
@@ -100,22 +103,6 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
     }));
   };
 
-  // const handelProjectsChange = (value: string) => {
-  //   if (value) {
-  //     const selectedProject = projects?.find(
-  //       (project) =>
-  //         `${project.project_title} - ${project.project_code}` === value
-  //     );
-  //     if (selectedProject) {
-  //       setSelectedProject(selectedProject);
-  //       // Update both the selected project AND the form data
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         project_code: selectedProject.project_code,
-  //       }));
-  //     }
-  //   }
-  // };
   const {
     saveConceptNote,
     isPending: isSaving,
@@ -123,12 +110,10 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   } = useSaveConceptNote();
 
   const {
-    updateConceptNote,
-    isPending: isUpdating,
-    isError: isErrorUpdate,
-  } = useUpdateConceptNote(param.requestId!);
-
-  // Handle form submission
+    sendConceptNote,
+    isPending: isSending,
+    isError: isErrorSend,
+  } = useSendConceptNote();
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
@@ -144,20 +129,19 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
     // Make sure project_code is included
     const data = {
       ...formData,
-      // project: selectedProject?.project || formData.project,
     };
     saveConceptNote(data);
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
 
     const data = { ...formData };
-    updateConceptNote(data);
+    sendConceptNote({ data, files: selectedFiles });
     dispatch(resetConceptNote());
   };
 
-  if (isErrorSave || isErrorUpdate) {
+  if (isErrorSave || isErrorSend) {
     return <NetworkErrorUI />;
   }
 
@@ -416,6 +400,16 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
               />
             )}
           </FormRow>
+
+          {formData.approvedBy && (
+            <FileUpload
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+              accept=".jpg,.png,.pdf,.xlsx"
+              multiple={true}
+            />
+          )}
+
           <div className="flex justify-center w-full gap-4">
             {!formData.approvedBy && (
               <Button size="medium" onClick={handleSave}>
@@ -423,8 +417,8 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
               </Button>
             )}
             {formData.approvedBy && (
-              <Button size="medium" onClick={handleUpdate}>
-                {isUpdating ? <SpinnerMini /> : "Update And Send"}
+              <Button size="medium" onClick={handleSend}>
+                {isSending ? <SpinnerMini /> : "Update And Send"}
               </Button>
             )}
           </div>

@@ -12,6 +12,7 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 // import { FaPlus, FaTrash } from "react-icons/fa";
 const FormAddConceptNotes = () => {
@@ -34,6 +35,8 @@ const FormAddConceptNotes = () => {
     approvedBy: null,
   });
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
   const projects = useMemo(
@@ -44,14 +47,6 @@ const FormAddConceptNotes = () => {
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
-
-  // Handle changes for top-level fields
-  // const handleFormChange = (
-  //   field: keyof ConceptNote,
-  //   value: string | string[] | number
-  // ) => {
-  //   setFormData({ ...formData, [field]: value });
-  // };
 
   const handleNestedChange = (
     parentField: keyof ConceptNote,
@@ -97,22 +92,6 @@ const FormAddConceptNotes = () => {
     }
   };
 
-  // const handelProjectsChange = (value: string) => {
-  //   if (value) {
-  //     const selectedProject = projects?.find(
-  //       (project) =>
-  //         `${project.project_title} - ${project.project_code}` === value
-  //     );
-  //     if (selectedProject) {
-  //       setSelectedProject(selectedProject);
-  //       // Update both the selected project AND the form data
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         project_code: selectedProject.project_code,
-  //       }));
-  //     }
-  //   }
-  // };
   const {
     saveConceptNote,
     isPending: isSaving,
@@ -123,8 +102,6 @@ const FormAddConceptNotes = () => {
     isPending: isSending,
     isError: isErrorSend,
   } = useSendConceptNote();
-
-  // Handle form submission
 
   // Handle form submission
   const handleSave = (e: React.FormEvent) => {
@@ -152,7 +129,7 @@ const FormAddConceptNotes = () => {
     e.preventDefault();
 
     const data = { ...formData };
-    sendConceptNote(data);
+    sendConceptNote({ data, files: selectedFiles });
   };
 
   if (isErrorSave || isErrorSend) {
@@ -414,6 +391,15 @@ const FormAddConceptNotes = () => {
               />
             )}
           </FormRow>
+          {formData.approvedBy && (
+            <FileUpload
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+              accept=".jpg,.png,.pdf,.xlsx"
+              multiple={true}
+            />
+          )}
+
           <div className="flex justify-center w-full gap-4">
             {!formData.approvedBy && (
               <Button size="medium" onClick={handleSave}>

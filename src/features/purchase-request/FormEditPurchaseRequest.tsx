@@ -20,6 +20,8 @@ import { useSavePurchaseRequest } from "./Hooks/useSavePurchaseRequest";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
+import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 interface FormEditRequestProps {
   purchaseRequest: PurChaseRequestType;
@@ -44,6 +46,9 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     reviewedBy: purchaseRequest?.reviewedBy?.id,
     approvedBy: purchaseRequest?.approvedBy?.id,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const [selectedProject, setSelectedProject] = useState<Project | any>(
     purchaseRequest?.project!
   );
@@ -74,6 +79,20 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     const newItems = [...itemGroup];
     newItems[index][field] = value as never;
     setItemGroup(newItems);
+  };
+
+  const handleNestedChange = (
+    parentField: keyof PurChaseRequestType,
+    field: string,
+    value: Date | string | number | null
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [parentField]: {
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
+      },
+    }));
   };
 
   // Calculate totals whenever frequency, quantity, or unitCost changes
@@ -200,7 +219,7 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    sendPurchaseRequest(data);
+    sendPurchaseRequest({ data, files: selectedFiles });
 
     dispatch(resetPurchaseRequest());
   };
@@ -277,17 +296,51 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
             onChange={(e) => handleFormChange("city", e.target.value)}
           />
         </FormRow>
-        <FormRow label="Period of Activity *">
-          <Input
-            placeholder=""
-            id="periodOfActivity"
-            required
-            value={formData.periodOfActivity}
-            onChange={(e) =>
-              handleFormChange("periodOfActivity", e.target.value)
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-4">
+        <FormRow label="Period Of Activity (From) *">
+          <DatePicker
+            selected={
+              formData?.periodOfActivity?.from
+                ? new Date(formData.periodOfActivity.from)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "periodOfActivity",
+                "from",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
+            minDate={new Date()}
           />
         </FormRow>
+
+        {formData.periodOfActivity?.from && (
+          <FormRow label="Period Of Activity (To) *">
+            <DatePicker
+              selected={
+                formData?.periodOfActivity?.to
+                  ? new Date(formData.periodOfActivity.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "periodOfActivity",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData?.periodOfActivity?.from}
+              requiredTrigger={formData.periodOfActivity?.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       <Row>
@@ -561,10 +614,21 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         </Row>
       )}
 
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
+
       <div className="flex justify-center w-full gap-4">
-        <Button size="medium" onClick={handleSave}>
-          {isPending ? <SpinnerMini /> : "Update And Save"}
-        </Button>
+        {!formData.reviewedBy && (
+          <Button size="medium" onClick={handleSave}>
+            {isPending ? <SpinnerMini /> : "Update And Save"}
+          </Button>
+        )}
         {formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}

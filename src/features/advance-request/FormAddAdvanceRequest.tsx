@@ -17,6 +17,7 @@ import { useSendAdvanceRequest } from "./Hooks/useSendAdvanceRequest";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
 import { useProjects } from "../project/Hooks/useProjects";
+import { FileUpload } from "../../ui/FileUpload";
 
 const FormAddAdvanceRequest: React.FC = () => {
   // State for the main form fields
@@ -36,6 +37,8 @@ const FormAddAdvanceRequest: React.FC = () => {
     activityDescription: "",
     reviewedBy: null,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // State for the item groups
   const [itemGroup, setItemGroup] = useState<AdvanceRequesItemGroupType[]>([]);
@@ -184,7 +187,7 @@ const FormAddAdvanceRequest: React.FC = () => {
     e.preventDefault();
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    sendAdvanceRequest(data);
+    sendAdvanceRequest({ data, files: selectedFiles });
   };
 
   return (
@@ -557,6 +560,15 @@ const FormAddAdvanceRequest: React.FC = () => {
           )}
         </FormRow>
       </Row>
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

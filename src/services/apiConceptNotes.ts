@@ -117,12 +117,48 @@ export const getConceptCote = async function (conceptNoteId: string) {
 };
 
 export const saveAndSendConceptNote = async function (
-  data: Partial<ConceptNote>
+  data: Partial<ConceptNote>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    formData.append("activity_period", JSON.stringify(data.activity_period));
+
+    // Append standard fields
+    const simpleFields: (keyof ConceptNote)[] = [
+      "activity_title",
+      "activity_location",
+      "background_context",
+      "objectives_purpose",
+      "detailed_activity_description",
+      "strategic_plan",
+      "benefits_of_project",
+      "means_of_verification",
+      "project",
+      "activity_budget",
+      "expense_Charged_To",
+      "account_Code",
+      "approvedBy",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<UseConceptNoteType>(
       `/concept-notes`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

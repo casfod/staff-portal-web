@@ -123,12 +123,46 @@ export const savePurchaseRequests = async function (
 };
 
 export const sendPurchaseRequests = async function (
-  data: Partial<PurChaseRequestType>
+  data: Partial<PurChaseRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    formData.append("itemGroups", JSON.stringify(data.itemGroups));
+    formData.append("periodOfActivity", JSON.stringify(data.periodOfActivity));
+
+    // Append standard fields
+    const simpleFields: (keyof PurChaseRequestType)[] = [
+      "project",
+      "accountCode",
+      "expenseChargedTo",
+      "department",
+      "suggestedSupplier",
+      "address",
+      "finalDeliveryPoint",
+      "city",
+      "activityDescription",
+      "reviewedBy",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<PurChaseRequestType>(
       `/purchase-requests/save-and-send`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

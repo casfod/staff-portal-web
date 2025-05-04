@@ -15,6 +15,8 @@ import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { useSendPurchaseRequest } from "./Hooks/useSendPurchaseRequest";
 import { useProjects } from "../project/Hooks/useProjects";
+import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 const FormAddPurchaseRequest: React.FC = () => {
   // State for the main form fields
@@ -25,12 +27,14 @@ const FormAddPurchaseRequest: React.FC = () => {
     finalDeliveryPoint: "",
     city: "",
     project: null,
-    periodOfActivity: "",
+    periodOfActivity: { from: "", to: "" },
     activityDescription: "",
     expenseChargedTo: "",
     accountCode: "",
     reviewedBy: null,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // State for the item groups
   const [itemGroup, setItemGroup] = useState<PurchaseRequesItemGroupType[]>([]);
@@ -59,6 +63,20 @@ const FormAddPurchaseRequest: React.FC = () => {
     const newItems = [...itemGroup];
     newItems[index][field] = value as never;
     setItemGroup(newItems);
+  };
+
+  const handleNestedChange = (
+    parentField: keyof PurChaseRequestType,
+    field: string,
+    value: Date | string | number | null
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [parentField]: {
+        ...(prev[parentField] as object),
+        [field]: value instanceof Date ? value.toISOString() : value,
+      },
+    }));
   };
 
   // Toggle edit mode for an item group
@@ -169,7 +187,7 @@ const FormAddPurchaseRequest: React.FC = () => {
     e.preventDefault();
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    sendPurchaseRequest(data);
+    sendPurchaseRequest({ data, files: selectedFiles });
   };
 
   return (
@@ -231,17 +249,51 @@ const FormAddPurchaseRequest: React.FC = () => {
             onChange={(e) => handleFormChange("city", e.target.value)}
           />
         </FormRow>
-        <FormRow label="Period of Activity *">
-          <Input
-            placeholder=""
-            id="periodOfActivity"
-            required
-            value={formData.periodOfActivity}
-            onChange={(e) =>
-              handleFormChange("periodOfActivity", e.target.value)
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-4">
+        <FormRow label="Period Of Activity (From) *">
+          <DatePicker
+            selected={
+              formData?.periodOfActivity?.from
+                ? new Date(formData.periodOfActivity.from)
+                : null
             }
+            onChange={(date) =>
+              handleNestedChange(
+                "periodOfActivity",
+                "from",
+                date ? date.toISOString() : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
+            minDate={new Date()}
           />
         </FormRow>
+
+        {formData.periodOfActivity?.from && (
+          <FormRow label="Period Of Activity (To) *">
+            <DatePicker
+              selected={
+                formData?.periodOfActivity?.to
+                  ? new Date(formData.periodOfActivity.to)
+                  : null
+              }
+              onChange={(date) =>
+                handleNestedChange(
+                  "periodOfActivity",
+                  "to",
+                  date ? date.toISOString() : null
+                )
+              }
+              variant="secondary"
+              placeholder="Select date"
+              minDate={formData?.periodOfActivity?.from}
+              requiredTrigger={formData.periodOfActivity?.from}
+            />
+          </FormRow>
+        )}
       </Row>
 
       <Row>
@@ -459,6 +511,15 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           )}
         </FormRow>
       </Row>
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
+      )}
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (

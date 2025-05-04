@@ -22,7 +22,13 @@ export function useSendConceptNote() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<ConceptNote>) => SendConceptNoteApi(data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<ConceptNote>;
+      files: File[];
+    }) => SendConceptNoteApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {

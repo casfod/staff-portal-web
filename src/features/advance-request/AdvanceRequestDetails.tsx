@@ -3,6 +3,7 @@ import { moneyFormat } from "../../utils/moneyFormat";
 import { AdvanceRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
 interface RequestDetailsProps {
   request: AdvanceRequestType;
@@ -132,11 +133,6 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
               <p>{value}</p>
             </div>
           ))}
-
-          {/* <p>
-            <span className="font-extrabold uppercase">Budget:</span>{" "}
-            {moneyFormat(Number(request.amountInFigure), "NGN")}
-          </p> */}
         </div>
       </div>
 
@@ -147,6 +143,11 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         ITEMS
       </h2>
       <ItemsTable itemGroups={request.itemGroups} />
+
+      {/* File Attachments Section */}
+      {request.files && request.files.length > 0 && (
+        <FileAttachmentContainer files={request.files} />
+      )}
     </div>
   );
 };

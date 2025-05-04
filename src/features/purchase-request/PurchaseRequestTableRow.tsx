@@ -2,11 +2,12 @@ import { PurChaseRequestType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
 import { dateformat } from "../../utils/dateFormat";
-import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
-import { Edit, Trash2 } from "lucide-react";
 import { moneyFormat } from "../../utils/moneyFormat";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
+import ActionIcons from "../../ui/ActionIcons";
+import TableRowMain from "../../ui/TableRowMain";
+import TableData from "../../ui/TableData";
 
 const PurchaseRequestTableRow = ({
   request,
@@ -39,66 +40,39 @@ const PurchaseRequestTableRow = ({
   const totalAmount =
     request.itemGroups?.reduce((sum, item) => sum + item.total, 0) ?? 0;
 
+  const rowData = [
+    { id: "requestedBy", content: request.requestedBy },
+    { id: "status", content: <StatusBadge status={request.status!} /> },
+    { id: "department", content: request.department },
+    { id: "amount", content: moneyFormat(totalAmount, "NGN") },
+    { id: "date", content: dateformat(requestCreatedAt) },
+    {
+      id: "actions",
+      content: (
+        <ActionIcons
+          isEditable={isEditable}
+          requestId={requestId}
+          visibleItems={visibleItems}
+          onToggleView={toggleViewItems}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          request={request}
+        />
+      ),
+    },
+  ];
+
   return (
     <>
-      <tr
-        key={request.id}
-        className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
-        onClick={() => requestId && toggleViewItems(requestId)}
+      <TableRowMain
+        key={requestId}
+        requestId={requestId}
+        toggleViewItems={toggleViewItems}
       >
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {request.requestedBy}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          <StatusBadge status={requestStatus} />
-        </td>
-
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {request.department}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {moneyFormat(totalAmount, "NGN")}
-        </td>
-
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {dateformat(requestCreatedAt)}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          <div className="flex space-x-4">
-            <span className="hover:cursor-pointer">
-              {visibleItems[request.id!] ? (
-                <HiMiniEyeSlash className="w-5 h-5" />
-              ) : (
-                <HiMiniEye className="w-5 h-5" />
-              )}
-            </span>
-
-            {isEditable && (
-              <div className="flex space-x-4">
-                <button
-                  className="hover:cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent event from bubbling up to the row
-                    handleEdit(request);
-                  }}
-                >
-                  <Edit className="h-5 w-5" />
-                </button>
-
-                <button
-                  className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent event from bubbling up to the row
-                    handleDelete(request.id!);
-                  }}
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
-            )}
-          </div>
-        </td>
-      </tr>
+        {rowData.map(({ id, content }) => (
+          <TableData key={`${requestId}-${id}`}>{content}</TableData>
+        ))}
+      </TableRowMain>
 
       {isVisible && (
         <tr key={`${requestId}-details`} className="max-w-full rounded-lg">

@@ -83,6 +83,8 @@ export function AllUsers() {
     return <NetworkErrorUI />;
   }
 
+  const tableHeadData = ["Name", "Email", "Role", "Status"];
+
   return (
     <div className="flex flex-col space-y-3 pt-6">
       {/* Header and Add User Button */}
@@ -159,18 +161,15 @@ export function AllUsers() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
-                Status
-              </th>
+              {tableHeadData.map((data, key) => (
+                <th
+                  key={key}
+                  className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"
+                >
+                  {data}
+                </th>
+              ))}
+
               {localStorageUserX.role === "SUPER-ADMIN" && (
                 <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                   Actions
@@ -190,45 +189,63 @@ export function AllUsers() {
             </tbody>
           ) : (
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]" // Apply max height to each row
-                >
-                  <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                    {`${user.first_name} ${user.last_name}`}
-                  </td>
-                  <td className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600">
-                    {user.email}
-                  </td>
-                  <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                    {user.role}
-                  </td>
-                  <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                    {user.isDeleted ? "Inactive" : "Active"}
-                  </td>
-                  {localStorageUserX.role === "SUPER-ADMIN" && (
-                    <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-                      <div className="flex space-x-4">
-                        <Modal>
-                          <Modal.Open open={`userCog-${user.id}`}>
-                            <button className="text-primary hover:text-indigo-900">
-                              <UserCog className="h-5 w-5" />
-                            </button>
-                          </Modal.Open>
-                        </Modal>
+              {users.map((user) => {
+                const rowData = [
+                  {
+                    id: "Name",
+                    content: `${user.first_name} ${user.last_name}`,
+                  },
+                  {
+                    id: "email",
+                    content: user.email,
+                  },
+                  {
+                    id: "status",
+                    content: user.role!,
+                  },
+                  {
+                    id: "isDeleted",
+                    content: user.isDeleted ? "Inactive" : "Active",
+                  },
+                ];
 
-                        <button
-                          className="text-red-600 hover:text-red-900"
-                          onClick={() => handleDelete(user.id!)}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
+                return (
+                  <tr
+                    key={user.id}
+                    className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]" // Apply max height to each row
+                  >
+                    {rowData.map((data) => (
+                      <td
+                        key={data.id}
+                        className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600"
+                      >
+                        {data.content}
+                      </td>
+                    ))}
+
+                    {localStorageUserX.role === "SUPER-ADMIN" && (
+                      <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                        <div className="flex space-x-4">
+                          <Modal>
+                            <Modal.Open open={`userCog-${user.id}`}>
+                              <button className="text-primary hover:text-indigo-900">
+                                <UserCog className="h-5 w-5" />
+                              </button>
+                            </Modal.Open>
+                          </Modal>
+
+                          <button
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDelete(user.id!)}
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           )}
         </table>
@@ -250,8 +267,6 @@ export function AllUsers() {
       )}
 
       {/* Modals */}
-
-      {/* <div></div> */}
       <Modal>
         <Modal.Window name="addUser">
           <AddUserForm />

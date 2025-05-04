@@ -2,6 +2,8 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PurChaseRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
+import { dateformat } from "../../utils/dateFormat";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
 interface RequestDetailsProps {
   request: PurChaseRequestType;
@@ -92,9 +94,10 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
           {request.finalDeliveryPoint}
         </p>
 
-        <p>
-          <span className="font-bold mr-1 uppercase">Period Of Activity :</span>
-          {request.periodOfActivity}
+        <p className="text-sm text-gray-600">
+          <span className="font-extrabold uppercase">Period Of Activity:</span>{" "}
+          <span>{dateformat(request.periodOfActivity.from)}</span> -{" "}
+          <span>{dateformat(request.periodOfActivity.to)}</span>
         </p>
         <p>
           <span className="font-bold mr-1 uppercase">
@@ -111,6 +114,11 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
         ITEMS
       </h2>
       <ItemsTable itemGroups={request.itemGroups} />
+
+      {/* File Attachments Section */}
+      {request.files && request.files.length > 0 && (
+        <FileAttachmentContainer files={request.files} />
+      )}
     </div>
   );
 };

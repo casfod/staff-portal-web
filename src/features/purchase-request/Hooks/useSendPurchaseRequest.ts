@@ -22,8 +22,13 @@ export function useSendPurchaseRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PurChaseRequestType>) =>
-      sendPurchaseRequestsApi(data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<PurChaseRequestType>;
+      files: File[];
+    }) => sendPurchaseRequestsApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {

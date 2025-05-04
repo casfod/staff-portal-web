@@ -123,12 +123,49 @@ export const saveAdvanceRequests = async function (
 };
 
 export const sendAdvanceRequests = async function (
-  data: Partial<AdvanceRequestType>
+  data: Partial<AdvanceRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    formData.append("itemGroups", JSON.stringify(data.itemGroups));
+    formData.append("periodOfActivity", JSON.stringify(data.periodOfActivity));
+
+    // Append standard fields
+    const simpleFields: (keyof AdvanceRequestType)[] = [
+      "project",
+      "accountCode",
+      "expenseChargedTo",
+      "department",
+      "suggestedSupplier",
+      "address",
+      "finalDeliveryPoint",
+      "city",
+      "accountNumber",
+      "accountName",
+      "bankName",
+      "activityDescription",
+      "reviewedBy",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<AdvanceRequestType>(
       `/advance-requests/save-and-send`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

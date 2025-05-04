@@ -22,6 +22,7 @@ import { useReviewers } from "../user/Hooks/useReviewers";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
 import { useProjects } from "../project/Hooks/useProjects";
+import { FileUpload } from "../../ui/FileUpload";
 
 interface FormEditAdavanceRequestProps {
   advanceRequest: AdvanceRequestType;
@@ -49,6 +50,8 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     reviewedBy: advanceRequest?.reviewedBy?.id,
     approvedBy: advanceRequest?.approvedBy?.id,
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const [selectedProject, setSelectedProject] = useState<Project | any>(
     advanceRequest?.project!
   );
@@ -146,14 +149,6 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     [projectData]
   );
 
-  // Update main form fields
-  // const handleFormChange = (
-  //   field: keyof AdvanceRequestType,
-  //   value: string
-  // ) => {
-  //   setFormData({ ...formData, [field]: value });
-  // };
-
   const handleFormChange = (field: keyof AdvanceRequestType, value: string) => {
     if (field === "expenseChargedTo") {
       // Find the selected project
@@ -215,7 +210,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
     console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
-    sendAdvanceRequest(data);
+    sendAdvanceRequest({ data, files: selectedFiles });
 
     dispatch(resetAdvanceRequest());
   };
@@ -650,6 +645,15 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
             )}
           </FormRow>
         </Row>
+      )}
+
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx"
+          multiple={true}
+        />
       )}
 
       <div className="flex justify-center w-full gap-4">

@@ -2,11 +2,12 @@ import { TravelRequestType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
 import { dateformat } from "../../utils/dateFormat";
-import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
-import { Edit, Trash2 } from "lucide-react";
 import { moneyFormat } from "../../utils/moneyFormat";
 import TravelRequestDetails from "./TravelRequestDetails";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
+import TableRowMain from "../../ui/TableRowMain";
+import ActionIcons from "../../ui/ActionIcons";
+import TableData from "../../ui/TableData";
 
 const TravelRequestTableRow = ({
   request,
@@ -26,64 +27,50 @@ const TravelRequestTableRow = ({
   const localStorageUserX = localStorageUser();
   const isVisible = visibleItems[request.id!];
 
+  const requestId = request.id ?? "";
+  const requestStatus = request.status ?? "pending";
+  const requestCreatedAt = request.createdAt ?? "";
+  const requestedById = request.createdBy?.id;
+
+  const totalExpense =
+    request.expenses?.reduce((sum, item) => sum + item.total, 0) ?? 0;
+
+  const isEditable =
+    (requestStatus === "draft" || requestStatus === "rejected") &&
+    requestedById === localStorageUserX?.id;
+
+  const rowData = [
+    { id: "staffName", content: request.staffName },
+    { id: "status", content: <StatusBadge status={request.status!} /> },
+    { id: "amount", content: moneyFormat(totalExpense, "NGN") },
+    { id: "date", content: dateformat(requestCreatedAt) },
+    {
+      id: "actions",
+      content: (
+        <ActionIcons
+          isEditable={isEditable}
+          requestId={requestId}
+          visibleItems={visibleItems}
+          onToggleView={toggleViewItems}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          request={request}
+        />
+      ),
+    },
+  ];
+
   return (
     <>
-      <tr
-        key={request.id}
-        className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
-        onClick={() => toggleViewItems(request.id!)}
+      <TableRowMain
+        key={requestId}
+        requestId={requestId}
+        toggleViewItems={toggleViewItems}
       >
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {request.staffName}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          <StatusBadge status={request.status!} />
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {moneyFormat(
-            request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0,
-            "NGN"
-          )}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          {dateformat(request.createdAt!)}
-        </td>
-        <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
-          <div className="flex space-x-4">
-            <button className="hover:text-gray-600">
-              {isVisible ? (
-                <HiMiniEyeSlash className="w-5 h-5" />
-              ) : (
-                <HiMiniEye className="w-5 h-5" />
-              )}
-            </button>
-
-            {(request.status === "draft" || request.status === "rejected") &&
-              request.createdBy?.id === localStorageUserX.id && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event from bubbling up to the row
-                      handleEdit(request);
-                    }}
-                    className="hover:text-blue-600"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event from bubbling up to the row
-                      handleDelete(request.id!);
-                    }}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </>
-              )}
-          </div>
-        </td>
-      </tr>
+        {rowData.map(({ id, content }) => (
+          <TableData key={`${requestId}-${id}`}>{content}</TableData>
+        ))}
+      </TableRowMain>
 
       {isVisible && (
         <tr key={`${request.id}-details`} className="rounded-lg">

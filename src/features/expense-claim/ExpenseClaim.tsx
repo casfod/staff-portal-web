@@ -87,14 +87,6 @@ const ExpenseClaim = () => {
     );
   }
 
-  // const totalAmount =
-  //   expenseClaim.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
-  // const showStatusUpdate =
-  //   (localStorageUserX.role === "REVIEWER" &&
-  //     expenseClaim.status === "pending") ||
-  //   (["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-  //     expenseClaim.status === "reviewed");
-
   const isCreator = expenseClaim!.createdBy!.id === localStorageUserX.id;
 
   const isReviewerUpdatingPending =
