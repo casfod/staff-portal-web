@@ -25,7 +25,8 @@ export function useUpdateProject(projectId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<Project>) => updateProjectApi(projectId, data),
+    mutationFn: ({ data, files }: { data: Partial<Project>; files: File[] }) =>
+      updateProjectApi(projectId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

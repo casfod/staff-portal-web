@@ -9,6 +9,8 @@ import { FaPlus } from "react-icons/fa";
 import { useUpdateProject } from "./Hooks/useUpdateProject";
 import Select from "../../ui/Select";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
 interface FormEditProjectProps {
   project: Project;
@@ -53,6 +55,8 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
     project_objectives: project.project_objectives,
     project_summary: project.project_summary,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Handle changes for top-level fields
   const handleFormChange = (
@@ -132,9 +136,9 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Project:", formData);
+    const data = { ...formData };
 
-    updateProject(formData);
+    updateProject({ data, files: selectedFiles });
   };
 
   return (
@@ -427,6 +431,18 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           />
         </FormRow>
       </Row>
+
+      {/* File Attachments Section */}
+      {project.files && project.files.length > 0 && (
+        <FileAttachmentContainer files={project.files} />
+      )}
+
+      <FileUpload
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
+        accept=".jpg,.png,.pdf,.xlsx"
+        multiple={true}
+      />
 
       {/* Submit Button */}
       <div className="flex justify-center w-full gap-4">

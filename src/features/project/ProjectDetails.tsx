@@ -162,7 +162,7 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
         className="text-center text-lg text-gray-600 font-semibold"
         style={{ letterSpacing: "2px" }}
       >
-        Sectors
+        SECTORS
       </h2>
 
       <SectorsTable sectors={request.sectors} />

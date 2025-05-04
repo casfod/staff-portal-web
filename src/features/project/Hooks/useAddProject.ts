@@ -22,7 +22,8 @@ export function useAddProject() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<Project>) => savePurchaseRequestsApi(data),
+    mutationFn: ({ data, files }: { data: Partial<Project>; files: File[] }) =>
+      savePurchaseRequestsApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {

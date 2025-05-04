@@ -9,6 +9,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import { useAddProject } from "./Hooks/useAddProject";
 import Select from "../../ui/Select";
 import DatePicker from "../../ui/DatePicker";
+import { FileUpload } from "../../ui/FileUpload";
 
 // Define the sector options
 const sectorOptions = [
@@ -43,10 +44,11 @@ const FormAddProject = () => {
     sectors: [],
     project_locations: [],
     target_beneficiaries: [],
-    // target_beneficiaries: { women: 0, girls: 0, boys: 0, men: 0 },
     project_objectives: "",
     project_summary: "",
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { addProject, isPending } = useAddProject();
 
@@ -108,15 +110,6 @@ const FormAddProject = () => {
     setFormData({ ...formData, sectors: updatedSectors });
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    console.log("Project:", formData);
-
-    addProject(formData);
-  };
-
   const addAccountCode = () => {
     setFormData({
       ...formData,
@@ -129,6 +122,15 @@ const FormAddProject = () => {
       (_, i) => i !== index
     );
     setFormData({ ...formData, account_code: updatedAccountCodes });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const data = { ...formData };
+
+    addProject({ data, files: selectedFiles });
   };
 
   return (
@@ -421,6 +423,13 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           />
         </FormRow>
       </Row>
+
+      <FileUpload
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
+        accept=".jpg,.png,.pdf,.xlsx"
+        multiple={true}
+      />
 
       {/* Submit Button */}
       <div className="flex justify-center w-full gap-4">

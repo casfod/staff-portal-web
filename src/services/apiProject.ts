@@ -109,12 +109,52 @@ export const getProject = async function (projectId: string) {
   }
 };
 
-export const addProject = async function (data: Partial<Project>) {
+export const addProject = async function (
+  data: Partial<Project>,
+  files: File[]
+) {
   try {
+    const formData = new FormData();
+
+    formData.append("project_partners", JSON.stringify(data.project_partners));
+    formData.append(
+      "implementation_period",
+      JSON.stringify(data.implementation_period)
+    );
+    formData.append("account_code", JSON.stringify(data.account_code));
+    formData.append("sectors", JSON.stringify(data.sectors));
+
+    // Append standard fields
+    const simpleFields: (keyof Project)[] = [
+      "project_title",
+      "donor",
+      "project_code",
+      "project_budget",
+      "project_locations",
+      "target_beneficiaries",
+      "project_objectives",
+      "project_summary",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.post<useProjectType>(
       `/projects`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
+
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -123,12 +163,49 @@ export const addProject = async function (data: Partial<Project>) {
 
 export const updateProject = async function (
   projectId: string,
-  data: Partial<Project>
+  data: Partial<Project>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    formData.append("project_partners", JSON.stringify(data.project_partners));
+    formData.append(
+      "implementation_period",
+      JSON.stringify(data.implementation_period)
+    );
+    formData.append("account_code", JSON.stringify(data.account_code));
+    formData.append("sectors", JSON.stringify(data.sectors));
+
+    // Append standard fields
+    const simpleFields: (keyof Project)[] = [
+      "project_title",
+      "donor",
+      "project_code",
+      "project_budget",
+      "project_locations",
+      "target_beneficiaries",
+      "project_objectives",
+      "project_summary",
+    ];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.put<Project>(
       `/projects/${projectId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {
