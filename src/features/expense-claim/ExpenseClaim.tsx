@@ -54,6 +54,8 @@ const ExpenseClaim = () => {
   };
 
   const handleStatusChange = () => {
+    console.log("Expense Claim:", { status, comment });
+
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change this request status?",
@@ -78,6 +80,8 @@ const ExpenseClaim = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Expense Claim:", formData);
+
     updateExpenseClaim(formData);
   };
 

@@ -2,7 +2,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
@@ -62,7 +62,7 @@ const PurchaseRequest = () => {
   }, [param, navigate]);
 
   // Stabilized handleStatusChange
-  const handleStatusChange = useCallback(() => {
+  const handleStatusChange = () => {
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change this request status?",
@@ -71,20 +71,11 @@ const PurchaseRequest = () => {
       cancelButtonColor: "#DC3340",
       confirmButtonText: "Yes, update it!",
       customClass: { popup: "custom-style" },
-      allowOutsideClick: false, // Prevent closing by clicking outside
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(
           { status, comment },
           {
-            onSuccess: () => {
-              // Optional success handling
-              Swal.fire({
-                title: "Success!",
-                text: "Status updated successfully",
-                icon: "success",
-              });
-            },
             onError: (error) => {
               Swal.fire("Error!", error.message, "error");
             },
@@ -92,7 +83,7 @@ const PurchaseRequest = () => {
         );
       }
     });
-  }, [status, comment, updateStatus]);
+  };
 
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {

@@ -44,7 +44,12 @@ export default function UploadFiles() {
     setIsLoading(true);
     try {
       const fileList = await getFileList();
-      setFiles(fileList);
+      if (Array.isArray(fileList)) {
+        setFiles(fileList);
+      } else {
+        setFiles([]); // fallback to empty array if bad data received
+        console.error("Unexpected fileList format:", fileList);
+      }
     } catch (err) {
       setError("Failed to fetch files. Please try again.");
       console.error("Fetch error:", err);
@@ -69,6 +74,8 @@ export default function UploadFiles() {
   useEffect(() => {
     fetchFiles();
   }, []);
+
+  const mainFiles = Array.isArray(files) ? files : [];
 
   return (
     <div className="p-4">
@@ -102,7 +109,7 @@ export default function UploadFiles() {
         <p>No files uploaded yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {files.map((file) => (
+          {mainFiles.map((file) => (
             <div key={file._id} className="border p-2 rounded shadow-sm">
               <a href={file.url} target="_blank" rel="noopener noreferrer">
                 <img

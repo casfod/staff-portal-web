@@ -162,14 +162,6 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     [projectData]
   );
 
-  // Update main form fields
-  // const handleFormChange = (
-  //   field: keyof PurChaseRequestType,
-  //   value: string
-  // ) => {
-  //   setFormData({ ...formData, [field]: value });
-  // };
-
   const handleFormChange = (
     field: keyof PurChaseRequestType,
     value: string

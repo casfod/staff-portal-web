@@ -175,6 +175,8 @@ export const updateExpenseClaim = async function (
   requestId: string,
   data: Partial<ExpenseClaimType>
 ) {
+  console.log("🔥❌🔥:", requestId);
+
   try {
     const response = await axiosInstance.put<Partial<ExpenseClaimType>>(
       `/expense-claims/${requestId}`,
