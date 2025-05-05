@@ -315,7 +315,7 @@ const FormEditPaymentRequest = ({
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
-          accept=".jpg,.png,.pdf,.xlsx"
+          accept=".jpg,.png,.pdf,.xlsx,.docx"
           multiple={true}
         />
       )}

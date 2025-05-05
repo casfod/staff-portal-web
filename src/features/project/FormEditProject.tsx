@@ -440,7 +440,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       <FileUpload
         selectedFiles={selectedFiles}
         setSelectedFiles={setSelectedFiles}
-        accept=".jpg,.png,.pdf,.xlsx"
+        accept=".jpg,.png,.pdf,.xlsx,.docx"
         multiple={true}
       />
 
