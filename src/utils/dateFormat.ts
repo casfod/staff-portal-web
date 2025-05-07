@@ -22,9 +22,24 @@ export const dateformat = (date: string | Date | null): string => {
   inputDateStart.setHours(0, 0, 0, 0);
 
   // Format time as HH:MM (24-hour format)
-  const hours = String(inputDate.getHours()).padStart(2, "0");
+  // const hours = String(inputDate.getHours()).padStart(2, "0");
+  // const minutes = String(inputDate.getMinutes()).padStart(2, "0");
+  // const timeString = `${hours}:${minutes}`;
+
+  // Format time as HH:MM AM/PM (12-hour format)
+  const hours = inputDate.getHours();
   const minutes = String(inputDate.getMinutes()).padStart(2, "0");
-  const timeString = `${hours}:${minutes}`;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const twelveHour = hours % 12 || 12; // Convert 0 to 12 for 12AM
+  const timeString = `${twelveHour}:${minutes} ${ampm}`;
+
+  if (inputDateStart.getTime() === today.getTime()) {
+    return `TODAY, ${timeString}`;
+  }
+
+  if (inputDateStart.getTime() === yesterday.getTime()) {
+    return `YESTERDAY, ${timeString}`;
+  }
 
   if (inputDateStart.getTime() === today.getTime()) {
     return `TODAY, ${timeString}`;
