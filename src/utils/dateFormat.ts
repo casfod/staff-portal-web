@@ -7,14 +7,51 @@
 export const dateformat = (date: string | Date | null): string => {
   if (!date) return "";
 
-  const dateObj = new Date(date);
+  const inputDate = new Date(date);
 
   // Return empty string for invalid dates
-  if (isNaN(dateObj.getTime())) return "";
+  if (isNaN(inputDate.getTime())) return "";
 
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const year = dateObj.getFullYear();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  return `${day}/${month}/${year}`;
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const inputDateStart = new Date(inputDate);
+  inputDateStart.setHours(0, 0, 0, 0);
+
+  // Format time as HH:MM (24-hour format)
+  const hours = String(inputDate.getHours()).padStart(2, "0");
+  const minutes = String(inputDate.getMinutes()).padStart(2, "0");
+  const timeString = `${hours}:${minutes}`;
+
+  if (inputDateStart.getTime() === today.getTime()) {
+    return `TODAY, ${timeString}`;
+  }
+
+  if (inputDateStart.getTime() === yesterday.getTime()) {
+    return `YESTERDAY, ${timeString}`;
+  }
+
+  // Format as dd/mm/yyyy for older dates (no timestamp)
+  const day = String(inputDate.getDate()).padStart(2, "0");
+  const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+  const year = inputDate.getFullYear();
+
+  return `${day}/${month}/${year}`; // No time included for older dates
 };
+// export const dateformat = (date: string | Date | null): string => {
+//   if (!date) return "";
+
+//   const dateObj = new Date(date);
+
+//   // Return empty string for invalid dates
+//   if (isNaN(dateObj.getTime())) return "";
+
+//   const day = String(dateObj.getDate()).padStart(2, "0");
+//   const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+//   const year = dateObj.getFullYear();
+
+//   return `${day}/${month}/${year}`;
+// };
