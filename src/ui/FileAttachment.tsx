@@ -5,6 +5,7 @@ import {
   FaFileExcel,
   FaFile,
 } from "react-icons/fa";
+import { saveAs } from "file-saver";
 import { FileType } from "../interfaces";
 
 export const FileAttachment = ({ file }: { file: FileType }) => {
@@ -23,10 +24,29 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
     }
   };
 
-  const getExtension = (fileType: string) => {
+  // Map file types to extensions
+  const getExtension = (fileType: string, mimeType?: string): string => {
+    if (mimeType) {
+      // Extract extension from mimeType if available
+      const mimeExtensions: Record<string, string> = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/gif": ".gif",
+        "application/pdf": ".pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          ".docx",
+        "application/msword": ".doc",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+          ".xlsx",
+        "application/vnd.ms-excel": ".xls",
+      };
+      return mimeExtensions[mimeType] || "";
+    }
+
+    // Fallback to fileType if mimeType not available
     switch (fileType) {
       case "image":
-        return ".jpg"; // or determine actual image extension
+        return ".jpg";
       case "pdf":
         return ".pdf";
       case "document":
@@ -38,15 +58,39 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
     }
   };
 
-  const getDownloadName = (name: string, fileType: string) => {
-    const hasExtension = /\.[^/.]+$/.test(name);
-    return hasExtension ? name : `${name}${getExtension(fileType)}`;
+  // Ensure filename has proper extension
+  const getDownloadName = (
+    name: string,
+    fileType: string,
+    mimeType?: string
+  ): string => {
+    // If name already has an extension, use as-is
+    if (/\.[^/.]+$/.test(name)) {
+      return name;
+    }
+
+    // Otherwise add appropriate extension
+    const extension = getExtension(fileType, mimeType);
+    return extension ? `${name}${extension}` : name;
   };
 
-  // // Extract file extension from the name
-  // const getFileExtension = (fileName: string) => {
-  //   return fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2);
-  // };
+  // Handle download with proper filename
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(file.url);
+      const blob = await response.blob();
+
+      // Determine the correct filename
+      const filename = getDownloadName(file.name, file.fileType, file.mimeType);
+
+      // Use file-saver to download with proper filename
+      saveAs(blob, filename);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback to regular download if file-saver fails
+      window.open(file.url, "_blank");
+    }
+  };
 
   return (
     <div className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -59,15 +103,12 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
           {Math.round(file.size / 1024)} KB • {file.fileType}
         </p>
       </div>
-      <a
-        href={file.url}
-        download={getDownloadName(file.name, file.fileType)}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={handleDownload}
         className="ml-3 px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-md hover:bg-blue-100"
       >
         Download
-      </a>
+      </button>
     </div>
   );
 };
