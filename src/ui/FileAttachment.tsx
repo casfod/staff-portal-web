@@ -23,19 +23,29 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
     }
   };
 
-  // const getFileIcon = (fileType: string) => {
-  //   switch (fileType) {
-  //     case "image":
-  //       return <FaFileImage className="text-blue-500" />;
-  //     case "pdf":
-  //       return <FaFilePdf className="text-red-500" />;
-  //     case "document":
-  //       return <FaFileAlt className="text-green-500" />;
-  //     case "spreadsheet":
-  //       return <FaFileExcel className="text-green-600" />;
-  //     default:
-  //       return <FaFile className="text-gray-500" />;
-  //   }
+  const getExtension = (fileType: string) => {
+    switch (fileType) {
+      case "image":
+        return ".jpg"; // or determine actual image extension
+      case "pdf":
+        return ".pdf";
+      case "document":
+        return ".docx";
+      case "spreadsheet":
+        return ".xlsx";
+      default:
+        return "";
+    }
+  };
+
+  const getDownloadName = (name: string, fileType: string) => {
+    const hasExtension = /\.[^/.]+$/.test(name);
+    return hasExtension ? name : `${name}${getExtension(fileType)}`;
+  };
+
+  // // Extract file extension from the name
+  // const getFileExtension = (fileName: string) => {
+  //   return fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2);
   // };
 
   return (
@@ -51,7 +61,7 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
       </div>
       <a
         href={file.url}
-        download={file.name}
+        download={getDownloadName(file.name, file.fileType)}
         target="_blank"
         rel="noopener noreferrer"
         className="ml-3 px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-md hover:bg-blue-100"
@@ -61,3 +71,18 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
     </div>
   );
 };
+
+// const getFileIcon = (fileType: string) => {
+//   switch (fileType) {
+//     case "image":
+//       return <FaFileImage className="text-blue-500" />;
+//     case "pdf":
+//       return <FaFilePdf className="text-red-500" />;
+//     case "document":
+//       return <FaFileAlt className="text-green-500" />;
+//     case "spreadsheet":
+//       return <FaFileExcel className="text-green-600" />;
+//     default:
+//       return <FaFile className="text-gray-500" />;
+//   }
+// };
