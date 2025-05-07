@@ -388,7 +388,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             }
             variant="secondary"
             placeholder="Select date"
-            minDate={new Date()} // Required to be Date, not null
+            // minDate={new Date()}
           />
         </FormRow>
 

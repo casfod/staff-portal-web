@@ -245,7 +245,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
             }
             variant="secondary"
             placeholder="Select date"
-            minDate={new Date()}
+            // minDate={new Date()}
           />
         </FormRow>
         {formData.activity_period?.from && (

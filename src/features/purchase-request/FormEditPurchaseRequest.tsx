@@ -307,7 +307,7 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
             }
             variant="secondary"
             placeholder="Select date"
-            minDate={new Date()}
+            // minDate={new Date()}
           />
         </FormRow>
 

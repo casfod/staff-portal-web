@@ -268,7 +268,7 @@ const FormAddPurchaseRequest: React.FC = () => {
             }
             variant="secondary"
             placeholder="Select date"
-            minDate={new Date()}
+            // minDate={new Date()}
           />
         </FormRow>
 

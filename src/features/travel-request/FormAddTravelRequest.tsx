@@ -219,7 +219,7 @@ const FormAddTravelRequest: React.FC = () => {
             placeholder="Select date"
             // className="custom-class-if-needed"
             clearable={true}
-            minDate={new Date()}
+            // minDate={new Date()}
           />
         </FormRow>
         {formData.dayOfDeparture && (
