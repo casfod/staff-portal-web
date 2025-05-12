@@ -462,14 +462,14 @@ export interface UseConceptNoteType {
   status: number;
   message: string;
   data: {
-    conceptNotes: ConceptNote[];
+    conceptNotes: ConceptNoteType[];
     total: number;
     totalPages: number;
     currentPage: number;
   };
 }
 
-export interface ConceptNote {
+export interface ConceptNoteType {
   id?: string;
   staff_name?: string;
   staff_role?: string;

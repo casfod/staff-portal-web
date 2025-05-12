@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
 import { updateConceptNote as updateConceptNoteApi } from "../../../services/apiConceptNotes.ts";
-import { ConceptNote } from "../../../interfaces.ts";
+import { ConceptNoteType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -25,8 +25,13 @@ export function useUpdateConceptNote(conceptNoteId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<ConceptNote>) =>
-      updateConceptNoteApi(conceptNoteId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<ConceptNoteType>;
+      files: File[];
+    }) => updateConceptNoteApi(conceptNoteId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

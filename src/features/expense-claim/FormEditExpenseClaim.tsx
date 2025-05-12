@@ -212,7 +212,7 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
     }
   };
 
-  const { saveExpenseClaim, isPending } = useSaveExpenseClaim();
+  const { saveExpenseClaim, isPending: isSaving } = useSaveExpenseClaim();
 
   const { sendExpenseClaim, isPending: isSending } = useSendExpenseClaim();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
@@ -607,7 +607,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           </FormRow>
         </Row>
       )}
-      {formData.reviewedBy && (
+      {expenseClaim.status !== "rejected" && formData.reviewedBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -617,13 +617,14 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleSave}>
-            {isPending ? <SpinnerMini /> : "Update And Save"}
+        {(!formData.reviewedBy ||
+          (expenseClaim.status === "rejected" && formData.reviewedBy)) && (
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
         {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>
         )}

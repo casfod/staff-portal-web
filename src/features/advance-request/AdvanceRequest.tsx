@@ -19,6 +19,7 @@ import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import StatusBadge from "../../ui/StatusBadge";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import { FileUpload } from "../../ui/FileUpload";
 
 const Request = () => {
   // State and hooks initialization
@@ -29,6 +30,8 @@ const Request = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const [formData, setFormData] = useState({ approvedBy: null });
 
   const navigate = useNavigate();
@@ -47,6 +50,7 @@ const Request = () => {
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     param.requestId!
   );
+
   const { updateAdvanceRequest, isPending: isUpdating } =
     useUpdateAdvanceRequest(param.requestId!);
 
@@ -87,7 +91,7 @@ const Request = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updateAdvanceRequest(formData);
+    updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
   // Handle the case where advanceRequest is null
@@ -191,19 +195,45 @@ const Request = () => {
                         </div>
                       )}
 
+                    {isCreator && advanceRequest.status === "approved" && (
+                      <div className="flex flex-col gap-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
+                        />
+
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            Upload
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Admin Approval Section (for STAFF role) */}
                     {!advanceRequest?.approvedBy && // Check if approvedBy is not set
                       advanceRequest?.status === "reviewed" && (
-                        <div className="relative z-10">
-                          <AdminApprovalSection
-                            formData={formData}
-                            handleFormChange={handleFormChange}
-                            admins={admins}
-                            isLoadingAmins={isLoadingAmins}
-                            isUpdating={isUpdating}
-                            handleSend={handleSend}
-                          />
-                        </div>
+                        <>
+                          {/* <FileUpload
+                            selectedFiles={selectedFiles}
+                            setSelectedFiles={setSelectedFiles}
+                            accept=".jpg,.png,.pdf,.xlsx,.docx"
+                            multiple={true}
+                          /> */}
+
+                          <div className="relative z-10 pb-64">
+                            <AdminApprovalSection
+                              formData={formData}
+                              handleFormChange={handleFormChange}
+                              admins={admins}
+                              isLoadingAmins={isLoadingAmins}
+                              isUpdating={isUpdating}
+                              handleSend={handleSend}
+                            />
+                          </div>
+                        </>
                       )}
                   </div>
                 </td>

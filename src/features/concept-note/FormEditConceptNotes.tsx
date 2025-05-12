@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ConceptNote, Project } from "../../interfaces";
+import { ConceptNoteType, Project } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
@@ -18,13 +18,13 @@ import { FileUpload } from "../../ui/FileUpload";
 import { useSendConceptNote } from "./Hooks/useSendConceptNotes";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 interface FormEditConceptNotesProps {
-  conceptNote: ConceptNote;
+  conceptNote: ConceptNoteType;
 }
 
 const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const [formData, setFormData] = useState<Partial<ConceptNote>>({
+  const [formData, setFormData] = useState<Partial<ConceptNoteType>>({
     activity_title: conceptNote.activity_title,
     activity_location: conceptNote.activity_location,
     activity_period: {
@@ -59,7 +59,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   // Handle changes for top-level fields
-  const handleFormChange = (field: keyof ConceptNote, value: string) => {
+  const handleFormChange = (field: keyof ConceptNoteType, value: string) => {
     if (field === "expense_Charged_To") {
       // Find the selected project
       const selectedProject = projects.find(
@@ -90,7 +90,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   };
 
   const handleNestedChange = (
-    parentField: keyof ConceptNote,
+    parentField: keyof ConceptNoteType,
     field: string,
     value: Date | string | number | null
   ) => {
@@ -401,7 +401,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
             )}
           </FormRow>
 
-          {formData.approvedBy && (
+          {conceptNote.status !== "rejected" && formData.approvedBy && (
             <FileUpload
               selectedFiles={selectedFiles}
               setSelectedFiles={setSelectedFiles}
@@ -411,13 +411,14 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
           )}
 
           <div className="flex justify-center w-full gap-4">
-            {!formData.approvedBy && (
-              <Button size="medium" onClick={handleSave}>
+            {(!formData.approvedBy ||
+              (conceptNote.status === "rejected" && formData.approvedBy)) && (
+              <Button size="medium" disabled={isSaving} onClick={handleSave}>
                 {isSaving ? <SpinnerMini /> : "Update And Save"}
               </Button>
             )}
             {formData.approvedBy && (
-              <Button size="medium" onClick={handleSend}>
+              <Button size="medium" disabled={isSending} onClick={handleSend}>
                 {isSending ? <SpinnerMini /> : "Update And Send"}
               </Button>
             )}

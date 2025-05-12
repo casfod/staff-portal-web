@@ -175,12 +175,31 @@ export const sendAdvanceRequests = async function (
 
 export const updateAdvanceRequest = async function (
   requestId: string,
-  data: Partial<AdvanceRequestType>
+  data: Partial<AdvanceRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    const simpleFields: (keyof AdvanceRequestType)[] = ["approvedBy"];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.put<Partial<AdvanceRequestType>>(
       `/advance-requests/${requestId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

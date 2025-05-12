@@ -311,7 +311,7 @@ const FormEditPaymentRequest = ({
         </FormRow>
       </Row>
 
-      {formData.reviewedBy && (
+      {paymentRequest.status !== "rejected" && formData.reviewedBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -321,13 +321,14 @@ const FormEditPaymentRequest = ({
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleSave}>
+        {(!formData.reviewedBy ||
+          (paymentRequest.status === "rejected" && formData.reviewedBy)) && (
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
             {isSaving ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
         {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>
         )}

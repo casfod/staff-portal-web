@@ -192,7 +192,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
       setFormData({ ...formData, [field]: value });
     }
   };
-  const { saveTravelRequest, isPending } = useSaveTravelRequest();
+  const { saveTravelRequest, isPending: isSaving } = useSaveTravelRequest();
 
   const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
@@ -588,7 +588,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         </Row>
       )}
 
-      {formData.reviewedBy && (
+      {travelRequest.status !== "rejected" && formData.reviewedBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -598,13 +598,14 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleUpdate}>
-            {isPending ? <SpinnerMini /> : "Update And Save"}
+        {(!formData.reviewedBy ||
+          (travelRequest.status === "rejected" && formData.reviewedBy)) && (
+          <Button size="medium" disabled={isSaving} onClick={handleUpdate}>
+            {isSaving ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
-        {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+        {travelRequest.status !== "rejected" && formData.reviewedBy && (
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>
         )}

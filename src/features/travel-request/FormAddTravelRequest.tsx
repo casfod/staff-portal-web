@@ -173,7 +173,7 @@ const FormAddTravelRequest: React.FC = () => {
     }
   };
 
-  const { saveTravelRequest, isPending } = useSaveTravelRequest();
+  const { saveTravelRequest, isPending: isSaving } = useSaveTravelRequest();
   const { sendTravelRequest, isPending: isSending } = useSendTravelRequest();
   const { data, isLoading } = useReviewers();
   const reviewers = useMemo(() => data?.data ?? [], [data]);
@@ -527,12 +527,12 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleSave}>
-            {isPending ? <SpinnerMini /> : "Save"}
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Save"}
           </Button>
         )}
         {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>
         )}

@@ -41,7 +41,7 @@ const FormAddPurchaseRequest: React.FC = () => {
   const [disabledStates, setDisabledStates] = useState<boolean[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const { savePurchaseRequest, isPending } = useSavePurchaseRequest();
+  const { savePurchaseRequest, isPending: isSaving } = useSavePurchaseRequest();
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
 
@@ -523,12 +523,12 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleSave}>
-            {isPending ? <SpinnerMini /> : "Save"}
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Save"}
           </Button>
         )}
         {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>
         )}

@@ -201,7 +201,7 @@ const PurchaseRequest = () => {
                     {/* Admin Approval Section (for STAFF role) */}
                     {!purchaseRequest.approvedBy && // Check if approvedBy is not set
                       purchaseRequest.status === "reviewed" && (
-                        <div className="relative z-10">
+                        <div className="relative z-10 pb-64">
                           <AdminApprovalSection
                             formData={formData}
                             handleFormChange={handleFormChange}

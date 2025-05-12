@@ -41,7 +41,7 @@ const AdminApprovalSection = ({
     </FormRow>
     <div className="flex w-full justify-center p-4">
       {formData.approvedBy && (
-        <Button size="medium" onClick={handleSend}>
+        <Button disabled={isUpdating} size="medium" onClick={handleSend}>
           {isUpdating ? <SpinnerMini /> : "Request Approval"}
         </Button>
       )}

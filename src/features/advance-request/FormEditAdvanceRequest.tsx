@@ -647,7 +647,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
         </Row>
       )}
 
-      {formData.reviewedBy && (
+      {advanceRequest.status !== "rejected" && formData.reviewedBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -657,12 +657,13 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
+        {(!formData.reviewedBy ||
+          (advanceRequest.status === "rejected" && formData.reviewedBy)) && (
           <Button size="medium" onClick={handleSave}>
             {isPending ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
-        {formData.reviewedBy && (
+        {advanceRequest.status !== "rejected" && formData.reviewedBy && (
           <Button size="medium" onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}
           </Button>

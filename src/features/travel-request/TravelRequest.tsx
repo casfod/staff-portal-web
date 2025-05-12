@@ -174,7 +174,7 @@ const TravelRequest = () => {
 
                   {!travelRequest.approvedBy &&
                     travelRequest.status === "reviewed" && (
-                      <div className="relative z-10">
+                      <div className="relative z-10 pb-64">
                         <AdminApprovalSection
                           formData={formData}
                           handleFormChange={handleFormChange}

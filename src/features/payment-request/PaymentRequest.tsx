@@ -186,7 +186,7 @@ const PaymentRequest = () => {
                     {/* Admin Approval Section (for STAFF role) */}
                     {!paymentRequest.approvedBy && // Check if approvedBy is not set
                       paymentRequest.status === "reviewed" && (
-                        <div className="relative z-10">
+                        <div className="relative z-10 pb-64">
                           <AdminApprovalSection
                             formData={formData}
                             handleFormChange={handleFormChange}

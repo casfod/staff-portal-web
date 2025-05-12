@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ConceptNote, Project } from "../../interfaces";
+import { ConceptNoteType, Project } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
@@ -18,7 +18,7 @@ import { FileUpload } from "../../ui/FileUpload";
 const FormAddConceptNotes = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const [formData, setFormData] = useState<Partial<ConceptNote>>({
+  const [formData, setFormData] = useState<Partial<ConceptNoteType>>({
     activity_title: "",
     activity_location: "",
     activity_period: { from: null, to: null },
@@ -49,7 +49,7 @@ const FormAddConceptNotes = () => {
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   const handleNestedChange = (
-    parentField: keyof ConceptNote,
+    parentField: keyof ConceptNoteType,
     field: string,
     value: Date | string | number | null
   ) => {
@@ -62,7 +62,7 @@ const FormAddConceptNotes = () => {
     }));
   };
 
-  const handleFormChange = (field: keyof ConceptNote, value: string) => {
+  const handleFormChange = (field: keyof ConceptNoteType, value: string) => {
     if (field === "expense_Charged_To") {
       // Find the selected project
       const selectedProject = projects.find(
@@ -402,12 +402,12 @@ const FormAddConceptNotes = () => {
 
           <div className="flex justify-center w-full gap-4">
             {!formData.approvedBy && (
-              <Button size="medium" onClick={handleSave}>
+              <Button disabled={isSaving} size="medium" onClick={handleSave}>
                 {isSaving ? <SpinnerMini /> : "Save"}
               </Button>
             )}
             {formData.approvedBy && (
-              <Button size="medium" onClick={handleSend}>
+              <Button size="medium" disabled={isSending} onClick={handleSend}>
                 {isSending ? <SpinnerMini /> : "Save And Send"}
               </Button>
             )}

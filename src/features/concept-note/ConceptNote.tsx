@@ -14,6 +14,9 @@ import { ConceptNoteDetails } from "./ConceptNoteDetails";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import TextHeader from "../../ui/TextHeader";
+import { FileUpload } from "../../ui/FileUpload";
+import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
+import { ConceptNoteType } from "../../interfaces";
 
 const ConceptNote = () => {
   const localStorageUserX = localStorageUser();
@@ -26,6 +29,8 @@ const ConceptNote = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [formData] = useState<Partial<ConceptNoteType>>({});
 
   useEffect(() => {
     if (!param || !conceptNote) {
@@ -36,6 +41,15 @@ const ConceptNote = () => {
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     param.requestId!
   );
+
+  const { updateConceptNote, isPending: isUpdating } = useUpdateConceptNote(
+    conceptNote?.id!
+  );
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateConceptNote({ data: formData, files: selectedFiles });
+  };
 
   const handleStatusChange = () => {
     Swal.fire({
@@ -76,6 +90,8 @@ const ConceptNote = () => {
     conceptNote.account_Code,
     dateformat(conceptNote.createdAt!),
   ];
+
+  const isCreator = conceptNote!.preparedBy!.id === localStorageUserX.id;
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -125,6 +141,23 @@ const ConceptNote = () => {
               <td colSpan={4}>
                 <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                   <ConceptNoteDetails request={conceptNote} />
+
+                  {isCreator && conceptNote.status === "approved" && (
+                    <div className="flex flex-col gap-3 mt-3">
+                      <FileUpload
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        accept=".jpg,.png,.pdf,.xlsx,.docx"
+                        multiple={true}
+                      />
+
+                      <div className="self-center">
+                        <Button disabled={isUpdating} onClick={handleSend}>
+                          Upload
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {conceptNote.status !== "draft" && (
                     <div className="text-gray-600 mt-4 tracking-wide">

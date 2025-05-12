@@ -328,12 +328,12 @@ const FormAddPaymentRequest = () => {
 
       <div className="flex justify-center w-full gap-4">
         {!formData.reviewedBy && (
-          <Button size="medium" onClick={handleSave}>
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
             {isSaving ? <SpinnerMini /> : "Save"}
           </Button>
         )}
         {formData.reviewedBy && (
-          <Button size="medium" onClick={handleSend}>
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>
         )}

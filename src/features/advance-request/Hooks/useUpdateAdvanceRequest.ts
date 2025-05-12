@@ -25,8 +25,13 @@ export function useUpdateAdvanceRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<AdvanceRequestType>) =>
-      updateAdvanceRequestApi(requestId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<AdvanceRequestType>;
+      files: File[];
+    }) => updateAdvanceRequestApi(requestId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {
