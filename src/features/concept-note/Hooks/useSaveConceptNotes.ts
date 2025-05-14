@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { saveConceptNote as saveAndSendConceptNoteApi } from "../../../services/apiConceptNotes.ts";
 import { AxiosError, AxiosResponse } from "axios";
-import { ConceptNote } from "../../../interfaces.ts";
+import { ConceptNoteType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -22,7 +22,8 @@ export function useSaveConceptNote() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<ConceptNote>) => saveAndSendConceptNoteApi(data),
+    mutationFn: (data: Partial<ConceptNoteType>) =>
+      saveAndSendConceptNoteApi(data),
 
     onSuccess: (data) => {
       if (data.status === 201) {

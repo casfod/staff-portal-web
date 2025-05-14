@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { setPage, setSearchTerm } from "../../store/genericQuerySlice";
 import Spinner from "../../ui/Spinner";
 import Swal from "sweetalert2";
-import { ConceptNote } from "../../interfaces";
+import { ConceptNoteType } from "../../interfaces";
 import { setConceptNote } from "../../store/conceptNoteSlice";
 import { useDeleteConceptNote } from "./Hooks/useDeleteConceptNote";
 import { GoXCircle } from "react-icons/go";
@@ -62,11 +62,11 @@ const AllConceptNotes = () => {
     }));
   };
 
-  const handleEdit = (conceptNote: ConceptNote) => {
+  const handleEdit = (conceptNote: ConceptNoteType) => {
     dispatch(setConceptNote(conceptNote));
     navigate(`/concept-notes/edit-concept-note/${conceptNote.id}`);
   };
-  const handleAction = (conceptNote: ConceptNote) => {
+  const handleAction = (conceptNote: ConceptNoteType) => {
     dispatch(setConceptNote(conceptNote));
     navigate(`/concept-notes/concept-note/${conceptNote.id}`);
   };

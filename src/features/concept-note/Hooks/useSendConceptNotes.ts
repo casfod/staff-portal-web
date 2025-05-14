@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { saveAndSendConceptNote as SendConceptNoteApi } from "../../../services/apiConceptNotes.ts";
 import { AxiosError, AxiosResponse } from "axios";
-import { ConceptNote } from "../../../interfaces.ts";
+import { ConceptNoteType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -26,7 +26,7 @@ export function useSendConceptNote() {
       data,
       files,
     }: {
-      data: Partial<ConceptNote>;
+      data: Partial<ConceptNoteType>;
       files: File[];
     }) => SendConceptNoteApi(data, files),
 

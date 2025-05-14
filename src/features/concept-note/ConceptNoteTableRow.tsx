@@ -1,4 +1,4 @@
-import { ConceptNote } from "../../interfaces";
+import { ConceptNoteType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
 import { dateformat } from "../../utils/dateFormat";
@@ -16,12 +16,12 @@ const ConceptNoteTableRow = ({
   handleDelete,
   handleAction,
 }: {
-  request: ConceptNote;
+  request: ConceptNoteType;
   visibleItems: { [key: string]: boolean };
   toggleViewItems: (id: string) => void;
-  handleEdit: (request: ConceptNote) => void;
+  handleEdit: (request: ConceptNoteType) => void;
   handleDelete: (id: string) => void;
-  handleAction: (request: ConceptNote) => void;
+  handleAction: (request: ConceptNoteType) => void;
 }) => {
   const localStorageUserX = localStorageUser();
 
