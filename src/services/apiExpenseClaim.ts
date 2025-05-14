@@ -173,14 +173,32 @@ export const sendExpenseClaims = async function (
 
 export const updateExpenseClaim = async function (
   requestId: string,
-  data: Partial<ExpenseClaimType>
+  data: Partial<ExpenseClaimType>,
+  files: File[]
 ) {
-  console.log("🔥❌🔥:", requestId);
-
   try {
+    const formData = new FormData();
+
+    // Append standard fields
+    const simpleFields: (keyof ExpenseClaimType)[] = [];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.put<Partial<ExpenseClaimType>>(
       `/expense-claims/${requestId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

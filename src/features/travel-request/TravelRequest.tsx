@@ -20,6 +20,8 @@ import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import { FileUpload } from "../../ui/FileUpload";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const TravelRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -32,6 +34,7 @@ const TravelRequest = () => {
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     param.requestId!
@@ -78,7 +81,7 @@ const TravelRequest = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updateTravelRequest(formData);
+    updateTravelRequest({ data: formData, files: selectedFiles });
   };
 
   if (!travelRequest) {
@@ -88,6 +91,8 @@ const TravelRequest = () => {
   }
 
   const isCreator = travelRequest!.createdBy!.id === localStorageUserX.id;
+
+  const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" && travelRequest.status === "pending";
@@ -171,6 +176,25 @@ const TravelRequest = () => {
                         )}
                       </div>
                     )}
+
+                  {isCreator && travelRequest.status === "approved" && (
+                    <div className="flex flex-col gap-3">
+                      <FileUpload
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        accept=".jpg,.png,.pdf,.xlsx,.docx"
+                        multiple={true}
+                      />
+
+                      {isFile && (
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            {isUpdating ? <SpinnerMini /> : "Upload"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {!travelRequest.approvedBy &&
                     travelRequest.status === "reviewed" && (

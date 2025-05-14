@@ -1,11 +1,11 @@
 import { moneyFormat } from "../../utils/moneyFormat";
-import { ConceptNote } from "../../interfaces";
+import { ConceptNoteType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
 interface RequestDetailsProps {
-  request: ConceptNote;
+  request: ConceptNoteType;
 }
 
 export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {

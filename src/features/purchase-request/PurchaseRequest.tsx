@@ -17,6 +17,8 @@ import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import { FileUpload } from "../../ui/FileUpload";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const PurchaseRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -30,6 +32,7 @@ const PurchaseRequest = () => {
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Custom hooks for updating status and purchase request
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
@@ -88,7 +91,7 @@ const PurchaseRequest = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePurchaseRequest(formData);
+    updatePurchaseRequest({ data: formData, files: selectedFiles });
   };
 
   // Handle the case where purchaseRequest is null
@@ -100,6 +103,7 @@ const PurchaseRequest = () => {
     purchaseRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   const isCreator = purchaseRequest!.createdBy!.id === localStorageUserX.id;
+  const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
@@ -197,6 +201,25 @@ const PurchaseRequest = () => {
                           {/* <Button onClick={handleStatusChange}>TEST</Button> */}
                         </div>
                       )}
+
+                    {isCreator && purchaseRequest.status === "approved" && (
+                      <div className="flex flex-col gap-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
+                        />
+
+                        {isFile && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!purchaseRequest.approvedBy && // Check if approvedBy is not set

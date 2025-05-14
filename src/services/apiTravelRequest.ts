@@ -172,12 +172,32 @@ export const sendTravelRequests = async function (
 
 export const updateTravelRequest = async function (
   requestId: string,
-  data: Partial<TravelRequestType>
+  data: Partial<TravelRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    // Append standard fields
+    const simpleFields: (keyof TravelRequestType)[] = [];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.put<Partial<TravelRequestType>>(
       `/travel-requests/${requestId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

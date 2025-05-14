@@ -1,6 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-// import { useNavigate } from "react-router-dom";
-
 import { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
 import { updateTravelRequest as updateTravelRequestApi } from "../../../services/apiTravelRequest.ts";
@@ -25,8 +23,13 @@ export function useUpdateTravelRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<TravelRequestType>) =>
-      updateTravelRequestApi(requestId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<TravelRequestType>;
+      files: File[];
+    }) => updateTravelRequestApi(requestId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

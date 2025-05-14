@@ -25,8 +25,13 @@ export function useUpdateExpenseClaim(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<ExpenseClaimType>) =>
-      updateExpenseClaimApi(requestId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<ExpenseClaimType>;
+      files: File[];
+    }) => updateExpenseClaimApi(requestId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

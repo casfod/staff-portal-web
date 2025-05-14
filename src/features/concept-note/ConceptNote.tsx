@@ -17,6 +17,7 @@ import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
 import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { ConceptNoteType } from "../../interfaces";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const ConceptNote = () => {
   const localStorageUserX = localStorageUser();
@@ -92,6 +93,7 @@ const ConceptNote = () => {
   ];
 
   const isCreator = conceptNote!.preparedBy!.id === localStorageUserX.id;
+  const isFile = selectedFiles.length > 0;
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -151,11 +153,13 @@ const ConceptNote = () => {
                         multiple={true}
                       />
 
-                      <div className="self-center">
-                        <Button disabled={isUpdating} onClick={handleSend}>
-                          Upload
-                        </Button>
-                      </div>
+                      {isFile && (
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            {isUpdating ? <SpinnerMini /> : "Upload"}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
 

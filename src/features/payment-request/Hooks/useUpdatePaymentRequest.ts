@@ -25,8 +25,13 @@ export function useUpdatePaymentRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PaymentRequestType>) =>
-      updatePaymentRequestApi(requestId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<PaymentRequestType>;
+      files: File[];
+    }) => updatePaymentRequestApi(requestId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

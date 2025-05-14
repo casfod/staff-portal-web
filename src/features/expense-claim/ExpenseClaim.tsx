@@ -20,6 +20,8 @@ import AdminApprovalSection from "../../ui/AdminApprovalSection";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import { FileUpload } from "../../ui/FileUpload";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const ExpenseClaim = () => {
   const localStorageUserX = localStorageUser();
@@ -32,6 +34,7 @@ const ExpenseClaim = () => {
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     param.requestId!
@@ -82,7 +85,7 @@ const ExpenseClaim = () => {
     e.preventDefault();
     console.log("Expense Claim:", formData);
 
-    updateExpenseClaim(formData);
+    updateExpenseClaim({ data: formData, files: selectedFiles });
   };
 
   if (!expenseClaim) {
@@ -92,6 +95,7 @@ const ExpenseClaim = () => {
   }
 
   const isCreator = expenseClaim!.createdBy!.id === localStorageUserX.id;
+  const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" && expenseClaim.status === "pending";
@@ -175,6 +179,25 @@ const ExpenseClaim = () => {
                         )}
                       </div>
                     )}
+
+                  {isCreator && expenseClaim.status === "approved" && (
+                    <div className="flex flex-col gap-3">
+                      <FileUpload
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        accept=".jpg,.png,.pdf,.xlsx,.docx"
+                        multiple={true}
+                      />
+
+                      {isFile && (
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            {isUpdating ? <SpinnerMini /> : "Upload"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {!expenseClaim.approvedBy &&
                     expenseClaim.status === "reviewed" && (

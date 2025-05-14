@@ -25,8 +25,13 @@ export function useUpdatePurChaseRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PurChaseRequestType>) =>
-      updatePurchaseRequestApi(requestId, data),
+    mutationFn: ({
+      data,
+      files,
+    }: {
+      data: Partial<PurChaseRequestType>;
+      files: File[];
+    }) => updatePurchaseRequestApi(requestId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {

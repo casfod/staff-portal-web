@@ -168,12 +168,32 @@ export const sendPaymentRequests = async function (
 };
 export const updatePaymentRequest = async function (
   requestId: string,
-  data: Partial<PaymentRequestType>
+  data: Partial<PaymentRequestType>,
+  files: File[]
 ) {
   try {
+    const formData = new FormData();
+
+    // Append standard fields
+    const simpleFields: (keyof PaymentRequestType)[] = [];
+
+    simpleFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.put<Partial<PaymentRequestType>>(
       `/payment-requests/${requestId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     return response.data;
   } catch (err) {

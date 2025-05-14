@@ -20,6 +20,8 @@ import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
+import { FileUpload } from "../../ui/FileUpload";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const PaymentRequest = () => {
   const localStorageUserX = localStorageUser();
@@ -33,6 +35,8 @@ const PaymentRequest = () => {
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   // Access the paymentRequest state from Redux
 
   // Custom hooks for updating status and payment request
@@ -84,7 +88,7 @@ const PaymentRequest = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePaymentRequest(formData);
+    updatePaymentRequest({ data: formData, files: selectedFiles });
   };
 
   // Handle the case where paymentRequest is null
@@ -93,6 +97,7 @@ const PaymentRequest = () => {
   }
 
   const isCreator = paymentRequest!.requestedBy!.id === localStorageUserX.id;
+  const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
@@ -183,6 +188,26 @@ const PaymentRequest = () => {
                           )}
                         </div>
                       )}
+
+                    {isCreator && paymentRequest.status === "approved" && (
+                      <div className="flex flex-col gap-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
+                        />
+
+                        {isFile && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Admin Approval Section (for STAFF role) */}
                     {!paymentRequest.approvedBy && // Check if approvedBy is not set
                       paymentRequest.status === "reviewed" && (

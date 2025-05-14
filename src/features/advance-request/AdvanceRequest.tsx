@@ -20,6 +20,7 @@ import StatusBadge from "../../ui/StatusBadge";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 const Request = () => {
   // State and hooks initialization
@@ -103,6 +104,7 @@ const Request = () => {
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   const isCreator = advanceRequest!.createdBy!.id === localStorageUserX.id;
+  const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
@@ -204,11 +206,13 @@ const Request = () => {
                           multiple={true}
                         />
 
-                        <div className="self-center">
-                          <Button disabled={isUpdating} onClick={handleSend}>
-                            Upload
-                          </Button>
-                        </div>
+                        {isFile && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
 
