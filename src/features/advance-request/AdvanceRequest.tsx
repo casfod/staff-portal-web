@@ -177,6 +177,25 @@ const Request = () => {
                   <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                     <AdvanceRequestDetails request={advanceRequest} />
 
+                    {isCreator && advanceRequest.status === "approved" && (
+                      <div className="flex flex-col gap-3 mt-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
+                        />
+
+                        {isFile && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Comments and Actions Section */}
                     {advanceRequest?.reviewedBy &&
                       advanceRequest?.status !== "draft" && (
@@ -196,25 +215,6 @@ const Request = () => {
                           )}
                         </div>
                       )}
-
-                    {isCreator && advanceRequest.status === "approved" && (
-                      <div className="flex flex-col gap-3">
-                        <FileUpload
-                          selectedFiles={selectedFiles}
-                          setSelectedFiles={setSelectedFiles}
-                          accept=".jpg,.png,.pdf,.xlsx,.docx"
-                          multiple={true}
-                        />
-
-                        {isFile && (
-                          <div className="self-center">
-                            <Button disabled={isUpdating} onClick={handleSend}>
-                              {isUpdating ? <SpinnerMini /> : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!advanceRequest?.approvedBy && // Check if approvedBy is not set

@@ -158,6 +158,25 @@ const TravelRequest = () => {
                 <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                   <TravelRequestDetails request={travelRequest} />
 
+                  {isCreator && travelRequest.status === "approved" && (
+                    <div className="flex flex-col gap-3 mt-3">
+                      <FileUpload
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        accept=".jpg,.png,.pdf,.xlsx,.docx"
+                        multiple={true}
+                      />
+
+                      {isFile && (
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            {isUpdating ? <SpinnerMini /> : "Upload"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {travelRequest.reviewedBy &&
                     travelRequest.status !== "draft" && (
                       <div className="text-gray-600 mt-4 tracking-wide">
@@ -176,25 +195,6 @@ const TravelRequest = () => {
                         )}
                       </div>
                     )}
-
-                  {isCreator && travelRequest.status === "approved" && (
-                    <div className="flex flex-col gap-3">
-                      <FileUpload
-                        selectedFiles={selectedFiles}
-                        setSelectedFiles={setSelectedFiles}
-                        accept=".jpg,.png,.pdf,.xlsx,.docx"
-                        multiple={true}
-                      />
-
-                      {isFile && (
-                        <div className="self-center">
-                          <Button disabled={isUpdating} onClick={handleSend}>
-                            {isUpdating ? <SpinnerMini /> : "Upload"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {!travelRequest.approvedBy &&
                     travelRequest.status === "reviewed" && (

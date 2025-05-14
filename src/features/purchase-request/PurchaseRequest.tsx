@@ -177,6 +177,25 @@ const PurchaseRequest = () => {
                   <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                     <PurchaseRequestDetails request={purchaseRequest} />
 
+                    {isCreator && purchaseRequest.status === "approved" && (
+                      <div className="flex flex-col gap-3 mt-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
+                        />
+
+                        {isFile && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Comments and Actions Section */}
 
                     {purchaseRequest?.reviewedBy &&
@@ -201,25 +220,6 @@ const PurchaseRequest = () => {
                           {/* <Button onClick={handleStatusChange}>TEST</Button> */}
                         </div>
                       )}
-
-                    {isCreator && purchaseRequest.status === "approved" && (
-                      <div className="flex flex-col gap-3">
-                        <FileUpload
-                          selectedFiles={selectedFiles}
-                          setSelectedFiles={setSelectedFiles}
-                          accept=".jpg,.png,.pdf,.xlsx,.docx"
-                          multiple={true}
-                        />
-
-                        {isFile && (
-                          <div className="self-center">
-                            <Button disabled={isUpdating} onClick={handleSend}>
-                              {isUpdating ? <SpinnerMini /> : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!purchaseRequest.approvedBy && // Check if approvedBy is not set
