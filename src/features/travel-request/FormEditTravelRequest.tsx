@@ -213,8 +213,6 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, expenses: [...itemGroup] };
     sendTravelRequest({ data, files: selectedFiles });

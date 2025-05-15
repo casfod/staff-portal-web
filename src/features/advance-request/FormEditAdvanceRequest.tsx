@@ -206,8 +206,6 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    console.log("Item Groups:", itemGroup);
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     sendAdvanceRequest({ data, files: selectedFiles });

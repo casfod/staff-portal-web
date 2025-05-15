@@ -13,7 +13,6 @@ export const login = async function (email: string, password: string) {
       email,
       password,
     });
-    console.log(response);
 
     return response.data;
   } catch (err) {
@@ -45,36 +44,9 @@ export const getUser = async function () {
   }
 };
 
-// export const updateUser = async function (
-//   UserId: number | undefined,
-//   data: UpdateUserType
-// ) {
-//   console.log("❌updateUser", data);
-
-//   try {
-//     const response = await axios.patch<UpdateUserType>(
-//       `${apiURL}/users/${UserId}`,
-//       data,
-//       { headers }
-//     );
-//     console.log(response.data);
-
-//     return response.data;
-//   } catch (err) {
-//     // ErrorHandler(err);
-//     if (axios.isAxiosError(err)) {
-//       return err.response?.data;
-//     } else {
-//       // Handle other errors
-//       console.log(err);
-//     }
-//   }
-// };
-
 export const logout = async function () {
   try {
     const response = await axios.get(`${apiURL}/users/logout`);
-    // console.log(response.data);
     document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
     return response.data;
