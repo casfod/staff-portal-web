@@ -78,7 +78,7 @@ export function Dashboard() {
   const stats = useMemo(
     () => [
       {
-        name: "Total Projects",
+        name: "Projects",
         total: renderStatValue(
           statsData.project?.totalProjects,
           statsQueries.project.isLoading
