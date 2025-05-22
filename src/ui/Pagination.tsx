@@ -15,7 +15,7 @@ export function Pagination({
       {currentPage > 1 && (
         <button
           onClick={() => onPageChange(currentPage - 1)}
-          className="px-3 py-1 bg-buttonColor hover:bg-buttonColorHover text-white rounded-lg"
+          className="px-3 py-1 bg-gradient-to-br from-buttonColor to-[#08527A] hover:bg-buttonColorHover text-white rounded-lg disabled:opacity-50"
         >
           Previous
         </button>
