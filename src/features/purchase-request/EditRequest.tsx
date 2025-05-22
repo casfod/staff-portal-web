@@ -45,7 +45,7 @@ const EditPurchaseRequest = () => {
       </div>
 
       <div className="border w-full rounded-lg">
-        <div className="bg-white bg-opacity-90 py-4 md:py-6 py-10 px-2 md:px-6 px-12 w-full rounded-lg">
+        <div className="bg-white bg-opacity-90 py-4 md:py-6 lg:py-10 px-2 md:px-6 lg:px-12 w-full rounded-lg">
           <FormEditPurchaseRequest purchaseRequest={purchaseRequest} />
         </div>
       </div>

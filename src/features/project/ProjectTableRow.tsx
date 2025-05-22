@@ -9,6 +9,7 @@ import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { ProjectDetails } from "./ProjectDetails";
+import { truncateText } from "../../utils/truncateText";
 
 const ProjectTableRow = ({
   request,
@@ -38,7 +39,7 @@ const ProjectTableRow = ({
 
   const rowData = [
     // { id: "project_title", content: request.project_title },
-    { id: "project_code", content: request.project_code },
+    { id: "project_code", content: truncateText(request.project_code, 40) },
     {
       id: "project_budget",
       content: moneyFormat(Number(request.project_budget), "USD"),
