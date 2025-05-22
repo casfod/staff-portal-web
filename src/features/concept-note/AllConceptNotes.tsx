@@ -22,7 +22,7 @@ import ConceptNoteTableRow from "./ConceptNoteTableRow";
 const tableHeadData = [
   "Prepared By",
   "Status",
-  "Project Code",
+  "Account Code",
   "Date",
   "Actions",
 ];
