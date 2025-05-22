@@ -18,6 +18,7 @@ import { FileUpload } from "../../ui/FileUpload";
 import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { ConceptNoteType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
+import { truncateText } from "../../utils/truncateText";
 
 const ConceptNote = () => {
   const localStorageUserX = localStorageUser();
@@ -88,7 +89,7 @@ const ConceptNote = () => {
   const tableRowData = [
     `${conceptNote.preparedBy.first_name} ${conceptNote.preparedBy.last_name}`,
     <StatusBadge status={conceptNote.status!} key="status-badge" />,
-    conceptNote.account_Code,
+    truncateText(conceptNote.account_Code, 40),
     dateformat(conceptNote.createdAt!),
   ];
 

@@ -8,6 +8,7 @@ import { dateformat } from "../../utils/dateFormat";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import { ProjectDetails } from "./ProjectDetails";
+import { truncateText } from "../../utils/truncateText";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Project = () => {
 
   const tableRowData = [
     // { id: "project_title", content: request.project_title },
-    { id: "project_code", content: project.project_code },
+    { id: "project_code", content: truncateText(project.project_code, 40) },
     {
       id: "project_budget",
       content: moneyFormat(Number(project.project_budget), "USD"),
