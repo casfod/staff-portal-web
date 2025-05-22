@@ -84,7 +84,7 @@ const ConceptNote = () => {
     conceptNote.status === "pending" &&
     localStorageUserX.id === conceptNote.approvedBy?.id;
 
-  const tableHeadData = ["Prepared By", "Status", "Project Code", "Date"];
+  const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
 
   const tableRowData = [
     `${conceptNote.preparedBy.first_name} ${conceptNote.preparedBy.last_name}`,
