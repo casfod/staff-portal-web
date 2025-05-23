@@ -146,8 +146,8 @@ const FormAddAdvanceRequest: React.FC = () => {
       ...itemGroup,
       {
         description: "",
-        frequency: 0,
-        quantity: 0,
+        frequency: 1,
+        quantity: 1,
         unit: "",
         unitCost: 0,
         total: 0,

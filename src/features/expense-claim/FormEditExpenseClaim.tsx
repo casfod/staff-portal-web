@@ -130,8 +130,8 @@ const FormEditExpenseClaim: React.FC<FormEditExpenseClaimProps> = ({
       ...itemGroup,
       {
         expense: "",
-        frequency: 0,
-        quantity: 0,
+        frequency: 1,
+        quantity: 1,
         unit: "",
         unitCost: 0,
         total: 0,
