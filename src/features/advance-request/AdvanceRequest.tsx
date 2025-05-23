@@ -104,15 +104,22 @@ const Request = () => {
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   const isCreator = advanceRequest!.createdBy!.id === localStorageUserX.id;
+  const isReviewer = advanceRequest!.reviewedBy?.id === localStorageUserX.id;
+  const isApprover = advanceRequest!.approvedBy?.id === localStorageUserX.id;
+
+  const isAllowed = isCreator || isReviewer || isApprover;
+
   const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
-    advanceRequest.status === "pending";
+    advanceRequest.status === "pending" &&
+    isReviewer;
 
   const isAdminUpdatingReviewed =
     ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    advanceRequest.status === "reviewed";
+    advanceRequest.status === "reviewed" &&
+    isApprover;
 
   const showStatusUpdate =
     !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
@@ -218,7 +225,8 @@ const Request = () => {
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!advanceRequest?.approvedBy && // Check if approvedBy is not set
-                      advanceRequest?.status === "reviewed" && (
+                      advanceRequest?.status === "reviewed" &&
+                      isAllowed && (
                         <>
                           {/* <FileUpload
                             selectedFiles={selectedFiles}

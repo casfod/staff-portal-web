@@ -103,15 +103,30 @@ const PurchaseRequest = () => {
     purchaseRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   const isCreator = purchaseRequest!.createdBy!.id === localStorageUserX.id;
+  const isReviewer = purchaseRequest!.reviewedBy?.id === localStorageUserX.id;
+  const isApprover = purchaseRequest!.approvedBy?.id === localStorageUserX.id;
+
+  const isAllowed = isCreator || isReviewer || isApprover;
+
   const isFile = selectedFiles.length > 0;
+
+  // const isReviewerUpdatingPending =
+  //   localStorageUserX.role === "REVIEWER" &&
+  //   purchaseRequest.status === "pending";
+
+  // const isAdminUpdatingReviewed =
+  //   ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+  //   purchaseRequest.status === "reviewed";
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
-    purchaseRequest.status === "pending";
+    purchaseRequest.status === "pending" &&
+    isReviewer;
 
   const isAdminUpdatingReviewed =
     ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    purchaseRequest.status === "reviewed";
+    purchaseRequest.status === "reviewed" &&
+    isApprover;
 
   const showStatusUpdate =
     !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
@@ -223,7 +238,8 @@ const PurchaseRequest = () => {
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!purchaseRequest.approvedBy && // Check if approvedBy is not set
-                      purchaseRequest.status === "reviewed" && (
+                      purchaseRequest.status === "reviewed" &&
+                      isAllowed && (
                         <div className="relative z-10 pb-64">
                           <AdminApprovalSection
                             formData={formData}

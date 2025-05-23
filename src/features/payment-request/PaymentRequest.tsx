@@ -57,8 +57,11 @@ const PaymentRequest = () => {
   }, [paymentRequest, param, navigate]);
 
   // Handle form field changes
+
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    console.log(formData.approvedBy);
   };
 
   // Handle status change with confirmation dialog
@@ -88,7 +91,9 @@ const PaymentRequest = () => {
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
+
     updatePaymentRequest({ data: formData, files: selectedFiles });
+    console.log("send:", formData.approvedBy);
   };
 
   // Handle the case where paymentRequest is null
@@ -97,15 +102,37 @@ const PaymentRequest = () => {
   }
 
   const isCreator = paymentRequest!.requestedBy!.id === localStorageUserX.id;
+  const isReviewer = paymentRequest!.reviewedBy?.id === localStorageUserX.id;
+  const isApprover = paymentRequest!.approvedBy?.id === localStorageUserX.id;
+
+  const isAllowed = isCreator || isReviewer || isApprover;
+
+  console.log("isCreator:", isCreator);
+  console.log("isApprover:", isApprover);
+  console.log("isReviewer:", isReviewer);
+  console.log("Creator:", paymentRequest!.requestedBy);
+  console.log("Reviewer:", paymentRequest!.reviewedBy);
+  console.log("Approver:", paymentRequest!.approvedBy);
+
   const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
     localStorageUserX.role === "REVIEWER" &&
-    paymentRequest.status === "pending";
+    paymentRequest.status === "pending" &&
+    isReviewer;
 
   const isAdminUpdatingReviewed =
     ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    paymentRequest.status === "reviewed";
+    paymentRequest.status === "reviewed" &&
+    isApprover;
+
+  // const isReviewerUpdatingPending =
+  //   localStorageUserX.role === "REVIEWER" &&
+  //   paymentRequest.status === "pending";
+
+  // const isAdminUpdatingReviewed =
+  //   ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
+  //   paymentRequest.status === "reviewed";
 
   const showStatusUpdate =
     !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
@@ -210,7 +237,8 @@ const PaymentRequest = () => {
 
                     {/* Admin Approval Section (for STAFF role) */}
                     {!paymentRequest.approvedBy && // Check if approvedBy is not set
-                      paymentRequest.status === "reviewed" && (
+                      paymentRequest.status === "reviewed" &&
+                      isAllowed && (
                         <div className="relative z-10 pb-64">
                           <AdminApprovalSection
                             formData={formData}

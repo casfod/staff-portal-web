@@ -179,7 +179,7 @@ export const updatePurchaseRequest = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof PurChaseRequestType)[] = [];
+    const simpleFields: (keyof PurChaseRequestType)[] = ["approvedBy"];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {

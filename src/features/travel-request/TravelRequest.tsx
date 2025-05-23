@@ -91,15 +91,22 @@ const TravelRequest = () => {
   }
 
   const isCreator = travelRequest!.createdBy!.id === localStorageUserX.id;
+  const isReviewer = travelRequest!.reviewedBy?.id === localStorageUserX.id;
+  const isApprover = travelRequest!.approvedBy?.id === localStorageUserX.id;
+
+  const isAllowed = isCreator || isReviewer || isApprover;
 
   const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
-    localStorageUserX.role === "REVIEWER" && travelRequest.status === "pending";
+    localStorageUserX.role === "REVIEWER" &&
+    travelRequest.status === "pending" &&
+    isReviewer;
 
   const isAdminUpdatingReviewed =
     ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    travelRequest.status === "reviewed";
+    travelRequest.status === "reviewed" &&
+    isApprover;
 
   const showStatusUpdate =
     !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
@@ -197,7 +204,8 @@ const TravelRequest = () => {
                     )}
 
                   {!travelRequest.approvedBy &&
-                    travelRequest.status === "reviewed" && (
+                    travelRequest.status === "reviewed" &&
+                    isAllowed && (
                       <div className="relative z-10 pb-64">
                         <AdminApprovalSection
                           formData={formData}

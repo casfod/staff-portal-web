@@ -187,7 +187,7 @@ export const updateConceptNote = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof ConceptNoteType)[] = [];
+    const simpleFields: (keyof ConceptNoteType)[] = ["approvedBy"];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {

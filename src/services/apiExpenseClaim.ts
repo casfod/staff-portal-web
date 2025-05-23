@@ -180,7 +180,7 @@ export const updateExpenseClaim = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof ExpenseClaimType)[] = [];
+    const simpleFields: (keyof ExpenseClaimType)[] = ["approvedBy"];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {

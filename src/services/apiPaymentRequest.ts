@@ -175,7 +175,7 @@ export const updatePaymentRequest = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof PaymentRequestType)[] = [];
+    const simpleFields: (keyof PaymentRequestType)[] = ["approvedBy"];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {

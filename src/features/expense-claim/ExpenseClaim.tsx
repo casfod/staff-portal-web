@@ -95,14 +95,22 @@ const ExpenseClaim = () => {
   }
 
   const isCreator = expenseClaim!.createdBy!.id === localStorageUserX.id;
+  const isReviewer = expenseClaim!.reviewedBy?.id === localStorageUserX.id;
+  const isApprover = expenseClaim!.approvedBy?.id === localStorageUserX.id;
+
+  const isAllowed = isCreator || isReviewer || isApprover;
+
   const isFile = selectedFiles.length > 0;
 
   const isReviewerUpdatingPending =
-    localStorageUserX.role === "REVIEWER" && expenseClaim.status === "pending";
+    localStorageUserX.role === "REVIEWER" &&
+    expenseClaim.status === "pending" &&
+    isReviewer;
 
   const isAdminUpdatingReviewed =
     ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    expenseClaim.status === "reviewed";
+    expenseClaim.status === "reviewed" &&
+    isApprover;
 
   const showStatusUpdate =
     !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
@@ -200,7 +208,8 @@ const ExpenseClaim = () => {
                     )}
 
                   {!expenseClaim.approvedBy &&
-                    expenseClaim.status === "reviewed" && (
+                    expenseClaim.status === "reviewed" &&
+                    isAllowed && (
                       <div className="relative z-10 pb-64">
                         <AdminApprovalSection
                           formData={formData}

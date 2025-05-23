@@ -179,7 +179,7 @@ export const updateTravelRequest = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof TravelRequestType)[] = [];
+    const simpleFields: (keyof TravelRequestType)[] = ["approvedBy"];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
