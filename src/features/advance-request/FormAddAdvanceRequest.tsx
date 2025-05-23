@@ -341,7 +341,7 @@ const FormAddAdvanceRequest: React.FC = () => {
                 <Input
                   placeholder=""
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   required
                   value={group.frequency}
@@ -355,7 +355,7 @@ const FormAddAdvanceRequest: React.FC = () => {
                 <Input
                   placeholder=""
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.quantity}
                   onChange={(e) =>
@@ -380,7 +380,7 @@ const FormAddAdvanceRequest: React.FC = () => {
               <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.unitCost}
                   placeholder="123..."

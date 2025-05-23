@@ -377,7 +377,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
                   placeholder=""
                   inputSize={100}
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   required
                   value={group.frequency}
@@ -391,7 +391,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
                   placeholder=""
                   inputSize={100}
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.quantity}
                   onChange={(e) =>
@@ -415,7 +415,7 @@ const FormEditAdavanceRequest: React.FC<FormEditAdavanceRequestProps> = ({
               <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.unitCost}
                   placeholder="123..."

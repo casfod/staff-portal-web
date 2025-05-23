@@ -323,7 +323,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
                 <Input
                   placeholder=""
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   required
                   value={group.frequency}
@@ -336,7 +336,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
                 <Input
                   placeholder=""
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.quantity}
                   onChange={(e) =>
@@ -359,7 +359,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
               <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"
-                  min="0"
+                  min="1"
                   disabled={disabledStates[index]}
                   value={group.unitCost}
                   placeholder="123..."
