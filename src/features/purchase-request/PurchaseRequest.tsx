@@ -106,7 +106,10 @@ const PurchaseRequest = () => {
   const isReviewer = purchaseRequest!.reviewedBy?.id === localStorageUserX.id;
   const isApprover = purchaseRequest!.approvedBy?.id === localStorageUserX.id;
 
-  const isAllowed = isCreator || isReviewer || isApprover;
+  const isAllowed =
+    isCreator ||
+    (isReviewer && !purchaseRequest.reviewedBy) ||
+    (isApprover && !purchaseRequest.approvedBy);
 
   const isFile = selectedFiles.length > 0;
 

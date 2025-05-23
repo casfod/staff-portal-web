@@ -105,14 +105,10 @@ const PaymentRequest = () => {
   const isReviewer = paymentRequest!.reviewedBy?.id === localStorageUserX.id;
   const isApprover = paymentRequest!.approvedBy?.id === localStorageUserX.id;
 
-  const isAllowed = isCreator || isReviewer || isApprover;
-
-  console.log("isCreator:", isCreator);
-  console.log("isApprover:", isApprover);
-  console.log("isReviewer:", isReviewer);
-  console.log("Creator:", paymentRequest!.requestedBy);
-  console.log("Reviewer:", paymentRequest!.reviewedBy);
-  console.log("Approver:", paymentRequest!.approvedBy);
+  const isAllowed =
+    isCreator ||
+    (isReviewer && !paymentRequest.reviewedBy) ||
+    (isApprover && !paymentRequest.approvedBy);
 
   const isFile = selectedFiles.length > 0;
 

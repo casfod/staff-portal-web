@@ -98,7 +98,10 @@ const ExpenseClaim = () => {
   const isReviewer = expenseClaim!.reviewedBy?.id === localStorageUserX.id;
   const isApprover = expenseClaim!.approvedBy?.id === localStorageUserX.id;
 
-  const isAllowed = isCreator || isReviewer || isApprover;
+  const isAllowed =
+    isCreator ||
+    (isReviewer && !expenseClaim.reviewedBy) ||
+    (isApprover && !expenseClaim.approvedBy);
 
   const isFile = selectedFiles.length > 0;
 

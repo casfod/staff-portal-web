@@ -94,7 +94,10 @@ const TravelRequest = () => {
   const isReviewer = travelRequest!.reviewedBy?.id === localStorageUserX.id;
   const isApprover = travelRequest!.approvedBy?.id === localStorageUserX.id;
 
-  const isAllowed = isCreator || isReviewer || isApprover;
+  const isAllowed =
+    isCreator ||
+    (isReviewer && !travelRequest.reviewedBy) ||
+    (isApprover && !travelRequest.approvedBy);
 
   const isFile = selectedFiles.length > 0;
 
