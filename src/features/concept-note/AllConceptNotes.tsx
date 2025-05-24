@@ -80,10 +80,6 @@ const AllConceptNotes = () => {
 
   const handleDelete = useDeleteRequest(deleteConceptNote, {
     entityName: "Concept Note",
-    confirmButtonColor: "#1373B0",
-    cancelButtonColor: "#DC3340",
-    confirmButtonText: "Yes, delete it!",
-    customClass: "custom-style",
   });
 
   if (isError) {

@@ -89,10 +89,6 @@ const AllPurchaseRequests = () => {
 
   const handleDelete = useDeleteRequest(deletePurchaseRequest, {
     entityName: "Purchase Request",
-    confirmButtonColor: "#1373B0",
-    cancelButtonColor: "#DC3340",
-    confirmButtonText: "Yes, delete it!",
-    customClass: "custom-style",
   });
 
   console.log(purchaseRequests);

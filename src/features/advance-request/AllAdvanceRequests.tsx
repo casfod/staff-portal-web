@@ -97,10 +97,6 @@ const AllAdvanceRequests = () => {
 
   const handleDelete = useDeleteRequest(deleteAdvanceRequest, {
     entityName: "Advance Request",
-    confirmButtonColor: "#1373B0",
-    cancelButtonColor: "#DC3340",
-    confirmButtonText: "Yes, delete it!",
-    customClass: "custom-style",
   });
 
   if (isError) {
