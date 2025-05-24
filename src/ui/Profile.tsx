@@ -8,8 +8,8 @@ const Profile = () => {
   const [isDropDown, setIsDropdown] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  const localStorageUserX = localStorageUser();
-  const user = localStorageUserX;
+  const currentUser = localStorageUser();
+  const user = currentUser;
 
   const handleClickOutside = (event: MouseEvent) => {
     if (

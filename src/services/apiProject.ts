@@ -11,10 +11,10 @@ const axiosInstance = axios.create({
 });
 
 const getToken = () => {
-  const localStorageUserX = localStorageUser();
-  return localStorageUserX
-    ? Cookies.get(`token-${localStorageUserX.id}`) ||
-        sessionStorage.getItem(`token-${localStorageUserX.id}`)
+  const currentUser = localStorageUser();
+  return currentUser
+    ? Cookies.get(`token-${currentUser.id}`) ||
+        sessionStorage.getItem(`token-${currentUser.id}`)
     : null;
 };
 

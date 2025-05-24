@@ -5,8 +5,6 @@ import { useDebounce } from "use-debounce";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 
-import Swal from "sweetalert2";
-
 import { TravelRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,6 +24,7 @@ import { useDeleteTravelRequest } from "./Hooks/useDeleteTravelRequest";
 import TravelRequestTableRow from "./TravelRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AllTravelRequests = () => {
   const navigate = useNavigate();
@@ -96,28 +95,14 @@ const AllTravelRequests = () => {
     [dispatch, navigate]
   );
 
-  const handleDelete = useCallback(
-    (id: string) => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this Travel Request?",
-        showCancelButton: true,
-        confirmButtonColor: "#1373B0",
-        cancelButtonColor: "#DC3340",
-        confirmButtonText: "Yes, delete it!",
-        customClass: { popup: "custom-style" },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          deleteTravelRequest(id, {
-            onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
-            },
-          });
-        }
-      });
-    },
-    [deleteTravelRequest]
-  );
+  // Implement the delete hook
+  const handleDelete = useDeleteRequest(deleteTravelRequest, {
+    entityName: "Travel Request",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
 
   if (isError) {
     return <NetworkErrorUI />;

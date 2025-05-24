@@ -24,7 +24,7 @@ const PurchaseRequestTableRow = ({
   handleDelete: (id: string) => void;
   handleAction: (request: PurChaseRequestType) => void;
 }) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
   const requestId = request.id ?? "";
   const requestStatus = request.status ?? "pending";
@@ -35,7 +35,7 @@ const PurchaseRequestTableRow = ({
 
   const isEditable =
     (requestStatus === "draft" || requestStatus === "rejected") &&
-    requestedById === localStorageUserX?.id;
+    requestedById === currentUser?.id;
 
   const totalAmount =
     request.itemGroups?.reduce((sum, item) => sum + item.total, 0) ?? 0;

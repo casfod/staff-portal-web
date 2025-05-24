@@ -26,9 +26,9 @@ const ProjectTableRow = ({
   handleDelete?: (id: string) => void;
   handleAction: (request: Project) => void;
 }) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
-  const isEditable = localStorageUserX.role === "SUPER-ADMIN";
+  const isEditable = currentUser.role === "SUPER-ADMIN";
 
   const requestId = request.id ?? "";
   // const requestStatus = request.status ?? "pending";

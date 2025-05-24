@@ -24,7 +24,7 @@ const ConceptNoteTableRow = ({
   handleDelete: (id: string) => void;
   handleAction: (request: ConceptNoteType) => void;
 }) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
   const requestId = request.id ?? "";
   const requestStatus = request.status ?? "pending";
@@ -35,7 +35,7 @@ const ConceptNoteTableRow = ({
 
   const isEditable =
     (requestStatus === "draft" || requestStatus === "rejected") &&
-    requestedById === localStorageUserX?.id;
+    requestedById === currentUser?.id;
 
   const rowData = [
     { id: "staff_name", content: request.staff_name },

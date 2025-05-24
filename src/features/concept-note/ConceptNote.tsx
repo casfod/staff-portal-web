@@ -6,7 +6,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { localStorageUser } from "../../utils/localStorageUser";
-import Swal from "sweetalert2";
 import Button from "../../ui/Button";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import StatusBadge from "../../ui/StatusBadge";
@@ -19,59 +18,56 @@ import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { ConceptNoteType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { truncateText } from "../../utils/truncateText";
+import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 
 const ConceptNote = () => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
   const conceptNote = useSelector(
     (state: RootState) => state.conceptNote.conceptNote
   );
   const navigate = useNavigate();
-  const param = useParams();
+  const { requestId } = useParams();
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData] = useState<Partial<ConceptNoteType>>({});
 
-  useEffect(() => {
-    if (!param || !conceptNote) {
-      navigate("/concept-notes");
-    }
-  }, [conceptNote, param, navigate]);
+  // Custom hooks
+  const { handleStatusChange } = useStatusUpdate();
 
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
-    param.requestId!
+    requestId!
   );
 
   const { updateConceptNote, isPending: isUpdating } = useUpdateConceptNote(
     conceptNote?.id!
   );
 
+  useEffect(() => {
+    if (!requestId || !conceptNote) {
+      navigate("/concept-notes");
+    }
+  }, [conceptNote, requestId, navigate]);
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     updateConceptNote({ data: formData, files: selectedFiles });
   };
 
-  const handleStatusChange = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change this request status?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, update it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateStatus(
-          { status, comment },
-          {
-            onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
-            },
-          }
-        );
+  const onStatusChangeHandler = () => {
+    handleStatusChange(status, comment, async (data) => {
+      try {
+        await updateStatus(data, {
+          onError: (error) => {
+            // This will be caught by the handleStatusChange's try/catch
+            throw error;
+          },
+        });
+      } catch (error) {
+        // Re-throw to ensure the promise chain is maintained
+        throw error;
       }
     });
   };
@@ -80,9 +76,11 @@ const ConceptNote = () => {
     return <div>No project data available.</div>;
   }
 
+  const requestStatus = conceptNote.status;
+
   const showStatusUpdate =
     conceptNote.status === "pending" &&
-    localStorageUserX.id === conceptNote.approvedBy?.id;
+    currentUser.id === conceptNote.approvedBy?.id;
 
   const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
 
@@ -93,8 +91,8 @@ const ConceptNote = () => {
     dateformat(conceptNote.createdAt!),
   ];
 
-  const isCreator = conceptNote!.preparedBy!.id === localStorageUserX.id;
-  const isFile = selectedFiles.length > 0;
+  const isCreator = conceptNote!.preparedBy!.id === currentUser.id;
+  const canUploadFiles = isCreator && requestStatus === "approved";
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -145,7 +143,7 @@ const ConceptNote = () => {
                 <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                   <ConceptNoteDetails request={conceptNote} />
 
-                  {isCreator && conceptNote.status === "approved" && (
+                  {canUploadFiles && (
                     <div className="flex flex-col gap-3 mt-3">
                       <FileUpload
                         selectedFiles={selectedFiles}
@@ -154,7 +152,7 @@ const ConceptNote = () => {
                         multiple={true}
                       />
 
-                      {isFile && (
+                      {selectedFiles.length > 0 && (
                         <div className="self-center">
                           <Button disabled={isUpdating} onClick={handleSend}>
                             {isUpdating ? <SpinnerMini /> : "Upload"}
@@ -176,7 +174,7 @@ const ConceptNote = () => {
                           comment={comment}
                           setComment={setComment}
                           isUpdatingStatus={isUpdatingStatus}
-                          handleStatusChange={handleStatusChange}
+                          handleStatusChange={onStatusChangeHandler}
                           directApproval={true}
                         />
                       )}

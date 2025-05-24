@@ -5,8 +5,6 @@ import { useDebounce } from "use-debounce";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 
-import Swal from "sweetalert2";
-
 import { PurChaseRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,6 +24,7 @@ import { useDeletePurchaseRequest } from "./Hooks/useDeletePurchaseRequest";
 import PurchaseRequestTableRow from "./PurchaseRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AllPurchaseRequests = () => {
   const navigate = useNavigate();
@@ -88,25 +87,13 @@ const AllPurchaseRequests = () => {
     navigate(`/purchase-requests/edit-request/${request.id}`);
   };
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this Purchase Request?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, delete it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deletePurchaseRequest(id, {
-          onError: (error) => {
-            Swal.fire("Error!", error.message, "error");
-          },
-        });
-      }
-    });
-  };
+  const handleDelete = useDeleteRequest(deletePurchaseRequest, {
+    entityName: "Purchase Request",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
 
   console.log(purchaseRequests);
 

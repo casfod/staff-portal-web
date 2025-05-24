@@ -20,7 +20,7 @@ import logo from "../assets/small-logo.webp";
 import Button from "./Button";
 
 const Navigation: React.FC = () => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
   const { logout, isPending } = useLogout();
   // const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   // const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -70,16 +70,13 @@ const Navigation: React.FC = () => {
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
-    // Check if localStorageUserX is null or undefined
-    if (!localStorageUserX) {
+    // Check if currentUser is null or undefined
+    if (!currentUser) {
       return true; // Include all items if no user is logged in
     }
 
     if (item.label === "User Management") {
-      return (
-        localStorageUserX.role === "SUPER-ADMIN" ||
-        localStorageUserX.role === "ADMIN"
-      );
+      return currentUser.role === "SUPER-ADMIN" || currentUser.role === "ADMIN";
     }
     return true; // Include all other items
   });

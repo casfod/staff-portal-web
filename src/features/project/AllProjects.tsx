@@ -20,7 +20,7 @@ import Button from "../../ui/Button";
 import ProjectTableRow from "./ProjectTableRow";
 
 export function AllProjects() {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -78,7 +78,7 @@ export function AllProjects() {
         <div className="flex justify-between items-center">
           <TextHeader>Projects</TextHeader>
 
-          {localStorageUserX.role === "SUPER-ADMIN" && (
+          {currentUser.role === "SUPER-ADMIN" && (
             <Button onClick={() => navigate("/projects/create-project")}>
               <Plus className="h-4 w-4 mr-1 md:mr-2" />
               Add

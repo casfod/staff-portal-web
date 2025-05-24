@@ -8,7 +8,6 @@ import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 import { Pagination } from "../../ui/Pagination";
 import Spinner from "../../ui/Spinner";
-import Swal from "sweetalert2";
 import { useDeleteAdvanceRequest } from "./Hooks/useDeleteAdvanceRequest";
 import { AdvanceRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +23,7 @@ import { RootState } from "../../store/store";
 import AdvanceRequestTableRow from "./AdvanceRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AllAdvanceRequests = () => {
   const navigate = useNavigate();
@@ -94,28 +94,14 @@ const AllAdvanceRequests = () => {
     },
     [dispatch, navigate]
   );
-  const handleDelete = useCallback(
-    (id: string) => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this Travel Request?",
-        showCancelButton: true,
-        confirmButtonColor: "#1373B0",
-        cancelButtonColor: "#DC3340",
-        confirmButtonText: "Yes, delete it!",
-        customClass: { popup: "custom-style" },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          deleteAdvanceRequest(id, {
-            onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
-            },
-          });
-        }
-      });
-    },
-    [deleteAdvanceRequest]
-  );
+
+  const handleDelete = useDeleteRequest(deleteAdvanceRequest, {
+    entityName: "Advance Request",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
 
   if (isError) {
     return <NetworkErrorUI />;

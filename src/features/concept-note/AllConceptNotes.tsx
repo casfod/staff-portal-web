@@ -9,7 +9,6 @@ import { Pagination } from "../../ui/Pagination";
 import { useNavigate } from "react-router-dom";
 import { setPage, setSearchTerm } from "../../store/genericQuerySlice";
 import Spinner from "../../ui/Spinner";
-import Swal from "sweetalert2";
 import { ConceptNoteType } from "../../interfaces";
 import { setConceptNote } from "../../store/conceptNoteSlice";
 import { useDeleteConceptNote } from "./Hooks/useDeleteConceptNote";
@@ -18,6 +17,7 @@ import { BiSearch } from "react-icons/bi";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import ConceptNoteTableRow from "./ConceptNoteTableRow";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const tableHeadData = [
   "Prepared By",
@@ -78,25 +78,14 @@ const AllConceptNotes = () => {
     limit
   );
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this Concept Note?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, delete it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteConceptNote(id, {
-          onError: (error) => {
-            Swal.fire("Error!", error.message, "error");
-          },
-        });
-      }
-    });
-  };
+  const handleDelete = useDeleteRequest(deleteConceptNote, {
+    entityName: "Concept Note",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
+
   if (isError) {
     return <NetworkErrorUI />;
   }

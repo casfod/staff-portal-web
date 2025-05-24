@@ -24,7 +24,7 @@ const ExpenseClaimTableRow = ({
   handleDelete: (id: string) => void;
   handleAction: (request: ExpenseClaimType) => void;
 }) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
   const isVisible = visibleItems[request.id!];
 
   const requestId = request.id ?? "";
@@ -37,7 +37,7 @@ const ExpenseClaimTableRow = ({
 
   const isEditable =
     (requestStatus === "draft" || requestStatus === "rejected") &&
-    requestedById === localStorageUserX?.id;
+    requestedById === currentUser?.id;
 
   const rowData = [
     { id: "staffName", content: request.staffName },

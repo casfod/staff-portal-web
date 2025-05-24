@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
-import Swal from "sweetalert2";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
 
@@ -21,70 +20,56 @@ import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
+import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 
 const Request = () => {
   // State and hooks initialization
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
   const advanceRequest = useSelector(
     (state: RootState) => state.advanceRequest.advanceRequest
   );
+  const navigate = useNavigate();
+  const { requestId } = useParams();
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
+  const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const [formData, setFormData] = useState({ approvedBy: null });
-
-  const navigate = useNavigate();
-  const param = useParams();
-
-  // Fetch purchase request from Redux store
-
-  // Redirect if no purchase request or params are available
-  useEffect(() => {
-    if (!param || !advanceRequest) {
-      navigate("/purchase-requests");
-    }
-  }, [advanceRequest, param, navigate]);
-
-  // Custom hooks for updating status and purchase request
+  // Custom hooks
+  const { handleStatusChange } = useStatusUpdate();
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
-    param.requestId!
+    requestId!
   );
-
   const { updateAdvanceRequest, isPending: isUpdating } =
-    useUpdateAdvanceRequest(param.requestId!);
-
-  // Fetch admins data
+    useUpdateAdvanceRequest(requestId!);
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
-  // Handle form field changes
+  // Redirect if no purchase request or params are available
+  useEffect(() => {
+    if (!requestId || !advanceRequest) {
+      navigate("/purchase-requests");
+    }
+  }, [advanceRequest, requestId, navigate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   // Handle status change with confirmation dialog
-  const handleStatusChange = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change this request status?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, update it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateStatus(
-          { status, comment },
-          {
-            onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
-            },
-          }
-        );
+  const onStatusChangeHandler = () => {
+    handleStatusChange(status, comment, async (data) => {
+      try {
+        await updateStatus(data, {
+          onError: (error) => {
+            // This will be caught by the handleStatusChange's try/catch
+            throw error;
+          },
+        });
+      } catch (error) {
+        // Re-throw to ensure the promise chain is maintained
+        throw error;
       }
     });
   };
@@ -103,32 +88,33 @@ const Request = () => {
   const totalAmount =
     advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
-  const isCreator = advanceRequest!.createdBy!.id === localStorageUserX.id;
-  const isReviewer = advanceRequest!.reviewedBy?.id === localStorageUserX.id;
-  const isApprover = advanceRequest!.approvedBy?.id === localStorageUserX.id;
+  // User references
+  const currentUserId = currentUser.id;
+  const userRole = currentUser.role;
+  const requestStatus = advanceRequest.status;
 
-  const isAllowed =
-    isCreator ||
-    (isReviewer && !advanceRequest.reviewedBy) ||
-    (isApprover && !advanceRequest.approvedBy);
+  // Permission flags with explicit null checks
+  const isCreator = advanceRequest.createdBy?.id === currentUserId;
+  const isReviewer = advanceRequest.reviewedBy?.id === currentUserId;
+  const isApprover = advanceRequest.approvedBy?.id === currentUserId;
+  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
-  const isFile = selectedFiles.length > 0;
+  // Conditional rendering flags
+  const canUploadFiles = isCreator && requestStatus === "approved";
+  const canUpdateStatus =
+    !isCreator &&
+    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
+      (isAdmin && requestStatus === "reviewed" && isApprover));
 
-  const isReviewerUpdatingPending =
-    localStorageUserX.role === "REVIEWER" &&
-    advanceRequest.status === "pending" &&
-    isReviewer;
+  const showAdminApproval =
+    !advanceRequest.approvedBy &&
+    requestStatus === "reviewed" &&
+    (isCreator ||
+      (isReviewer && !advanceRequest.reviewedBy) ||
+      (isApprover && !advanceRequest.approvedBy));
 
-  const isAdminUpdatingReviewed =
-    ["SUPER-ADMIN", "ADMIN"].includes(localStorageUserX.role) &&
-    advanceRequest.status === "reviewed" &&
-    isApprover;
-
-  const showStatusUpdate =
-    !isCreator && (isReviewerUpdatingPending || isAdminUpdatingReviewed);
-
+  // Table data
   const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
-
   const tableRowData = [
     advanceRequest?.requestedBy,
     <StatusBadge status={advanceRequest?.status!} />,
@@ -187,7 +173,7 @@ const Request = () => {
                   <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                     <AdvanceRequestDetails request={advanceRequest} />
 
-                    {isCreator && advanceRequest.status === "approved" && (
+                    {canUploadFiles && (
                       <div className="flex flex-col gap-3 mt-3">
                         <FileUpload
                           selectedFiles={selectedFiles}
@@ -196,7 +182,7 @@ const Request = () => {
                           multiple={true}
                         />
 
-                        {isFile && (
+                        {selectedFiles.length > 0 && (
                           <div className="self-center">
                             <Button disabled={isUpdating} onClick={handleSend}>
                               {isUpdating ? <SpinnerMini /> : "Upload"}
@@ -212,7 +198,7 @@ const Request = () => {
                         <div className="text-gray-600 mt-4 tracking-wide">
                           <RequestCommentsAndActions request={advanceRequest} />
 
-                          {showStatusUpdate && (
+                          {canUpdateStatus && (
                             <StatusUpdateForm
                               requestStatus={advanceRequest?.status!}
                               status={status}
@@ -220,36 +206,25 @@ const Request = () => {
                               comment={comment}
                               setComment={setComment}
                               isUpdatingStatus={isUpdatingStatus}
-                              handleStatusChange={handleStatusChange}
+                              handleStatusChange={onStatusChangeHandler}
                             />
                           )}
                         </div>
                       )}
 
                     {/* Admin Approval Section (for STAFF role) */}
-                    {!advanceRequest?.approvedBy && // Check if approvedBy is not set
-                      advanceRequest?.status === "reviewed" &&
-                      isAllowed && (
-                        <>
-                          {/* <FileUpload
-                            selectedFiles={selectedFiles}
-                            setSelectedFiles={setSelectedFiles}
-                            accept=".jpg,.png,.pdf,.xlsx,.docx"
-                            multiple={true}
-                          /> */}
-
-                          <div className="relative z-10 pb-64">
-                            <AdminApprovalSection
-                              formData={formData}
-                              handleFormChange={handleFormChange}
-                              admins={admins}
-                              isLoadingAmins={isLoadingAmins}
-                              isUpdating={isUpdating}
-                              handleSend={handleSend}
-                            />
-                          </div>
-                        </>
-                      )}
+                    {showAdminApproval && (
+                      <div className="relative z-10 pb-64">
+                        <AdminApprovalSection
+                          formData={formData}
+                          handleFormChange={handleFormChange}
+                          admins={admins}
+                          isLoadingAmins={isLoadingAmins}
+                          isUpdating={isUpdating}
+                          handleSend={handleSend}
+                        />
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>

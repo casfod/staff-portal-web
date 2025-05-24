@@ -5,8 +5,6 @@ import { useDebounce } from "use-debounce";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 
-import Swal from "sweetalert2";
-
 import { ExpenseClaimType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,6 +24,7 @@ import { useDeleteExpenseClaim } from "./Hooks/useDeleteExpenseClaim";
 import ExpenseClaimTableRow from "./ExpenseClaimTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AllExpenseClaims = () => {
   const navigate = useNavigate();
@@ -93,28 +92,13 @@ const AllExpenseClaims = () => {
     [dispatch, navigate]
   );
 
-  const handleDelete = useCallback(
-    (id: string) => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this Travel Request?",
-        showCancelButton: true,
-        confirmButtonColor: "#1373B0",
-        cancelButtonColor: "#DC3340",
-        confirmButtonText: "Yes, delete it!",
-        customClass: { popup: "custom-style" },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          deleteExpenseClaim(id, {
-            onError: (error) => {
-              Swal.fire("Error!", error.message, "error");
-            },
-          });
-        }
-      });
-    },
-    [deleteExpenseClaim]
-  );
+  const handleDelete = useDeleteRequest(deleteExpenseClaim, {
+    entityName: "Expense Claim",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
 
   if (isError) {
     return <NetworkErrorUI />;

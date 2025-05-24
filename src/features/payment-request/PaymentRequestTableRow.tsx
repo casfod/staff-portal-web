@@ -27,7 +27,7 @@ const PaymentRequestTableRow = ({
   handleDelete,
   handleAction,
 }: PaymentRequestTableRowProps) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
   const requestId = request.id ?? "";
   const requestStatus = request.status ?? "pending";
@@ -37,7 +37,7 @@ const PaymentRequestTableRow = ({
   const isVisible = visibleItems[requestId];
   const isEditable =
     (requestStatus === "draft" || requestStatus === "rejected") &&
-    requestedById === localStorageUserX?.id;
+    requestedById === currentUser?.id;
 
   const rowData = [
     { id: "requestBy", content: request.requestBy },

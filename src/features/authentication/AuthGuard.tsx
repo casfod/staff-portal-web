@@ -8,17 +8,17 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
 
-  if (!localStorageUserX) {
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
 
-  const authToken = getUserToken(localStorageUserX.id);
+  const authToken = getUserToken(currentUser.id);
 
   if (!authToken) {
     localStorage.removeItem("currentLocalUser");
-    localStorage.removeItem(`token-${localStorageUserX.id}`);
+    localStorage.removeItem(`token-${currentUser.id}`);
     return <Navigate to="/login" replace />;
   }
 

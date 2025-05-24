@@ -26,7 +26,7 @@ import { useEffect, useMemo } from "react";
 import Button from "../../ui/Button";
 
 export function AllUsers() {
-  const localStorageUserX = localStorageUser();
+  const currentUser = localStorageUser();
   const dispatch = useDispatch();
   const { searchTerm, sort, page, limit } = useSelector(
     (state: RootState) => state.genericQuerySlice
@@ -95,7 +95,7 @@ export function AllUsers() {
         >
           User Management
         </h1>
-        {localStorageUserX.role === "SUPER-ADMIN" && (
+        {currentUser.role === "SUPER-ADMIN" && (
           <Modal>
             <Modal.Open open="addUser">
               <Button>
@@ -170,7 +170,7 @@ export function AllUsers() {
                 </th>
               ))}
 
-              {localStorageUserX.role === "SUPER-ADMIN" && (
+              {currentUser.role === "SUPER-ADMIN" && (
                 <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
                   Actions
                 </th>
@@ -180,7 +180,7 @@ export function AllUsers() {
           {isLoading ? (
             <tbody>
               <tr>
-                <td colSpan={localStorageUserX.role === "SUPER-ADMIN" ? 5 : 4}>
+                <td colSpan={currentUser.role === "SUPER-ADMIN" ? 5 : 4}>
                   <div className="flex justify-center items-center h-96">
                     <Spinner />
                   </div>
@@ -223,7 +223,7 @@ export function AllUsers() {
                       </td>
                     ))}
 
-                    {localStorageUserX.role === "SUPER-ADMIN" && (
+                    {currentUser.role === "SUPER-ADMIN" && (
                       <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
                         <div className="flex space-x-4">
                           <Modal>

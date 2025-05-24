@@ -9,7 +9,7 @@ import { GoXCircle } from "react-icons/go";
 import { Pagination } from "../../ui/Pagination";
 
 import Spinner from "../../ui/Spinner";
-import Swal from "sweetalert2";
+
 import { useDeletePaymentRequest } from "./Hooks/useDeletePaymentRequest";
 import { PaymentRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,7 @@ import { setPaymentRequest } from "../../store/paymentRequestSlice";
 import PaymentRequestTableRow from "./PaymentRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AllPaymentRequests = () => {
   const navigate = useNavigate();
@@ -86,25 +87,13 @@ const AllPaymentRequests = () => {
     navigate(`/payment-requests/edit-request/${request.id}`);
   };
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this Payment Request?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, delete it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deletePaymentRequest(id, {
-          onError: (error) => {
-            Swal.fire("Error!", error.message, "error");
-          },
-        });
-      }
-    });
-  };
+  const handleDelete = useDeleteRequest(deletePaymentRequest, {
+    entityName: "Payment Request",
+    confirmButtonColor: "#1373B0",
+    cancelButtonColor: "#DC3340",
+    confirmButtonText: "Yes, delete it!",
+    customClass: "custom-style",
+  });
 
   if (isError) {
     return <NetworkErrorUI />;
