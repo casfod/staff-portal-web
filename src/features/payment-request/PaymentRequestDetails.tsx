@@ -13,9 +13,7 @@ interface RequestDetailsProps {
 }
 
 const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
-  const param = useParams();
-
-  const isInspect = param.requestId!;
+  const { requestId } = useParams();
 
   const data1 = [
     { label: "Amount In Words", value: request.amountInWords },
@@ -43,7 +41,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       {/* Request Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          !requestId ? "text-sm" : "text-sm md:text-base"
         } text-gray-600 mb-3 ${
           request?.files!.length > 0 && "border-b border-gray-300"
         } pb-6`}

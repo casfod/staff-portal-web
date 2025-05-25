@@ -63,9 +63,7 @@ const ItemsTable = ({
 );
 
 export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
-  const param = useParams();
-
-  const isInspect = param.requestId!;
+  const { requestId } = useParams();
 
   const rowData = [
     {
@@ -112,7 +110,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       {/* Purchase Request Details Section */}
       <div
         className={`flex flex-col gap-2 md:gap-3 w-full text-gray-600 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          !requestId ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
         {rowData.map((data) => (

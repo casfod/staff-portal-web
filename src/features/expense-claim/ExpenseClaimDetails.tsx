@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom";
 import { ExpenseClaimType } from "../../interfaces";
 import DetailContainer from "../../ui/DetailContainer";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
@@ -6,7 +7,6 @@ import { moneyFormat } from "../../utils/moneyFormat";
 
 interface RequestDetailsProps {
   request: ExpenseClaimType;
-  isInspect?: boolean;
 }
 
 const ItemsTableData = [
@@ -64,7 +64,9 @@ const ExpenseTable = ({
 
 // Then update your FileAttachment component
 
-const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
+const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
+  const { requestId } = useParams();
+
   const totalAmount =
     request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
 
@@ -130,7 +132,7 @@ const ExpenseClaimDetails = ({ request, isInspect }: RequestDetailsProps) => {
       {/* Expense Claim Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          !requestId ? "text-sm" : "text-sm md:text-base"
         } text-gray-600 mb-3 border-b border-gray-300 pb-6 break-words`}
       >
         <div className="flex flex-col gap-2 md:gap-3 w-full">

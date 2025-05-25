@@ -66,8 +66,6 @@ const ItemsTable = ({
 export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
 
-  const isInspect = requestId!;
-
   const rowData = [
     {
       id: "accountCode",
@@ -119,7 +117,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       {/* Request Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          !requestId ? "text-sm" : "text-sm md:text-base"
         } text-gray-600 mb-3 border-b border-gray-300 pb-6`}
       >
         <div className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 mb-3">

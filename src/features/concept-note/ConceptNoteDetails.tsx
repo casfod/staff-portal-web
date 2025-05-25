@@ -10,8 +10,7 @@ interface RequestDetailsProps {
 }
 
 export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
-  const param = useParams();
-  const isInspect = param.requestId!;
+  const { requestId } = useParams();
 
   // Create the data object with all fields
   const conceptNoteData = [
@@ -88,7 +87,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
       {/* Concept Note Details Section */}
       <div
         className={`flex flex-col gap-3 w-full text-gray-600 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          !requestId ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
         {conceptNoteData.map((item) => (
@@ -108,7 +107,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
       <div className="w-fit mt-4 border-t border-gray-300 pt-4">
         <p
           className={`${
-            !isInspect ? "text-sm" : "text-sm md:text-base"
+            !requestId ? "text-sm" : "text-sm md:text-base"
           } text-gray-600`}
         >
           <span className="font-bold mr-1 uppercase">Prepared By:</span>
@@ -117,7 +116,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
 
         <p
           className={`${
-            !isInspect ? "text-sm" : "text-sm md:text-base"
+            !requestId ? "text-sm" : "text-sm md:text-base"
           } text-gray-600`}
         >
           <span className="font-bold mr-1 uppercase">Role:</span>
