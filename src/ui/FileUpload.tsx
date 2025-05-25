@@ -135,7 +135,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {/* File Previews */}
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+          <h4 className="text-sm font-medium">Selected Files:</h4>
           <ul className="space-y-2">
             <Row cols="grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
               {selectedFiles.map((file, index) => (
