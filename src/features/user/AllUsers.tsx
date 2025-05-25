@@ -194,7 +194,7 @@ export function AllUsers() {
                 const rowData = [
                   {
                     id: "Name",
-                    content: `${user.first_name} ${user.last_name}`,
+                    content: `${user.first_name.toUpperCase()} ${user.last_name.toUpperCase()}`,
                   },
                   {
                     id: "email",
