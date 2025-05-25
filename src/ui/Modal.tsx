@@ -46,7 +46,7 @@ function Window({ children, name }: WindowProps) {
       >
         <button
           onClick={() => dispatch(closeModal())}
-          className="absolute top-3 right-3 text-red-500 hover:text-gray-600"
+          className="absolute top-3 right-3 text-red-500 hover: "
         >
           &#x2715; {/* Close Icon */}
         </button>

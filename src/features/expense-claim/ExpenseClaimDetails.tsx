@@ -28,7 +28,7 @@ const ExpenseTable = ({
         {ItemsTableData.map((data, index) => (
           <th
             key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider"
+            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium   uppercase tracking-wider"
           >
             {data}
           </th>
@@ -50,7 +50,7 @@ const ExpenseTable = ({
             {rowData.map((data) => (
               <td
                 key={data.id}
-                className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs"
+                className="px-6 py-4 text-sm   break-words max-w-xs"
               >
                 {data.content}
               </td>
@@ -133,7 +133,7 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
-        } text-gray-600 mb-3 border-b border-gray-300 pb-6 break-words`}
+        }   mb-3 border-b border-gray-300 pb-6 break-words`}
       >
         <div className="flex flex-col gap-2 md:gap-3 w-full">
           {rowData.map((data) => (
@@ -159,7 +159,7 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       {/* Expenses Section Header */}
-      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest my-4 break-words">
+      <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest my-4 break-words">
         EXPENSES
       </h2>
 

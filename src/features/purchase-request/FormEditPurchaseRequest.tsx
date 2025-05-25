@@ -220,12 +220,12 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     <form className="space-y-6 uppercase ">
       <Row>
         <p
-          className="text-gray-600"
+          className=" "
           style={{ letterSpacing: "1px" }}
         >{`Status : ${purchaseRequest.status}`}</p>
 
         <p
-          className="text-gray-600"
+          className=" "
           style={{ letterSpacing: "1px" }}
         >{`Request : ${purchaseRequest.requestedBy}`}</p>
       </Row>
@@ -338,7 +338,7 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
       <Row>
         <FormRow label="Activity Description" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             placeholder=""
             id="activityDescription"
@@ -358,13 +358,11 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
             className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
 p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
-            <h4 className="text-gray-600 text-lg font-semibold">
-              ITEM {index + 1}
-            </h4>
+            <h4 className="  text-lg font-semibold">ITEM {index + 1}</h4>
 
             <FormRow label="Description *" type="wide">
               <input
-                className="w-full text-gray-600 text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
+                className="w-full   text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
                 placeholder=""
                 disabled={disabledStates[index]}
                 value={group.description}
@@ -462,7 +460,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-600 font-bold">
+        <span className="  font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}
@@ -529,7 +527,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       </Row>
 
       {purchaseRequest.reviewedBy ? (
-        <div className="text-gray-600">
+        <div className=" ">
           <p className="mb-2">
             <span className="font-bold mr-1  uppercase">Reviewed By :</span>
             {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}

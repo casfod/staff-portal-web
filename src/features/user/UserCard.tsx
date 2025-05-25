@@ -120,7 +120,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                   />
                 </>
               ) : (
-                <h2 className="text-lg font-semibold text-gray-600">
+                <h2 className="text-lg font-semibold  ">
                   {`${user?.first_name} ${user?.last_name}`}
                 </h2>
               )}
@@ -132,7 +132,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                   className="text-sm border-2 px-1"
                 />
               ) : (
-                <p className="text-sm text-gray-600">{user?.email}</p>
+                <p className="text-sm  ">{user?.email}</p>
               )}
             </div>
           </div>

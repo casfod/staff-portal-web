@@ -8,7 +8,7 @@ const ShowPasswordIcon: React.FC<ShowPasswordIconProps> = ({
   showPassword,
 }) => {
   return (
-    <div className="text-gray-600">
+    <div className=" ">
       {!showPassword ? <HiMiniEye /> : <HiMiniEyeSlash />}
     </div>
   );

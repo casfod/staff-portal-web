@@ -86,7 +86,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
     <DetailContainer>
       {/* Concept Note Details Section */}
       <div
-        className={`flex flex-col gap-3 w-full text-gray-600 ${
+        className={`flex flex-col gap-3 w-full   ${
           !requestId ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
@@ -105,20 +105,12 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
 
       {/* Prepared By Section */}
       <div className="w-fit mt-4 border-t border-gray-300 pt-4">
-        <p
-          className={`${
-            !requestId ? "text-sm" : "text-sm md:text-base"
-          } text-gray-600`}
-        >
+        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}  `}>
           <span className="font-bold mr-1 uppercase">Prepared By:</span>
           {`${request?.preparedBy?.first_name} ${request?.preparedBy?.last_name}`}
         </p>
 
-        <p
-          className={`${
-            !requestId ? "text-sm" : "text-sm md:text-base"
-          } text-gray-600`}
-        >
+        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}  `}>
           <span className="font-bold mr-1 uppercase">Role:</span>
           {request?.preparedBy?.role}
         </p>

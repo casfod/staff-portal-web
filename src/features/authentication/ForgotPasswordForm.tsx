@@ -49,16 +49,13 @@ const ForgotPasswordForm: React.FC = () => {
         >
           <div className="flex flex-col w-full gap-4">
             <div>
-              <label
-                htmlFor="email"
-                className="block mb-1 font-bold text-gray-600"
-              >
+              <label htmlFor="email" className="block mb-1 font-bold  ">
                 Reset Your Password
               </label>
               <input
                 className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
                   focus:border-[#052859] focus:outline-none shadow-lg 
-                  text-gray-600"
+                   "
                 id="email"
                 type="email"
                 placeholder="Enter your email"

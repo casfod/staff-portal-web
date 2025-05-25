@@ -130,16 +130,13 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <div
-      className="text-gray-600 relative w-full md:w-[250px]"
+      className="  relative w-full md:w-[250px]"
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
       {/* Label */}
       {label && (
-        <label
-          htmlFor={id}
-          className="block mb-1 font-bold text-sm text-gray-600"
-        >
+        <label htmlFor={id} className="block mb-1 font-bold text-sm  ">
           {label}
         </label>
       )}
@@ -149,7 +146,7 @@ const Select: React.FC<SelectProps> = ({
         id={id}
         className={`w-full h-10 px-4 py-2 rounded-md border ${
           isOpen ? "border-primary" : "border-gray-300"
-        } focus:outline-none shadow-sm text-gray-600 flex items-center justify-between cursor-pointer bg-white`}
+        } focus:outline-none shadow-sm   flex items-center justify-between cursor-pointer bg-white`}
         onClick={() => {
           setIsOpen(!isOpen);
           setSearchTerm("");
@@ -170,7 +167,7 @@ const Select: React.FC<SelectProps> = ({
             <button
               type="button"
               onClick={handleReset}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:  transition-colors"
               aria-label="Clear selection"
             >
               <X size={16} />
@@ -229,9 +226,7 @@ const Select: React.FC<SelectProps> = ({
               </div>
             ))
           ) : (
-            <div className="px-4 py-2 text-gray-600 text-center">
-              No options found
-            </div>
+            <div className="px-4 py-2   text-center">No options found</div>
           )}
         </div>
       )}

@@ -33,7 +33,7 @@ export default function DatePicker({
 }: DatePickerProps) {
   const variantClasses = {
     primary: "border-gray-50 text-gray-50",
-    secondary: "border-gray-300 text-gray-600",
+    secondary: "border-gray-300  ",
   };
 
   const sizeClasses = {

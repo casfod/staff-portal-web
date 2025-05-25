@@ -24,7 +24,7 @@ const DatePickerHeader: React.FC<DatePickerHeaderProps> = ({
         onClick={onPrevMonth}
         disabled={isPrevDisabled}
         className={`p-1 rounded-full hover:bg-gray-100 transition-colors ${
-          isPrevDisabled ? "text-gray-300 cursor-not-allowed" : "text-gray-600"
+          isPrevDisabled ? "text-gray-300 cursor-not-allowed" : " "
         }`}
         aria-label="Previous month"
       >
@@ -40,7 +40,7 @@ const DatePickerHeader: React.FC<DatePickerHeaderProps> = ({
         onClick={onNextMonth}
         disabled={isNextDisabled}
         className={`p-1 rounded-full hover:bg-gray-100 transition-colors ${
-          isNextDisabled ? "text-gray-300 cursor-not-allowed" : "text-gray-600"
+          isNextDisabled ? "text-gray-300 cursor-not-allowed" : " "
         }`}
         aria-label="Next month"
       >

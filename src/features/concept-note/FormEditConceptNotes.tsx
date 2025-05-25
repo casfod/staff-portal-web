@@ -290,7 +290,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       <Row>
         <FormRow label="Background Context *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="background_context"
             required
@@ -305,7 +305,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       <Row>
         <FormRow label="Objectives/Purpose *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="objectives_purpose"
             required
@@ -319,7 +319,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       <Row>
         <FormRow label="Detailed Activity Description *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="detailed_activity_description"
             required
@@ -335,7 +335,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       <Row>
         <FormRow label="Strategic Plan *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="strategic_plan"
             required
@@ -347,7 +347,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       <Row>
         <FormRow label="Benefits of Project *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="benefits_of_project"
             required

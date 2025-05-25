@@ -29,7 +29,7 @@ const ItemsTable = ({
         {ItemsTableData.map((data, index) => (
           <th
             key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider"
+            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium   uppercase tracking-wider"
           >
             {data}
           </th>
@@ -50,7 +50,7 @@ const ItemsTable = ({
             {rowData.map((data) => (
               <td
                 key={data.id}
-                className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs"
+                className="px-6 py-4 text-sm   break-words max-w-xs"
               >
                 {data.content}
               </td>
@@ -109,7 +109,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
     <DetailContainer>
       {/* Purchase Request Details Section */}
       <div
-        className={`flex flex-col gap-2 md:gap-3 w-full text-gray-600 ${
+        className={`flex flex-col gap-2 md:gap-3 w-full   ${
           !requestId ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
@@ -124,7 +124,7 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       {/* Items Section Header */}
-      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest my-4 break-words">
+      <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest my-4 break-words">
         ITEMS
       </h2>
 

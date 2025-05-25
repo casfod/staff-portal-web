@@ -115,7 +115,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           className="cursor-pointer flex flex-col items-center justify-center space-y-2"
         >
           <UploadIcon />
-          <p className="text-sm text-gray-600">
+          <p className="text-sm  ">
             <span className="font-medium text-blue-600 hover:text-blue-500">
               Click to upload
             </span>{" "}
@@ -173,7 +173,7 @@ const UploadIcon = () => (
 
 const FileItem = ({ file, onRemove }: { file: File; onRemove: () => void }) => (
   <li className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-    <span className="text-sm text-gray-600 truncate max-w-xs">
+    <span className="text-sm   truncate max-w-xs">
       {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
     </span>
     <button onClick={onRemove} className="text-red-500 hover:text-red-700">

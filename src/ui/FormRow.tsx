@@ -37,7 +37,7 @@ const FormRow: React.FC<FormRowProps> = ({
           htmlFor={children.props.id}
           // className={`border min-w-[150px] ${
           className={`${
-            lebelColor ? `text-[${lebelColor}]` : "text-gray-600"
+            lebelColor ? `text-[${lebelColor}]` : " "
           } font-extrabold`}
           style={{ letterSpacing: "1px" }}
         >

@@ -241,7 +241,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           <Button type="button" onClick={addAccountCode}>
             <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add
           </Button>
-          <span className="text-gray-600 font-bold">
+          <span className="  font-bold">
             {formData.account_code.length > 1
               ? formData.account_code.length + " Accounts "
               : formData.account_code.length + " Account"}
@@ -259,9 +259,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
               className="flex flex-col gap-3 bg-[#F8F8F8] bg-opacity-90 border-2  min-w-[200px] 
      p-3 md:p-6 mb-3 rounded-lg shadow-md"
             >
-              <h4 className="text-gray-600 text-lg font-semibold">
-                SECTOR {index + 1}
-              </h4>
+              <h4 className="  text-lg font-semibold">SECTOR {index + 1}</h4>
 
               <FormRow label="Sector Name *" type="wide">
                 <Select
@@ -314,7 +312,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           <Button type="button" onClick={addSector}>
             <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Sector
           </Button>
-          <span className="text-gray-600 font-bold">
+          <span className="  font-bold">
             {formData.sectors.length > 1
               ? formData.sectors.length + " Sectors "
               : formData.sectors.length + " Sector "}
@@ -341,7 +339,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       <Row>
         <FormRow label="Target Beneficiaries *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             id="target_beneficiaries"
             required
             value={formData.target_beneficiaries.join(", ")}
@@ -359,7 +357,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       <Row>
         <FormRow label="Project Objectives *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="project_objectives"
             required
@@ -420,7 +418,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       <Row>
         <FormRow label="Project Summary *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="project_summary"
             required

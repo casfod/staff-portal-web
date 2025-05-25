@@ -193,7 +193,7 @@ const FormAddPaymentRequest = () => {
       <Row>
         <FormRow label="Purpose Of Expense *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="purposeOfExpense"
             required
@@ -276,7 +276,7 @@ const FormAddPaymentRequest = () => {
       <Row>
         <FormRow label="Special Instruction*" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             id="specialInstruction"
             required

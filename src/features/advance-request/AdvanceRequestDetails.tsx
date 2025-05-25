@@ -29,7 +29,7 @@ const ItemsTable = ({
         {tableHeadData.map((data, index) => (
           <th
             key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-xs md:text-sm font-medium text-gray-600 uppercase tracking-wider"
+            className="px-6 py-2 bg-gray-50 text-left text-xs md:text-sm font-medium   uppercase tracking-wider"
           >
             {data}
           </th>
@@ -51,7 +51,7 @@ const ItemsTable = ({
             {rowData.map((data) => (
               <td
                 key={data.id}
-                className="px-6 py-4 text-sm text-gray-600 break-words max-w-xs"
+                className="px-6 py-4 text-sm   break-words max-w-xs"
               >
                 {data.content}
               </td>
@@ -118,9 +118,9 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
-        } text-gray-600 mb-3 border-b border-gray-300 pb-6`}
+        }   mb-3 border-b border-gray-300 pb-6`}
       >
-        <div className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 mb-3">
+        <div className="flex flex-col gap-2 md:gap-3 w-full   mb-3">
           {rowData.map((data) => (
             <p>
               <span key={data.id} className="text-sm font-bold mr-1 uppercase">
@@ -146,7 +146,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         </div>
       </div>
 
-      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest">
+      <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest">
         ITEMS
       </h2>
       <ItemsTable itemGroups={request.itemGroups} />

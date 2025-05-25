@@ -12,7 +12,7 @@ const RoleBadge = ({
   const baseClasses =
     "flex items-center w-fit h-fit px-2 py-1.5 whitespace-nowrap rounded-md uppercase mb-1";
   const roleStyles = {
-    STAFF: "border border-gray-400 text-gray-600",
+    STAFF: "border border-gray-400  ",
     ADMIN: "bg-secondary text-white",
     "SUPER-ADMIN": "bg-secondary text-white",
     REVIEWER: "bg-[#0B6DA2] text-white",

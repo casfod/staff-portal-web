@@ -136,7 +136,7 @@ const PaymentRequest = () => {
               {tableHeadData.map((title, index) => (
                 <th
                   key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
                 >
                   {title}
                 </th>
@@ -149,7 +149,7 @@ const PaymentRequest = () => {
               {tableRowData.map((data, index) => (
                 <td
                   key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-gray-600 uppercase text-sm 2xl:text-text-base tracking-wider"
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
                 >
                   {data}
                 </td>
@@ -181,7 +181,7 @@ const PaymentRequest = () => {
                   )}
 
                   {paymentRequest.reviewedBy && requestStatus !== "draft" && (
-                    <div className="text-gray-600 mt-4 tracking-wide">
+                    <div className="  mt-4 tracking-wide">
                       <RequestCommentsAndActions request={paymentRequest} />
 
                       {canUpdateStatus && (

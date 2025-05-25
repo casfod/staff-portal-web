@@ -112,7 +112,7 @@ const Navigation: React.FC = () => {
                       <li key={dropdownItem.to}>
                         <Link
                           to={dropdownItem.to}
-                          className="block px-4 py-2 text-xs xl:text-sm text-gray-600 hover:bg-gray-100"
+                          className="block px-4 py-2 text-xs xl:text-sm   hover:bg-gray-100"
                         >
                           {dropdownItem.label}
                         </Link>

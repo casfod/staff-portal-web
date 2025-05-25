@@ -42,7 +42,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
-        } text-gray-600 mb-3 ${
+        }   mb-3 ${
           request?.files!.length > 0 && "border-b border-gray-300"
         } pb-6`}
       >

@@ -264,7 +264,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
       <Row>
         <FormRow label="Travel Reason *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 text-gray-600"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
             maxLength={4000}
             placeholder=""
             id="travelReason"
@@ -310,9 +310,7 @@ const FormEditTravelRequest: React.FC<FormEditTravelRequestProps> = ({
 p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
             {" "}
-            <h4 className="text-gray-600 text-lg font-semibold">
-              EXPENSE {index + 1}
-            </h4>
+            <h4 className="  text-lg font-semibold">EXPENSE {index + 1}</h4>
             <Row>
               <FormRow label="Expense *" type="wide">
                 <Select
@@ -420,7 +418,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         <Button type="button" onClick={addItem}>
           <FaPlus className="h-4 w-4 mr-1 md:mr-2" /> Add Item
         </Button>
-        <span className="text-gray-600 font-bold">
+        <span className="  font-bold">
           {itemGroup.length > 1
             ? itemGroup.length + " Items "
             : itemGroup.length + " Item "}
@@ -509,7 +507,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       </Row>
 
       {travelRequest.reviewedBy ? (
-        <div className="text-gray-600">
+        <div className=" ">
           <p className="mb-2">
             <span className="font-bold mr-1  uppercase">Reviewed By :</span>
             {`${travelRequest?.reviewedBy?.first_name} ${travelRequest?.reviewedBy?.last_name}`}

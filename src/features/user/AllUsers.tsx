@@ -91,7 +91,7 @@ export function AllUsers() {
       {/* Header and Add User Button */}
       <div className="flex justify-between items-center">
         <h1
-          className=" md:text-lg lg:text-2xl font-semibold text-gray-600"
+          className=" md:text-lg lg:text-2xl font-semibold  "
           style={{ fontFamily: "Lato", letterSpacing: "2px" }}
         >
           User Management
@@ -118,7 +118,7 @@ export function AllUsers() {
             type="text"
             value={searchTerm}
             onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-            className="w-full h-full px-2 text-gray-600 placeholder-gray-400 placeholder:tracking-widest rounded-lg focus:outline-none focus:ring-0 mr-7"
+            className="w-full h-full px-2   placeholder-gray-400 placeholder:tracking-widest rounded-lg focus:outline-none focus:ring-0 mr-7"
             placeholder="Search"
           />
           <span
@@ -134,7 +134,7 @@ export function AllUsers() {
           <select
             value={sort}
             onChange={handleSortChange}
-            className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm text-gray-600 appearance-none bg-white"
+            className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm   appearance-none bg-white"
           >
             {/* Placeholder Option */}
             <option value="" disabled selected className="text-gray-400">
@@ -165,14 +165,14 @@ export function AllUsers() {
               {tableHeadData.map((data, key) => (
                 <th
                   key={key}
-                  className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  className="px-6 py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
                 >
                   {data}
                 </th>
               ))}
 
               {currentUser.role === "SUPER-ADMIN" && (
-                <th className="px-6 py-3 text-left  font-medium text-gray-600 uppercase text-xs 2xl:text-text-sm tracking-wider">
+                <th className="px-6 py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider">
                   Actions
                 </th>
               )}
@@ -223,14 +223,14 @@ export function AllUsers() {
                     {rowData.map((data) => (
                       <td
                         key={data.id}
-                        className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600"
+                        className="px-3 py-2.5 md:px-6 md:py-3 whitespace-nowrap  text-xs 2xl:text-sm  "
                       >
                         {data.content}
                       </td>
                     ))}
 
                     {currentUser.role === "SUPER-ADMIN" && (
-                      <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm text-gray-600 uppercase">
+                      <td className="px-3 py-1.5 md:px-6 md:py-2 whitespace-nowrap  text-xs 2xl:text-sm   uppercase">
                         <div className="flex space-x-4">
                           <Modal>
                             <Modal.Open open={`userCog-${user.id}`}>
@@ -260,7 +260,7 @@ export function AllUsers() {
         {/* No Results Message */}
         {users.length === 0 && !isLoading && (
           <div className="bg-gray-50 p-8">
-            <p className="text-2xl text-center text-gray-600">No result</p>
+            <p className="text-2xl text-center  ">No result</p>
           </div>
         )}
       </div>

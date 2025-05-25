@@ -205,21 +205,19 @@ export function Dashboard() {
               // role="button"
               tabIndex={0}
             >
-              <h3 className="text-sm lg:text-base 2xl:text-lg font-medium text-gray-600 mb-2">
+              <h3 className="text-sm lg:text-base 2xl:text-lg font-medium   mb-2">
                 {stat.name}
               </h3>
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs 2xl:text-sm text-gray-600 font-semibold">
-                    Total
-                  </p>
-                  <p className="text-xl 2xl:text-2xl font-semibold text-gray-600">
+                  <p className="text-xs 2xl:text-sm   font-semibold">Total</p>
+                  <p className="text-xl 2xl:text-2xl font-semibold  ">
                     {stat.total}
                   </p>
                 </div>
                 {stat.approved !== null && (
                   <div>
-                    <p className="text-xs 2xl:text-sm text-gray-600 font-semibold">
+                    <p className="text-xs 2xl:text-sm   font-semibold">
                       Approved
                     </p>
                     <p className="text-xl 2xl:text-2xl font-semibold text-green-600">
