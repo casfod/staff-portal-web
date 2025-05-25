@@ -118,13 +118,13 @@ export const updateUser = async function (data: UserType) {
   }
 };
 
-export const updateUserRole = async function (
+export const updateUserAdmin = async function (
   userId: string,
   data: Partial<UserType>
 ) {
   try {
     const response = await axiosInstance.patch<UserType>(
-      `/users/updateUserRole/${userId}`,
+      `/users/updateUserAdmin/${userId}`,
       data
     );
     return response.data;

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
-import { updateUserRole as updateUserRoleAPI } from "../../../services/apiUser";
+import { updateUserAdmin as updateUserAdminAPI } from "../../../services/apiUser";
 import toast from "react-hot-toast";
 import { UserType } from "../../../interfaces";
 
@@ -16,16 +16,16 @@ interface Error extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
-export function useUpdateUserRole(id: string) {
+export function useUpdateUser(id: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const {
-    mutate: UpdateUserRole,
+    mutate: UpdateUser,
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<UserType>) => updateUserRoleAPI(id, data),
+    mutationFn: (data: Partial<UserType>) => updateUserAdminAPI(id, data),
 
     onSuccess: () => {
       queryClient.invalidateQueries(["users"] as any);
@@ -43,5 +43,5 @@ export function useUpdateUserRole(id: string) {
     },
   });
 
-  return { UpdateUserRole, isPending, isError, errorMessage };
+  return { UpdateUser, isPending, isError, errorMessage };
 }

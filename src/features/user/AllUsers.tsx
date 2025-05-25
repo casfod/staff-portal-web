@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useEffect, useMemo } from "react";
 import Button from "../../ui/Button";
+import UserBadge from "../../ui/UserBadge";
 
 export function AllUsers() {
   const currentUser = localStorageUser();
@@ -205,7 +206,12 @@ export function AllUsers() {
                   },
                   {
                     id: "isDeleted",
-                    content: user.isDeleted ? "Inactive" : "Active",
+                    content: (
+                      <UserBadge
+                        isDeleted={user.isDeleted!}
+                        status={user.isDeleted ? "Inactive" : "Active"}
+                      />
+                    ),
                   },
                 ];
 

@@ -26,8 +26,6 @@ const StatusUpdateForm = ({
     handleStatusChange();
   };
 
-  console.log(requestStatus);
-
   return (
     <form
       className="flex flex-col w-full gap-3 tracking-wide"
