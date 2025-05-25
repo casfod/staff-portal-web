@@ -1,4 +1,5 @@
 import { TravelRequestType } from "../../interfaces";
+import DetailContainer from "../../ui/DetailContainer";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
@@ -123,32 +124,38 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-300 pb-6 break-words">
-        <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
+    <DetailContainer>
+      {/* Travel Request Details Section */}
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+          !isInspect ? "text-sm" : "text-sm md:text-base"
+        } text-gray-600 mb-3 border-b border-gray-300 pb-6 break-words`}
+      >
+        <div className="flex flex-col gap-2 md:gap-3 w-full">
           {rowData.map((data) => (
             <p key={data.id}>
-              <span className="font-bold mr-1 uppercase">{data.label}</span>
+              <span className="text-sm font-bold mr-1 uppercase">
+                {data.label}
+              </span>
               {formatContent(data.content)}
             </p>
           ))}
         </div>
 
-        <div className="flex flex-col gap-2 text-gray-600 text-sm tracking-wide">
+        <div className="flex flex-col gap-2 md:gap-3 w-full">
           {rowData2.map((data) => (
             <p key={data.id}>
-              <span className="font-bold mr-1 uppercase">{data.label}</span>
+              <span className="text-sm font-bold mr-1 uppercase">
+                {data.label}
+              </span>
               {formatContent(data.content)}
             </p>
           ))}
         </div>
       </div>
 
-      <h2 className="text-center text-lg text-gray-600 font-semibold tracking-wide my-4 break-words">
+      {/* Expenses Section Header */}
+      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest my-4 break-words">
         EXPENSES
       </h2>
 
@@ -158,7 +165,7 @@ const TravelRequestDetails = ({ request, isInspect }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };
 

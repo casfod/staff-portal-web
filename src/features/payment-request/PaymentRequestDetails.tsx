@@ -5,6 +5,7 @@ import { PaymentRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
+import DetailContainer from "../../ui/DetailContainer";
 
 interface RequestDetailsProps {
   request: PaymentRequestType;
@@ -27,7 +28,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
     { label: "Special Instruction", value: request.specialInstruction },
     {
       label: "Request",
-      value: `${request.requestedBy?.first_name} ${request.requestedBy?.last_name}`,
+      value: `${request.requestedBy?.first_name?.toUpperCase()} ${request.requestedBy?.last_name?.toUpperCase()}`,
     },
   ];
 
@@ -38,45 +39,47 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
+    <DetailContainer>
       {/* Request Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          !isInspect && "text-sm"
-        } text-gray-600`}
+          !isInspect ? "text-sm" : "text-sm md:text-base"
+        } text-gray-600 mb-3 ${
+          request?.files!.length > 0 && "border-b border-gray-300"
+        } pb-6`}
       >
         {/* Left Column */}
-        <div className="space-y-3">
+        <div className="flex flex-col gap-2 md:gap-3 w-full">
           <p>
-            <span className="font-extrabold uppercase">Grant Code:</span>{" "}
+            <span className="text-sm font-bold mr-1 uppercase">
+              Grant Code:
+            </span>
             {request.grantCode}
           </p>
 
           {data1.map(({ label, value }) => (
             <div key={label} className="whitespace-pre-line">
-              <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
+              <h2 className="text-sm font-bold uppercase mb-1">{label}:</h2>
               <p>{value}</p>
             </div>
           ))}
         </div>
 
-        {/* Right Column */}
+        {/* Right Column - Recipients Information */}
         <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
+          <h2 className="font-bold">RECIPIENTS INFORMATION</h2>
+
           {data2.map(({ label, value }) => (
-            <div key={label} className="whitespace-pre-line ">
-              <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
+            <div key={label} className="whitespace-pre-line">
+              <h2 className="text-sm font-bold uppercase mb-1">{label}:</h2>
               <p>{value}</p>
             </div>
           ))}
 
-          <p>
-            <span className="font-extrabold uppercase">Budget:</span>{" "}
-            {moneyFormat(Number(request.amountInFigure), "NGN")}
-          </p>
+          <div className="whitespace-pre-line">
+            <h2 className="text-sm font-bold uppercase mb-1">Budget:</h2>
+            <p>{moneyFormat(Number(request.amountInFigure), "NGN")}</p>
+          </div>
         </div>
       </div>
 
@@ -84,8 +87,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };
-
 export default PaymentRequestDetails;

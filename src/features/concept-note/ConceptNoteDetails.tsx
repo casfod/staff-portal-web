@@ -3,6 +3,7 @@ import { ConceptNoteType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
+import DetailContainer from "../../ui/DetailContainer";
 
 interface RequestDetailsProps {
   request: ConceptNoteType;
@@ -83,34 +84,43 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
+    <DetailContainer>
+      {/* Concept Note Details Section */}
       <div
-        className="flex flex-col gap-3 w-full text-gray-600 text-sm mb-3 break-words"
-        style={{ letterSpacing: "1px" }}
+        className={`flex flex-col gap-3 w-full text-gray-600 ${
+          !isInspect ? "text-sm" : "text-sm md:text-base"
+        } mb-3 break-words`}
       >
         {conceptNoteData.map((item) => (
           <div
             key={item.id}
             className={item.isBlock ? "whitespace-pre-line" : ""}
           >
-            <h2 className="font-extrabold uppercase mb-1">{item.label}:</h2>
+            <h2 className="text-sm font-extrabold uppercase mb-1">
+              {item.label}:
+            </h2>
             <p>{item.content}</p>
           </div>
         ))}
       </div>
 
-      <div className="w-fit mt-4">
-        <p className="text-sm text-gray-600">
-          <span className="font-bold mr-1 uppercase">Prepared By :</span>
+      {/* Prepared By Section */}
+      <div className="w-fit mt-4 border-t border-gray-300 pt-4">
+        <p
+          className={`${
+            !isInspect ? "text-sm" : "text-sm md:text-base"
+          } text-gray-600`}
+        >
+          <span className="font-bold mr-1 uppercase">Prepared By:</span>
           {`${request?.preparedBy?.first_name} ${request?.preparedBy?.last_name}`}
         </p>
 
-        <p className="text-sm text-gray-600">
-          <span className="font-bold mr-1 uppercase">Role :</span>
+        <p
+          className={`${
+            !isInspect ? "text-sm" : "text-sm md:text-base"
+          } text-gray-600`}
+        >
+          <span className="font-bold mr-1 uppercase">Role:</span>
           {request?.preparedBy?.role}
         </p>
       </div>
@@ -119,6 +129,6 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };

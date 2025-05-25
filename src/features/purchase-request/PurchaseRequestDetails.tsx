@@ -4,6 +4,7 @@ import { PurChaseRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
+import DetailContainer from "../../ui/DetailContainer";
 
 interface RequestDetailsProps {
   request: PurChaseRequestType;
@@ -107,19 +108,16 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
+    <DetailContainer>
+      {/* Purchase Request Details Section */}
       <div
-        className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3 break-words"
-        style={{ letterSpacing: "1px" }}
+        className={`flex flex-col gap-2 md:gap-3 w-full text-gray-600 ${
+          !isInspect ? "text-sm" : "text-sm md:text-base"
+        } mb-3 break-words`}
       >
         {rowData.map((data) => (
-          <p>
-            <span key={data.id} className="font-bold mr-1 uppercase">
-              {" "}
+          <p key={data.id}>
+            <span className="text-sm font-bold mr-1 uppercase">
               {data.label}
             </span>
             {data.content}
@@ -127,18 +125,17 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
         ))}
       </div>
 
-      <h2
-        className="text-center text-lg text-gray-600 font-semibold break-words"
-        style={{ letterSpacing: "2px" }}
-      >
+      {/* Items Section Header */}
+      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest my-4 break-words">
         ITEMS
       </h2>
+
       <ItemsTable itemGroups={request.itemGroups} />
 
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };

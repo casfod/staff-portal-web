@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { Dot } from "lucide-react";
+import DetailContainer from "../../ui/DetailContainer";
 
 interface RequestDetailsProps {
   request: Project;
@@ -138,30 +139,26 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
+    <DetailContainer>
+      {/* Project Details Section */}
       <div
-        className="flex flex-col gap-3 w-full text-gray-600 text-sm mb-3 break-words"
-        style={{ letterSpacing: "1px" }}
+        className={`flex flex-col gap-3 w-full text-gray-600 ${
+          !isInspect ? "text-sm" : "text-sm md:text-base"
+        } mb-3 break-words`}
       >
         {projectData.map((item) => (
           <div
             key={item.id}
             className={item.isBlock ? "whitespace-pre-line" : ""}
           >
-            <h2 className="font-extrabold uppercase mb-1">{item.label}:</h2>
+            <h2 className="text-sm font-bold uppercase mb-1">{item.label}:</h2>
             <p>{item.content}</p>
           </div>
         ))}
       </div>
 
-      <h2
-        className="text-center text-lg text-gray-600 font-semibold"
-        style={{ letterSpacing: "2px" }}
-      >
+      {/* Sectors Section Header */}
+      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest my-4">
         SECTORS
       </h2>
 
@@ -171,6 +168,6 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };

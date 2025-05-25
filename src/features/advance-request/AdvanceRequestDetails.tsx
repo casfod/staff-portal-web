@@ -4,6 +4,7 @@ import { AdvanceRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
+import DetailContainer from "../../ui/DetailContainer";
 
 interface RequestDetailsProps {
   request: AdvanceRequestType;
@@ -28,7 +29,7 @@ const ItemsTable = ({
         {tableHeadData.map((data, index) => (
           <th
             key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium text-gray-600 uppercase tracking-wider"
+            className="px-6 py-2 bg-gray-50 text-left text-xs md:text-sm font-medium text-gray-600 uppercase tracking-wider"
           >
             {data}
           </th>
@@ -63,9 +64,9 @@ const ItemsTable = ({
 );
 
 export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
-  const param = useParams();
+  const { requestId } = useParams();
 
-  const isInspect = param.requestId!;
+  const isInspect = requestId!;
 
   const rowData = [
     {
@@ -90,7 +91,7 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
     },
     {
       id: "finalDeliveryPoint",
-      label: "Delivery Point",
+      label: "Delivery Point :",
       content: request.finalDeliveryPoint,
     },
     {
@@ -114,24 +115,17 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
   ];
 
   return (
-    <div
-      className={`border border-gray-300 px-6 py-4 rounded-lg shadow-sm ${
-        !isInspect && "bg-[#F8F8F8]"
-      }`}
-    >
+    <DetailContainer>
       {/* Request Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          !isInspect && "text-sm"
+          !isInspect ? "text-sm" : "text-sm md:text-base"
         } text-gray-600 mb-3 border-b border-gray-300 pb-6`}
       >
-        <div
-          className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 text-sm mb-3"
-          style={{ letterSpacing: "1px" }}
-        >
+        <div className="flex flex-col gap-2 md:gap-3 w-full text-gray-600 mb-3">
           {rowData.map((data) => (
             <p>
-              <span key={data.id} className="font-bold mr-1 uppercase">
+              <span key={data.id} className="text-sm font-bold mr-1 uppercase">
                 {" "}
                 {data.label}
               </span>
@@ -145,17 +139,16 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
 
           {accCardData.map(({ label, value }) => (
             <div key={label} className="whitespace-pre-line ">
-              <h2 className="font-extrabold uppercase mb-1">{label}:</h2>
+              <h2 className="text-sm font-extrabold uppercase mb-1">
+                {label}:
+              </h2>
               <p>{value}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <h2
-        className="text-center text-lg text-gray-600 font-semibold"
-        style={{ letterSpacing: "2px" }}
-      >
+      <h2 className="text-center text-base md:text-lg text-gray-600 font-semibold tracking-widest">
         ITEMS
       </h2>
       <ItemsTable itemGroups={request.itemGroups} />
@@ -164,6 +157,6 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-    </div>
+    </DetailContainer>
   );
 };
