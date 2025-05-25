@@ -5,7 +5,7 @@ import DesktopNavigation from "./DesktopNavigation";
 export function Layout() {
   return (
     <div
-      className="text-[#2d3c43] max-h-screen bg-[#F8F8F8]"
+      className="text-gray-700 max-h-screen bg-[#F8F8F8]"
       style={{ fontFamily: "Cabin", letterSpacing: "1.2px" }}
     >
       <Header />
