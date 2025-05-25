@@ -240,12 +240,14 @@ export function AllUsers() {
                             </Modal.Open>
                           </Modal>
 
-                          <button
-                            className="text-red-600 hover:text-red-900"
-                            onClick={() => handleDelete(user.id!)}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                          {!user.isDeleted && (
+                            <button
+                              className="text-red-600 hover:text-red-900"
+                              onClick={() => handleDelete(user.id!)}
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     )}
