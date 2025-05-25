@@ -199,10 +199,15 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       <div className="flex gap-2">
         {isEditing ? (
           <>
-            <Button onClick={handleSaveChanges} disabled={isPending}>
+            <Button
+              size="small"
+              onClick={handleSaveChanges}
+              disabled={isPending}
+            >
               {isPending ? <SpinnerMini /> : "Save Changes"}
             </Button>
             <Button
+              size="small"
               variant="secondary"
               onClick={handleCancelEdit}
               disabled={isPending}
@@ -211,7 +216,9 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
             </Button>
           </>
         ) : (
-          <Button onClick={() => setIsEditing(true)}>Edit User</Button>
+          <Button size="small" onClick={() => setIsEditing(true)}>
+            Edit User
+          </Button>
         )}
       </div>
     </div>
