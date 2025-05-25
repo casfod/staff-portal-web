@@ -143,7 +143,7 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
       {/* Project Details Section */}
       <div
         className={`flex flex-col gap-3 w-full text-gray-600 ${
-          !isInspect ? "text-sm" : "text-sm md:text-base"
+          isInspect ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
         {projectData.map((item) => (
