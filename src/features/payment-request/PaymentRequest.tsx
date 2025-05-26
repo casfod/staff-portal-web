@@ -1,7 +1,7 @@
-import { List } from "lucide-react";
+import { Download, List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { RootState } from "../../store/store";
 import { localStorageUser } from "../../utils/localStorageUser";
@@ -11,6 +11,7 @@ import { useUpdatePaymentRequest } from "./Hooks/useUpdatePaymentRequest";
 
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
+// import { generatePdf } from "../../utils/generatePdf";
 import PaymentRequestDetails from "./PaymentRequestDetails";
 import StatusBadge from "../../ui/StatusBadge";
 import AdminApprovalSection from "../../ui/AdminApprovalSection";
@@ -21,6 +22,7 @@ import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
 
 const PaymentRequest = () => {
   const currentUser = localStorageUser();
@@ -34,6 +36,7 @@ const PaymentRequest = () => {
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isDownloadPDF, setIsDownloadPDF] = useState<boolean>(false);
 
   // Custom hooks
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
@@ -46,7 +49,6 @@ const PaymentRequest = () => {
 
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
-  // Redirect if no payment request or params
   useEffect(() => {
     if (!requestId || !paymentRequest) {
       navigate("/payment-requests");
@@ -62,15 +64,27 @@ const PaymentRequest = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
+  };
+
+  //PDF Logic
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const { downloadPdf } = usePdfDownload({
+    filename: `payment-request-${requestId}.pdf`,
+    format: "a4",
+    orientation: "portrait",
+  });
+
+  const handleDownloadPdf = () => {
+    setIsDownloadPDF(true);
+    downloadPdf(pdfRef);
+    setIsDownloadPDF(false);
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -109,12 +123,36 @@ const PaymentRequest = () => {
       (isApprover && !paymentRequest.approvedBy));
 
   // Table data
-  const tableHeadData = ["Request", "Status", "Budget", "Date"];
+  const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
   const tableRowData = [
-    requestedByName,
-    <StatusBadge status={requestStatus} key="status-badge" />,
-    moneyFormat(paymentRequest.amountInFigure, "NGN"),
-    dateformat(paymentRequest.createdAt!),
+    {
+      id: "requestedByName",
+      content: requestedByName,
+    },
+    {
+      id: "requestStatus",
+      content: isDownloadPDF ? (
+        requestStatus
+      ) : (
+        <StatusBadge status={requestStatus!} key="status-badge" />
+      ),
+    },
+    {
+      id: "moneyFormat",
+      content: moneyFormat(paymentRequest.amountInFigure, "NGN"),
+    },
+    {
+      id: "dateformat",
+      content: dateformat(paymentRequest.createdAt!),
+    },
+    {
+      id: "dateformat",
+      content: (
+        <button onClick={handleDownloadPdf}>
+          <Download className="w-6 h-6" />
+        </button>
+      ),
+    },
   ];
 
   return (
@@ -129,14 +167,17 @@ const PaymentRequest = () => {
         </div>
       </div>
 
-      <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
+      <div
+        // ref={pdfRef}
+        className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll"
+      >
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               {tableHeadData.map((title, index) => (
                 <th
                   key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
                 >
                   {title}
                 </th>
@@ -146,19 +187,22 @@ const PaymentRequest = () => {
 
           <tbody className="bg-white divide-y divide-gray-200">
             <tr key={paymentRequest.id} className="h-[40px] max-h-[40px]">
-              {tableRowData.map((data, index) => (
+              {tableRowData.map((data) => (
                 <td
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                  key={data.id}
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
                 >
-                  {data}
+                  {data.content}
                 </td>
               ))}
             </tr>
 
             <tr>
               <td colSpan={5}>
-                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                <div
+                  ref={pdfRef}
+                  className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative"
+                >
                   <PaymentRequestDetails request={paymentRequest} />
 
                   {canUploadFiles && (
@@ -181,7 +225,7 @@ const PaymentRequest = () => {
                   )}
 
                   {paymentRequest.reviewedBy && requestStatus !== "draft" && (
-                    <div className="  mt-4 tracking-wide">
+                    <div className="mt-4 tracking-wide">
                       <RequestCommentsAndActions request={paymentRequest} />
 
                       {canUpdateStatus && (
