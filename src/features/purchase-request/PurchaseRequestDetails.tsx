@@ -72,6 +72,11 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
       content: request.accountCode,
     },
     {
+      id: "department",
+      label: "Department :",
+      content: request.department,
+    },
+    {
       id: "expenseChargedTo",
       label: "Charged To :",
       content: request.expenseChargedTo,

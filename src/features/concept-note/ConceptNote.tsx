@@ -17,7 +17,7 @@ import { FileUpload } from "../../ui/FileUpload";
 import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { ConceptNoteType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { truncateText } from "../../utils/truncateText";
+// import { truncateText } from "../../utils/truncateText";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 
 const ConceptNote = () => {
@@ -82,12 +82,13 @@ const ConceptNote = () => {
     conceptNote.status === "pending" &&
     currentUser.id === conceptNote.approvedBy?.id;
 
-  const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
+  // const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
+  const tableHeadData = ["Prepared By", "Status", "Date"];
 
   const tableRowData = [
     `${conceptNote.preparedBy.first_name} ${conceptNote.preparedBy.last_name}`,
     <StatusBadge status={conceptNote.status!} key="status-badge" />,
-    truncateText(conceptNote.account_Code, 25),
+    // truncateText(conceptNote.account_Code, 25),
     dateformat(conceptNote.createdAt!),
   ];
 

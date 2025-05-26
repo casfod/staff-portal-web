@@ -114,7 +114,8 @@ const Request = () => {
       (isApprover && !advanceRequest.approvedBy));
 
   // Table data
-  const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+  // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+  const tableHeadData = ["Request", "Status", "Amount", "Date"];
   const tableRowData = [
     advanceRequest?.requestedBy,
     <StatusBadge status={advanceRequest?.status!} />,

@@ -44,7 +44,7 @@ const AdvanceRequestTableRow = ({
   const rowData = [
     { id: "requestedBy", content: request.requestedBy },
     { id: "status", content: <StatusBadge status={request.status!} /> },
-    { id: "department", content: request.department },
+    // { id: "department", content: request.department },
     { id: "amount", content: moneyFormat(totalAmount, "NGN") },
     { id: "date", content: dateformat(requestCreatedAt) },
     {

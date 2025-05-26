@@ -7,7 +7,7 @@ import { ConceptNoteDetails } from "./ConceptNoteDetails";
 import TableRowMain from "../../ui/TableRowMain";
 import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
-import { truncateText } from "../../utils/truncateText";
+// import { truncateText } from "../../utils/truncateText";
 
 const ConceptNoteTableRow = ({
   request,
@@ -40,7 +40,7 @@ const ConceptNoteTableRow = ({
   const rowData = [
     { id: "staff_name", content: request.staff_name },
     { id: "status", content: <StatusBadge status={request.status!} /> },
-    { id: "account_Code", content: truncateText(request.account_Code, 25) },
+    // { id: "account_Code", content: truncateText(request.account_Code, 25) },
     { id: "date", content: dateformat(requestCreatedAt) },
     {
       id: "actions",

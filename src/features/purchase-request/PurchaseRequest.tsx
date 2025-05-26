@@ -112,11 +112,12 @@ const PurchaseRequest = () => {
       (isApprover && !purchaseRequest.approvedBy));
 
   // Table data
-  const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+  // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
+  const tableHeadData = ["Request", "Status", "Amount", "Date"];
   const tableRowData = [
     purchaseRequest.requestedBy,
     <StatusBadge status={requestStatus!} key="status-badge" />,
-    purchaseRequest.department,
+    // purchaseRequest.department,
     moneyFormat(totalAmount, "NGN"),
     dateformat(purchaseRequest.createdAt!),
   ];
