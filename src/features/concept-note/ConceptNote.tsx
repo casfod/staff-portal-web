@@ -87,7 +87,7 @@ const ConceptNote = () => {
   const tableRowData = [
     `${conceptNote.preparedBy.first_name} ${conceptNote.preparedBy.last_name}`,
     <StatusBadge status={conceptNote.status!} key="status-badge" />,
-    truncateText(conceptNote.account_Code, 40),
+    truncateText(conceptNote.account_Code, 25),
     dateformat(conceptNote.createdAt!),
   ];
 
