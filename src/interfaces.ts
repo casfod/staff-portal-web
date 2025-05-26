@@ -1,9 +1,3 @@
-// declare module "redux-persist/lib/storage" {
-//   import { WebStorage } from "redux-persist/es/types";
-//   const localStorage: WebStorage;
-//   export default localStorage;
-// }
-
 ///////////////////////
 //File
 ///////////////////////
@@ -111,6 +105,7 @@ export interface PurChaseRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 export interface PurchaseRequesItemGroupType {
@@ -177,6 +172,7 @@ export interface AdvanceRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 export interface AdvanceRequesItemGroupType {
@@ -252,6 +248,7 @@ export interface TravelRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -316,6 +313,7 @@ export interface ExpenseClaimType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -374,6 +372,7 @@ export interface PaymentRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -505,12 +504,5 @@ export interface ConceptNoteType {
   updatedAt?: string;
 
   files?: [];
+  copiedTo?: [UserType];
 }
-
-///////////////////////
-//SUB-INTERFACE
-///////////////////////
-
-// export type StyledInputProps = {
-//   reset: UseFormReset<FormValues>;
-// };
