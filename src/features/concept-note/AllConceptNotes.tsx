@@ -66,7 +66,7 @@ const AllConceptNotes = () => {
   };
   const handleAction = (conceptNote: ConceptNoteType) => {
     dispatch(setConceptNote(conceptNote));
-    navigate(`/concept-notes/concept-note/${conceptNote.id}`);
+    navigate(`/concept-notes/request/${conceptNote.id}`);
   };
 
   const { deleteConceptNote } = useDeleteConceptNote(
