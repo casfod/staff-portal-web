@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { useAdvanceRequestType } from "../../../interfaces";
+import { UseAdvanceRequestType } from "../../../interfaces";
 import { getAllAdvanceRequest } from "../../../services/apiAdvanceRequest";
 
 export function useAllAdvanceRequests(
@@ -7,9 +7,9 @@ export function useAllAdvanceRequests(
   sort?: string,
   page?: number,
   limit?: number,
-  options?: UseQueryOptions<useAdvanceRequestType, Error> // Add options parameter
+  options?: UseQueryOptions<UseAdvanceRequestType, Error> // Add options parameter
 ) {
-  return useQuery<useAdvanceRequestType, Error>({
+  return useQuery<UseAdvanceRequestType, Error>({
     queryKey: ["all-advance-requests", search, sort, page, limit],
     queryFn: () => getAllAdvanceRequest({ search, sort, page, limit }),
     staleTime: 0,

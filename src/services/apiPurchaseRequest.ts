@@ -4,6 +4,7 @@ import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
 import {
   PurChaseRequestType,
+  UsePurChaseRequest,
   // PurchaseRequestStats,
   usePurChaseRequestType,
   UsePurchaseStatsType,
@@ -90,6 +91,18 @@ export const getAllPurchaseRequest = async function (queryParams: {
       {
         params: queryParams,
       }
+    );
+    console.log("API Response:", response.data); // Debugging line
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const getPurChaseRequest = async function (requestId: string) {
+  try {
+    const response = await axiosInstance.get<UsePurChaseRequest>(
+      `/purchase-requests/${requestId}`
     );
     console.log("API Response:", response.data); // Debugging line
     return response.data;
