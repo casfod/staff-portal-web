@@ -88,12 +88,12 @@ const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
     {
       id: "dayOfDeparture",
       label: "Day Of Departure :",
-      content: request.dayOfDeparture,
+      content: dateformat(request.dayOfDeparture!),
     },
     {
       id: "dayOfReturn",
       label: "Day Of Return :",
-      content: request.dayOfReturn,
+      content: dateformat(request.dayOfReturn),
     },
     {
       id: "amountInWords",
