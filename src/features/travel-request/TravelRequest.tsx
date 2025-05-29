@@ -31,7 +31,11 @@ const TravelRequest = () => {
   const { requestId } = useParams();
 
   // Data fetching and reconciliation
-  const { data: remoteData, isLoading, isError } = useTravelRequest(requestId!);
+  const {
+    data: remoteData,
+    isLoading,
+    isError,
+  } = useTravelRequest({ requestId });
 
   const travelRequest = useSelector(
     (state: RootState) => state.travelRequest.travelRequest

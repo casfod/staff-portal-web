@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useNavigate } from "react-router-dom";
 
 import { AxiosError, AxiosResponse } from "axios";
@@ -6,7 +6,6 @@ import { useState } from "react";
 import { updateConceptNote as updateConceptNoteApi } from "../../../services/apiConceptNotes.ts";
 import { ConceptNoteType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -18,7 +17,8 @@ interface LoginError extends AxiosError {
 
 export function useUpdateConceptNote(conceptNoteId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateConceptNote,
@@ -37,7 +37,10 @@ export function useUpdateConceptNote(conceptNoteId: string) {
       if (data.status === 200) {
         toast.success("Concept note updated successfully");
 
-        navigate(-1);
+        //Invalidate
+        queryClient.invalidateQueries({
+          queryKey: ["concept-note", conceptNoteId],
+        });
       } else if (data.status !== 200) {
         toast.error("Concept note update not successful");
         setErrorMessage(data.message);
