@@ -108,6 +108,8 @@ const ConceptNote = () => {
   const isCreator = requestData!.preparedBy!.id === currentUser.id;
   const canUploadFiles = isCreator && requestStatus === "approved";
 
+  console.log("isCreator:=>", isCreator);
+
   return (
     <div className="flex flex-col space-y-3 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">

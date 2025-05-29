@@ -113,6 +113,8 @@ const Request = () => {
   const isApprover = requestData.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  console.log("isCreator:=>", isCreator);
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canUpdateStatus =
