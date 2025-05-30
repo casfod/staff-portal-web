@@ -22,6 +22,7 @@ import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import { useConceptNote } from "./Hooks/useConceptNote";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
+import { DataStateContainer } from "../../ui/DataStateContainer";
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -84,31 +85,24 @@ const ConceptNote = () => {
     });
   };
 
-  if (isError) return <NetworkErrorUI />;
-  if (!requestData) {
-    return <div>No project data available.</div>;
-  }
-
-  const requestStatus = requestData.status;
+  const requestStatus = requestData?.status;
 
   const showStatusUpdate =
-    requestData.status === "pending" &&
-    currentUser.id === requestData.approvedBy?.id;
+    requestData?.status === "pending" &&
+    currentUser.id === requestData?.approvedBy?.id;
 
   // const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
   const tableHeadData = ["Prepared By", "Status", "Date"];
 
   const tableRowData = [
-    `${requestData.preparedBy.first_name} ${requestData.preparedBy.last_name}`,
-    <StatusBadge status={requestData.status!} key="status-badge" />,
-    // truncateText(requestData.account_Code, 25),
-    dateformat(requestData.createdAt!),
+    `${requestData?.preparedBy.first_name} ${requestData?.preparedBy.last_name}`,
+    <StatusBadge status={requestData?.status!} key="status-badge" />,
+    // truncateText(requestData?.account_Code, 25),
+    dateformat(requestData?.createdAt!),
   ];
 
   const isCreator = requestData!.preparedBy!.id === currentUser.id;
   const canUploadFiles = isCreator && requestStatus === "approved";
-
-  console.log("isCreator:=>", isCreator);
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -124,90 +118,91 @@ const ConceptNote = () => {
       </div>
 
       {/* Main Table Section */}
-      {isLoading ? (
-        <div className="flex justify-center w-full h-full">
-          <Spinner />
-        </div>
-      ) : (
-        <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 ">
-              <tr>
-                {tableHeadData.map((title, index) => (
-                  <th
-                    key={index}
-                    className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                  >
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+      <DataStateContainer
+        isLoading={isLoading}
+        isError={isError}
+        data={requestData}
+        errorComponent={<NetworkErrorUI />}
+        loadingComponent={<Spinner />}
+        emptyComponent={<div>No data available</div>}
+      >
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50 ">
+            <tr>
+              {tableHeadData.map((title, index) => (
+                <th
+                  key={index}
+                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                >
+                  {title}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr
-                key={requestData.id}
-                className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
-              >
-                {tableRowData.map((data, index) => (
-                  <td
-                    key={index}
-                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                  >
-                    {data}
-                  </td>
-                ))}
-              </tr>
-
-              <tr>
-                <td colSpan={4}>
-                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                    <ConceptNoteDetails request={requestData} />
-
-                    {canUploadFiles && (
-                      <div className="flex flex-col gap-3 mt-3">
-                        <FileUpload
-                          selectedFiles={selectedFiles}
-                          setSelectedFiles={setSelectedFiles}
-                          accept=".jpg,.png,.pdf,.xlsx,.docx"
-                          multiple={true}
-                        />
-
-                        {selectedFiles.length > 0 && (
-                          <div className="self-center">
-                            <Button disabled={isUpdating} onClick={handleSend}>
-                              {isUpdating ? <SpinnerMini /> : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {requestData.status !== "draft" && (
-                      <div className="  mt-4 tracking-wide">
-                        <RequestCommentsAndActions request={requestData} />
-
-                        {showStatusUpdate && (
-                          <StatusUpdateForm
-                            requestStatus={requestData.status!}
-                            status={status}
-                            setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
-                            isUpdatingStatus={isUpdatingStatus}
-                            handleStatusChange={onStatusChangeHandler}
-                            directApproval={true}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
+          <tbody className="bg-white divide-y divide-gray-200">
+            <tr
+              key={requestData?.id}
+              className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
+            >
+              {tableRowData.map((data, index) => (
+                <td
+                  key={index}
+                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                >
+                  {data}
                 </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))}
+            </tr>
+
+            <tr>
+              <td colSpan={4}>
+                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                  <ConceptNoteDetails request={requestData!} />
+
+                  {canUploadFiles && (
+                    <div className="flex flex-col gap-3 mt-3">
+                      <FileUpload
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        accept=".jpg,.png,.pdf,.xlsx,.docx"
+                        multiple={true}
+                      />
+
+                      {selectedFiles.length > 0 && (
+                        <div className="self-center">
+                          <Button disabled={isUpdating} onClick={handleSend}>
+                            {isUpdating ? <SpinnerMini /> : "Upload"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {requestData?.status !== "draft" && (
+                    <div className="  mt-4 tracking-wide">
+                      <RequestCommentsAndActions request={requestData} />
+
+                      {showStatusUpdate && (
+                        <StatusUpdateForm
+                          requestStatus={requestData?.status!}
+                          status={status}
+                          setStatus={setStatus}
+                          comment={comment}
+                          setComment={setComment}
+                          isUpdatingStatus={isUpdatingStatus}
+                          handleStatusChange={onStatusChangeHandler}
+                          directApproval={true}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </DataStateContainer>
     </div>
   );
 };

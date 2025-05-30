@@ -4,7 +4,7 @@ export const moneyFormat = (
 ): string => {
   if (currency === "NGN") {
     // Manually format for Naira
-    return `₦${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+    return `₦${amount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
   }
 
   // Use Intl.NumberFormat for other currencies
