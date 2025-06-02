@@ -378,7 +378,7 @@ const FormAddAdvanceRequest: React.FC = () => {
               <FormRow label="Unit Cost (₦) *">
                 <Input
                   type="number"
-                  min="1"
+                  min="0"
                   disabled={disabledStates[index]}
                   value={group.unitCost}
                   placeholder="123..."
