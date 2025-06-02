@@ -23,8 +23,11 @@ import { usePurchaseRequest } from "./Hooks/usePurchaseRequest";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
+import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
 
 const PurchaseRequest = () => {
+  const isUnderMaintenance = true; // Set this based on your maintenance status
+
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { requestId } = useParams();
@@ -136,113 +139,126 @@ const PurchaseRequest = () => {
   ];
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        <div className="flex justify-between items-center">
-          <TextHeader>Purchase Request</TextHeader>
-          <Button onClick={() => navigate("/purchase-requests")}>
-            <List className="h-4 w-4 mr-1 md:mr-2" />
-            List
-          </Button>
-        </div>
-      </div>
+    <>
+      {isUnderMaintenance ? (
+        <MaintenanceBanner
+          title="Purchase Requests Under Maintenance"
+          message="We're addressing a purchase request error."
+          expectedCompletion="Will Be Back Very soon "
+        />
+      ) : (
+        <div className="flex flex-col space-y-3 pb-80">
+          <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+            <div className="flex justify-between items-center">
+              <TextHeader>Purchase Request</TextHeader>
+              <Button onClick={() => navigate("/purchase-requests")}>
+                <List className="h-4 w-4 mr-1 md:mr-2" />
+                List
+              </Button>
+            </div>
+          </div>
 
-      {/* Main Table Section */}
-      <DataStateContainer
-        isLoading={isLoading}
-        isError={isError}
-        data={requestData}
-        errorComponent={<NetworkErrorUI />}
-        loadingComponent={<Spinner />}
-        emptyComponent={<div>No data available</div>}
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
+          {/* Main Table Section */}
+          <DataStateContainer
+            isLoading={isLoading}
+            isError={isError}
+            data={requestData}
+            errorComponent={<NetworkErrorUI />}
+            loadingComponent={<Spinner />}
+            emptyComponent={<div>No data available</div>}
+          >
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {tableHeadData.map((title, index) => (
+                    <th
+                      key={index}
+                      className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                    >
+                      {title}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr key={requestData?.id} className="h-[40px] max-h-[40px]">
-              {tableRowData.map((data, index) => (
-                <td
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                >
-                  {data}
-                </td>
-              ))}
-            </tr>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr key={requestData?.id} className="h-[40px] max-h-[40px]">
+                  {tableRowData.map((data, index) => (
+                    <td
+                      key={index}
+                      className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                    >
+                      {data}
+                    </td>
+                  ))}
+                </tr>
 
-            <tr>
-              <td colSpan={5}>
-                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                  <PurchaseRequestDetails request={requestData!} />
+                <tr>
+                  <td colSpan={5}>
+                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                      <PurchaseRequestDetails request={requestData!} />
 
-                  {canUploadFiles && (
-                    <div className="flex flex-col gap-3 mt-3">
-                      <FileUpload
-                        selectedFiles={selectedFiles}
-                        setSelectedFiles={setSelectedFiles}
-                        accept=".jpg,.png,.pdf,.xlsx,.docx"
-                        multiple={true}
-                      />
+                      {canUploadFiles && (
+                        <div className="flex flex-col gap-3 mt-3">
+                          <FileUpload
+                            selectedFiles={selectedFiles}
+                            setSelectedFiles={setSelectedFiles}
+                            accept=".jpg,.png,.pdf,.xlsx,.docx"
+                            multiple={true}
+                          />
 
-                      {selectedFiles.length > 0 && (
-                        <div className="self-center">
-                          <Button disabled={isUpdating} onClick={handleSend}>
-                            {isUpdating ? <SpinnerMini /> : "Upload"}
-                          </Button>
+                          {selectedFiles.length > 0 && (
+                            <div className="self-center">
+                              <Button
+                                disabled={isUpdating}
+                                onClick={handleSend}
+                              >
+                                {isUpdating ? <SpinnerMini /> : "Upload"}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {requestData?.reviewedBy && requestStatus !== "draft" && (
+                        <div className="  mt-4 tracking-wide">
+                          <RequestCommentsAndActions request={requestData} />
+
+                          {canUpdateStatus && (
+                            <StatusUpdateForm
+                              requestStatus={requestStatus}
+                              status={status}
+                              setStatus={setStatus}
+                              comment={comment}
+                              setComment={setComment}
+                              isUpdatingStatus={isUpdatingStatus}
+                              handleStatusChange={onStatusChangeHandler}
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      {showAdminApproval && (
+                        <div className="relative z-10 pb-64">
+                          <AdminApprovalSection
+                            formData={formData}
+                            handleFormChange={handleFormChange}
+                            admins={admins}
+                            isLoadingAmins={isLoadingAmins}
+                            isUpdating={isUpdating}
+                            handleSend={handleSend}
+                          />
                         </div>
                       )}
                     </div>
-                  )}
-
-                  {requestData?.reviewedBy && requestStatus !== "draft" && (
-                    <div className="  mt-4 tracking-wide">
-                      <RequestCommentsAndActions request={requestData} />
-
-                      {canUpdateStatus && (
-                        <StatusUpdateForm
-                          requestStatus={requestStatus}
-                          status={status}
-                          setStatus={setStatus}
-                          comment={comment}
-                          setComment={setComment}
-                          isUpdatingStatus={isUpdatingStatus}
-                          handleStatusChange={onStatusChangeHandler}
-                        />
-                      )}
-                    </div>
-                  )}
-
-                  {showAdminApproval && (
-                    <div className="relative z-10 pb-64">
-                      <AdminApprovalSection
-                        formData={formData}
-                        handleFormChange={handleFormChange}
-                        admins={admins}
-                        isLoadingAmins={isLoadingAmins}
-                        isUpdating={isUpdating}
-                        handleSend={handleSend}
-                      />
-                    </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </DataStateContainer>
-    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </DataStateContainer>
+        </div>
+      )}
+    </>
   );
 };
 
