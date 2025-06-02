@@ -4,8 +4,9 @@ import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
 import {
   AdvanceRequestType,
+  UseAdvanceRequest,
   // PdvanceRequestStats,
-  useAdvanceRequestType,
+  UseAdvanceRequestType,
   UseAdvanceStatsType,
 } from "../interfaces.ts";
 
@@ -85,11 +86,22 @@ export const getAllAdvanceRequest = async function (queryParams: {
   limit?: number;
 }) {
   try {
-    const response = await axiosInstance.get<useAdvanceRequestType>(
+    const response = await axiosInstance.get<UseAdvanceRequestType>(
       `/advance-requests`,
       {
         params: queryParams,
       }
+    );
+    console.log("API Response:", response.data); // Debugging line
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+export const getAdvanceRequest = async function (requestId: string) {
+  try {
+    const response = await axiosInstance.get<UseAdvanceRequest>(
+      `/advance-requests/${requestId}`
     );
     console.log("API Response:", response.data); // Debugging line
     return response.data;

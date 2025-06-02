@@ -117,7 +117,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "concept-note/:requestId",
+            path: "request/:requestId",
             element: (
               <AnimatedRoute
                 key="concept-note/:requestId"

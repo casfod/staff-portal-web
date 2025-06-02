@@ -32,6 +32,11 @@ export function useUpdateStatus(requestId: string) {
       if (data.status === 200) {
         toast.success("Status updated successfully");
 
+        //Invalidate
+        queryClient.invalidateQueries({
+          queryKey: ["expense-claim", requestId],
+        });
+
         navigate(-1);
       } else if (data.status !== 200) {
         toast.error("Status update not successful");

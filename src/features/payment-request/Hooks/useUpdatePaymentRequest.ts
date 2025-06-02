@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useNavigate } from "react-router-dom";
 
 import { AxiosError, AxiosResponse } from "axios";
@@ -6,7 +6,6 @@ import { useState } from "react";
 import { updatePaymentRequest as updatePaymentRequestApi } from "../../../services/apiPaymentRequest.ts";
 import { PaymentRequestType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -18,7 +17,7 @@ interface LoginError extends AxiosError {
 
 export function useUpdatePaymentRequest(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     mutate: updatePaymentRequest,
@@ -37,7 +36,10 @@ export function useUpdatePaymentRequest(requestId: string) {
       if (data.status === 200) {
         toast.success("Payment Request updated successfully");
 
-        navigate(-1);
+        //Invalidate
+        queryClient.invalidateQueries({
+          queryKey: ["payment-request", requestId],
+        });
       } else if (data.status !== 200) {
         toast.error("Payment Request update not successful");
         setErrorMessage(data.message);

@@ -21,14 +21,35 @@ import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
+import { useExpenseClaim } from "./Hooks/useExpenseClaim";
+import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import Spinner from "../../ui/Spinner";
+import { DataStateContainer } from "../../ui/DataStateContainer";
 
 const ExpenseClaim = () => {
   const currentUser = localStorageUser();
+  const navigate = useNavigate();
+  const { requestId } = useParams();
+
+  // Data fetching and reconciliation
+  const { data: remoteData, isLoading, isError } = useExpenseClaim(requestId!);
+
   const expenseClaim = useSelector(
     (state: RootState) => state.expenseClaim.expenseClaim
   );
-  const navigate = useNavigate();
-  const { requestId } = useParams();
+
+  const remote = remoteData?.data;
+  const requestData = useMemo(() => {
+    if (remote) return remote;
+    return expenseClaim;
+  }, [remote, expenseClaim]);
+
+  // Redirect logic - PLACE IT HERE
+  useEffect(() => {
+    if (!requestId || (!isLoading && !requestData)) {
+      navigate("/expense-claims");
+    }
+  }, [requestData, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -46,13 +67,6 @@ const ExpenseClaim = () => {
   );
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
-
-  // Redirect if no expense claim or params
-  useEffect(() => {
-    if (!requestId || !expenseClaim) {
-      navigate("/expense-claims");
-    }
-  }, [expenseClaim, requestId, navigate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -79,23 +93,18 @@ const ExpenseClaim = () => {
     updateExpenseClaim({ data: formData, files: selectedFiles });
   };
 
-  if (!expenseClaim) {
-    return (
-      <div className="p-4 text-center">No expense claim data available.</div>
-    );
-  }
-
   // User references
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = expenseClaim.status;
+  const requestStatus = requestData?.status;
 
   // Permission flags with explicit null checks
-  const isCreator = expenseClaim.createdBy?.id === currentUserId;
-  const isReviewer = expenseClaim.reviewedBy?.id === currentUserId;
-  const isApprover = expenseClaim.approvedBy?.id === currentUserId;
+  const isCreator = requestData?.createdBy?.id === currentUserId;
+  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
+  const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  console.log("isCreator:=>", isCreator);
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canUpdateStatus =
@@ -104,19 +113,19 @@ const ExpenseClaim = () => {
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
   const showAdminApproval =
-    !expenseClaim.approvedBy &&
+    !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
     (isCreator ||
-      (isReviewer && !expenseClaim.reviewedBy) ||
-      (isApprover && !expenseClaim.approvedBy));
+      (isReviewer && !requestData?.reviewedBy) ||
+      (isApprover && !requestData?.approvedBy));
 
   // Table data
   const tableHeadData = ["Request", "Status", "Budget", "Date"];
   const tableRowData = [
-    expenseClaim.staffName,
+    requestData?.staffName,
     <StatusBadge status={requestStatus!} key="status-badge" />,
-    moneyFormat(expenseClaim.budget, "NGN"),
-    dateformat(expenseClaim.createdAt!),
+    moneyFormat(requestData?.budget!, "NGN"),
+    dateformat(requestData?.createdAt!),
   ];
 
   return (
@@ -124,14 +133,23 @@ const ExpenseClaim = () => {
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Expense Claim</TextHeader>
-          <Button onClick={() => navigate(-1)}>
+          <Button onClick={() => navigate("/expense-claims")}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>
         </div>
       </div>
 
-      <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
+      {/* Main Table Section */}
+      <DataStateContainer
+        isLoading={isLoading}
+        isError={isError}
+        data={requestData}
+        errorComponent={<NetworkErrorUI />}
+        loadingComponent={<Spinner />}
+        emptyComponent={<div>No data available</div>}
+      >
+        {" "}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -147,7 +165,7 @@ const ExpenseClaim = () => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            <tr key={expenseClaim.id} className="h-[40px] max-h-[40px]">
+            <tr key={requestData?.id} className="h-[40px] max-h-[40px]">
               {tableRowData.map((data, index) => (
                 <td
                   key={index}
@@ -161,7 +179,7 @@ const ExpenseClaim = () => {
             <tr>
               <td colSpan={5}>
                 <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                  <ExpenseClaimDetails request={expenseClaim} />
+                  <ExpenseClaimDetails request={requestData!} />
 
                   {canUploadFiles && (
                     <div className="flex flex-col gap-3 mt-3">
@@ -182,9 +200,9 @@ const ExpenseClaim = () => {
                     </div>
                   )}
 
-                  {expenseClaim.reviewedBy && requestStatus !== "draft" && (
+                  {requestData?.reviewedBy && requestStatus !== "draft" && (
                     <div className="  mt-4 tracking-wide">
-                      <RequestCommentsAndActions request={expenseClaim} />
+                      <RequestCommentsAndActions request={requestData} />
 
                       {canUpdateStatus && (
                         <StatusUpdateForm
@@ -217,7 +235,7 @@ const ExpenseClaim = () => {
             </tr>
           </tbody>
         </table>
-      </div>
+      </DataStateContainer>
     </div>
   );
 };

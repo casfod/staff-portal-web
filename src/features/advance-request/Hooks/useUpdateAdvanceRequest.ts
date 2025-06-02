@@ -1,12 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useNavigate } from "react-router-dom";
-
 import { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
 import { updateAdvanceRequest as updateAdvanceRequestApi } from "../../../services/apiAdvanceRequest.ts";
 import { AdvanceRequestType } from "../../../interfaces.ts";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -18,7 +16,7 @@ interface LoginError extends AxiosError {
 
 export function useUpdateAdvanceRequest(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateAdvanceRequest,
@@ -37,7 +35,10 @@ export function useUpdateAdvanceRequest(requestId: string) {
       if (data.status === 200) {
         toast.success("Advance Request updated successfully");
 
-        navigate(-1);
+        //Invalidate
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
       } else if (data.status !== 200) {
         toast.error("Advance Request update not successful");
         setErrorMessage(data.message);

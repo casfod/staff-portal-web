@@ -4,6 +4,7 @@ import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
 import {
   TravelRequestType,
+  UseTravelRequest,
   // PdvanceRequestStats,
   useTravelRequestType,
   UseTravelStatsType,
@@ -90,6 +91,18 @@ export const getAllTravelRequest = async function (queryParams: {
       {
         params: queryParams,
       }
+    );
+    console.log("API Response:", response.data); // Debugging line
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const getTravelRequest = async function (requestId: string) {
+  try {
+    const response = await axiosInstance.get<UseTravelRequest>(
+      `/travel-requests/${requestId}`
     );
     console.log("API Response:", response.data); // Debugging line
     return response.data;

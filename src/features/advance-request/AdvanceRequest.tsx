@@ -21,15 +21,38 @@ import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
+import { useAdvanceRequest } from "./Hooks/useAdvanceRequest";
+import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import Spinner from "../../ui/Spinner";
+import { DataStateContainer } from "../../ui/DataStateContainer";
 
 const Request = () => {
-  // State and hooks initialization
   const currentUser = localStorageUser();
+  const navigate = useNavigate();
+  const { requestId } = useParams();
+
+  // Data fetching and reconciliation
+  const {
+    data: remoteData,
+    isLoading,
+    isError,
+  } = useAdvanceRequest(requestId!);
+
   const advanceRequest = useSelector(
     (state: RootState) => state.advanceRequest.advanceRequest
   );
-  const navigate = useNavigate();
-  const { requestId } = useParams();
+
+  const requestData = useMemo(
+    () => remoteData?.data || advanceRequest,
+    [remoteData, advanceRequest]
+  );
+
+  // Redirect logic - PLACE IT HERE
+  useEffect(() => {
+    if (!requestId || (!isLoading && !requestData)) {
+      navigate("/advance-requests");
+    }
+  }, [requestData, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -45,13 +68,6 @@ const Request = () => {
     useUpdateAdvanceRequest(requestId!);
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
-
-  // Redirect if no purchase request or params are available
-  useEffect(() => {
-    if (!requestId || !advanceRequest) {
-      navigate("/purchase-requests");
-    }
-  }, [advanceRequest, requestId, navigate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -80,23 +96,18 @@ const Request = () => {
     updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
-  // Handle the case where advanceRequest is null
-  if (!advanceRequest) {
-    return <div>No purchase request data available.</div>;
-  }
-
   const totalAmount =
-    advanceRequest.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+    requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   // User references
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = advanceRequest.status;
+  const requestStatus = requestData?.status;
 
   // Permission flags with explicit null checks
-  const isCreator = advanceRequest.createdBy?.id === currentUserId;
-  const isReviewer = advanceRequest.reviewedBy?.id === currentUserId;
-  const isApprover = advanceRequest.approvedBy?.id === currentUserId;
+  const isCreator = requestData?.createdBy?.id === currentUserId;
+  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
+  const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
   // Conditional rendering flags
@@ -107,21 +118,21 @@ const Request = () => {
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
   const showAdminApproval =
-    !advanceRequest.approvedBy &&
+    !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
     (isCreator ||
-      (isReviewer && !advanceRequest.reviewedBy) ||
-      (isApprover && !advanceRequest.approvedBy));
+      (isReviewer && !requestData?.reviewedBy) ||
+      (isApprover && !requestData?.approvedBy));
 
   // Table data
   // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
   const tableHeadData = ["Request", "Status", "Amount", "Date"];
   const tableRowData = [
-    advanceRequest?.requestedBy,
-    <StatusBadge status={advanceRequest?.status!} />,
-    advanceRequest?.department,
+    requestData?.requestedBy,
+    <StatusBadge status={requestData?.status!} />,
+    requestData?.department,
     moneyFormat(totalAmount, "NGN"),
-    dateformat(advanceRequest?.createdAt!),
+    dateformat(requestData?.createdAt!),
   ];
 
   return (
@@ -130,7 +141,7 @@ const Request = () => {
         <div className="flex justify-between items-center">
           <TextHeader>Advance Request</TextHeader>
           <Button
-            onClick={() => navigate(-1)} // Use relative path here
+            onClick={() => navigate("/advance-requests")} // Use relative path here
           >
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
@@ -139,7 +150,14 @@ const Request = () => {
       </div>
 
       {/* Main Table Section */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
+      <DataStateContainer
+        isLoading={isLoading}
+        isError={isError}
+        data={requestData}
+        errorComponent={<NetworkErrorUI />}
+        loadingComponent={<Spinner />}
+        emptyComponent={<div>No data available</div>}
+      >
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -157,7 +175,7 @@ const Request = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             <>
               {/* Purchase Request Details Row */}
-              <tr key={advanceRequest?.id} className="h-[40px] max-h-[40px] ">
+              <tr key={requestData?.id} className="h-[40px] max-h-[40px] ">
                 {tableRowData.map((data, index) => (
                   <td
                     key={index}
@@ -172,7 +190,7 @@ const Request = () => {
               <tr>
                 <td colSpan={5}>
                   <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                    <AdvanceRequestDetails request={advanceRequest} />
+                    <AdvanceRequestDetails request={requestData!} />
 
                     {canUploadFiles && (
                       <div className="flex flex-col gap-3 mt-3">
@@ -194,14 +212,14 @@ const Request = () => {
                     )}
 
                     {/* Comments and Actions Section */}
-                    {advanceRequest?.reviewedBy &&
-                      advanceRequest?.status !== "draft" && (
+                    {requestData?.reviewedBy &&
+                      requestData?.status !== "draft" && (
                         <div className="  mt-4 tracking-wide">
-                          <RequestCommentsAndActions request={advanceRequest} />
+                          <RequestCommentsAndActions request={requestData} />
 
                           {canUpdateStatus && (
                             <StatusUpdateForm
-                              requestStatus={advanceRequest?.status!}
+                              requestStatus={requestData?.status!}
                               status={status}
                               setStatus={setStatus}
                               comment={comment}
@@ -232,7 +250,7 @@ const Request = () => {
             </>
           </tbody>
         </table>
-      </div>
+      </DataStateContainer>
     </div>
   );
 };

@@ -69,6 +69,12 @@ export interface UsePurchaseStatsType {
   data: PurchaseRequestStats;
 }
 
+export interface UsePurChaseRequest {
+  status: number;
+  message: string;
+  data: PurChaseRequestType;
+}
+
 export interface usePurChaseRequestType {
   status: number;
   message: string;
@@ -132,7 +138,13 @@ export interface UseAdvanceStatsType {
   data: AdvanceRequestStats;
 }
 
-export interface useAdvanceRequestType {
+export interface UseAdvanceRequest {
+  status: number;
+  message: string;
+  data: AdvanceRequestType;
+}
+
+export interface UseAdvanceRequestType {
   status: number;
   message: string;
   data: {
@@ -201,6 +213,12 @@ export interface UseTravelStatsType {
   data: TravelRequestStats;
 }
 
+export interface UseTravelRequest {
+  status: number;
+  message: string;
+  data: TravelRequestType;
+}
+
 export interface useTravelRequestType {
   status: number;
   message: string;
@@ -265,6 +283,11 @@ export interface UseExpenseClaimStatsType {
   message: string;
   amount: number;
   data: ExpenseClaimStats;
+}
+export interface UseExpenseClaim {
+  status: number;
+  message: string;
+  data: ExpenseClaimType;
 }
 
 export interface useExpenseClaimType {
@@ -332,6 +355,12 @@ export interface UsePaymentStatsType {
   data: PaymentRequestStats;
 }
 
+export interface UsePaymentRequest {
+  status: number;
+  message: string;
+  data: PaymentRequestType;
+}
+
 export interface usePaymentRequestType {
   status: number;
   message: string;
@@ -387,6 +416,12 @@ export interface UseProjectStatsType {
   message: string;
   amount: number;
   data: ProjectStats;
+}
+
+export interface UseProject {
+  status: number;
+  message: string;
+  data: Project;
 }
 
 export interface useProjectType {
@@ -455,6 +490,12 @@ export interface UseConceptNoteStatsType {
   message: string;
   amount: number;
   data: ConceptNoteStats;
+}
+
+export interface UseConceptNote {
+  status: number;
+  message: string;
+  data: ConceptNoteType;
 }
 
 export interface UseConceptNoteType {
