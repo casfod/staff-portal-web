@@ -130,7 +130,6 @@ const Request = () => {
   const tableRowData = [
     requestData?.requestedBy,
     <StatusBadge status={requestData?.status!} />,
-    requestData?.department,
     moneyFormat(totalAmount, "NGN"),
     dateformat(requestData?.createdAt!),
   ];
