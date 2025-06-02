@@ -95,13 +95,13 @@ const ConceptNote = () => {
   const tableHeadData = ["Prepared By", "Status", "Date"];
 
   const tableRowData = [
-    `${requestData?.preparedBy.first_name} ${requestData?.preparedBy.last_name}`,
+    `${requestData?.preparedBy?.first_name} ${requestData?.preparedBy?.last_name}`,
     <StatusBadge status={requestData?.status!} key="status-badge" />,
     // truncateText(requestData?.account_Code, 25),
     dateformat(requestData?.createdAt!),
   ];
 
-  const isCreator = requestData!.preparedBy!.id === currentUser.id;
+  const isCreator = requestData?.preparedBy!.id === currentUser.id;
   const canUploadFiles = isCreator && requestStatus === "approved";
 
   return (
