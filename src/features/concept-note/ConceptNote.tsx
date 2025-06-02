@@ -3,7 +3,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Button from "../../ui/Button";
@@ -23,6 +23,8 @@ import { useConceptNote } from "./Hooks/useConceptNote";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
+import ActionIcons from "../../ui/ActionIcons";
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -85,6 +87,17 @@ const ConceptNote = () => {
     });
   };
 
+  //PDF logic
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { downloadMultiPagePdf } = usePdfDownload({
+    filename: `ConceptNote-${conceptNote?.id}`,
+    format: "a4",
+    orientation: "portrait",
+  });
+  const handleDownloadPDF = () => {
+    downloadMultiPagePdf(pdfContentRef);
+  };
+
   const requestStatus = requestData?.status;
 
   const showStatusUpdate =
@@ -92,13 +105,23 @@ const ConceptNote = () => {
     currentUser.id === requestData?.approvedBy?.id;
 
   // const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
-  const tableHeadData = ["Prepared By", "Status", "Date"];
+  const tableHeadData = ["Prepared By", "Status", "Date", "Actions"];
 
   const tableRowData = [
-    `${requestData?.preparedBy?.first_name} ${requestData?.preparedBy?.last_name}`,
-    <StatusBadge status={requestData?.status!} key="status-badge" />,
-    // truncateText(requestData?.account_Code, 25),
-    dateformat(requestData?.createdAt!),
+    {
+      id: "name",
+      content: `${requestData?.preparedBy?.first_name} ${requestData?.preparedBy?.last_name}`,
+    },
+    {
+      id: "status",
+      content: <StatusBadge status={requestData?.status!} key="status-badge" />,
+    },
+
+    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    {
+      id: "action",
+      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+    },
   ];
 
   const isCreator = requestData?.preparedBy!.id === currentUser.id;
@@ -118,91 +141,93 @@ const ConceptNote = () => {
       </div>
 
       {/* Main Table Section */}
-      <DataStateContainer
-        isLoading={isLoading}
-        isError={isError}
-        data={requestData}
-        errorComponent={<NetworkErrorUI />}
-        loadingComponent={<Spinner />}
-        emptyComponent={<div>No data available</div>}
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 ">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
+      <div ref={pdfContentRef}>
+        <DataStateContainer
+          isLoading={isLoading}
+          isError={isError}
+          data={requestData}
+          errorComponent={<NetworkErrorUI />}
+          loadingComponent={<Spinner />}
+          emptyComponent={<div>No data available</div>}
+        >
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 ">
+              <tr>
+                {tableHeadData.map((title, index) => (
+                  <th
+                    key={index}
+                    className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  >
+                    {title}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr
-              key={requestData?.id}
-              className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
-            >
-              {tableRowData.map((data, index) => (
-                <td
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                >
-                  {data}
-                </td>
-              ))}
-            </tr>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr
+                key={requestData?.id}
+                className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
+              >
+                {tableRowData.map((data) => (
+                  <td
+                    key={data.id}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data.content}
+                  </td>
+                ))}
+              </tr>
 
-            <tr>
-              <td colSpan={4}>
-                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                  <ConceptNoteDetails request={requestData!} />
+              <tr>
+                <td colSpan={4}>
+                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                    <ConceptNoteDetails request={requestData!} />
 
-                  {canUploadFiles && (
-                    <div className="flex flex-col gap-3 mt-3">
-                      <FileUpload
-                        selectedFiles={selectedFiles}
-                        setSelectedFiles={setSelectedFiles}
-                        accept=".jpg,.png,.pdf,.xlsx,.docx"
-                        multiple={true}
-                      />
-
-                      {selectedFiles.length > 0 && (
-                        <div className="self-center">
-                          <Button disabled={isUpdating} onClick={handleSend}>
-                            {isUpdating ? <SpinnerMini /> : "Upload"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {requestData?.status !== "draft" && (
-                    <div className="  mt-4 tracking-wide">
-                      <RequestCommentsAndActions request={requestData} />
-
-                      {showStatusUpdate && (
-                        <StatusUpdateForm
-                          requestStatus={requestData?.status!}
-                          status={status}
-                          setStatus={setStatus}
-                          comment={comment}
-                          setComment={setComment}
-                          isUpdatingStatus={isUpdatingStatus}
-                          handleStatusChange={onStatusChangeHandler}
-                          directApproval={true}
+                    {canUploadFiles && (
+                      <div className="flex flex-col gap-3 mt-3">
+                        <FileUpload
+                          selectedFiles={selectedFiles}
+                          setSelectedFiles={setSelectedFiles}
+                          accept=".jpg,.png,.pdf,.xlsx,.docx"
+                          multiple={true}
                         />
-                      )}
-                    </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </DataStateContainer>
+
+                        {selectedFiles.length > 0 && (
+                          <div className="self-center">
+                            <Button disabled={isUpdating} onClick={handleSend}>
+                              {isUpdating ? <SpinnerMini /> : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {requestData?.status !== "draft" && (
+                      <div className="  mt-4 tracking-wide">
+                        <RequestCommentsAndActions request={requestData} />
+
+                        {showStatusUpdate && (
+                          <StatusUpdateForm
+                            requestStatus={requestData?.status!}
+                            status={status}
+                            setStatus={setStatus}
+                            comment={comment}
+                            setComment={setComment}
+                            isUpdatingStatus={isUpdatingStatus}
+                            handleStatusChange={onStatusChangeHandler}
+                            directApproval={true}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </DataStateContainer>
+      </div>
     </div>
   );
 };

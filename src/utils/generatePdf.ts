@@ -9,16 +9,17 @@ export type PdfOptions = {
   margin?: number;
   quality?: number;
   backgroundColor?: string;
+  letterRendering?: boolean; // Made optional with ?
 };
-
 const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
   orientation: "portrait",
-  scale: 2,
-  margin: 10,
-  quality: 1,
+  scale: 1.5,
+  margin: 5,
+  quality: 0.88,
   backgroundColor: "#FFFFFF",
+  letterRendering: true, // Default value added
 };
 
 /**
@@ -42,38 +43,49 @@ export const generatePdf = async (
   } = { ...defaultOptions, ...options };
 
   try {
-    // Clone the element to avoid affecting the original DOM
+    // Clone the element with improved isolation
     const clone = element.cloneNode(true) as HTMLElement;
     clone.style.position = "absolute";
     clone.style.left = "-9999px";
     clone.style.width = `${element.offsetWidth}px`;
+    clone.style.visibility = "visible"; // Ensure visibility
     document.body.appendChild(clone);
 
-    // Generate canvas with optimized settings
+    // Generate canvas with enhanced settings
     const canvas = await html2canvas(clone, {
       scale: scale! * (quality || 1),
       useCORS: true,
-      logging: false,
+      logging: true, // Enable for debugging
       backgroundColor,
       removeContainer: true,
-      ignoreElements: (el) => ["BUTTON", "A", "INPUT"].includes(el.tagName),
+      ignoreElements: (el) =>
+        ["BUTTON", "A", "INPUT", "VIDEO", "IFRAME"].includes(el.tagName),
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
+      allowTaint: true, // For external images
+      // letterRendering: true, // Better text quality
     });
 
     document.body.removeChild(clone);
 
-    // Initialize PDF
+    // Initialize PDF with improved settings
     const pdf = new jsPDF({
       orientation,
       unit: "mm",
       format,
+      compress: true, // Reduce file size
     });
 
-    // Calculate dimensions
-    const pageWidth = pdf.internal.pageSize.getWidth() - margin! * 2;
-    const pageHeight = pdf.internal.pageSize.getHeight() - margin! * 2;
-    const imgRatio = canvas.width / canvas.height;
+    // Calculate dimensions with safety checks
+    const pageWidth = Math.max(
+      10,
+      pdf.internal.pageSize.getWidth() - margin! * 2
+    );
+    const pageHeight = Math.max(
+      10,
+      pdf.internal.pageSize.getHeight() - margin! * 2
+    );
+    const imgRatio = canvas.width / Math.max(1, canvas.height);
 
     let imgWidth = pageWidth;
     let imgHeight = pageWidth / imgRatio;
@@ -84,22 +96,31 @@ export const generatePdf = async (
       imgWidth = pageHeight * imgRatio;
     }
 
-    // Center the image on the page
-    const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2;
-    const y = (pdf.internal.pageSize.getHeight() - imgHeight) / 2;
+    // Position at top-left with margins
+    const x = margin!;
+    const y = margin!;
 
-    // Add image to PDF
+    // Add image with quality options
     pdf.addImage(
-      canvas.toDataURL("image/jpeg", 1.0),
+      canvas.toDataURL("image/jpeg", quality), // Use specified quality
       "JPEG",
       x,
       y,
       imgWidth,
-      imgHeight
+      imgHeight,
+      undefined,
+      "MEDIUM" // Compression level
     );
 
-    // Save PDF
-    pdf.save(filename);
+    // Metadata for better PDF handling
+    pdf.setProperties({
+      title: filename?.replace(".pdf", ""),
+      creator: "PDF Generator",
+      subject: "Exported content",
+    });
+
+    // Save PDF with improved filename handling
+    pdf.save(filename?.endsWith(".pdf") ? filename : `${filename}.pdf`);
   } catch (error) {
     console.error("PDF generation failed:", error);
     throw new Error(
@@ -158,11 +179,11 @@ export const generateMultiPagePdf = async (
       format,
     });
 
-    // Page dimensions
+    // Page dimensions (subtract margins)
     const pageWidth = pdf.internal.pageSize.getWidth() - margin! * 2;
     const pageHeight = pdf.internal.pageSize.getHeight() - margin! * 2;
 
-    // Image dimensions
+    // Calculate image dimensions to maintain aspect ratio
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     const totalPages = Math.ceil(imgHeight / pageHeight);
@@ -171,19 +192,20 @@ export const generateMultiPagePdf = async (
     for (let i = 0; i < totalPages; i++) {
       if (i > 0) pdf.addPage();
 
-      const position = -i * pageHeight;
-      // const height = Math.min(pageHeight, imgHeight - i * pageHeight);
+      // Calculate vertical position for this page
+      const yOffset = -i * pageHeight;
 
+      // Add image to current page
       pdf.addImage(
         canvas.toDataURL("image/jpeg", 1.0),
         "JPEG",
-        margin!,
-        margin!,
+        margin!, // x position (left margin)
+        margin!, // y position (top margin)
         imgWidth,
         imgHeight,
         undefined,
         "FAST",
-        position
+        yOffset // Vertical offset for this page's content
       );
     }
 
