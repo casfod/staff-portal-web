@@ -7,6 +7,7 @@ import {
   // PdvanceRequestStats,
   useExpenseClaimType,
   UseExpenseClaimStatsType,
+  UseExpenseClaim,
 } from "../interfaces.ts";
 
 const url = baseUrl();
@@ -103,6 +104,18 @@ export const getExpenseClaimStats = async function () {
     const response = await axiosInstance.get<UseExpenseClaimStatsType>(
       `/expense-claims/stats`
     );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const getExpenseClaim = async function (requestId: string) {
+  try {
+    const response = await axiosInstance.get<UseExpenseClaim>(
+      `/expense-claims/${requestId}`
+    );
+    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);

@@ -22,7 +22,7 @@ import useDeleteRequest from "../../hooks/useDeleteRequest";
 const tableHeadData = [
   "Prepared By",
   "Status",
-  "Account Code",
+  // "Account Code",
   "Date",
   "Actions",
 ];
@@ -46,8 +46,6 @@ const AllConceptNotes = () => {
     limit
   );
 
-  console.log(data);
-
   const conceptNotes = useMemo(() => data?.data?.conceptNotes ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
@@ -68,7 +66,7 @@ const AllConceptNotes = () => {
   };
   const handleAction = (conceptNote: ConceptNoteType) => {
     dispatch(setConceptNote(conceptNote));
-    navigate(`/concept-notes/concept-note/${conceptNote.id}`);
+    navigate(`/concept-notes/request/${conceptNote.id}`);
   };
 
   const { deleteConceptNote } = useDeleteConceptNote(

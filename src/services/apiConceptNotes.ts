@@ -4,6 +4,7 @@ import { localStorageUser } from "../utils/localStorageUser.ts";
 import { baseUrl } from "./baseUrl.ts";
 import {
   ConceptNoteType,
+  UseConceptNote,
   UseConceptNoteStatsType,
   UseConceptNoteType,
 } from "../interfaces.ts";
@@ -105,16 +106,28 @@ export const getAllConceptNotes = async function (queryParams: {
   }
 };
 
-export const getConceptCote = async function (conceptNoteId: string) {
+export const getConceptNote = async function (requestId: string) {
   try {
-    const response = await axiosInstance.get<UseConceptNoteType>(
-      `/concept-notes/${conceptNoteId}`
+    const response = await axiosInstance.get<UseConceptNote>(
+      `/concept-notes/${requestId}`
     );
+    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
+
+// export const getConceptCote = async function (conceptNoteId: string) {
+//   try {
+//     const response = await axiosInstance.get<UseConceptNoteType>(
+//       `/concept-notes/${conceptNoteId}`
+//     );
+//     return response.data;
+//   } catch (err) {
+//     return handleError(err);
+//   }
+// };
 
 export const saveAndSendConceptNote = async function (
   data: Partial<ConceptNoteType>,

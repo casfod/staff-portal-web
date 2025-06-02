@@ -29,7 +29,7 @@ export function Login() {
     <div
       className="h-screen flex flex-col items-center justify-center 
         bg-gradient-to-br  from-blue-500 to-primary overflow-y-scroll 
-      font-roboto tracking-wide  text-white px-3 md:px-8 pt-16"
+      font-roboto tracking-wide  px-3 md:px-8 pt-16"
     >
       <div className="w-full md:w-[450px] bg-white  flex flex-col items-center justify-center p-4 md:p-6  shadow-xl rounded-md ">
         <div className="flex items-center justify-center mb-4">

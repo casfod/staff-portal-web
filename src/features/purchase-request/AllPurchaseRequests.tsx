@@ -100,7 +100,7 @@ const AllPurchaseRequests = () => {
   const tableHeadData = [
     "Request",
     "Status",
-    "Department",
+    // "Department",
     "Amount",
     "Date",
     "Actions",

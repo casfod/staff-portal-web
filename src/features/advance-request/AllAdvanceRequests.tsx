@@ -106,7 +106,7 @@ const AllAdvanceRequests = () => {
   const tableHeadData = [
     "Request",
     "Status",
-    "Department",
+    // "Department",
     "Amount",
     "Date",
     "Actions",

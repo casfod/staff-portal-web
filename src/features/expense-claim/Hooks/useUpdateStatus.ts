@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useNavigate } from "react-router-dom";
 
 import { AxiosError, AxiosResponse } from "axios";
@@ -6,7 +6,6 @@ import { useState } from "react";
 import { updateStatus as updateStatusApi } from "../../../services/apiExpenseClaim.ts";
 
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
@@ -18,7 +17,7 @@ interface LoginError extends AxiosError {
 
 export function useUpdateStatus(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateStatus,
@@ -32,7 +31,9 @@ export function useUpdateStatus(requestId: string) {
       if (data.status === 200) {
         toast.success("Status updated successfully");
 
-        navigate(-1);
+        queryClient.invalidateQueries({
+          queryKey: ["expense-claim", requestId],
+        });
       } else if (data.status !== 200) {
         toast.error("Status update not successful");
         setErrorMessage(data.message);

@@ -16,6 +16,7 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
 
   const data1 = [
+    { label: "Account Code", value: request.grantCode },
     { label: "Amount In Words", value: request.amountInWords },
 
     { label: "Purpose Of Expense", value: request.purposeOfExpense },
@@ -48,13 +49,6 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
       >
         {/* Left Column */}
         <div className="flex flex-col gap-2 md:gap-3 w-full">
-          <p>
-            <span className="text-sm font-bold mr-1 uppercase">
-              Grant Code:
-            </span>
-            {request.grantCode}
-          </p>
-
           {data1.map(({ label, value }) => (
             <div key={label} className="whitespace-pre-line">
               <h2 className="text-sm font-bold uppercase mb-1">{label}:</h2>

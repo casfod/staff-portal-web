@@ -1,9 +1,3 @@
-// declare module "redux-persist/lib/storage" {
-//   import { WebStorage } from "redux-persist/es/types";
-//   const localStorage: WebStorage;
-//   export default localStorage;
-// }
-
 ///////////////////////
 //File
 ///////////////////////
@@ -75,6 +69,12 @@ export interface UsePurchaseStatsType {
   data: PurchaseRequestStats;
 }
 
+export interface UsePurChaseRequest {
+  status: number;
+  message: string;
+  data: PurChaseRequestType;
+}
+
 export interface usePurChaseRequestType {
   status: number;
   message: string;
@@ -111,6 +111,7 @@ export interface PurChaseRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 export interface PurchaseRequesItemGroupType {
@@ -137,7 +138,13 @@ export interface UseAdvanceStatsType {
   data: AdvanceRequestStats;
 }
 
-export interface useAdvanceRequestType {
+export interface UseAdvanceRequest {
+  status: number;
+  message: string;
+  data: AdvanceRequestType;
+}
+
+export interface UseAdvanceRequestType {
   status: number;
   message: string;
   data: {
@@ -177,6 +184,7 @@ export interface AdvanceRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 export interface AdvanceRequesItemGroupType {
@@ -203,6 +211,12 @@ export interface UseTravelStatsType {
   message: string;
   amount: number;
   data: TravelRequestStats;
+}
+
+export interface UseTravelRequest {
+  status: number;
+  message: string;
+  data: TravelRequestType;
 }
 
 export interface useTravelRequestType {
@@ -252,6 +266,7 @@ export interface TravelRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -268,6 +283,11 @@ export interface UseExpenseClaimStatsType {
   message: string;
   amount: number;
   data: ExpenseClaimStats;
+}
+export interface UseExpenseClaim {
+  status: number;
+  message: string;
+  data: ExpenseClaimType;
 }
 
 export interface useExpenseClaimType {
@@ -316,6 +336,7 @@ export interface ExpenseClaimType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -332,6 +353,12 @@ export interface UsePaymentStatsType {
   message: string;
   amount: number;
   data: PaymentRequestStats;
+}
+
+export interface UsePaymentRequest {
+  status: number;
+  message: string;
+  data: PaymentRequestType;
 }
 
 export interface usePaymentRequestType {
@@ -374,6 +401,7 @@ export interface PaymentRequestType {
   createdAt?: string;
   updatedAt?: string;
   files?: [];
+  copiedTo?: [UserType];
 }
 
 ///////////////////////
@@ -388,6 +416,12 @@ export interface UseProjectStatsType {
   message: string;
   amount: number;
   data: ProjectStats;
+}
+
+export interface UseProject {
+  status: number;
+  message: string;
+  data: Project;
 }
 
 export interface useProjectType {
@@ -458,6 +492,12 @@ export interface UseConceptNoteStatsType {
   data: ConceptNoteStats;
 }
 
+export interface UseConceptNote {
+  status: number;
+  message: string;
+  data: ConceptNoteType;
+}
+
 export interface UseConceptNoteType {
   status: number;
   message: string;
@@ -505,12 +545,5 @@ export interface ConceptNoteType {
   updatedAt?: string;
 
   files?: [];
+  copiedTo?: [UserType];
 }
-
-///////////////////////
-//SUB-INTERFACE
-///////////////////////
-
-// export type StyledInputProps = {
-//   reset: UseFormReset<FormValues>;
-// };
