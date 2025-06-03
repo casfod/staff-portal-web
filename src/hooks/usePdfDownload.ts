@@ -1,9 +1,5 @@
 import { useState, useCallback, RefObject } from "react";
-import {
-  generatePdf,
-  generateMultiPagePdf,
-  PdfOptions,
-} from "../utils/generatePdf";
+import { generatePdf, PdfOptions } from "../utils/generatePdf";
 
 // Define the status type since it wasn't included in the util
 export type PdfDownloadStatus = "idle" | "generating" | "success" | "error";
@@ -23,7 +19,7 @@ export const usePdfDownload = (defaultOptions?: PdfOptions) => {
     async (
       elementRef: RefObject<HTMLElement>,
       options: PdfOptions | undefined,
-      generator: typeof generatePdf | typeof generateMultiPagePdf
+      generator: typeof generatePdf
     ) => {
       if (!elementRef.current) {
         setError("Component reference is not available");
@@ -62,16 +58,15 @@ export const usePdfDownload = (defaultOptions?: PdfOptions) => {
   /**
    * Download a multi-page PDF using a ref
    */
-  const downloadMultiPagePdf = useCallback(
-    async (elementRef: RefObject<HTMLElement>, options?: PdfOptions) => {
-      await handleDownload(elementRef, options, generateMultiPagePdf);
-    },
-    [handleDownload]
-  );
+  // const downloadMultiPagePdf = useCallback(
+  //   async (elementRef: RefObject<HTMLElement>, options?: PdfOptions) => {
+  //     await handleDownload(elementRef, options, generateMultiPagePdf);
+  //   },
+  //   [handleDownload]
+  // );
 
   return {
     downloadPdf,
-    downloadMultiPagePdf,
     status,
     error,
     isGenerating: status === "generating",

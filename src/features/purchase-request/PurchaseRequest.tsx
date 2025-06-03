@@ -102,13 +102,12 @@ const PurchaseRequest = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadMultiPagePdf } = usePdfDownload({
+  const { downloadPdf } = usePdfDownload({
     filename: `PurchaseRequest-${purchaseRequest?.id}`,
-    format: "a4",
-    orientation: "portrait",
+    multiPage: true,
   });
   const handleDownloadPDF = () => {
-    downloadMultiPagePdf(pdfContentRef);
+    downloadPdf(pdfContentRef);
   };
 
   // Calculate total amount once

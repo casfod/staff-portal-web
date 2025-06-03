@@ -1,3 +1,4 @@
+// generatePdf.ts
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -9,25 +10,46 @@ export type PdfOptions = {
   margin?: number;
   quality?: number;
   backgroundColor?: string;
-  letterRendering?: boolean; // Made optional with ?
+  letterRendering?: boolean;
+  enableLinks?: boolean;
+  pagebreak?: {
+    mode?: "css";
+    avoid?: string[];
+  };
+  multiPage?: boolean; // New flag to toggle multi-page behavior
 };
+
 const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
   orientation: "portrait",
   scale: 2,
-  margin: 5,
+  margin: 10,
   quality: 0.95,
   backgroundColor: "#FFFFFF",
-  letterRendering: true, // Default value added
+  letterRendering: true,
+  enableLinks: true,
+  pagebreak: {
+    mode: "css",
+    avoid: [".pdf-avoid-break"],
+  },
+  multiPage: false,
 };
 
-/**
- * Generates a high-quality PDF from a DOM element
- * @param element The DOM element to convert
- * @param options PDF generation options
- * @returns Promise that resolves when PDF is generated
- */
+const getPdfDimensions = (format: string, orientation: string) => {
+  const pageSizes: Record<string, [number, number]> = {
+    a4: [210, 297],
+    a3: [297, 420],
+    letter: [215.9, 279.4],
+    legal: [215.9, 355.6],
+  };
+
+  let [width, height] = pageSizes[format] || pageSizes.a4;
+  return orientation === "landscape"
+    ? { width: height, height: width }
+    : { width, height };
+};
+
 export const generatePdf = async (
   element: HTMLElement,
   options: Partial<PdfOptions> = {}
@@ -40,182 +62,114 @@ export const generatePdf = async (
     margin,
     quality,
     backgroundColor,
+    // letterRendering,
+    enableLinks,
+    pagebreak,
+    multiPage,
+    compression = "FAST",
   } = { ...defaultOptions, ...options };
 
   try {
-    // Clone the element with improved isolation
-    const clone = element.cloneNode(true) as HTMLElement;
-    clone.style.position = "absolute";
-    clone.style.left = "-9999px";
-    clone.style.width = `${element.offsetWidth}px`;
-    clone.style.visibility = "visible"; // Ensure visibility
-    document.body.appendChild(clone);
+    // Prepare the element
+    const originalClasses = element.className;
+    element.classList.add("pdf-container");
 
     // Generate canvas with enhanced settings
-    const canvas = await html2canvas(clone, {
-      scale: scale! * (quality || 1),
+    const canvas = await html2canvas(element, {
+      scale: scale! * quality!,
       useCORS: true,
-      logging: true, // Enable for debugging
+      allowTaint: true,
+      // letterRendering,
       backgroundColor,
-      removeContainer: true,
-      ignoreElements: (el) =>
-        ["BUTTON", "A", "INPUT", "VIDEO", "IFRAME"].includes(el.tagName),
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
-      allowTaint: true, // For external images
-      // letterRendering: true, // Better text quality
+      onclone: (clonedDoc) => {
+        // Handle links
+        if (enableLinks) {
+          clonedDoc.querySelectorAll("a").forEach((link) => {
+            link.style.color = "inherit";
+            link.style.textDecoration = "underline";
+          });
+        }
+        // Handle page breaks
+        pagebreak?.avoid?.forEach((selector) => {
+          clonedDoc.querySelectorAll(selector).forEach((el) => {
+            (el as HTMLElement).style.pageBreakInside = "avoid";
+          });
+        });
+      },
     });
 
-    document.body.removeChild(clone);
+    // Restore original element
+    element.className = originalClasses;
 
-    // Initialize PDF with improved settings
+    // Create PDF
     const pdf = new jsPDF({
       orientation,
       unit: "mm",
       format,
-      compress: true, // Reduce file size
+      compress: true,
     });
 
-    // Calculate dimensions with safety checks
-    const pageWidth = Math.max(
-      10,
-      pdf.internal.pageSize.getWidth() - margin! * 2
+    const { width: pdfWidth, height: pdfHeight } = getPdfDimensions(
+      format!,
+      orientation!
     );
-    const pageHeight = Math.max(
-      10,
-      pdf.internal.pageSize.getHeight() - margin! * 2
-    );
-    const imgRatio = canvas.width / Math.max(1, canvas.height);
+    const contentWidth = pdfWidth - margin! * 2;
+    const contentHeight = pdfHeight - margin! * 2;
 
-    let imgWidth = pageWidth;
-    let imgHeight = pageWidth / imgRatio;
-
-    // Adjust if image is taller than page
-    if (imgHeight > pageHeight) {
-      imgHeight = pageHeight;
-      imgWidth = pageHeight * imgRatio;
-    }
-
-    // Position at top-left with margins
-    const x = margin!;
-    const y = margin!;
-
-    // Add image with quality options
-    pdf.addImage(
-      canvas.toDataURL("image/jpeg", quality), // Use specified quality
-      "JPEG",
-      x,
-      y,
-      imgWidth,
-      imgHeight,
-      undefined,
-      "MEDIUM" // Compression level
-    );
-
-    // Metadata for better PDF handling
-    pdf.setProperties({
-      title: filename?.replace(".pdf", ""),
-      creator: "PDF Generator",
-      subject: "Exported content",
-    });
-
-    // Save PDF with improved filename handling
-    pdf.save(filename?.endsWith(".pdf") ? filename : `${filename}.pdf`);
-  } catch (error) {
-    console.error("PDF generation failed:", error);
-    throw new Error(
-      `Failed to generate PDF: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-};
-
-/**
- * Generates a multi-page PDF for large content
- * @param element The DOM element to convert
- * @param options PDF generation options
- * @returns Promise that resolves when PDF is generated
- */
-export const generateMultiPagePdf = async (
-  element: HTMLElement,
-  options: Partial<PdfOptions> = {}
-): Promise<void> => {
-  const {
-    filename,
-    format,
-    orientation,
-    scale,
-    margin,
-    quality,
-    backgroundColor,
-  } = { ...defaultOptions, ...options };
-
-  try {
-    // Clone the element
-    const clone = element.cloneNode(true) as HTMLElement;
-    clone.style.position = "absolute";
-    clone.style.left = "-9999px";
-    clone.style.width = `${element.offsetWidth}px`;
-    document.body.appendChild(clone);
-
-    // Generate canvas
-    const canvas = await html2canvas(clone, {
-      scale: scale! * (quality || 1),
-      useCORS: true,
-      logging: false,
-      backgroundColor,
-      removeContainer: true,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-    });
-
-    document.body.removeChild(clone);
-
-    // Initialize PDF
-    const pdf = new jsPDF({
-      orientation,
-      unit: "mm",
-      format,
-    });
-
-    // Page dimensions (subtract margins)
-    const pageWidth = pdf.internal.pageSize.getWidth() - margin! * 2;
-    const pageHeight = pdf.internal.pageSize.getHeight() - margin! * 2;
-
-    // Calculate image dimensions to maintain aspect ratio
-    const imgWidth = pageWidth;
+    const imgWidth = contentWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const totalPages = Math.ceil(imgHeight / pageHeight);
 
-    // Add pages with content
-    for (let i = 0; i < totalPages; i++) {
-      if (i > 0) pdf.addPage();
+    if (multiPage && imgHeight > contentHeight) {
+      // Multi-page logic
+      let remainingHeight = imgHeight;
+      let position = margin;
 
-      // Calculate vertical position for this page
-      const yOffset = -i * pageHeight;
+      while (remainingHeight > 0) {
+        const viewportHeight = Math.min(contentHeight, remainingHeight);
+        pdf.addImage(
+          canvas.toDataURL("image/jpeg", quality),
+          "JPEG",
+          margin!,
+          position!,
+          imgWidth,
+          viewportHeight,
+          undefined,
+          compression,
+          undefined
+        );
 
-      // Add image to current page
+        remainingHeight -= contentHeight;
+        position! -= contentHeight;
+
+        if (remainingHeight > 0) {
+          pdf.addPage();
+        }
+      }
+    } else {
+      // Single-page logic (scaled to fit)
+      const scaleFactor = Math.min(
+        contentWidth / imgWidth,
+        contentHeight / imgHeight
+      );
+
       pdf.addImage(
-        canvas.toDataURL("image/jpeg", 1.0),
+        canvas.toDataURL("image/jpeg", quality),
         "JPEG",
-        margin!, // x position (left margin)
-        margin!, // y position (top margin)
-        imgWidth,
-        imgHeight,
+        margin!,
+        margin!,
+        imgWidth * scaleFactor,
+        imgHeight * scaleFactor,
         undefined,
-        "FAST",
-        yOffset // Vertical offset for this page's content
+        compression,
+        undefined
       );
     }
 
     pdf.save(filename);
   } catch (error) {
-    console.error("Multi-page PDF generation failed:", error);
-    throw new Error(
-      `Failed to generate multi-page PDF: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    console.error("PDF generation failed:", error);
+    throw error;
   }
 };

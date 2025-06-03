@@ -96,13 +96,12 @@ const TravelRequest = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadMultiPagePdf } = usePdfDownload({
+  const { downloadPdf } = usePdfDownload({
     filename: `TravelRequest-${travelRequest?.id}`,
-    format: "a4",
-    orientation: "portrait",
+    multiPage: true,
   });
   const handleDownloadPDF = () => {
-    downloadMultiPagePdf(pdfContentRef);
+    downloadPdf(pdfContentRef);
   };
 
   // User references
