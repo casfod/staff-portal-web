@@ -15,9 +15,9 @@ const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
   orientation: "portrait",
-  scale: 1.5,
+  scale: 2,
   margin: 5,
-  quality: 0.88,
+  quality: 0.95,
   backgroundColor: "#FFFFFF",
   letterRendering: true, // Default value added
 };

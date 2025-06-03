@@ -166,7 +166,7 @@ const Request = () => {
       </div>
 
       {/* Main Table Section */}
-      <div ref={pdfContentRef}>
+      <div id="pdfContentRef" ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}

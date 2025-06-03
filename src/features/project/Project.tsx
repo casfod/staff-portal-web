@@ -74,45 +74,44 @@ const Project = () => {
       </div>
 
       {/* Main Table Section */}
-      <div
-        ref={pdfContentRef}
-        className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll"
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 ">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
+      <div ref={pdfContentRef}>
+        <div className="w-full bg-inherit shadow-sm rounded-lg  border pb-[200px] overflow-x-scroll">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 ">
+              <tr>
+                {tableHeadData.map((title, index) => (
+                  <th
+                    key={index}
+                    className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  >
+                    {title}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr key={project?.id}>
-              {tableRowData.map((data) => (
-                <td
-                  key={data.id}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                >
-                  {data.content}
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr key={project?.id}>
+                {tableRowData.map((data) => (
+                  <td
+                    key={data.id}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data.content}
+                  </td>
+                ))}
+              </tr>
+
+              <tr>
+                <td colSpan={4}>
+                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                    <ProjectDetails request={project} />
+                  </div>
                 </td>
-              ))}
-            </tr>
-
-            <tr>
-              <td colSpan={4}>
-                <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                  <ProjectDetails request={project} />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
