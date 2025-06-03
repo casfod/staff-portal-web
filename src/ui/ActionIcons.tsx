@@ -1,5 +1,5 @@
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
-import { Download, Edit, Trash2 } from "lucide-react";
+import { Download, Edit, Trash2, UserPlus } from "lucide-react";
 import LoadingDots from "./LoadingDots";
 
 interface ActionIconsProps {
@@ -11,6 +11,7 @@ interface ActionIconsProps {
   onEdit?: (request: any) => void;
   onDelete?: (requestId: string) => void;
   onDownloadPDF?: () => void;
+  onTag?: () => void;
   request?: any;
   iconSize?: number | string;
   editIcon?: React.ReactNode;
@@ -18,6 +19,7 @@ interface ActionIconsProps {
   viewIcon?: React.ReactNode;
   hideIcon?: React.ReactNode;
   downloadIcon?: React.ReactNode;
+  TagIcon?: React.ReactNode;
 }
 
 const ActionIcons = ({
@@ -29,12 +31,14 @@ const ActionIcons = ({
   onEdit,
   onDelete,
   onDownloadPDF,
+  onTag,
   request,
   iconSize = 5,
   editIcon = <Edit className={`h-${iconSize} w-${iconSize}`} />,
   deleteIcon = <Trash2 className={`h-${iconSize} w-${iconSize}`} />,
   viewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   hideIcon = <HiMiniEyeSlash className={`h-${iconSize} w-${iconSize}`} />,
+  TagIcon = <UserPlus className={`h-${iconSize} w-${iconSize}`} />,
   downloadIcon = isGeneratingPDF ? (
     <LoadingDots />
   ) : (
@@ -79,18 +83,30 @@ const ActionIcons = ({
           )}
         </div>
       )}
-
-      {onDownloadPDF && (
-        <button
-          className="hover:cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDownloadPDF();
-          }}
-        >
-          {downloadIcon}
-        </button>
-      )}
+      <div className="flex space-x-4">
+        {onDownloadPDF && (
+          <button
+            className="hidden lg:block hover:cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDownloadPDF();
+            }}
+          >
+            {downloadIcon}
+          </button>
+        )}
+        {onTag && (
+          <button
+            className="hover:cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTag();
+            }}
+          >
+            {TagIcon}
+          </button>
+        )}
+      </div>
     </div>
   );
 };
