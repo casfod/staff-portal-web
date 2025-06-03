@@ -23,7 +23,7 @@ const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
   orientation: "portrait",
-  scale: 3,
+  scale: 2,
   margin: 10,
   quality: 1,
   backgroundColor: "#FFFFFF",
