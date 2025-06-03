@@ -66,6 +66,8 @@ const Request = () => {
   );
   const { updateAdvanceRequest, isPending: isUpdating } =
     useUpdateAdvanceRequest(requestId!);
+
+  // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
@@ -96,6 +98,7 @@ const Request = () => {
     updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
+  // Calculate total amount once
   const totalAmount =
     requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 

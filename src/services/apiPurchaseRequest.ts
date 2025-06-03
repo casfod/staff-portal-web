@@ -5,7 +5,6 @@ import { baseUrl } from "./baseUrl.ts";
 import {
   PurChaseRequestType,
   UsePurChaseRequest,
-  // PurchaseRequestStats,
   usePurChaseRequestType,
   UsePurchaseStatsType,
 } from "../interfaces.ts";

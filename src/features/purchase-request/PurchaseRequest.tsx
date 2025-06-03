@@ -26,7 +26,7 @@ import { DataStateContainer } from "../../ui/DataStateContainer";
 import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
 
 const PurchaseRequest = () => {
-  const isUnderMaintenance = true; // Set this based on your maintenance status
+  const isUnderMaintenance = false; // Set this based on your maintenance status
 
   const currentUser = localStorageUser();
   const navigate = useNavigate();
@@ -62,7 +62,6 @@ const PurchaseRequest = () => {
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
-
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     requestId!
   );
@@ -93,6 +92,7 @@ const PurchaseRequest = () => {
     });
   };
 
+  // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     updatePurchaseRequest({ data: formData, files: selectedFiles });
