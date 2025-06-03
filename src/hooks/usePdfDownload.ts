@@ -55,16 +55,6 @@ export const usePdfDownload = (defaultOptions?: PdfOptions) => {
     [handleDownload]
   );
 
-  /**
-   * Download a multi-page PDF using a ref
-   */
-  // const downloadMultiPagePdf = useCallback(
-  //   async (elementRef: RefObject<HTMLElement>, options?: PdfOptions) => {
-  //     await handleDownload(elementRef, options, generateMultiPagePdf);
-  //   },
-  //   [handleDownload]
-  // );
-
   return {
     downloadPdf,
     status,

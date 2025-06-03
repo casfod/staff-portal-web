@@ -26,7 +26,7 @@ const Project = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf } = usePdfDownload({
+  const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `Project-${project?.id}`,
     multiPage: true,
   });
@@ -53,7 +53,12 @@ const Project = () => {
     { id: "date", content: dateformat(requestCreatedAt) },
     {
       id: "action",
-      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+      content: (
+        <ActionIcons
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
+        />
+      ),
     },
   ];
 

@@ -1,8 +1,10 @@
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Download, Edit, Trash2 } from "lucide-react";
+import LoadingDots from "./LoadingDots";
 
 interface ActionIconsProps {
   isEditable?: boolean;
+  isGeneratingPDF?: boolean;
   requestId?: string;
   visibleItems?: Record<string, boolean>;
   onToggleView?: (requestId: string) => void;
@@ -20,6 +22,7 @@ interface ActionIconsProps {
 
 const ActionIcons = ({
   isEditable,
+  isGeneratingPDF,
   requestId = "",
   visibleItems = {},
   onToggleView,
@@ -32,7 +35,11 @@ const ActionIcons = ({
   deleteIcon = <Trash2 className={`h-${iconSize} w-${iconSize}`} />,
   viewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   hideIcon = <HiMiniEyeSlash className={`h-${iconSize} w-${iconSize}`} />,
-  downloadIcon = <Download className="w-6 h-6" />,
+  downloadIcon = isGeneratingPDF ? (
+    <LoadingDots />
+  ) : (
+    <Download className="w-6 h-6" />
+  ),
 }: ActionIconsProps) => {
   return (
     <div className="flex space-x-4">
