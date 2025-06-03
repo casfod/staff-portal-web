@@ -100,9 +100,6 @@ const Request = () => {
     updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
-<<<<<<< HEAD
-  // Calculate total amount once
-=======
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadMultiPagePdf } = usePdfDownload({
@@ -114,7 +111,6 @@ const Request = () => {
     downloadMultiPagePdf(pdfContentRef);
   };
 
->>>>>>> pdf
   const totalAmount =
     requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
@@ -147,12 +143,6 @@ const Request = () => {
   // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
   const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
   const tableRowData = [
-<<<<<<< HEAD
-    requestData?.requestedBy,
-    <StatusBadge status={requestData?.status!} />,
-    moneyFormat(totalAmount, "NGN"),
-    dateformat(requestData?.createdAt!),
-=======
     { id: "requestedBy", content: requestData?.requestedBy },
     { id: "status", content: <StatusBadge status={requestData?.status!} /> },
     { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
@@ -161,7 +151,6 @@ const Request = () => {
       id: "action",
       content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
     },
->>>>>>> pdf
   ];
 
   return (
