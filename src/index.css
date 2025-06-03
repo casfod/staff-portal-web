@@ -20,6 +20,20 @@ body {
   /* min-width: 1024px; */
   overflow-x: hidden;
 }
+/* Scoped to #pdfContentRef only */
+/* #pdfContentRef ul {
+  padding-left: 1em; 
+  list-style-type: none;
+}
+#pdfContentRef li {
+  position: relative;
+  padding-left: 1em;
+}
+#pdfContentRef li::before {
+  content: "• ";
+  position: absolute;
+  left: 0;
+} */
 
 /* Vertical scrollbar (overflow-y) */
 ::-webkit-scrollbar {

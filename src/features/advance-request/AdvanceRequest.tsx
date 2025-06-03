@@ -2,7 +2,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
@@ -25,6 +25,8 @@ import { useAdvanceRequest } from "./Hooks/useAdvanceRequest";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
+import ActionIcons from "../../ui/ActionIcons";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
 
 const Request = () => {
   const currentUser = localStorageUser();
@@ -98,7 +100,21 @@ const Request = () => {
     updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
+<<<<<<< HEAD
   // Calculate total amount once
+=======
+  //PDF logic
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { downloadMultiPagePdf } = usePdfDownload({
+    filename: `AdvanceRequest-${advanceRequest?.id}`,
+    format: "a4",
+    orientation: "portrait",
+  });
+  const handleDownloadPDF = () => {
+    downloadMultiPagePdf(pdfContentRef);
+  };
+
+>>>>>>> pdf
   const totalAmount =
     requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
@@ -129,12 +145,23 @@ const Request = () => {
 
   // Table data
   // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
-  const tableHeadData = ["Request", "Status", "Amount", "Date"];
+  const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
   const tableRowData = [
+<<<<<<< HEAD
     requestData?.requestedBy,
     <StatusBadge status={requestData?.status!} />,
     moneyFormat(totalAmount, "NGN"),
     dateformat(requestData?.createdAt!),
+=======
+    { id: "requestedBy", content: requestData?.requestedBy },
+    { id: "status", content: <StatusBadge status={requestData?.status!} /> },
+    { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
+    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    {
+      id: "action",
+      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+    },
+>>>>>>> pdf
   ];
 
   return (
@@ -152,107 +179,112 @@ const Request = () => {
       </div>
 
       {/* Main Table Section */}
-      <DataStateContainer
-        isLoading={isLoading}
-        isError={isError}
-        data={requestData}
-        errorComponent={<NetworkErrorUI />}
-        loadingComponent={<Spinner />}
-        emptyComponent={<div>No data available</div>}
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="bg-white divide-y divide-gray-200">
-            <>
-              {/* Purchase Request Details Row */}
-              <tr key={requestData?.id} className="h-[40px] max-h-[40px] ">
-                {tableRowData.map((data, index) => (
-                  <td
+      <div id="pdfContentRef" ref={pdfContentRef}>
+        <DataStateContainer
+          isLoading={isLoading}
+          isError={isError}
+          data={requestData}
+          errorComponent={<NetworkErrorUI />}
+          loadingComponent={<Spinner />}
+          emptyComponent={<div>No data available</div>}
+        >
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {tableHeadData.map((title, index) => (
+                  <th
                     key={index}
-                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
                   >
-                    {data}
-                  </td>
+                    {title}
+                  </th>
                 ))}
               </tr>
+            </thead>
 
-              {/* Items Table Section */}
-              <tr>
-                <td colSpan={5}>
-                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                    <AdvanceRequestDetails request={requestData!} />
+            <tbody className="bg-white divide-y divide-gray-200">
+              <>
+                {/* Purchase Request Details Row */}
+                <tr key={requestData?.id} className="h-[40px] max-h-[40px] ">
+                  {tableRowData.map((data) => (
+                    <td
+                      key={data.id}
+                      className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                    >
+                      {data.content}
+                    </td>
+                  ))}
+                </tr>
 
-                    {canUploadFiles && (
-                      <div className="flex flex-col gap-3 mt-3">
-                        <FileUpload
-                          selectedFiles={selectedFiles}
-                          setSelectedFiles={setSelectedFiles}
-                          accept=".jpg,.png,.pdf,.xlsx,.docx"
-                          multiple={true}
-                        />
+                {/* Items Table Section */}
+                <tr>
+                  <td colSpan={5}>
+                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                      <AdvanceRequestDetails request={requestData!} />
 
-                        {selectedFiles.length > 0 && (
-                          <div className="self-center">
-                            <Button disabled={isUpdating} onClick={handleSend}>
-                              {isUpdating ? <SpinnerMini /> : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      {canUploadFiles && (
+                        <div className="flex flex-col gap-3 mt-3">
+                          <FileUpload
+                            selectedFiles={selectedFiles}
+                            setSelectedFiles={setSelectedFiles}
+                            accept=".jpg,.png,.pdf,.xlsx,.docx"
+                            multiple={true}
+                          />
 
-                    {/* Comments and Actions Section */}
-                    {requestData?.reviewedBy &&
-                      requestData?.status !== "draft" && (
-                        <div className="  mt-4 tracking-wide">
-                          <RequestCommentsAndActions request={requestData} />
-
-                          {canUpdateStatus && (
-                            <StatusUpdateForm
-                              requestStatus={requestData?.status!}
-                              status={status}
-                              setStatus={setStatus}
-                              comment={comment}
-                              setComment={setComment}
-                              isUpdatingStatus={isUpdatingStatus}
-                              handleStatusChange={onStatusChangeHandler}
-                            />
+                          {selectedFiles.length > 0 && (
+                            <div className="self-center">
+                              <Button
+                                disabled={isUpdating}
+                                onClick={handleSend}
+                              >
+                                {isUpdating ? <SpinnerMini /> : "Upload"}
+                              </Button>
+                            </div>
                           )}
                         </div>
                       )}
 
-                    {/* Admin Approval Section (for STAFF role) */}
-                    {showAdminApproval && (
-                      <div className="relative z-10 pb-64">
-                        <AdminApprovalSection
-                          formData={formData}
-                          handleFormChange={handleFormChange}
-                          admins={admins}
-                          isLoadingAmins={isLoadingAmins}
-                          isUpdating={isUpdating}
-                          handleSend={handleSend}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            </>
-          </tbody>
-        </table>
-      </DataStateContainer>
+                      {/* Comments and Actions Section */}
+                      {requestData?.reviewedBy &&
+                        requestData?.status !== "draft" && (
+                          <div className="  mt-4 tracking-wide">
+                            <RequestCommentsAndActions request={requestData} />
+
+                            {canUpdateStatus && (
+                              <StatusUpdateForm
+                                requestStatus={requestData?.status!}
+                                status={status}
+                                setStatus={setStatus}
+                                comment={comment}
+                                setComment={setComment}
+                                isUpdatingStatus={isUpdatingStatus}
+                                handleStatusChange={onStatusChangeHandler}
+                              />
+                            )}
+                          </div>
+                        )}
+
+                      {/* Admin Approval Section (for STAFF role) */}
+                      {showAdminApproval && (
+                        <div className="relative z-10 pb-64">
+                          <AdminApprovalSection
+                            formData={formData}
+                            handleFormChange={handleFormChange}
+                            admins={admins}
+                            isLoadingAmins={isLoadingAmins}
+                            isUpdating={isUpdating}
+                            handleSend={handleSend}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              </>
+            </tbody>
+          </table>
+        </DataStateContainer>
+      </div>
     </div>
   );
 };

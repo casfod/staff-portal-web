@@ -1,19 +1,21 @@
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
-import { Edit, Trash2 } from "lucide-react";
+import { Download, Edit, Trash2 } from "lucide-react";
 
 interface ActionIconsProps {
-  isEditable: boolean;
+  isEditable?: boolean;
   requestId?: string;
   visibleItems?: Record<string, boolean>;
   onToggleView?: (requestId: string) => void;
   onEdit?: (request: any) => void;
   onDelete?: (requestId: string) => void;
+  onDownloadPDF?: () => void;
   request?: any;
   iconSize?: number | string;
   editIcon?: React.ReactNode;
   deleteIcon?: React.ReactNode;
   viewIcon?: React.ReactNode;
   hideIcon?: React.ReactNode;
+  downloadIcon?: React.ReactNode;
 }
 
 const ActionIcons = ({
@@ -23,12 +25,14 @@ const ActionIcons = ({
   onToggleView,
   onEdit,
   onDelete,
+  onDownloadPDF,
   request,
   iconSize = 5,
   editIcon = <Edit className={`h-${iconSize} w-${iconSize}`} />,
   deleteIcon = <Trash2 className={`h-${iconSize} w-${iconSize}`} />,
   viewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   hideIcon = <HiMiniEyeSlash className={`h-${iconSize} w-${iconSize}`} />,
+  downloadIcon = <Download className="w-6 h-6" />,
 }: ActionIconsProps) => {
   return (
     <div className="flex space-x-4">
@@ -67,6 +71,18 @@ const ActionIcons = ({
             </button>
           )}
         </div>
+      )}
+
+      {onDownloadPDF && (
+        <button
+          className="hover:cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDownloadPDF();
+          }}
+        >
+          {downloadIcon}
+        </button>
       )}
     </div>
   );

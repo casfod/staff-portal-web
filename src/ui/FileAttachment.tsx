@@ -96,9 +96,7 @@ export const FileAttachment = ({ file }: { file: FileType }) => {
     <div className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
       <span className="text-2xl mr-3">{getFileIcon(file.fileType)}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
-          {file.name}
-        </p>
+        <p className="font-medium text-gray-900 truncate">{file.name}</p>
         <p className="text-xs text-gray-500">
           {Math.round(file.size / 1024)} KB • {file.fileType}
         </p>

@@ -18,13 +18,13 @@ export const DataStateContainer = ({
   loadingComponent,
   emptyComponent,
   children,
-  // containerClassName = "bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll",
   containerClassName = "w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll",
+  ...props
 }: DataStateContainerProps) => {
   if (isError) return <>{errorComponent}</>;
 
   return (
-    <div className={containerClassName}>
+    <div {...props} className={containerClassName}>
       {isLoading ? loadingComponent : !data ? emptyComponent : children}
     </div>
   );
