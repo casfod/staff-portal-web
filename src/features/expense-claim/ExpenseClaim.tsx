@@ -97,7 +97,7 @@ const ExpenseClaim = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf } = usePdfDownload({
+  const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `ExpenseClaim-${expenseClaim?.id}`,
     multiPage: true,
   });
@@ -144,7 +144,12 @@ const ExpenseClaim = () => {
     { id: "createdAt", content: dateformat(requestData?.createdAt!) },
     {
       id: "action",
-      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+      content: (
+        <ActionIcons
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
+        />
+      ),
     },
   ];
 

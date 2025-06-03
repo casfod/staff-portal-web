@@ -89,7 +89,7 @@ const ConceptNote = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf } = usePdfDownload({
+  const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `ConceptNote-${conceptNote?.id}`,
     multiPage: true,
   });
@@ -119,7 +119,12 @@ const ConceptNote = () => {
     { id: "createdAt", content: dateformat(requestData?.createdAt!) },
     {
       id: "action",
-      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+      content: (
+        <ActionIcons
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
+        />
+      ),
     },
   ];
 

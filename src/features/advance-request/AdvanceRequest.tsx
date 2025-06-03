@@ -102,7 +102,7 @@ const Request = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf } = usePdfDownload({
+  const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `AdvanceRequest-${advanceRequest?.id}`,
     multiPage: true,
   });
@@ -148,7 +148,12 @@ const Request = () => {
     { id: "createdAt", content: dateformat(requestData?.createdAt!) },
     {
       id: "action",
-      content: <ActionIcons onDownloadPDF={handleDownloadPDF} />,
+      content: (
+        <ActionIcons
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
+        />
+      ),
     },
   ];
 
