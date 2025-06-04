@@ -42,7 +42,7 @@ const ActionIcons = ({
   downloadIcon = isGeneratingPDF ? (
     <LoadingDots />
   ) : (
-    <Download className="w-6 h-6" />
+    <Download className={`h-${iconSize} w-${iconSize}`} />
   ),
 }: ActionIconsProps) => {
   return (
