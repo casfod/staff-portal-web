@@ -73,7 +73,7 @@ const Project = () => {
             onClick={() => navigate(-1)} // Use relative path here
           >
             <List className="h-4 w-4 mr-1 md:mr-2" />
-            All Projects
+            List
           </Button>
         </div>
       </div>
