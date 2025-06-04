@@ -151,7 +151,8 @@ const PurchaseRequest = () => {
       id: "action",
       content: (
         <ActionIcons
-          onTag={() => console.log("Tag")}
+          // showTagDropdown={showTagDropdown}
+          // setShowTagDropdown={setShowTagDropdown}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
         />

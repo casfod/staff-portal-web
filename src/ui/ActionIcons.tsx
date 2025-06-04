@@ -1,6 +1,11 @@
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Download, Edit, Trash2, UserPlus } from "lucide-react";
 import LoadingDots from "./LoadingDots";
+import { useDebounce } from "use-debounce";
+import { useState } from "react";
+import { useCopy } from "../features/advance-request/Hooks/useCopy";
+import { useUsers } from "../features/user/Hooks/useUsers";
+import TagUsersDropdown from "./TagUsersDropdown";
 
 interface ActionIconsProps {
   isEditable?: boolean;
@@ -11,7 +16,8 @@ interface ActionIconsProps {
   onEdit?: (request: any) => void;
   onDelete?: (requestId: string) => void;
   onDownloadPDF?: () => void;
-  onTag?: () => void;
+  showTagDropdown?: boolean;
+  setShowTagDropdown?: (isOpen: boolean) => void;
   request?: any;
   iconSize?: number | string;
   editIcon?: React.ReactNode;
@@ -31,7 +37,8 @@ const ActionIcons = ({
   onEdit,
   onDelete,
   onDownloadPDF,
-  onTag,
+  showTagDropdown,
+  setShowTagDropdown,
   request,
   iconSize = 5,
   editIcon = <Edit className={`h-${iconSize} w-${iconSize}`} />,
@@ -45,6 +52,38 @@ const ActionIcons = ({
     <Download className={`h-${iconSize} w-${iconSize}`} />
   ),
 }: ActionIconsProps) => {
+  // const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
+
+  const { copyto, isPending } = useCopy(requestId!);
+
+  // Users query
+  const {
+    data: usersData,
+    isLoading,
+    isError,
+  } = useUsers(
+    debouncedSearchTerm,
+    "", // sort (empty string if not needed)
+    1, // page
+    10 // limit
+  );
+
+  const handleTagClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowTagDropdown!(!showTagDropdown);
+    setSearchTerm(""); // Reset search on open
+  };
+
+  const handleSelectUsers = async (userIds: string[]) => {
+    console.log("userIds:===>", userIds);
+
+    if (!requestId || userIds.length < 1) return;
+
+    copyto({ userIds });
+  };
+
   return (
     <div className="flex space-x-4">
       {onToggleView && (
@@ -95,16 +134,22 @@ const ActionIcons = ({
             {downloadIcon}
           </button>
         )}
-        {onTag && (
-          <button
-            className="hover:cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onTag();
-            }}
-          >
-            {TagIcon}
-          </button>
+        {setShowTagDropdown && (
+          <div className="relative">
+            <button className="hover:cursor-pointer" onClick={handleTagClick}>
+              {isPending ? <LoadingDots /> : TagIcon}
+            </button>
+
+            {showTagDropdown && (
+              <TagUsersDropdown
+                users={usersData?.data?.users || []}
+                isLoading={isLoading}
+                isError={isError}
+                onSelectUsers={handleSelectUsers}
+                onClose={() => setShowTagDropdown!(false)}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>

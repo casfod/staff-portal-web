@@ -145,7 +145,6 @@ const TravelRequest = () => {
       id: "action",
       content: (
         <ActionIcons
-          onTag={() => console.log("Tag")}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
         />

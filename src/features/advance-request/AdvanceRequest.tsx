@@ -60,6 +60,7 @@ const Request = () => {
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
@@ -150,9 +151,11 @@ const Request = () => {
       id: "action",
       content: (
         <ActionIcons
-          onTag={() => console.log("Tag")}
+          requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
+          showTagDropdown={showTagDropdown}
+          setShowTagDropdown={setShowTagDropdown}
         />
       ),
     },

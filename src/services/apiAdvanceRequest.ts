@@ -232,6 +232,20 @@ export const updateStatus = async function (
     return handleError(err);
   }
 };
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<AdvanceRequestType>>(
+      `/advance-requests/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 
 export const deleteAdvanceRequest = async function (advanceRequestID: string) {
   try {

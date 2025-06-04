@@ -146,7 +146,6 @@ const ExpenseClaim = () => {
       id: "action",
       content: (
         <ActionIcons
-          onTag={() => console.log("Tag")}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
         />
