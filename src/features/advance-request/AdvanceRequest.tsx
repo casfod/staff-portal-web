@@ -151,6 +151,7 @@ const Request = () => {
       id: "action",
       content: (
         <ActionIcons
+          isCreator={isCreator}
           requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}

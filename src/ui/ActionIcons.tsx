@@ -8,6 +8,7 @@ import { useUsers } from "../features/user/Hooks/useUsers";
 import TagUsersDropdown from "./TagUsersDropdown";
 
 interface ActionIconsProps {
+  isCreator?: boolean;
   isEditable?: boolean;
   isGeneratingPDF?: boolean;
   requestId?: string;
@@ -29,6 +30,7 @@ interface ActionIconsProps {
 }
 
 const ActionIcons = ({
+  isCreator,
   isEditable,
   isGeneratingPDF,
   requestId = "",
@@ -134,7 +136,7 @@ const ActionIcons = ({
             {downloadIcon}
           </button>
         )}
-        {setShowTagDropdown && (
+        {isCreator && setShowTagDropdown && (
           <div className="relative">
             <button className="hover:cursor-pointer" onClick={handleTagClick}>
               {isPending ? <LoadingDots /> : TagIcon}
