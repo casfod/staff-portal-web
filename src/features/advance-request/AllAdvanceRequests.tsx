@@ -154,7 +154,7 @@ const AllAdvanceRequests = () => {
       {/*Advance REQUEST TABLE*/}
       {/* ///////////////////////////// */}
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll overflow-y-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
