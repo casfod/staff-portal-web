@@ -182,6 +182,21 @@ export const sendPurchaseRequests = async function (
   }
 };
 
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(
+      `/purchase-requests/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updatePurchaseRequest = async function (
   requestId: string,
   data: Partial<PurChaseRequestType>,

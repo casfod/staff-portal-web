@@ -179,6 +179,22 @@ export const sendPaymentRequests = async function (
     return handleError(err);
   }
 };
+
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<PaymentRequestType>>(
+      `/payment-requests/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updatePaymentRequest = async function (
   requestId: string,
   data: Partial<PaymentRequestType>,

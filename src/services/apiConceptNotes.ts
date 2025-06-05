@@ -191,6 +191,21 @@ export const saveConceptNote = async function (data: Partial<ConceptNoteType>) {
   }
 };
 
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<ConceptNoteType>>(
+      `/concept-notes/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updateConceptNote = async function (
   conceptNoteId: string,
   data: Partial<ConceptNoteType>,

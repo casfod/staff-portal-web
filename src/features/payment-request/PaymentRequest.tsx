@@ -27,6 +27,7 @@ import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
+import { useCopy } from "./Hooks/useCopy";
 
 const PaymentRequest = () => {
   const currentUser = localStorageUser();
@@ -60,6 +61,7 @@ const PaymentRequest = () => {
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
@@ -71,6 +73,7 @@ const PaymentRequest = () => {
   const { handleStatusChange } = useStatusUpdate();
 
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -150,8 +153,14 @@ const PaymentRequest = () => {
       id: "action",
       content: (
         <ActionIcons
+          copyTo={copyto}
+          isCopying={isCopying}
+          isCreator={isCreator}
+          requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
+          showTagDropdown={showTagDropdown}
+          setShowTagDropdown={setShowTagDropdown}
         />
       ),
     },

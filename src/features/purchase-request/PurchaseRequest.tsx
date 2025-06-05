@@ -26,6 +26,7 @@ import { DataStateContainer } from "../../ui/DataStateContainer";
 import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
+import { useCopy } from "./Hooks/useCopy";
 
 const PurchaseRequest = () => {
   const isUnderMaintenance = false; // Set this based on your maintenance status
@@ -61,6 +62,7 @@ const PurchaseRequest = () => {
   const [comment, setComment] = useState("");
   const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
@@ -74,6 +76,7 @@ const PurchaseRequest = () => {
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -151,10 +154,14 @@ const PurchaseRequest = () => {
       id: "action",
       content: (
         <ActionIcons
-          // showTagDropdown={showTagDropdown}
-          // setShowTagDropdown={setShowTagDropdown}
+          copyTo={copyto}
+          isCopying={isCopying}
+          isCreator={isCreator}
+          requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
+          showTagDropdown={showTagDropdown}
+          setShowTagDropdown={setShowTagDropdown}
         />
       ),
     },

@@ -3,11 +3,12 @@ import { Download, Edit, Trash2, UserPlus } from "lucide-react";
 import LoadingDots from "./LoadingDots";
 import { useDebounce } from "use-debounce";
 import { useState } from "react";
-import { useCopy } from "../features/advance-request/Hooks/useCopy";
 import { useUsers } from "../features/user/Hooks/useUsers";
 import TagUsersDropdown from "./TagUsersDropdown";
 
 interface ActionIconsProps {
+  copyTo?: ({ userIds }: { userIds: string[] }) => void;
+  isCopying?: boolean;
   isCreator?: boolean;
   isEditable?: boolean;
   isGeneratingPDF?: boolean;
@@ -30,6 +31,8 @@ interface ActionIconsProps {
 }
 
 const ActionIcons = ({
+  copyTo,
+  isCopying,
   isCreator,
   isEditable,
   isGeneratingPDF,
@@ -58,8 +61,6 @@ const ActionIcons = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
 
-  const { copyto, isPending } = useCopy(requestId!);
-
   // Users query
   const {
     data: usersData,
@@ -69,7 +70,7 @@ const ActionIcons = ({
     debouncedSearchTerm,
     "", // sort (empty string if not needed)
     1, // page
-    10 // limit
+    9999 // limit
   );
 
   const handleTagClick = (e: React.MouseEvent) => {
@@ -83,7 +84,7 @@ const ActionIcons = ({
 
     if (!requestId || userIds.length < 1) return;
 
-    copyto({ userIds });
+    copyTo!({ userIds });
   };
 
   return (
@@ -136,11 +137,19 @@ const ActionIcons = ({
             {downloadIcon}
           </button>
         )}
-        {isCreator && setShowTagDropdown && (
+        {setShowTagDropdown && (
           <div className="relative">
-            <button className="hover:cursor-pointer" onClick={handleTagClick}>
-              {isPending ? <LoadingDots /> : TagIcon}
-            </button>
+            {isCreator ? (
+              <button className="hover:cursor-pointer" onClick={handleTagClick}>
+                {isCopying ? <LoadingDots /> : TagIcon}
+              </button>
+            ) : (
+              <span
+                className={`text-xl font-extrabold h-${iconSize} w-${iconSize}`}
+              >
+                --
+              </span>
+            )}
 
             {showTagDropdown && (
               <TagUsersDropdown

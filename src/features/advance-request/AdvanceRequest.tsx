@@ -27,6 +27,7 @@ import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
+import { useCopy } from "./Hooks/useCopy";
 
 const Request = () => {
   const currentUser = localStorageUser();
@@ -73,6 +74,8 @@ const Request = () => {
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -151,6 +154,8 @@ const Request = () => {
       id: "action",
       content: (
         <ActionIcons
+          copyTo={copyto}
+          isCopying={isCopying}
           isCreator={isCreator}
           requestId={requestData?.id}
           isGeneratingPDF={isGenerating}

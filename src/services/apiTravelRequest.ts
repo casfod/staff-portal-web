@@ -5,7 +5,6 @@ import { baseUrl } from "./baseUrl.ts";
 import {
   TravelRequestType,
   UseTravelRequest,
-  // PdvanceRequestStats,
   useTravelRequestType,
   UseTravelStatsType,
 } from "../interfaces.ts";
@@ -177,6 +176,21 @@ export const sendTravelRequests = async function (
       }
     );
 
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<TravelRequestType>>(
+      `/travel-requests/copy/${requestId}`,
+      data
+    );
     return response.data;
   } catch (err) {
     return handleError(err);

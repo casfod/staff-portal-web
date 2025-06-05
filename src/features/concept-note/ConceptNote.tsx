@@ -25,6 +25,7 @@ import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
+import { useCopy } from "./Hooks/useCopy";
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -52,8 +53,9 @@ const ConceptNote = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData] = useState<Partial<ConceptNoteType>>({});
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
@@ -65,6 +67,7 @@ const ConceptNote = () => {
   const { updateConceptNote, isPending: isUpdating } = useUpdateConceptNote(
     conceptNote?.id!
   );
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +100,9 @@ const ConceptNote = () => {
     downloadPdf(pdfContentRef);
   };
 
+  const isCreator = requestData?.preparedBy!.id === currentUser.id;
   const requestStatus = requestData?.status;
+  const canUploadFiles = isCreator && requestStatus === "approved";
 
   const showStatusUpdate =
     requestData?.status === "pending" &&
@@ -121,15 +126,18 @@ const ConceptNote = () => {
       id: "action",
       content: (
         <ActionIcons
+          copyTo={copyto}
+          isCopying={isCopying}
+          isCreator={isCreator}
+          requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
+          showTagDropdown={showTagDropdown}
+          setShowTagDropdown={setShowTagDropdown}
         />
       ),
     },
   ];
-
-  const isCreator = requestData?.preparedBy!.id === currentUser.id;
-  const canUploadFiles = isCreator && requestStatus === "approved";
 
   return (
     <div className="flex flex-col space-y-3 pb-80">

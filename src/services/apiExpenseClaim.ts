@@ -184,6 +184,21 @@ export const sendExpenseClaims = async function (
   }
 };
 
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<ExpenseClaimType>>(
+      `/expense-claims/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updateExpenseClaim = async function (
   requestId: string,
   data: Partial<ExpenseClaimType>,
