@@ -5,7 +5,7 @@ const CopiedTo = ({ to }: { to: UserType[] }) => {
   return (
     // <div className="max-w-md mx-auto p-4 bg-inherit rounded-lg shadow-sm">
     <div className="w-full p-4 bg-inherit rounded-lg shadow-sm">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">Shared With</h1>
+      <h1 className="font-semibold text-gray-800 mb-4">SHARED WITH</h1>
 
       {to.length === 0 ? (
         <p className="text-sm text-gray-400">No recipients</p>
