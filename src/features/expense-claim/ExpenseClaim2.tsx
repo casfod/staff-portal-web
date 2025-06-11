@@ -209,6 +209,7 @@ const ExpenseClaimContent = memo(
     isApprover: boolean;
     requestStatus?: string;
   }) => {
+    const currentUser = localStorageUser();
     // Table data
     const tableHeadData = useMemo(
       () => ["Request", "Status", "Budget", "Date"],
@@ -226,6 +227,9 @@ const ExpenseClaimContent = memo(
 
     // Permission flags
     const canUploadFiles = isCreator && requestStatus === "approved";
+    const canShareRequest =
+      isCreator ||
+      ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
     const canUpdateStatus =
       !isCreator &&
       ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||

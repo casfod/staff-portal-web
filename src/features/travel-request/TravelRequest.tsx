@@ -120,6 +120,9 @@ const TravelRequest = () => {
 
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
+  const canShareRequest =
+    isCreator ||
+    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
   const canUpdateStatus =
     !isCreator &&
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
@@ -150,7 +153,7 @@ const TravelRequest = () => {
         <ActionIcons
           copyTo={copyto}
           isCopying={isCopying}
-          isCreator={isCreator}
+          canShareRequest={canShareRequest}
           requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}

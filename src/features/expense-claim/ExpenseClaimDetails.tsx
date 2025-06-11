@@ -4,6 +4,7 @@ import DetailContainer from "../../ui/DetailContainer";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { dateformat } from "../../utils/dateFormat";
 import { moneyFormat } from "../../utils/moneyFormat";
+import CopiedTo from "../../ui/CopiedTo";
 
 interface RequestDetailsProps {
   request: ExpenseClaimType;
@@ -169,6 +170,9 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
+
+      {/* Copied To */}
+      {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
     </DetailContainer>
   );
 };

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
+import CopiedTo from "../../ui/CopiedTo";
 
 interface RequestDetailsProps {
   request: ConceptNoteType;
@@ -120,6 +121,9 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
+
+      {/* Copied To */}
+      {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
     </DetailContainer>
   );
 };

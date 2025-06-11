@@ -17,7 +17,6 @@ import { FileUpload } from "../../ui/FileUpload";
 import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
 import { ConceptNoteType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-// import { truncateText } from "../../utils/truncateText";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import { useConceptNote } from "./Hooks/useConceptNote";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
@@ -103,6 +102,9 @@ const ConceptNote = () => {
   const isCreator = requestData?.preparedBy!.id === currentUser.id;
   const requestStatus = requestData?.status;
   const canUploadFiles = isCreator && requestStatus === "approved";
+  const canShareRequest =
+    isCreator ||
+    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
 
   const showStatusUpdate =
     requestData?.status === "pending" &&
@@ -128,7 +130,7 @@ const ConceptNote = () => {
         <ActionIcons
           copyTo={copyto}
           isCopying={isCopying}
-          isCreator={isCreator}
+          canShareRequest={canShareRequest}
           requestId={requestData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}

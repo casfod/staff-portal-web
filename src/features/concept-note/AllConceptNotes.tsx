@@ -19,13 +19,7 @@ import Button from "../../ui/Button";
 import ConceptNoteTableRow from "./ConceptNoteTableRow";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
 
-const tableHeadData = [
-  "Prepared By",
-  "Status",
-  // "Account Code",
-  "Date",
-  "Actions",
-];
+const tableHeadData = ["Prepared By", "Status", "Date", "Actions"];
 const AllConceptNotes = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();

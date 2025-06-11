@@ -9,7 +9,7 @@ import TagUsersDropdown from "./TagUsersDropdown";
 interface ActionIconsProps {
   copyTo?: ({ userIds }: { userIds: string[] }) => void;
   isCopying?: boolean;
-  isCreator?: boolean;
+  canShareRequest?: boolean;
   isEditable?: boolean;
   isGeneratingPDF?: boolean;
   requestId?: string;
@@ -33,7 +33,7 @@ interface ActionIconsProps {
 const ActionIcons = ({
   copyTo,
   isCopying,
-  isCreator,
+  canShareRequest,
   isEditable,
   isGeneratingPDF,
   requestId = "",
@@ -80,8 +80,6 @@ const ActionIcons = ({
   };
 
   const handleSelectUsers = async (userIds: string[]) => {
-    console.log("userIds:===>", userIds);
-
     if (!requestId || userIds.length < 1) return;
 
     copyTo!({ userIds });
@@ -139,7 +137,7 @@ const ActionIcons = ({
         )}
         {setShowTagDropdown && (
           <div className="relative">
-            {isCreator ? (
+            {canShareRequest ? (
               <button className="hover:cursor-pointer" onClick={handleTagClick}>
                 {isCopying ? <LoadingDots /> : TagIcon}
               </button>
