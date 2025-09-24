@@ -49,12 +49,12 @@ const Navigation: React.FC = () => {
       to: "/purchase-requests",
       label: "Purchase Requests",
       icon: ShoppingCart,
-      // dropdown: [
-      //   {
-      //     to: "/purchase-requests/create-purchase-request",
-      //     label: "New Request",
-      //   },
-      // ],
+      dropdown: [
+        {
+          to: "/purchase-requests/create-purchase-request",
+          label: "New Request",
+        },
+      ],
     },
     {
       to: "/payment-requests",
@@ -70,9 +70,9 @@ const Navigation: React.FC = () => {
       icon: Banknote,
       dropdown: [
         { to: "/procurement/vendor-management", label: "Vendor Management" },
-        { to: "/procurement/rfq", label: "RFQ" },
-        { to: "/procurement/purchase-order", label: "Purchase Order" },
-        { to: "/procurement/goods-received", label: "Goods Received" },
+        { to: "/procurement/tenders", label: "Tenders" },
+        { to: "/procurement/contracts", label: "Contracts" },
+        { to: "/procurement/reports", label: "Reports" },
       ],
     },
     { to: "/user-management", label: "User Management", icon: Users },

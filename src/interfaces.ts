@@ -547,3 +547,81 @@ export interface ConceptNoteType {
   files?: [];
   copiedTo?: [UserType];
 }
+
+///////////////////////
+//Vendor //
+///////////////////////
+export interface VendorType {
+  id: string;
+  businessName: string;
+  businessType: string;
+  address: string;
+  email: string;
+  businessPhoneNumber: string;
+  contactPhoneNumber: string;
+  category?: string;
+  supplierNumber?: string;
+  contactPerson: string;
+  position: string;
+  vendorCode: string;
+  tinNumber: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UseVendorType {
+  status: string;
+  message: string;
+  data: {
+    vendors: VendorType[];
+    totalVendors: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UseVendor {
+  status: string;
+  message: string;
+  data: {
+    vendor: VendorType;
+  };
+}
+
+export interface UseVendorStatsType {
+  status: number;
+  message: string;
+  data: {
+    totalVendors: number;
+    activeVendors: number;
+    vendorsByCategory: { category: string; count: number }[];
+  };
+}
+
+export interface CreateVendorType {
+  businessName: string;
+  businessType: string;
+  address: string;
+  email: string;
+  businessPhoneNumber: string;
+  contactPhoneNumber: string;
+  category?: string;
+  supplierNumber?: string;
+  contactPerson: string;
+  position: string;
+  tinNumber: string;
+}
+
+export interface UpdateVendorType {
+  businessName?: string;
+  businessType?: string;
+  address?: string;
+  email?: string;
+  businessPhoneNumber?: string;
+  contactPhoneNumber?: string;
+  category?: string;
+  supplierNumber?: string;
+  contactPerson?: string;
+  position?: string;
+  tinNumber?: string;
+}

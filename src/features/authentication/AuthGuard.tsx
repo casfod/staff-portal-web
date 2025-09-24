@@ -22,7 +22,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return <div className="-z-50">{children}</div>;
 };
 
 export default AuthGuard;

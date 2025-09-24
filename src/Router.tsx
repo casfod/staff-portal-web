@@ -43,6 +43,12 @@ import AllPurchaseRequests from "./features/purchase-request/AllPurchaseRequests
 import EditPurchaseRequest from "./features/purchase-request/EditRequest";
 import ForgotPasswordForm from "./features/authentication/ForgotPasswordForm.tsx";
 import ResetPasswordForm from "./features/authentication/ResetPasswordForm.tsx";
+import { Procurement } from "./pages/Procurement";
+import EditVendor from "./features/Vendor/EditVendor.tsx";
+import CreateVendor from "./features/Vendor/CreateVendor.tsx";
+import { AllVendors } from "./features/Vendor/AllVendors.tsx";
+import Vendor from "./features/Vendor/Vendor.tsx";
+import VendorManagement from "./pages/VendorManagement.tsx";
 
 const router = createBrowserRouter([
   {
@@ -366,7 +372,126 @@ const router = createBrowserRouter([
           },
         ],
       },
-
+      {
+        path: "procurement",
+        element: <AnimatedRoute key="procurement" element={<Procurement />} />,
+        children: [
+          { index: true, element: <Navigate to="vendor-management" /> },
+          {
+            path: "vendor-management",
+            element: (
+              <AnimatedRoute
+                key="vendor-management"
+                element={<VendorManagement />}
+              />
+            ),
+            children: [
+              { index: true, element: <Navigate to="vendors" /> },
+              {
+                path: "create-vendor", // Changed from absolute path
+                element: (
+                  <AnimatedRoute
+                    key="create-vendor"
+                    element={<CreateVendor />}
+                  />
+                ),
+              },
+              {
+                path: "vendors", // Changed from absolute path
+                element: (
+                  <AnimatedRoute key="vendors" element={<AllVendors />} />
+                ),
+              },
+              {
+                path: "vendor/:vendorId", // Changed from absolute path
+                element: (
+                  <AnimatedRoute key="vendor/:vendorId" element={<Vendor />} />
+                ),
+              },
+              {
+                path: "edit-vendor/:vendorId", // Changed from absolute path
+                element: (
+                  <AnimatedRoute
+                    key="edit-vendor/:vendorId"
+                    element={<EditVendor />}
+                  />
+                ),
+              },
+            ],
+          },
+          {
+            path: "rfq",
+            element: (
+              <AnimatedRoute
+                key="rfq"
+                element={<div>Tenders Page - To be implemented</div>}
+              />
+            ),
+            children: [
+              {
+                path: "goods-received/:id",
+                element: <div>View good received</div>,
+              },
+              {
+                path: "goods-received/create-goods-received/:id",
+                element: <div>Create good received</div>,
+              },
+              {
+                path: "goods-received/edit-goods-received/:id",
+                element: <div>Edit good received</div>,
+              },
+            ],
+          },
+          {
+            path: "purchase-order",
+            element: (
+              <AnimatedRoute
+                key="purchase-order"
+                element={<div>Contracts Page - To be implemented</div>}
+              />
+            ),
+            children: [
+              {
+                path: ":id", // Simplified path
+                element: <div>View purchase-order</div>,
+              },
+              {
+                path: "create-purchase-order/:id",
+                element: <div>Create purchase-order</div>,
+              },
+              {
+                path: "edit-purchase-order/:id",
+                element: <div>Edit purchase-order</div>,
+              },
+            ],
+          },
+          {
+            path: "goods-received",
+            element: (
+              <AnimatedRoute
+                key="goods-received"
+                element={
+                  <div>Procurement Reports Page - To be implemented</div>
+                }
+              />
+            ),
+            children: [
+              {
+                path: "rfq/:id",
+                element: <div>View rfq</div>,
+              },
+              {
+                path: "rfq/create-rfq/:id",
+                element: <div>Create rfq</div>,
+              },
+              {
+                path: "rfq/edit-rfq/:id",
+                element: <div>Edit rfq</div>,
+              },
+            ],
+          },
+        ],
+      },
       {
         path: "user-management",
         element: (
