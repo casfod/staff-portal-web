@@ -96,6 +96,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
           <Input
             type="text"
             id="businessName"
+            minLength={3}
             required
             value={formData.businessName}
             onChange={(e) => handleFormChange("businessName", e.target.value)}

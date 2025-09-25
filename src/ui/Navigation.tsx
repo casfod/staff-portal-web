@@ -121,7 +121,7 @@ const Navigation: React.FC = () => {
                       <li key={dropdownItem.to}>
                         <Link
                           to={dropdownItem.to}
-                          className="block px-4 py-2 text-xs xl:text-sm hover:bg-gray-100 transition-colors duration-200"
+                          className="block border border-b px-4 py-2 text-xs xl:text-sm hover:bg-gray-100 transition-colors duration-200"
                           onClick={() => setOpenDropdown(null)}
                         >
                           {dropdownItem.label}

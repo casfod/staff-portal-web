@@ -10,6 +10,7 @@ import {
   Building,
   FileText,
   Calendar,
+  ArrowUpRightFromCircleIcon,
 } from "lucide-react";
 import { ReactElement } from "react";
 
@@ -80,15 +81,17 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           id: "contactPerson",
           label: "Contact Person",
           content: vendor.contactPerson,
+          icon: <User className="w-4 h-4" />,
         },
         {
           id: "position",
           label: "Position",
           content: vendor.position,
+          icon: <ArrowUpRightFromCircleIcon className="w-4 h-4" />,
         },
         {
           id: "email",
-          label: "Email",
+          label: "Business Email",
           content: vendor.email,
           icon: <Mail className="w-4 h-4" />,
         },
@@ -148,12 +151,36 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
         {vendorSections.map((section, sectionIndex) => (
           <div
             key={sectionIndex}
-            className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+            className={`rounded-lg p-4 border ${
+              section.title === "Contact Information"
+                ? "bg-blue-50 border-slate-200"
+                : "bg-gray-50 border-gray-200"
+            }`}
           >
             {/* Section Header */}
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-300">
-              <div className="text-gray-600">{section.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-800">
+            <div
+              className={`flex items-center gap-2 mb-3 pb-2 border-b ${
+                section.title === "Contact Information"
+                  ? "border-slate-300"
+                  : "border-gray-300"
+              }`}
+            >
+              <div
+                className={
+                  section.title === "Contact Information"
+                    ? "text-slate-600"
+                    : "text-gray-600"
+                }
+              >
+                {section.icon}
+              </div>
+              <h3
+                className={`text-lg font-semibold ${
+                  section.title === "Contact Information"
+                    ? "text-slate-800"
+                    : "text-gray-800"
+                }`}
+              >
                 {section.title}
               </h3>
             </div>
@@ -163,22 +190,64 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
               {section.fields.map((field) => (
                 <div
                   key={field.id}
-                  className={`${field.isBlock ? "md:col-span-2" : ""}`}
+                  className={`${field.isBlock ? "md:col-span-2" : ""} ${
+                    section.title === "Contact Information"
+                      ? "flex items-center gap-3"
+                      : ""
+                  }`}
                 >
-                  <div className="flex items-start gap-2">
+                  <div
+                    className={`flex items-start gap-2 ${
+                      section.title === "Contact Information" ? "w-full" : ""
+                    }`}
+                  >
                     {field.icon && (
-                      <div className="text-gray-500 mt-0.5">{field.icon}</div>
+                      <div
+                        className={`mt-0.5 ${
+                          section.title === "Contact Information"
+                            ? "text-slate-700"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {field.icon}
+                      </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <label className="block text-sm font-medium text-gray-600 mb-1 uppercase tracking-wide">
+                      <label
+                        className={`block fon text-sm font-extrabold mb-1 uppercase tracking-wide ${
+                          section.title === "Contact Information"
+                            ? "text-slate-600"
+                            : "text-gray-600"
+                        }`}
+                      >
                         {field.label}
                       </label>
                       <div
-                        className={`text-gray-800 ${
+                        className={`${
                           field.isBlock
                             ? "whitespace-pre-line bg-white p-3 rounded border"
                             : "break-words"
+                        } ${
+                          section.title === "Contact Information"
+                            ? field.id === "email" ||
+                              field.id === "businessPhone" ||
+                              field.id === "contactPhone"
+                              ? "text-slate-600 hover:underline cursor-pointer"
+                              : "text-slate-800"
+                            : "text-gray-800"
                         }`}
+                        onClick={() => {
+                          if (section.title === "Contact Information") {
+                            if (field.id === "email") {
+                              window.location.href = `mailto:${field.content}`;
+                            } else if (
+                              field.id === "businessPhone" ||
+                              field.id === "contactPhone"
+                            ) {
+                              window.location.href = `tel:${field.content}`;
+                            }
+                          }
+                        }}
                       >
                         {field.content}
                       </div>
@@ -189,38 +258,6 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
             </div>
           </div>
         ))}
-
-        {/* Quick Contact Card */}
-        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center gap-2">
-            <Phone className="w-4 h-4" />
-            Quick Contact
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-blue-600" />
-              <a
-                href={`mailto:${vendor.email}`}
-                className="text-blue-600 hover:underline"
-              >
-                {vendor.email}
-              </a>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-blue-600" />
-              <a
-                href={`tel:${vendor.businessPhoneNumber}`}
-                className="text-blue-600 hover:underline"
-              >
-                {vendor.businessPhoneNumber}
-              </a>
-            </div>
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-600" />
-              <span className="text-gray-700">{vendor.contactPerson}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </DetailContainer>
   );
