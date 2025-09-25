@@ -41,6 +41,12 @@ export interface UserType {
   last_name: string;
   email: string;
   role: string;
+  procurementRole?: {
+    canCreate?: boolean;
+    canView?: boolean;
+    canUpdate?: boolean;
+    canDelete?: boolean;
+  };
   isDeleted?: boolean;
   password?: string;
   passwordConfirm?: string;
