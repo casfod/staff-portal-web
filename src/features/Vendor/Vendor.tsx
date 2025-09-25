@@ -27,6 +27,9 @@ const Vendor = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `Vendor-${vendor?.vendorCode}`,
     multiPage: true,
+    titleOptions: {
+      text: "Vendor",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);

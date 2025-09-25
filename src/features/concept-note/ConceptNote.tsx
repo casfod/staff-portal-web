@@ -94,6 +94,9 @@ const ConceptNote = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `ConceptNote-${conceptNote?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Concept Note",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);

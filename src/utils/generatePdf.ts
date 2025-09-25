@@ -1,8 +1,9 @@
-// generatePdf.ts
+// generatePdf.ts - Updated version with default titleOptions
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export type PdfOptions = {
+  title?: string;
   filename?: string;
   format?: "a4" | "a3" | "letter" | "legal";
   orientation?: "portrait" | "landscape";
@@ -16,7 +17,14 @@ export type PdfOptions = {
     mode?: "css";
     avoid?: string[];
   };
-  multiPage?: boolean; // New flag to toggle multi-page behavior
+  multiPage?: boolean;
+  titleOptions?: {
+    text: string;
+    fontSize?: number;
+    fontStyle?: "normal" | "bold" | "italic" | "bolditalic";
+    color?: string;
+    marginBottom?: number;
+  };
 };
 
 const defaultOptions: PdfOptions = {
@@ -34,6 +42,14 @@ const defaultOptions: PdfOptions = {
     avoid: [".pdf-avoid-break"],
   },
   multiPage: false,
+  titleOptions: {
+    // Add default titleOptions
+    text: "",
+    fontSize: 16,
+    fontStyle: "bold",
+    color: "#000000",
+    marginBottom: 5,
+  },
 };
 
 const getPdfDimensions = (format: string, orientation: string) => {
@@ -59,13 +75,20 @@ export const generatePdf = async (
     format = "a4",
     orientation = "portrait",
     scale = 2,
-    margin = 10,
+    margin = 5, // Reduced from 10 to 5
     quality = 1,
     backgroundColor = "#FFFFFF",
     enableLinks = true,
     pagebreak = { mode: "css", avoid: [".pdf-avoid-break"] },
     multiPage = false,
     compression = "FAST",
+    titleOptions = {
+      text: "",
+      fontSize: 16,
+      fontStyle: "bold",
+      color: "#000000",
+      marginBottom: 5,
+    },
   } = { ...defaultOptions, ...options };
 
   try {
@@ -118,13 +141,63 @@ export const generatePdf = async (
     const imgWidth = contentWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+    // Add title if provided
+    let titleHeight = 0;
+    if (titleOptions?.text) {
+      const {
+        text,
+        fontSize = 16,
+        fontStyle = "bold",
+        color = "#000000",
+        marginBottom = 5,
+      } = titleOptions;
+
+      pdf.setFontSize(fontSize);
+      pdf.setFont("helvetica", fontStyle);
+      pdf.setTextColor(color);
+
+      // Calculate title width and position
+      const titleWidth = pdf.getTextWidth(text);
+      const titleX = margin + (contentWidth - titleWidth) / 2;
+      const titleY = margin + fontSize / 2;
+
+      pdf.text(text, titleX, titleY);
+      titleHeight = fontSize + marginBottom;
+    }
+
+    const adjustedMarginTop = margin + titleHeight;
+
     if (multiPage) {
-      // MULTI-PAGE LOGIC (FIXED)
-      const pageContentHeightPx = (contentHeight * canvas.width) / imgWidth;
+      // MULTI-PAGE LOGIC (UPDATED WITH TITLE SUPPORT)
+      const availableContentHeight = contentHeight - titleHeight;
+      const pageContentHeightPx =
+        (availableContentHeight * canvas.width) / imgWidth;
       const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
       for (let i = 0; i < totalPages; i++) {
-        if (i > 0) pdf.addPage(format, orientation);
+        if (i > 0) {
+          pdf.addPage(format, orientation);
+          // Add title to subsequent pages if needed
+          if (titleOptions?.text) {
+            const {
+              text,
+              fontSize = 16,
+              fontStyle = "bold",
+              color = "#000000",
+              // marginBottom = 5,
+            } = titleOptions;
+
+            pdf.setFontSize(fontSize);
+            pdf.setFont("helvetica", fontStyle);
+            pdf.setTextColor(color);
+
+            const titleWidth = pdf.getTextWidth(text);
+            const titleX = margin + (contentWidth - titleWidth) / 2;
+            const titleY = margin + fontSize / 2;
+
+            pdf.text(text, titleX, titleY);
+          }
+        }
 
         // Calculate the portion of canvas to show
         const startY = i * pageContentHeightPx;
@@ -143,13 +216,13 @@ export const generatePdf = async (
         ctx.drawImage(
           canvas,
           0,
-          startY, // source x, y
+          startY,
           canvas.width,
-          pageImgHeightPx, // source width, height
+          pageImgHeightPx,
           0,
-          0, // destination x, y
+          0,
           canvas.width,
-          pageImgHeightPx // destination width, height
+          pageImgHeightPx
         );
 
         // Calculate height in PDF units
@@ -159,7 +232,7 @@ export const generatePdf = async (
           pageCanvas.toDataURL("image/jpeg", quality),
           "JPEG",
           margin,
-          margin,
+          adjustedMarginTop,
           imgWidth,
           pageImgHeight,
           undefined,
@@ -167,17 +240,18 @@ export const generatePdf = async (
         );
       }
     } else {
-      // SINGLE-PAGE LOGIC
+      // SINGLE-PAGE LOGIC (UPDATED WITH TITLE SUPPORT)
+      const availableContentHeight = contentHeight - titleHeight;
       const scaleFactor = Math.min(
         contentWidth / imgWidth,
-        contentHeight / imgHeight
+        availableContentHeight / imgHeight
       );
 
       pdf.addImage(
         canvas.toDataURL("image/jpeg", quality),
         "JPEG",
         margin,
-        margin,
+        adjustedMarginTop,
         imgWidth * scaleFactor,
         imgHeight * scaleFactor,
         undefined,
@@ -191,127 +265,3 @@ export const generatePdf = async (
     throw error;
   }
 };
-
-// export const generatePdf = async (
-//   element: HTMLElement,
-//   options: Partial<PdfOptions> = {}
-// ): Promise<void> => {
-//   const {
-//     filename,
-//     format,
-//     orientation,
-//     scale,
-//     margin,
-//     quality,
-//     backgroundColor,
-//     // letterRendering,
-//     enableLinks,
-//     pagebreak,
-//     multiPage,
-//     compression = "FAST",
-//   } = { ...defaultOptions, ...options };
-
-//   try {
-//     // Prepare the element
-//     const originalClasses = element.className;
-//     element.classList.add("pdf-container");
-
-//     // Generate canvas with enhanced settings
-//     const canvas = await html2canvas(element, {
-//       scale: scale! * quality!,
-//       useCORS: true,
-//       allowTaint: true,
-//       // letterRendering,
-//       backgroundColor,
-//       windowWidth: element.scrollWidth,
-//       windowHeight: element.scrollHeight,
-//       onclone: (clonedDoc) => {
-//         // Handle links
-//         if (enableLinks) {
-//           clonedDoc.querySelectorAll("a").forEach((link) => {
-//             link.style.color = "inherit";
-//             link.style.textDecoration = "underline";
-//           });
-//         }
-//         // Handle page breaks
-//         pagebreak?.avoid?.forEach((selector) => {
-//           clonedDoc.querySelectorAll(selector).forEach((el) => {
-//             (el as HTMLElement).style.pageBreakInside = "avoid";
-//           });
-//         });
-//       },
-//     });
-
-//     // Restore original element
-//     element.className = originalClasses;
-
-//     // Create PDF
-//     const pdf = new jsPDF({
-//       orientation,
-//       unit: "mm",
-//       format,
-//       compress: true,
-//     });
-
-//     const { width: pdfWidth, height: pdfHeight } = getPdfDimensions(
-//       format!,
-//       orientation!
-//     );
-//     const contentWidth = pdfWidth - margin! * 2;
-//     const contentHeight = pdfHeight - margin! * 2;
-
-//     const imgWidth = contentWidth;
-//     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-//     if (multiPage && imgHeight > contentHeight) {
-//       // Multi-page logic
-//       let remainingHeight = imgHeight;
-//       let position = margin;
-
-//       while (remainingHeight > 0) {
-//         const viewportHeight = Math.min(contentHeight, remainingHeight);
-//         pdf.addImage(
-//           canvas.toDataURL("image/jpeg", quality),
-//           "JPEG",
-//           margin!,
-//           position!,
-//           imgWidth,
-//           viewportHeight,
-//           undefined,
-//           compression,
-//           undefined
-//         );
-
-//         remainingHeight -= contentHeight;
-//         position! -= contentHeight;
-
-//         if (remainingHeight > 0) {
-//           pdf.addPage();
-//         }
-//       }
-//     } else {
-//       // Single-page logic (scaled to fit)
-//       const scaleFactor = Math.min(
-//         contentWidth / imgWidth,
-//         contentHeight / imgHeight
-//       );
-
-//       pdf.addImage(
-//         canvas.toDataURL("image/jpeg", quality),
-//         "JPEG",
-//         margin!,
-//         margin!,
-//         imgWidth * scaleFactor,
-//         imgHeight * scaleFactor,
-//         undefined,
-//         compression,
-//         undefined
-//       );
-//     }
-
-//     pdf.save(filename);
-//   } catch (error) {
-//     console.error("PDF generation failed:", error);
-//     throw error;
-//   }
-// };

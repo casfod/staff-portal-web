@@ -25,7 +25,8 @@ const VendorTableRow = ({
 }) => {
   const currentUser = localStorageUser();
 
-  const isEditable = currentUser.role === "SUPER-ADMIN";
+  const isEditable =
+    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canUpdate;
 
   const vendorId = vendor.id ?? "";
   // const vendorCreatedAt = vendor.createdAt ?? "";

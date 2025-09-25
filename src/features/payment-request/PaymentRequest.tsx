@@ -102,10 +102,15 @@ const PaymentRequest = () => {
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
+  // In your PaymentRequest.tsx component, update the usePdfDownload hook usage:
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `PaymentRequest-${paymentRequest?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Payment Request",
+    },
   });
+
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);
   };

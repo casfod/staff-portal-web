@@ -109,6 +109,9 @@ const Request = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `AdvanceRequest-${advanceRequest?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Advance Request",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);

@@ -84,9 +84,32 @@ const Navigation: React.FC = () => {
       return true;
     }
 
+    // User Management - Only for SUPER-ADMIN and ADMIN
     if (item.label === "User Management") {
       return currentUser.role === "SUPER-ADMIN" || currentUser.role === "ADMIN";
     }
+
+    // Procurement - Show if user has any procurement permission or is SUPER-ADMIN
+    if (item.label === "Procurement") {
+      // SUPER-ADMIN always has access to procurement
+      if (currentUser.role === "SUPER-ADMIN") {
+        return true;
+      }
+
+      // Check if user has any procurement permissions
+      const hasProcurementPermission =
+        currentUser.procurementRole && currentUser.procurementRole.canView;
+
+      // const hasProcurementPermission =
+      //   currentUser.procurementRole &&
+      //   (currentUser.procurementRole.canCreate ||
+      //     currentUser.procurementRole.canView ||
+      //     currentUser.procurementRole.canUpdate ||
+      //     currentUser.procurementRole.canDelete);
+
+      return hasProcurementPermission;
+    }
+
     return true;
   });
 

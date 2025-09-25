@@ -102,6 +102,9 @@ const TravelRequest = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `TravelRequest-${travelRequest?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Travel Request",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);

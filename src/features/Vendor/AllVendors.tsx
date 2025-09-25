@@ -83,7 +83,8 @@ export function AllVendors() {
         <div className="flex justify-between items-center">
           <TextHeader>Vendors</TextHeader>
 
-          {currentUser.role === "SUPER-ADMIN" && (
+          {(currentUser.role === "SUPER-ADMIN" ||
+            currentUser.procurementRole.canCreate) && (
             <Button
               onClick={() =>
                 navigate("/procurement/vendor-management/create-vendor")

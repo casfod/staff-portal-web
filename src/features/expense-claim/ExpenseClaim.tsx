@@ -103,6 +103,9 @@ const ExpenseClaim = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `ExpenseClaim-${expenseClaim?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Expense Claim",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);

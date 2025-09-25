@@ -108,6 +108,9 @@ const PurchaseRequest = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `PurchaseRequest-${purchaseRequest?.id}`,
     multiPage: true,
+    titleOptions: {
+      text: "Purchase Request",
+    },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);
