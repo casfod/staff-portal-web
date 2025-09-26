@@ -15,6 +15,7 @@ import {
   createVendor,
   updateVendor,
   deleteVendor,
+  exportVendorsToExcel, // Add this import
 } from "../../../services/apiVendor";
 import {
   CreateVendorType,
@@ -39,6 +40,7 @@ export const vendorKeys = {
   details: () => [...vendorKeys.all, "detail"] as const,
   detail: (id: string) => [...vendorKeys.details(), id] as const,
   stats: () => [...vendorKeys.all, "stats"] as const,
+  export: () => [...vendorKeys.all, "export"] as const, // Add export key
 };
 
 // Hooks
@@ -204,4 +206,45 @@ export const useDeleteVendor = () => {
   });
 
   return { deleteVendor: deleteVendorMutation, isPending, isError };
+};
+
+// Add this new hook for exporting vendors to Excel
+export const useExportVendorsToExcel = () => {
+  const {
+    mutate: exportVendorsMutation,
+    isPending: isExporting,
+    isError: isExportError,
+    isSuccess: isExportSuccess,
+  } = useMutation({
+    mutationFn: exportVendorsToExcel,
+
+    onSuccess: (blob: Blob) => {
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `vendors_export_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Vendors exported successfully");
+    },
+
+    onError: (err: ApiError) => {
+      const errorMessage =
+        err.response?.data?.message ||
+        "An error occurred while exporting vendors";
+      toast.error(errorMessage);
+      console.error("Vendor export error:", errorMessage);
+    },
+  });
+
+  return {
+    exportVendors: exportVendorsMutation,
+    isExporting,
+    isExportError,
+    isExportSuccess,
+  };
 };

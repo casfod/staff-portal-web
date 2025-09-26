@@ -32,11 +32,14 @@ const FormAddVendor: React.FC = () => {
   const { createVendor, isPending } = useCreateVendor();
 
   const businessTypes = [
-    { id: "sole_proprietorship", name: "Sole Proprietorship" },
-    { id: "partnership", name: "Partnership" },
-    { id: "corporation", name: "Corporation" },
-    { id: "llc", name: "Limited Liability Company (LLC)" },
-    { id: "nonprofit", name: "Non-Profit Organization" },
+    { id: "Sole Proprietorship", name: "Sole Proprietorship" },
+    { id: "Partnership", name: "Partnership" },
+    { id: "Corporation", name: "Corporation" },
+    {
+      id: "Limited Liability Company (LLC)",
+      name: "Limited Liability Company (LLC)",
+    },
+    { id: "Non-Profit Organization", name: "Non-Profit Organization" },
   ];
 
   const categories = [

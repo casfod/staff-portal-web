@@ -39,10 +39,10 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
   const { vendorId } = useParams();
 
   // Format categories array for display
-  const formatCategories = (categories?: string[]): string => {
-    if (!categories || categories.length === 0) return "N/A";
-    return categories.join(", ");
-  };
+  // const formatCategories = (categories?: string[]): string => {
+  //   if (!categories || categories.length === 0) return "N/A";
+  //   return categories.join(", ");
+  // };
 
   // Grouped vendor information with proper typing
   const vendorSections: VendorSection[] = [

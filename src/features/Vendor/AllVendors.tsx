@@ -1,8 +1,8 @@
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 
-import { useVendors } from "./Hooks/useVendor";
+import { useVendors, useExportVendorsToExcel } from "./Hooks/useVendor"; // Update import
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { RootState } from "../../store/store";
@@ -18,6 +18,8 @@ import { localStorageUser } from "../../utils/localStorageUser";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import VendorTableRow from "./VendorTableRow";
+import SpinnerMini from "../../ui/SpinnerMini";
+// Remove the direct import: import { exportVendorsToExcel } from "../../services/apiVendor";
 
 export function AllVendors() {
   const currentUser = localStorageUser();
@@ -35,6 +37,9 @@ export function AllVendors() {
     page,
     limit,
   });
+
+  // Use the new export hook
+  const { exportVendors, isExporting } = useExportVendorsToExcel();
 
   // State for toggling nested tables
   const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
@@ -64,6 +69,10 @@ export function AllVendors() {
     navigate(`/procurement/vendor-management/edit-vendor/${vendor.id}`);
   };
 
+  const handleExportExcel = () => {
+    exportVendors();
+  };
+
   if (isError) {
     return <NetworkErrorUI />;
   }
@@ -83,17 +92,36 @@ export function AllVendors() {
         <div className="flex justify-between items-center">
           <TextHeader>Vendors</TextHeader>
 
-          {(currentUser.role === "SUPER-ADMIN" ||
-            currentUser.procurementRole.canCreate) && (
-            <Button
-              onClick={() =>
-                navigate("/procurement/vendor-management/create-vendor")
-              }
-            >
-              <Plus className="h-4 w-4 mr-1 md:mr-2" />
-              Add Vendor
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {(currentUser.role === "SUPER-ADMIN" ||
+              currentUser.procurementRole.canCreate) && (
+              <Button
+                onClick={() =>
+                  navigate("/procurement/vendor-management/create-vendor")
+                }
+              >
+                <Plus className="h-4 w-4 mr-1 md:mr-2" />
+                Add Vendor
+              </Button>
+            )}
+
+            {(currentUser.role === "SUPER-ADMIN" ||
+              currentUser.procurementRole.canView) && (
+              <Button onClick={handleExportExcel} disabled={isExporting}>
+                {isExporting ? (
+                  <>
+                    <SpinnerMini />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-1 md:mr-2" />
+                    Export Excel
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Search Bar */}

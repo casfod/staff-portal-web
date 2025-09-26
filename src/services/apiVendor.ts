@@ -230,6 +230,18 @@ export const updateVendor = async function (
   }
 };
 
+export const exportVendorsToExcel = async function (): Promise<Blob> {
+  try {
+    const response = await axiosInstance.get(`/vendors/export/excel`, {
+      responseType: "blob", // Important for file downloads
+    });
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deleteVendor = async function (
   vendorId: string
 ): Promise<{ status: string; message: string }> {
