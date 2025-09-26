@@ -60,7 +60,7 @@ const getPdfDimensions = (format: string, orientation: string) => {
     legal: [215.9, 355.6],
   };
 
-  let [width, height] = pageSizes[format] || pageSizes.a4;
+  const [width, height] = pageSizes[format] || pageSizes.a4;
   return orientation === "landscape"
     ? { width: height, height: width }
     : { width, height };

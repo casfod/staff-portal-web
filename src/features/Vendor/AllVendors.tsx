@@ -93,7 +93,7 @@ export function AllVendors() {
   const tableHeadData = [
     "Business Name",
     "Vendor Code",
-    "Category",
+    // "Category",
     "Contact Person",
     "Actions",
   ];
@@ -193,9 +193,7 @@ export function AllVendors() {
                   visibleItems={visibleItems}
                   toggleViewItems={toggleViewItems}
                   handleEdit={handleEdit}
-                  handleDelete={
-                    currentUser.procurementRole?.canDelete! && handleDelete
-                  }
+                  handleDelete={handleDelete}
                   handleAction={handleAction}
                 />
               ))

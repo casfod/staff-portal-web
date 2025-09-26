@@ -27,6 +27,8 @@ const VendorTableRow = ({
 
   const isEditable =
     currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canUpdate;
+  const isDeletable =
+    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canDelete;
 
   const vendorId = vendor.id ?? "";
   // const vendorCreatedAt = vendor.createdAt ?? "";
@@ -36,13 +38,14 @@ const VendorTableRow = ({
   const rowData = [
     { id: "businessName", content: truncateText(vendor.businessName, 40) },
     { id: "vendorCode", content: vendor.vendorCode },
-    { id: "categories", content: vendor.categories || "N/A" },
+    // { id: "categories", content: vendor.categories || "N/A" },
     { id: "contactPerson", content: vendor.contactPerson },
     {
       id: "actions",
       content: (
         <ActionIcons
           isEditable={isEditable}
+          isDeletable={isDeletable}
           requestId={vendorId}
           visibleItems={visibleItems}
           onToggleView={toggleViewItems}

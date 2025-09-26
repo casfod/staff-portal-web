@@ -11,6 +11,7 @@ interface ActionIconsProps {
   isCopying?: boolean;
   canShareRequest?: boolean;
   isEditable?: boolean;
+  isDeletable?: boolean;
   isGeneratingPDF?: boolean;
   requestId?: string;
   visibleItems?: Record<string, boolean>;
@@ -35,6 +36,7 @@ const ActionIcons = ({
   isCopying,
   canShareRequest,
   isEditable,
+  isDeletable = true,
   isGeneratingPDF,
   requestId = "",
   visibleItems = {},
@@ -110,7 +112,7 @@ const ActionIcons = ({
             </button>
           )}
 
-          {onDelete && (
+          {onDelete && isDeletable && (
             <button
               className="text-red-600 hover:text-red-900 hover:cursor-pointer"
               onClick={(e) => {
