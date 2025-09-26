@@ -27,14 +27,18 @@ export function useUpdateUser(id: string) {
   } = useMutation({
     mutationFn: (data: Partial<UserType>) => updateUserAdminAPI(id, data),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries(["users"] as any);
-      toast.success("User role updated");
+    onSuccess: (data) => {
+      console.log("data:", data);
+
+      if (data.status === 200) {
+        queryClient.invalidateQueries(["users"] as any);
+        toast.success("User updated");
+      }
     },
 
     onError: (err: Error) => {
       // Check if the error has a response, if so, display it
-      toast.error("Error updating user role");
+      toast.error("Error updating user");
 
       const error = err.response?.data.message || "An error occurred";
 
