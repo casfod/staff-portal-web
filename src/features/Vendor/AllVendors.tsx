@@ -2,7 +2,11 @@ import { Download, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 
-import { useVendors, useExportVendorsToExcel } from "./Hooks/useVendor"; // Update import
+import {
+  useVendors,
+  useExportVendorsToExcel,
+  useDeleteVendor,
+} from "./Hooks/useVendor"; // Update import
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { RootState } from "../../store/store";
@@ -19,12 +23,15 @@ import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import VendorTableRow from "./VendorTableRow";
 import SpinnerMini from "../../ui/SpinnerMini";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 // Remove the direct import: import { exportVendorsToExcel } from "../../services/apiVendor";
 
 export function AllVendors() {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  console.log("currentUser:", currentUser);
 
   const { searchTerm, sort, page, limit } = useSelector(
     (state: RootState) => state.genericQuerySlice
@@ -40,6 +47,8 @@ export function AllVendors() {
 
   // Use the new export hook
   const { exportVendors, isExporting } = useExportVendorsToExcel();
+
+  const { deleteVendor } = useDeleteVendor();
 
   // State for toggling nested tables
   const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
@@ -68,6 +77,10 @@ export function AllVendors() {
     dispatch(setVendor(vendor));
     navigate(`/procurement/vendor-management/edit-vendor/${vendor.id}`);
   };
+
+  const handleDelete = useDeleteRequest(deleteVendor, {
+    entityName: "Vendor",
+  });
 
   const handleExportExcel = () => {
     exportVendors();
@@ -110,7 +123,7 @@ export function AllVendors() {
               <Button onClick={handleExportExcel} disabled={isExporting}>
                 {isExporting ? (
                   <>
-                    <SpinnerMini />
+                    <SpinnerMini width={4} height={4} />
                     Exporting...
                   </>
                 ) : (
@@ -180,6 +193,9 @@ export function AllVendors() {
                   visibleItems={visibleItems}
                   toggleViewItems={toggleViewItems}
                   handleEdit={handleEdit}
+                  handleDelete={
+                    currentUser.procurementRole?.canDelete! && handleDelete
+                  }
                   handleAction={handleAction}
                 />
               ))
