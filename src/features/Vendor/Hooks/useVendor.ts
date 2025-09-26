@@ -105,7 +105,7 @@ export const useCreateVendor = () => {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: CreateVendorType) => createVendor(data),
+    mutationFn: (data: CreateVendorType) => createVendor(data, data.files),
 
     onSuccess: (data) => {
       // Check based on your API response structure
@@ -145,7 +145,7 @@ export const useUpdateVendor = () => {
     }: {
       vendorId: string;
       data: UpdateVendorType;
-    }) => updateVendor(vendorId, data),
+    }) => updateVendor(vendorId, data, data.files),
 
     onSuccess: (data, variables) => {
       // Check based on your API response structure

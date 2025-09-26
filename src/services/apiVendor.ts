@@ -126,10 +126,49 @@ export const getVendorByCode = async function (
 };
 
 export const createVendor = async function (
-  data: CreateVendorType
+  data: CreateVendorType,
+  files: File[] = []
 ): Promise<UseVendor> {
   try {
-    const response = await axiosInstance.post<UseVendor>(`/vendors`, data);
+    const formData = new FormData();
+
+    // Append all vendor fields
+    const vendorFields: (keyof CreateVendorType)[] = [
+      "businessName",
+      "businessType",
+      "address",
+      "email",
+      "businessPhoneNumber",
+      "contactPhoneNumber",
+      "categories", // Changed from "category" to "categories"
+      "supplierNumber",
+      "contactPerson",
+      "position",
+      "tinNumber",
+    ];
+
+    vendorFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        if (key === "categories" && Array.isArray(data[key])) {
+          // Append each category individually or as JSON string
+          (data[key] as string[]).forEach((category) => {
+            formData.append("categories", category);
+          });
+        } else {
+          formData.append(key, String(data[key]));
+        }
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await axiosInstance.post<UseVendor>(`/vendors`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -138,13 +177,53 @@ export const createVendor = async function (
 
 export const updateVendor = async function (
   vendorId: string,
-  data: UpdateVendorType
+  data: UpdateVendorType,
+  files: File[] = []
 ): Promise<UseVendor> {
   try {
+    const formData = new FormData();
+
+    // Append all vendor fields
+    const vendorFields: (keyof UpdateVendorType)[] = [
+      "businessName",
+      "businessType",
+      "address",
+      "email",
+      "businessPhoneNumber",
+      "contactPhoneNumber",
+      "categories", // Changed from "category" to "categories"
+      "supplierNumber",
+      "contactPerson",
+      "position",
+      "tinNumber",
+    ];
+
+    vendorFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        if (key === "categories" && Array.isArray(data[key])) {
+          // Append each category individually
+          (data[key] as string[]).forEach((category) => {
+            formData.append("categories", category);
+          });
+        } else {
+          formData.append(key, String(data[key]));
+        }
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     const response = await axiosInstance.patch<UseVendor>(
       `/vendors/${vendorId}`,
-      data
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
+
     return response.data;
   } catch (err) {
     return handleError(err);

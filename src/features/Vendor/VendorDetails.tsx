@@ -11,8 +11,10 @@ import {
   FileText,
   Calendar,
   ArrowUpRightFromCircleIcon,
+  Tag,
 } from "lucide-react";
 import { ReactElement } from "react";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
 interface VendorDetailsProps {
   vendor: VendorType;
@@ -21,9 +23,10 @@ interface VendorDetailsProps {
 interface VendorField {
   id: string;
   label: string;
-  content: string;
+  content: string | string[]; // Updated to accept array
   icon?: ReactElement;
   isBlock?: boolean;
+  isArray?: boolean; // New flag to indicate array content
 }
 
 interface VendorSection {
@@ -34,6 +37,12 @@ interface VendorSection {
 
 export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
   const { vendorId } = useParams();
+
+  // Format categories array for display
+  const formatCategories = (categories?: string[]): string => {
+    if (!categories || categories.length === 0) return "N/A";
+    return categories.join(", ");
+  };
 
   // Grouped vendor information with proper typing
   const vendorSections: VendorSection[] = [
@@ -62,9 +71,11 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           content: vendor.supplierNumber || "N/A",
         },
         {
-          id: "category",
-          label: "Category",
-          content: vendor.category || "N/A",
+          id: "categories",
+          label: "Categories",
+          content: vendor.categories || [], // Keep as array for special handling
+          icon: <Tag className="w-4 h-4" />,
+          isArray: true, // Flag to indicate this is an array field
         },
         {
           id: "tinNumber",
@@ -222,35 +233,56 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
                       >
                         {field.label}
                       </label>
-                      <div
-                        className={`${
-                          field.isBlock
-                            ? "whitespace-pre-line bg-white p-3 rounded border"
-                            : "break-words"
-                        } ${
-                          section.title === "Contact Information"
-                            ? field.id === "email" ||
-                              field.id === "businessPhone" ||
-                              field.id === "contactPhone"
-                              ? "text-slate-600 hover:underline cursor-pointer"
-                              : "text-slate-800"
-                            : "text-gray-800"
-                        }`}
-                        onClick={() => {
-                          if (section.title === "Contact Information") {
-                            if (field.id === "email") {
-                              window.location.href = `mailto:${field.content}`;
-                            } else if (
-                              field.id === "businessPhone" ||
-                              field.id === "contactPhone"
-                            ) {
-                              window.location.href = `tel:${field.content}`;
+
+                      {/* Special handling for array fields (categories) */}
+                      {field.isArray ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(field.content as string[]).length > 0 ? (
+                            (field.content as string[]).map(
+                              (category, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                >
+                                  {category}
+                                </span>
+                              )
+                            )
+                          ) : (
+                            <span className="text-gray-500">N/A</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          className={`${
+                            field.isBlock
+                              ? "whitespace-pre-line bg-white p-3 rounded border"
+                              : "break-words"
+                          } ${
+                            section.title === "Contact Information"
+                              ? field.id === "email" ||
+                                field.id === "businessPhone" ||
+                                field.id === "contactPhone"
+                                ? "text-slate-600 hover:underline cursor-pointer"
+                                : "text-slate-800"
+                              : "text-gray-800"
+                          }`}
+                          onClick={() => {
+                            if (section.title === "Contact Information") {
+                              if (field.id === "email") {
+                                window.location.href = `mailto:${field.content}`;
+                              } else if (
+                                field.id === "businessPhone" ||
+                                field.id === "contactPhone"
+                              ) {
+                                window.location.href = `tel:${field.content}`;
+                              }
                             }
-                          }
-                        }}
-                      >
-                        {field.content}
-                      </div>
+                          }}
+                        >
+                          {field.content}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -259,6 +291,11 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           </div>
         ))}
       </div>
+
+      {/* File Attachments Section */}
+      {vendor.files && vendor.files.length > 0 && (
+        <FileAttachmentContainer files={vendor.files} />
+      )}
     </DetailContainer>
   );
 };

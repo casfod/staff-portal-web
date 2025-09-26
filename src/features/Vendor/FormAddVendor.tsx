@@ -5,10 +5,10 @@ import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import { CreateVendorType } from "../../interfaces";
-
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import { useCreateVendor } from "./Hooks/useVendor";
+import { FileUpload } from "../../ui/FileUpload";
 
 const FormAddVendor: React.FC = () => {
   const navigate = useNavigate();
@@ -19,12 +19,15 @@ const FormAddVendor: React.FC = () => {
     email: "",
     businessPhoneNumber: "",
     contactPhoneNumber: "",
-    category: "",
+    categories: [], // Changed to array
     supplierNumber: "",
     contactPerson: "",
     position: "",
     tinNumber: "",
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { createVendor, isPending } = useCreateVendor();
 
@@ -53,16 +56,41 @@ const FormAddVendor: React.FC = () => {
     }));
   };
 
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategories((prev) => {
+      const newCategoryIds = prev.includes(categoryId)
+        ? prev.filter((cat) => cat !== categoryId)
+        : [...prev, categoryId];
+
+      // Convert IDs to names
+      const categoryNames = newCategoryIds.map((id) => {
+        const category = categories.find((cat) => cat.id === id);
+        return category?.name || id; // Use name or fallback to ID
+      });
+
+      // Update form data
+      setFormData((prev) => ({
+        ...prev,
+        categories: categoryNames,
+      }));
+
+      return newCategoryIds;
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
-    createVendor(formData, {
-      onSuccess: () => {
-        navigate("/procurement/vendor-management");
-      },
-    });
+    createVendor(
+      { ...formData, files: selectedFiles },
+      {
+        onSuccess: () => {
+          navigate("/procurement/vendor-management");
+        },
+      }
+    );
   };
 
   return (
@@ -93,6 +121,37 @@ const FormAddVendor: React.FC = () => {
         </FormRow>
       </Row>
 
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Categories">
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <label
+                  key={category.id}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={() => handleCategoryChange(category.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-700">{category.name}</span>
+                </label>
+              ))}
+            </div>
+            {selectedCategories.length > 0 && (
+              <p className="text-xs text-gray-500">
+                Selected:{" "}
+                {selectedCategories
+                  .map((catId) => categories.find((c) => c.id === catId)?.name)
+                  .join(", ")}
+              </p>
+            )}
+          </div>
+        </FormRow>
+      </Row>
+
       <Row>
         <FormRow label="Business Address *" type="wide">
           <textarea
@@ -116,17 +175,6 @@ const FormAddVendor: React.FC = () => {
             value={formData.email}
             onChange={(e) => handleFormChange("email", e.target.value)}
             placeholder="email@company.com"
-          />
-        </FormRow>
-
-        <FormRow label="Category">
-          <Select
-            clearable={true}
-            id="category"
-            customLabel="Select Category"
-            value={formData.category || ""}
-            onChange={(value) => handleFormChange("category", value)}
-            options={categories}
           />
         </FormRow>
       </Row>
@@ -209,6 +257,13 @@ const FormAddVendor: React.FC = () => {
           />
         </FormRow>
       </Row>
+
+      <FileUpload
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
+        accept=".jpg,.png,.pdf,.xlsx,.docx"
+        multiple={true}
+      />
 
       <div className="flex justify-center w-full gap-4 pt-6">
         <Button type="submit" size="medium" disabled={isPending}>

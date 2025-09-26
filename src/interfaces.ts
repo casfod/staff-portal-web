@@ -565,7 +565,7 @@ export interface VendorType {
   email: string;
   businessPhoneNumber: string;
   contactPhoneNumber: string;
-  category?: string;
+  categories?: string[];
   supplierNumber?: string;
   contactPerson: string;
   position: string;
@@ -573,6 +573,7 @@ export interface VendorType {
   tinNumber: string;
   createdAt: string;
   updatedAt: string;
+  files?: [];
 }
 
 export interface UseVendorType {
@@ -611,11 +612,12 @@ export interface CreateVendorType {
   email: string;
   businessPhoneNumber: string;
   contactPhoneNumber: string;
-  category?: string;
+  categories?: string[];
   supplierNumber?: string;
   contactPerson: string;
   position: string;
   tinNumber: string;
+  files?: File[];
 }
 
 export interface UpdateVendorType {
@@ -625,9 +627,10 @@ export interface UpdateVendorType {
   email?: string;
   businessPhoneNumber?: string;
   contactPhoneNumber?: string;
-  category?: string;
+  categories?: string[];
   supplierNumber?: string;
   contactPerson?: string;
   position?: string;
   tinNumber?: string;
+  files?: File[];
 }
