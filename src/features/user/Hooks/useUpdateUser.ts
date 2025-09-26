@@ -28,8 +28,6 @@ export function useUpdateUser(id: string) {
     mutationFn: (data: Partial<UserType>) => updateUserAdminAPI(id, data),
 
     onSuccess: (data) => {
-      console.log("data:", data);
-
       if (data.status === 200) {
         queryClient.invalidateQueries(["users"] as any);
         toast.success("User updated");
