@@ -43,7 +43,6 @@ const Vendor = () => {
   const tableHeadData = [
     "Business Name",
     "Vendor Code",
-    "Category",
     "Contact Person",
     "Actions",
   ];
@@ -53,7 +52,6 @@ const Vendor = () => {
   const tableRowData = [
     { id: "businessName", content: truncateText(vendor.businessName, 40) },
     { id: "vendorCode", content: vendor.vendorCode },
-    { id: "categories", content: vendor.categories || "N/A" },
     { id: "contactPerson", content: vendor.contactPerson },
     {
       id: "action",
