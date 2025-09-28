@@ -466,7 +466,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "goods-receivedc",
+            path: "goods-received",
             element: (
               <AnimatedRoute
                 key="goods-received"
