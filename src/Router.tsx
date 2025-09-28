@@ -424,7 +424,7 @@ const router = createBrowserRouter([
             element: (
               <AnimatedRoute
                 key="rfq"
-                element={<div>Tenders Page - To be implemented</div>}
+                element={<div>RFQ Page - To be implemented</div>}
               />
             ),
             children: [
@@ -447,7 +447,7 @@ const router = createBrowserRouter([
             element: (
               <AnimatedRoute
                 key="purchase-order"
-                element={<div>Contracts Page - To be implemented</div>}
+                element={<div>Purchase Order Page - To be implemented</div>}
               />
             ),
             children: [
@@ -466,13 +466,11 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "goods-received",
+            path: "goods-receivedc",
             element: (
               <AnimatedRoute
                 key="goods-received"
-                element={
-                  <div>Procurement Reports Page - To be implemented</div>
-                }
+                element={<div>Goods Received Page - To be implemented</div>}
               />
             ),
             children: [
