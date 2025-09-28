@@ -236,6 +236,8 @@ const FormAddPaymentRequest = () => {
             required
             value={formData.accountNumber}
             onChange={(e) => handleFormChange("accountNumber", e.target.value)}
+            placeholder="11-digit account number"
+            maxLength={11}
           />
         </FormRow>
         <FormRow label="Account Name*">

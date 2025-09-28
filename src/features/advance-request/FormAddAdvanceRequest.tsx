@@ -323,7 +323,7 @@ const FormAddAdvanceRequest: React.FC = () => {
 
             <FormRow label="Description *" type="wide">
               <input
-                className="w-full   text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
+                className="w-full text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
                 placeholder=""
                 disabled={disabledStates[index]}
                 value={group.description}
@@ -495,6 +495,8 @@ const FormAddAdvanceRequest: React.FC = () => {
             required
             value={formData.accountNumber}
             onChange={(e) => handleFormChange("accountNumber", e.target.value)}
+            placeholder="11-digit account number"
+            maxLength={11}
           />
         </FormRow>
         <FormRow label="Account Name*">

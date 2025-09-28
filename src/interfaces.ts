@@ -566,13 +566,18 @@ export interface VendorType {
   businessPhoneNumber: string;
   contactPhoneNumber: string;
   categories?: string[];
-  supplierNumber?: string;
   contactPerson: string;
   position: string;
   vendorCode: string;
   tinNumber: string;
   createdAt: string;
   updatedAt: string;
+  businessRegNumber: string;
+  businessState: string;
+  operatingLGA: string;
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
   files?: [];
 }
 
@@ -613,10 +618,15 @@ export interface CreateVendorType {
   businessPhoneNumber: string;
   contactPhoneNumber: string;
   categories?: string[];
-  supplierNumber?: string;
   contactPerson: string;
   position: string;
   tinNumber: string;
+  businessRegNumber: string;
+  businessState: string;
+  operatingLGA: string;
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
   files?: File[];
 }
 
@@ -628,9 +638,14 @@ export interface UpdateVendorType {
   businessPhoneNumber?: string;
   contactPhoneNumber?: string;
   categories?: string[];
-  supplierNumber?: string;
   contactPerson?: string;
   position?: string;
   tinNumber?: string;
+  businessRegNumber?: string;
+  businessState?: string;
+  operatingLGA?: string;
+  accountNumber?: string;
+  accountName?: string;
+  bankName?: string;
   files?: File[];
 }

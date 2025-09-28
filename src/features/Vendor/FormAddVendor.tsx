@@ -9,6 +9,64 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import { useCreateVendor } from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
+import { bankNames } from "../../assets/Banks";
+
+export const categories = [
+  {
+    id: "General Supplies and Non Food Items",
+    name: "General Supplies and Non Food Items",
+  },
+  { id: "Outdoor Catering Services", name: "Outdoor Catering Services" },
+  {
+    id: "Hall Rental and Catering Services",
+    name: "Hall Rental and Catering Services",
+  },
+  {
+    id: "Furniture Supplies and Repairs",
+    name: "Furniture Supplies and Repairs",
+  },
+  { id: "Automobile Repairs", name: "Automobile Repairs" },
+  { id: "Health and Medical", name: "Health and Medical" },
+  {
+    id: "Construction and Building Materials",
+    name: "Construction and Building Materials",
+  },
+  {
+    id: "Generator Services and Maintenance",
+    name: "Generator Services and Maintenance",
+  },
+  { id: "Printings", name: "Printings" },
+  { id: "Stationary Supplies", name: "Stationary Supplies" },
+  { id: "Beverages", name: "Beverages" },
+  { id: "Electrical and AC Repairs", name: "Electrical and AC Repairs" },
+  { id: "Media Corporation", name: "Media Corporation" },
+  { id: "Petroleum Products", name: "Petroleum Products" },
+  { id: " Hotels and Hospitality", name: " Hotels and Hospitality" },
+  { id: "Travel Agents and Agency", name: "Travel Agents and Agency" },
+  {
+    id: "Car/Vehicle Hire and Leasing",
+    name: "Car/Vehicle Hire and Leasing",
+  },
+];
+
+export const businessState = [
+  { id: "Adamawa", name: "Adamawa" },
+  { id: "Borno", name: "Borno" },
+  { id: "Yobe", name: "Yobe" },
+  { id: "Sokoto", name: "Sokoto" },
+  { id: "Abuja", name: "Abuja" },
+];
+
+export const businessTypes = [
+  { id: "Sole Proprietorship", name: "Sole Proprietorship" },
+  { id: "Partnership", name: "Partnership" },
+  { id: "Corporation", name: "Corporation" },
+  {
+    id: "Limited Liability Company (LLC)",
+    name: "Limited Liability Company (LLC)",
+  },
+  { id: "Non-Profit Organization", name: "Non-Profit Organization" },
+];
 
 const FormAddVendor: React.FC = () => {
   const navigate = useNavigate();
@@ -19,38 +77,21 @@ const FormAddVendor: React.FC = () => {
     email: "",
     businessPhoneNumber: "",
     contactPhoneNumber: "",
-    categories: [], // Changed to array
-    supplierNumber: "",
+    categories: [],
     contactPerson: "",
     position: "",
+    businessRegNumber: "",
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    businessState: "",
+    operatingLGA: "",
     tinNumber: "",
   });
-
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { createVendor, isPending } = useCreateVendor();
-
-  const businessTypes = [
-    { id: "Sole Proprietorship", name: "Sole Proprietorship" },
-    { id: "Partnership", name: "Partnership" },
-    { id: "Corporation", name: "Corporation" },
-    {
-      id: "Limited Liability Company (LLC)",
-      name: "Limited Liability Company (LLC)",
-    },
-    { id: "Non-Profit Organization", name: "Non-Profit Organization" },
-  ];
-
-  const categories = [
-    { id: "technology", name: "Technology" },
-    { id: "construction", name: "Construction" },
-    { id: "consulting", name: "Consulting" },
-    { id: "logistics", name: "Logistics" },
-    { id: "office_supplies", name: "Office Supplies" },
-    { id: "services", name: "Services" },
-    { id: "other", name: "Other" },
-  ];
 
   const handleFormChange = (field: keyof CreateVendorType, value: string) => {
     setFormData((prev) => ({
@@ -89,8 +130,10 @@ const FormAddVendor: React.FC = () => {
     createVendor(
       { ...formData, files: selectedFiles },
       {
-        onSuccess: () => {
-          navigate("/procurement/vendor-management");
+        onSuccess: (data: any) => {
+          if (data.status === 200) {
+            navigate("/procurement/vendor-management");
+          }
         },
       }
     );
@@ -98,168 +141,258 @@ const FormAddVendor: React.FC = () => {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Business Name *">
-          <Input
-            type="text"
-            id="businessName"
-            minLength={3}
-            required
-            value={formData.businessName}
-            onChange={(e) => handleFormChange("businessName", e.target.value)}
-            placeholder="Enter business name"
-          />
-        </FormRow>
+      <div className="space-y-6">
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Business Name *">
+            <Input
+              type="text"
+              id="businessName"
+              minLength={3}
+              required
+              value={formData.businessName}
+              onChange={(e) => handleFormChange("businessName", e.target.value)}
+              placeholder="Enter business name"
+            />
+          </FormRow>
 
-        <FormRow label="Business Type *">
-          <Select
-            clearable={true}
-            id="businessType"
-            customLabel="Select Business Type"
-            required
-            value={formData.businessType}
-            onChange={(value) => handleFormChange("businessType", value)}
-            options={businessTypes}
-          />
-        </FormRow>
-      </Row>
+          <FormRow label="Business Type *">
+            <Select
+              clearable={true}
+              id="businessType"
+              customLabel="Select Business Type"
+              required
+              value={formData.businessType}
+              onChange={(value) => handleFormChange("businessType", value)}
+              options={businessTypes}
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Categories">
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <label
-                  key={category.id}
-                  className="flex items-center space-x-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(category.id)}
-                    onChange={() => handleCategoryChange(category.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="text-sm text-gray-700">{category.name}</span>
-                </label>
-              ))}
+        <Row>
+          <FormRow label="Categories">
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <label
+                    key={category.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category.id)}
+                      onChange={() => handleCategoryChange(category.id)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {category.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {selectedCategories.length > 0 && (
+                <p className="text-xs text-gray-500">
+                  Selected:{" "}
+                  {selectedCategories
+                    .map(
+                      (catId) => categories.find((c) => c.id === catId)?.name
+                    )
+                    .join(", ")}
+                </p>
+              )}
             </div>
-            {selectedCategories.length > 0 && (
-              <p className="text-xs text-gray-500">
-                Selected:{" "}
-                {selectedCategories
-                  .map((catId) => categories.find((c) => c.id === catId)?.name)
-                  .join(", ")}
-              </p>
-            )}
-          </div>
-        </FormRow>
-      </Row>
+          </FormRow>
+        </Row>
 
-      <Row>
-        <FormRow label="Business Address *" type="wide">
-          <textarea
-            className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
-            maxLength={500}
-            placeholder="Enter full business address"
-            id="address"
-            value={formData.address}
-            onChange={(e) => handleFormChange("address", e.target.value)}
-            required
-          />
-        </FormRow>
-      </Row>
+        <Row>
+          <FormRow label="Business Address *" type="wide">
+            <textarea
+              className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
+              maxLength={500}
+              placeholder="Enter full business address"
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleFormChange("address", e.target.value)}
+              required
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Email Address *">
-          <Input
-            type="email"
-            id="email"
-            required
-            value={formData.email}
-            onChange={(e) => handleFormChange("email", e.target.value)}
-            placeholder="email@company.com"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Where Your Company does Business *">
+            <Select
+              clearable={true}
+              id="businessState"
+              customLabel="Select a State"
+              value={formData.businessState || ""}
+              onChange={(value) => handleFormChange("businessState", value)} // Direct value now
+              options={
+                businessState
+                  ? businessState.map((bank) => ({
+                      id: bank.name as string,
+                      name: `${bank.name}`,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              filterable={true}
+              required
+            />
+          </FormRow>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Business Phone *">
-          <Input
-            type="tel"
-            id="businessPhoneNumber"
-            required
-            value={formData.businessPhoneNumber}
-            onChange={(e) =>
-              handleFormChange("businessPhoneNumber", e.target.value)
-            }
-            placeholder="11-digit phone number"
-            pattern="[0-9]{11}"
-            maxLength={11}
-          />
-        </FormRow>
+          <FormRow label="Preffered LGA of Operation *">
+            <Input
+              type="text" // Use standard text type
+              id="operatingLGA"
+              required
+              value={formData.operatingLGA}
+              onChange={(e) => handleFormChange("operatingLGA", e.target.value)}
+              placeholder="Enter Local Government Area"
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="Supplier Number">
-          <Input
-            type="text"
-            id="supplierNumber"
-            value={formData.supplierNumber}
-            onChange={(e) => handleFormChange("supplierNumber", e.target.value)}
-            placeholder="Optional supplier number"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Email Address *">
+            <Input
+              type="email"
+              id="email"
+              required
+              value={formData.email}
+              onChange={(e) => handleFormChange("email", e.target.value)}
+              placeholder="email@company.com"
+            />
+          </FormRow>
+          <FormRow label="Business Registration Number *">
+            <Input
+              type="businessRegNumber"
+              id="businessRegNumber"
+              required
+              value={formData.businessRegNumber}
+              onChange={(e) =>
+                handleFormChange("businessRegNumber", e.target.value)
+              }
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact Person *">
-          <Input
-            type="text"
-            id="contactPerson"
-            required
-            value={formData.contactPerson}
-            onChange={(e) => handleFormChange("contactPerson", e.target.value)}
-            placeholder="Full name of contact person"
-          />
-        </FormRow>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Business Phone *">
+            <Input
+              type="tel"
+              id="businessPhoneNumber"
+              required
+              value={formData.businessPhoneNumber}
+              onChange={(e) =>
+                handleFormChange("businessPhoneNumber", e.target.value)
+              }
+              placeholder="11-digit phone number"
+              pattern="[0-9]{11}"
+              maxLength={11}
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="Position *">
-          <Input
-            type="text"
-            id="position"
-            required
-            value={formData.position}
-            onChange={(e) => handleFormChange("position", e.target.value)}
-            placeholder="Position in company"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact Person *">
+            <Input
+              type="text"
+              id="contactPerson"
+              required
+              value={formData.contactPerson}
+              onChange={(e) =>
+                handleFormChange("contactPerson", e.target.value)
+              }
+              placeholder="Full name of contact person"
+            />
+          </FormRow>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact Phone *">
-          <Input
-            type="tel"
-            id="contactPhoneNumber"
-            required
-            value={formData.contactPhoneNumber}
-            onChange={(e) =>
-              handleFormChange("contactPhoneNumber", e.target.value)
-            }
-            placeholder="11-digit phone number"
-            pattern="[0-9]{11}"
-            maxLength={11}
-          />
-        </FormRow>
+          <FormRow label="Position *">
+            <Input
+              type="text"
+              id="position"
+              required
+              value={formData.position}
+              onChange={(e) => handleFormChange("position", e.target.value)}
+              placeholder="Position in company"
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="TIN Number *">
-          <Input
-            type="text"
-            id="tinNumber"
-            required
-            value={formData.tinNumber}
-            onChange={(e) => handleFormChange("tinNumber", e.target.value)}
-            placeholder="Tax Identification Number"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact Phone *">
+            <Input
+              type="tel"
+              id="contactPhoneNumber"
+              required
+              value={formData.contactPhoneNumber}
+              onChange={(e) =>
+                handleFormChange("contactPhoneNumber", e.target.value)
+              }
+              placeholder="11-digit phone number"
+              pattern="[0-9]{11}"
+              maxLength={11}
+            />
+          </FormRow>
+
+          <FormRow label="TIN Number *">
+            <Input
+              type="text"
+              id="tinNumber"
+              required
+              value={formData.tinNumber}
+              onChange={(e) => handleFormChange("tinNumber", e.target.value)}
+              placeholder="Tax Identification Number"
+            />
+          </FormRow>
+        </Row>
+
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Account Number*">
+            <Input
+              type="text"
+              id="accountNumber"
+              required
+              value={formData.accountNumber}
+              onChange={(e) =>
+                handleFormChange("accountNumber", e.target.value)
+              }
+              placeholder="11-digit account number"
+              maxLength={11}
+            />
+          </FormRow>
+          <FormRow label="Account Name*">
+            <Input
+              type="text"
+              id="accountName"
+              required
+              value={formData.accountName}
+              onChange={(e) => handleFormChange("accountName", e.target.value)}
+            />
+          </FormRow>
+        </Row>
+        <Row>
+          <FormRow label="Bank Name *">
+            <Select
+              clearable={true}
+              id="bankName"
+              customLabel="Select a Bank"
+              value={formData.bankName || ""}
+              onChange={(value) => handleFormChange("bankName", value)} // Direct value now
+              options={
+                bankNames
+                  ? bankNames.map((bank) => ({
+                      id: bank.name as string,
+                      name: `${bank.name}`,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              filterable={true}
+              required
+            />
+          </FormRow>
+        </Row>
+      </div>
 
       <FileUpload
         selectedFiles={selectedFiles}

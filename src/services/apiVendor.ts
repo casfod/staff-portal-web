@@ -132,7 +132,7 @@ export const createVendor = async function (
   try {
     const formData = new FormData();
 
-    // Append all vendor fields
+    // Append all vendor fields - ADD THE MISSING FIELDS
     const vendorFields: (keyof CreateVendorType)[] = [
       "businessName",
       "businessType",
@@ -140,11 +140,16 @@ export const createVendor = async function (
       "email",
       "businessPhoneNumber",
       "contactPhoneNumber",
-      "categories", // Changed from "category" to "categories"
-      "supplierNumber",
+      "categories",
       "contactPerson",
       "position",
       "tinNumber",
+      "businessRegNumber", // ADDED
+      "bankName", // ADDED
+      "accountName", // ADDED
+      "accountNumber", // ADDED
+      "businessState", // ADDED
+      "operatingLGA", // ADDED
     ];
 
     vendorFields.forEach((key) => {
@@ -183,7 +188,7 @@ export const updateVendor = async function (
   try {
     const formData = new FormData();
 
-    // Append all vendor fields
+    // Append all vendor fields - ADD THE MISSING FIELDS
     const vendorFields: (keyof UpdateVendorType)[] = [
       "businessName",
       "businessType",
@@ -191,11 +196,16 @@ export const updateVendor = async function (
       "email",
       "businessPhoneNumber",
       "contactPhoneNumber",
-      "categories", // Changed from "category" to "categories"
-      "supplierNumber",
+      "categories",
       "contactPerson",
       "position",
       "tinNumber",
+      "businessRegNumber", // ADDED
+      "bankName", // ADDED
+      "accountName", // ADDED
+      "accountNumber", // ADDED
+      "businessState", // ADDED
+      "operatingLGA", // ADDED
     ];
 
     vendorFields.forEach((key) => {

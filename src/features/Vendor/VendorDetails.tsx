@@ -12,6 +12,9 @@ import {
   Calendar,
   ArrowUpRightFromCircleIcon,
   Tag,
+  CreditCard,
+  Landmark,
+  UserCircle,
 } from "lucide-react";
 import { ReactElement } from "react";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
@@ -38,13 +41,7 @@ interface VendorSection {
 export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
   const { vendorId } = useParams();
 
-  // Format categories array for display
-  // const formatCategories = (categories?: string[]): string => {
-  //   if (!categories || categories.length === 0) return "N/A";
-  //   return categories.join(", ");
-  // };
-
-  // Grouped vendor information with proper typing
+  // Grouped vendor information with proper typing - INCLUDING Bank Account Details
   const vendorSections: VendorSection[] = [
     {
       title: "Business Information",
@@ -65,22 +62,25 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           label: "Vendor Code",
           content: vendor.vendorCode,
         },
+
         {
-          id: "supplierNumber",
-          label: "Supplier Number",
-          content: vendor.supplierNumber || "N/A",
+          id: "tinNumber",
+          label: "TIN Number",
+          content: vendor.tinNumber,
         },
+        {
+          id: "businessRegNumber",
+          label: "Business Registration Number",
+          content: vendor.businessRegNumber || "N/A",
+        },
+
         {
           id: "categories",
           label: "Categories",
           content: vendor.categories || [], // Keep as array for special handling
           icon: <Tag className="w-4 h-4" />,
           isArray: true, // Flag to indicate this is an array field
-        },
-        {
-          id: "tinNumber",
-          label: "TIN Number",
-          content: vendor.tinNumber,
+          isBlock: true,
         },
       ],
     },
@@ -120,15 +120,55 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
         },
       ],
     },
+    // Bank Account Details as a proper section
+    ...(vendor.bankName || vendor.accountName || vendor.accountNumber
+      ? [
+          {
+            title: "Bank Account Details",
+            icon: <CreditCard className="w-4 h-4" />,
+            fields: [
+              {
+                id: "bankName",
+                label: "Bank Name",
+                content: vendor.bankName || "N/A",
+                icon: <Landmark className="w-4 h-4" />,
+              },
+              {
+                id: "accountName",
+                label: "Account Name",
+                content: vendor.accountName || "N/A",
+                icon: <UserCircle className="w-4 h-4" />,
+              },
+              {
+                id: "accountNumber",
+                label: "Account Number",
+                content: vendor.accountNumber || "N/A",
+                icon: <CreditCard className="w-4 h-4" />,
+                isBlock: true,
+              },
+            ],
+          },
+        ]
+      : []),
     {
-      title: "Address",
+      title: "Address & Location",
       icon: <MapPin className="w-4 h-4" />,
       fields: [
         {
           id: "address",
-          label: "Full Address",
+          label: "Business Address",
           content: vendor.address,
           isBlock: true,
+        },
+        {
+          id: "businessState",
+          label: "Business State",
+          content: vendor.businessState || "N/A",
+        },
+        {
+          id: "operatingLGA",
+          label: "Operating LGA",
+          content: vendor.operatingLGA || "N/A",
         },
       ],
     },
@@ -159,11 +199,13 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           !vendorId ? "text-sm" : "text-sm md:text-base"
         } break-words`}
       >
+        {/* All Vendor Sections including Bank Account Details */}
         {vendorSections.map((section, sectionIndex) => (
           <div
             key={sectionIndex}
             className={`rounded-lg p-4 border ${
-              section.title === "Contact Information"
+              section.title === "Contact Information" ||
+              section.title === "Bank Account Details"
                 ? "bg-blue-50 border-slate-200"
                 : "bg-gray-50 border-gray-200"
             }`}
@@ -173,12 +215,16 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
               className={`flex items-center gap-2 mb-3 pb-2 border-b ${
                 section.title === "Contact Information"
                   ? "border-slate-300"
+                  : section.title === "Bank Account Details"
+                  ? "border-slate-300"
                   : "border-gray-300"
               }`}
             >
               <div
                 className={
                   section.title === "Contact Information"
+                    ? "text-slate-600"
+                    : section.title === "Bank Account Details"
                     ? "text-slate-600"
                     : "text-gray-600"
                 }
@@ -188,6 +234,8 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
               <h3
                 className={`text-lg font-semibold ${
                   section.title === "Contact Information"
+                    ? "text-slate-800"
+                    : section.title === "Bank Account Details"
                     ? "text-slate-800"
                     : "text-gray-800"
                 }`}
@@ -202,20 +250,25 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
                 <div
                   key={field.id}
                   className={`${field.isBlock ? "md:col-span-2" : ""} ${
-                    section.title === "Contact Information"
+                    section.title === "Contact Information" ||
+                    section.title === "Bank Account Details"
                       ? "flex items-center gap-3"
                       : ""
                   }`}
                 >
                   <div
                     className={`flex items-start gap-2 ${
-                      section.title === "Contact Information" ? "w-full" : ""
+                      section.title === "Contact Information" ||
+                      section.title === "Bank Account Details"
+                        ? "w-full"
+                        : ""
                     }`}
                   >
                     {field.icon && (
                       <div
                         className={`mt-0.5 ${
-                          section.title === "Contact Information"
+                          section.title === "Contact Information" ||
+                          section.title === "Bank Account Details"
                             ? "text-slate-700"
                             : "text-gray-500"
                         }`}
@@ -226,7 +279,8 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
                     <div className="flex-1 min-w-0">
                       <label
                         className={`block fon text-sm font-extrabold mb-1 uppercase tracking-wide ${
-                          section.title === "Contact Information"
+                          section.title === "Contact Information" ||
+                          section.title === "Bank Account Details"
                             ? "text-slate-600"
                             : "text-gray-600"
                         }`}
@@ -265,6 +319,10 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
                                 field.id === "contactPhone"
                                 ? "text-slate-600 hover:underline cursor-pointer"
                                 : "text-slate-800"
+                              : section.title === "Bank Account Details"
+                              ? field.id === "accountNumber"
+                                ? "text-slate-800 font-mono font-medium text-lg tracking-wider"
+                                : "text-slate-800 font-medium"
                               : "text-gray-800"
                           }`}
                           onClick={() => {

@@ -9,6 +9,8 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import { useUpdateVendor } from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
+import { businessState, categories } from "./FormAddVendor";
+import { bankNames } from "../../assets/Banks";
 
 interface FormEditVendorProps {
   vendor: VendorType | null;
@@ -24,10 +26,15 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     businessPhoneNumber: vendor?.businessPhoneNumber,
     contactPhoneNumber: vendor?.contactPhoneNumber,
     categories: vendor?.categories || [], // Changed to array
-    supplierNumber: vendor?.supplierNumber,
     contactPerson: vendor?.contactPerson,
     position: vendor?.position,
     tinNumber: vendor?.tinNumber,
+    businessRegNumber: vendor?.businessRegNumber,
+    bankName: vendor?.bankName,
+    accountName: vendor?.accountName,
+    accountNumber: vendor?.accountNumber,
+    businessState: vendor?.businessState,
+    operatingLGA: vendor?.operatingLGA,
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -47,17 +54,6 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     },
     { id: "Non-Profit Organization", name: "Non-Profit Organization" },
   ];
-
-  const categories = [
-    { id: "technology", name: "Technology" },
-    { id: "construction", name: "Construction" },
-    { id: "consulting", name: "Consulting" },
-    { id: "logistics", name: "Logistics" },
-    { id: "office_supplies", name: "Office Supplies" },
-    { id: "services", name: "Services" },
-    { id: "other", name: "Other" },
-  ];
-
   useEffect(() => {
     if (vendor) {
       setFormData({
@@ -68,10 +64,15 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         businessPhoneNumber: vendor.businessPhoneNumber,
         contactPhoneNumber: vendor.contactPhoneNumber,
         categories: vendor.categories || [],
-        supplierNumber: vendor.supplierNumber,
         contactPerson: vendor.contactPerson,
         position: vendor.position,
         tinNumber: vendor.tinNumber,
+        businessRegNumber: vendor.businessRegNumber, // Added
+        bankName: vendor.bankName, // Added
+        accountName: vendor.accountName, // Added
+        accountNumber: vendor.accountNumber, // Added
+        businessState: vendor.businessState, // Added
+        operatingLGA: vendor.operatingLGA, // Added
       });
       setSelectedCategories(vendor.categories || []);
     }
@@ -126,182 +127,258 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Business Name *">
-          <Input
-            type="text"
-            id="businessName"
-            minLength={3}
-            required
-            value={formData.businessName}
-            onChange={(e) => handleFormChange("businessName", e.target.value)}
-            placeholder="Enter business name"
-          />
-        </FormRow>
+      <div className="space-y-6">
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Business Name *">
+            <Input
+              type="text"
+              id="businessName"
+              minLength={3}
+              required
+              value={formData.businessName}
+              onChange={(e) => handleFormChange("businessName", e.target.value)}
+              placeholder="Enter business name"
+            />
+          </FormRow>
 
-        <FormRow label="Business Type *">
-          <Select
-            clearable={true}
-            id="businessType"
-            customLabel="Select Business Type"
-            required
-            value={formData.businessType!}
-            onChange={(value) => handleFormChange("businessType", value)}
-            options={businessTypes}
-          />
-        </FormRow>
-      </Row>
+          <FormRow label="Business Type *">
+            <Select
+              clearable={true}
+              id="businessType"
+              customLabel="Select Business Type"
+              required
+              value={formData.businessType || ""}
+              onChange={(value) => handleFormChange("businessType", value)}
+              options={businessTypes}
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Categories">
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <label
-                  key={category.id}
-                  className="flex items-center space-x-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(category.id)}
-                    onChange={() => handleCategoryChange(category.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="text-sm text-gray-700">{category.name}</span>
-                </label>
-              ))}
+        <Row>
+          <FormRow label="Categories">
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <label
+                    key={category.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category.id)}
+                      onChange={() => handleCategoryChange(category.id)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {category.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {selectedCategories.length > 0 && (
+                <p className="text-xs text-gray-500">
+                  Selected:{" "}
+                  {selectedCategories
+                    .map(
+                      (catId) => categories.find((c) => c.id === catId)?.name
+                    )
+                    .join(", ")}
+                </p>
+              )}
             </div>
-            {selectedCategories.length > 0 && (
-              <p className="text-xs text-gray-500">
-                Selected:{" "}
-                {selectedCategories
-                  .map((catId) => categories.find((c) => c.id === catId)?.name)
-                  .join(", ")}
-              </p>
-            )}
-          </div>
-        </FormRow>
-      </Row>
+          </FormRow>
+        </Row>
 
-      <Row>
-        <FormRow label="Business Address *" type="wide">
-          <textarea
-            className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
-            maxLength={500}
-            placeholder="Enter full business address"
-            id="address"
-            value={formData.address}
-            onChange={(e) => handleFormChange("address", e.target.value)}
-            required
-          />
-        </FormRow>
-      </Row>
+        <Row>
+          <FormRow label="Business Address *" type="wide">
+            <textarea
+              className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
+              maxLength={500}
+              placeholder="Enter full business address"
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleFormChange("address", e.target.value)}
+              required
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Email Address *">
-          <Input
-            type="email"
-            id="email"
-            required
-            value={formData.email}
-            onChange={(e) => handleFormChange("email", e.target.value)}
-            placeholder="email@company.com"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Where Your Company does Business *">
+            <Select
+              clearable={true}
+              id="businessState"
+              customLabel="Select a State"
+              value={formData.businessState || ""}
+              onChange={(value) => handleFormChange("businessState", value)} // Direct value now
+              options={
+                businessState
+                  ? businessState.map((bank) => ({
+                      id: bank.name as string,
+                      name: `${bank.name}`,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              filterable={true}
+              required
+            />
+          </FormRow>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Business Phone *">
-          <Input
-            type="tel"
-            id="businessPhoneNumber"
-            required
-            value={formData.businessPhoneNumber}
-            onChange={(e) =>
-              handleFormChange("businessPhoneNumber", e.target.value)
-            }
-            placeholder="11-digit phone number"
-            pattern="[0-9]{11}"
-            maxLength={11}
-          />
-        </FormRow>
+          <FormRow label="Preffered LGA of Operation *">
+            <Input
+              type="text" // Use standard text type
+              id="operatingLGA"
+              required
+              value={formData.operatingLGA}
+              onChange={(e) => handleFormChange("operatingLGA", e.target.value)}
+              placeholder="Enter Local Government Area"
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="Supplier Number">
-          <Input
-            type="text"
-            id="supplierNumber"
-            value={formData.supplierNumber}
-            onChange={(e) => handleFormChange("supplierNumber", e.target.value)}
-            placeholder="Optional supplier number"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Email Address *">
+            <Input
+              type="email"
+              id="email"
+              required
+              value={formData.email}
+              onChange={(e) => handleFormChange("email", e.target.value)}
+              placeholder="email@company.com"
+            />
+          </FormRow>
+          <FormRow label="Business Registration Number *">
+            <Input
+              type="businessRegNumber"
+              id="businessRegNumber"
+              required
+              value={formData.businessRegNumber}
+              onChange={(e) =>
+                handleFormChange("businessRegNumber", e.target.value)
+              }
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact Person *">
-          <Input
-            type="text"
-            id="contactPerson"
-            required
-            value={formData.contactPerson}
-            onChange={(e) => handleFormChange("contactPerson", e.target.value)}
-            placeholder="Full name of contact person"
-          />
-        </FormRow>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Business Phone *">
+            <Input
+              type="tel"
+              id="businessPhoneNumber"
+              required
+              value={formData.businessPhoneNumber}
+              onChange={(e) =>
+                handleFormChange("businessPhoneNumber", e.target.value)
+              }
+              placeholder="11-digit phone number"
+              pattern="[0-9]{11}"
+              maxLength={11}
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="Position *">
-          <Input
-            type="text"
-            id="position"
-            required
-            value={formData.position}
-            onChange={(e) => handleFormChange("position", e.target.value)}
-            placeholder="Position in company"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact Person *">
+            <Input
+              type="text"
+              id="contactPerson"
+              required
+              value={formData.contactPerson}
+              onChange={(e) =>
+                handleFormChange("contactPerson", e.target.value)
+              }
+              placeholder="Full name of contact person"
+            />
+          </FormRow>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact Phone *">
-          <Input
-            type="tel"
-            id="contactPhoneNumber"
-            required
-            value={formData.contactPhoneNumber}
-            onChange={(e) =>
-              handleFormChange("contactPhoneNumber", e.target.value)
-            }
-            placeholder="11-digit phone number"
-            pattern="[0-9]{11}"
-            maxLength={11}
-          />
-        </FormRow>
+          <FormRow label="Position *">
+            <Input
+              type="text"
+              id="position"
+              required
+              value={formData.position}
+              onChange={(e) => handleFormChange("position", e.target.value)}
+              placeholder="Position in company"
+            />
+          </FormRow>
+        </Row>
 
-        <FormRow label="TIN Number *">
-          <Input
-            type="text"
-            id="tinNumber"
-            required
-            value={formData.tinNumber}
-            onChange={(e) => handleFormChange("tinNumber", e.target.value)}
-            placeholder="Tax Identification Number"
-          />
-        </FormRow>
-      </Row>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact Phone *">
+            <Input
+              type="tel"
+              id="contactPhoneNumber"
+              required
+              value={formData.contactPhoneNumber}
+              onChange={(e) =>
+                handleFormChange("contactPhoneNumber", e.target.value)
+              }
+              placeholder="11-digit phone number"
+              pattern="[0-9]{11}"
+              maxLength={11}
+            />
+          </FormRow>
 
-      <Row>
-        <FormRow label="Vendor Code">
-          <Input
-            type="text"
-            id="vendorCode"
-            value={vendor?.vendorCode}
-            readOnly
-            disabled
-            className="bg-gray-100"
-          />
-        </FormRow>
-      </Row>
+          <FormRow label="TIN Number *">
+            <Input
+              type="text"
+              id="tinNumber"
+              required
+              value={formData.tinNumber}
+              onChange={(e) => handleFormChange("tinNumber", e.target.value)}
+              placeholder="Tax Identification Number"
+            />
+          </FormRow>
+        </Row>
 
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Account Number*">
+            <Input
+              type="text"
+              id="accountNumber"
+              required
+              value={formData.accountNumber}
+              onChange={(e) =>
+                handleFormChange("accountNumber", e.target.value)
+              }
+              placeholder="11-digit account number"
+              maxLength={11}
+            />
+          </FormRow>
+          <FormRow label="Account Name*">
+            <Input
+              type="text"
+              id="accountName"
+              required
+              value={formData.accountName}
+              onChange={(e) => handleFormChange("accountName", e.target.value)}
+            />
+          </FormRow>
+        </Row>
+        <Row>
+          <FormRow label="Bank Name *">
+            <Select
+              clearable={true}
+              id="bankName"
+              customLabel="Select a Bank"
+              value={formData.bankName || ""}
+              onChange={(value) => handleFormChange("bankName", value)} // Direct value now
+              options={
+                bankNames
+                  ? bankNames.map((bank) => ({
+                      id: bank.name as string,
+                      name: `${bank.name}`,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              filterable={true}
+              required
+            />
+          </FormRow>
+        </Row>
+      </div>
       <FileUpload
         selectedFiles={selectedFiles}
         setSelectedFiles={setSelectedFiles}

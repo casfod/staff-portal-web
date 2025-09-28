@@ -28,7 +28,7 @@ const Vendor = () => {
     filename: `Vendor-${vendor?.vendorCode}`,
     multiPage: true,
     titleOptions: {
-      text: "Vendor",
+      text: "Vendor Registration Details",
     },
   });
   const handleDownloadPDF = () => {
