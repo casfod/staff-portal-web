@@ -118,8 +118,10 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         data: { ...formData, files: selectedFiles },
       },
       {
-        onSuccess: () => {
-          navigate("/procurement/vendor-management");
+        onSuccess: (data: any) => {
+          if (data.status === 200) {
+            navigate("/procurement/vendor-management");
+          }
         },
       }
     );
