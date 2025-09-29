@@ -243,7 +243,6 @@ const FormAddVendor: React.FC = () => {
             <Input
               type="text" // Use standard text type
               id="operatingLGA"
-              required
               value={formData.operatingLGA}
               onChange={(e) => handleFormChange("operatingLGA", e.target.value)}
               placeholder="Enter Local Government Area"
