@@ -495,8 +495,9 @@ const FormAddAdvanceRequest: React.FC = () => {
             required
             value={formData.accountNumber}
             onChange={(e) => handleFormChange("accountNumber", e.target.value)}
-            placeholder="11-digit account number"
-            maxLength={11}
+            placeholder="10-digit account number"
+            maxLength={10}
+            minLength={10}
           />
         </FormRow>
         <FormRow label="Account Name*">

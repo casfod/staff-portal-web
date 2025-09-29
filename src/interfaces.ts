@@ -623,7 +623,7 @@ export interface CreateVendorType {
   tinNumber: string;
   businessRegNumber: string;
   businessState: string;
-  operatingLGA: string;
+  operatingLGA?: string;
   accountNumber: string;
   accountName: string;
   bankName: string;

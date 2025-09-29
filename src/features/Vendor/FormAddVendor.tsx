@@ -239,7 +239,7 @@ const FormAddVendor: React.FC = () => {
             />
           </FormRow>
 
-          <FormRow label="Preffered LGA of Operation *">
+          <FormRow label="Preferred LGA of Operation *">
             <Input
               type="text" // Use standard text type
               id="operatingLGA"
@@ -356,8 +356,9 @@ const FormAddVendor: React.FC = () => {
               onChange={(e) =>
                 handleFormChange("accountNumber", e.target.value)
               }
-              placeholder="11-digit account number"
-              maxLength={11}
+              placeholder="10-digit account number"
+              maxLength={10}
+              minLength={10}
             />
           </FormRow>
           <FormRow label="Account Name*">
