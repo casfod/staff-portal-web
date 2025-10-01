@@ -49,6 +49,11 @@ import CreateVendor from "./features/Vendor/CreateVendor.tsx";
 import { AllVendors } from "./features/Vendor/AllVendors.tsx";
 import Vendor from "./features/Vendor/Vendor.tsx";
 import VendorManagement from "./pages/VendorManagement.tsx";
+import RFQManagement from "./pages/RFQManagement.tsx";
+import RFQ from "./features/rfq/RFQ.tsx";
+import CreateRFQ from "./features/rfq/CreateRFQ.tsx";
+import EditRFQ from "./features/rfq/EditRFQ.tsx";
+import { AllRFQs } from "./features/rfq/AllRFQs.tsx";
 
 const router = createBrowserRouter([
   {
@@ -419,12 +424,39 @@ const router = createBrowserRouter([
               },
             ],
           },
+
           {
             path: "rfq",
+            element: <AnimatedRoute key="rfq" element={<RFQManagement />} />,
+
+            children: [
+              { index: true, element: <Navigate to="rfqs" /> },
+
+              {
+                path: ":rfqId",
+                element: <RFQ />,
+              },
+              {
+                path: "rfqs",
+                element: <AllRFQs />,
+              },
+              {
+                path: "create-rfq",
+                element: <CreateRFQ />,
+              },
+              {
+                path: "edit-rfq/:rfqId",
+                element: <EditRFQ />,
+              },
+            ],
+          },
+          {
+            path: "goods-received",
+
             element: (
               <AnimatedRoute
                 key="rfq"
-                element={<div>RFQ Page - To be implemented</div>}
+                element={<div>Goods - To be implemented</div>}
               />
             ),
             children: [
@@ -462,29 +494,6 @@ const router = createBrowserRouter([
               {
                 path: "edit-purchase-order/:id",
                 element: <div>Edit purchase-order</div>,
-              },
-            ],
-          },
-          {
-            path: "goods-received",
-            element: (
-              <AnimatedRoute
-                key="goods-received"
-                element={<div>Goods Received Page - To be implemented</div>}
-              />
-            ),
-            children: [
-              {
-                path: "rfq/:id",
-                element: <div>View rfq</div>,
-              },
-              {
-                path: "rfq/create-rfq/:id",
-                element: <div>Create rfq</div>,
-              },
-              {
-                path: "rfq/edit-rfq/:id",
-                element: <div>Edit rfq</div>,
               },
             ],
           },

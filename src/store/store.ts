@@ -23,6 +23,7 @@ import genericQuerySliceReducer from "./genericQuerySlice";
 import navigationSliceReducer from "./navigationSlice";
 import expenseClaimReducer from "./expenseClaimSlice";
 import vendorReducer from "./vendorSlice";
+import rfqReducer from "./rfqSlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -37,6 +38,7 @@ const rootReducer = combineReducers({
   navigationSlice: navigationSliceReducer,
   expenseClaim: expenseClaimReducer,
   vendor: vendorReducer,
+  rfq: rfqReducer,
 });
 
 // Create persist config

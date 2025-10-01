@@ -649,3 +649,84 @@ export interface UpdateVendorType {
   bankName?: string;
   files?: File[];
 }
+
+///////////////////////
+//RFQ //
+///////////////////////
+// Add these to your existing interfaces.ts file
+
+export interface ItemGroupType {
+  description: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
+
+export interface RFQType {
+  id: string;
+  RFQTitle: string;
+  RFQCode: string;
+  itemGroups: ItemGroupType[];
+  copiedTo: string[] | VendorType[];
+  deliveryPeriod: string;
+  bidValidityPeriod: string;
+  guaranteePeriod: string;
+  pdfUrl?: string;
+  cloudinaryId?: string;
+  status: "draft" | "preview" | "sent" | "cancelled";
+  createdBy: UserType;
+  createdAt: string;
+  updatedAt: string;
+  files?: FileType[];
+}
+
+export interface CreateRFQType {
+  RFQTitle: string;
+  deliveryPeriod: string;
+  bidValidityPeriod: string;
+  guaranteePeriod: string;
+  itemGroups: ItemGroupType[];
+  copiedTo: string[];
+  files?: File[];
+}
+
+export interface UpdateRFQType {
+  RFQTitle?: string;
+  deliveryPeriod?: string;
+  bidValidityPeriod?: string;
+  guaranteePeriod?: string;
+  itemGroups?: ItemGroupType[];
+  copiedTo?: string[];
+  files?: File[];
+}
+
+export interface UseRFQ {
+  status: number;
+  message: string;
+  data: {
+    rfq: RFQType;
+  };
+}
+
+export interface UseRFQType {
+  status: number;
+  message: string;
+  data: {
+    rfqs: RFQType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UseRFQStatsType {
+  status: number;
+  message: string;
+  data: {
+    totalRFQs: number;
+    totalSentRFQs: number;
+    totalDraftRFQs: number;
+  };
+}

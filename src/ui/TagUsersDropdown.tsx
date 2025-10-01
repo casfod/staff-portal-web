@@ -8,7 +8,7 @@ import {
   CheckCheck,
   Circle,
 } from "lucide-react";
-import { UserType } from "../interfaces";
+import { UserType, VendorType } from "../interfaces";
 import { AnimatePresence, motion } from "framer-motion";
 import Button from "./Button";
 
@@ -17,7 +17,7 @@ interface GroupedUsers {
 }
 
 interface TagUsersDropdownProps {
-  users: UserType[];
+  users: UserType[] | VendorType[];
   isLoading: boolean;
   isError: boolean;
   onSelectUsers: (userIds: string[]) => Promise<void>;
@@ -50,7 +50,7 @@ const TagUsersDropdown = ({
     }, {});
   };
 
-  const groupedUsers = groupUsersByRole(users);
+  const groupedUsers = groupUsersByRole(users as UserType[]);
 
   // Get all possible roles (even if filtered out by search)
   const allRoles = Object.keys(groupedUsers);
