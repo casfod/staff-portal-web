@@ -6,6 +6,7 @@ import { UserType } from "../../interfaces";
 
 interface RFQPDFTemplateProps {
   pdfRef?: any;
+  isPreview?: boolean;
   rfqData: {
     RFQTitle: string;
     RFQCode: string;
@@ -25,7 +26,11 @@ interface RFQPDFTemplateProps {
   };
 }
 
-const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData, pdfRef }) => {
+const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
+  isPreview = true,
+  rfqData,
+  pdfRef,
+}) => {
   const grandTotal = rfqData.itemGroups.reduce(
     (sum, item) => sum + item.total,
     0
@@ -95,6 +100,94 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData, pdfRef }) => {
           fill up the table below. Please read the instruction carefully.
         </p>
       </div>
+
+      {/* Terms and Conditions */}
+      <div className="mb-6">
+        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
+          Terms and Conditions as per CASFOD's Policy
+        </h3>
+        <ul className="text-sm text-gray-700 space-y-2">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Payment terms: Payment will be made after delivery and acceptance
+              of goods
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              All responses to this RFQ will be treated as confidential.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              CASFOD reserves the right to accept or reject any quotations.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Bidders shall adhere to all the requirements of this RFQ
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              CASFOD enforces a withholding tax deduction on the total
+              contractual sum. CASFOD reserves the right to validate
+              documentation accuracy. Inquiries or clarifications on tax matters
+              should be communicated before the RFQ submission deadline.
+              Participation implies vendor agreement to the outlined withholding
+              tax and VAT exemption policies
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Language in which Quotation will be submitted must be in English.
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Evaluation Criteria */}
+      <div className="mb-6">
+        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
+          Evaluation Criteria
+        </h3>
+        <ul className="text-sm text-gray-700 space-y-2">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Bidder can legally operate in Nigeria as a business entity (attach
+              copies of proof of business registration CAC)
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Completely filled, signed and stamped Quotation page to page to be
+              submitted
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>Evidence of TIN Registration</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>Delivery Period</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>Best Price</span>
+          </li>
+        </ul>
+      </div>
+
+      {isPreview && <div>SPACE</div>}
 
       {/* Items Table */}
       <div className="mb-6">
@@ -208,92 +301,6 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData, pdfRef }) => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* Terms and Conditions */}
-      <div className="mb-6">
-        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
-          Terms and Conditions as per CASFOD's Policy
-        </h3>
-        <ul className="text-sm text-gray-700 space-y-2">
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Payment terms: Payment will be made after delivery and acceptance
-              of goods
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              All responses to this RFQ will be treated as confidential.
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              CASFOD reserves the right to accept or reject any quotations.
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Bidders shall adhere to all the requirements of this RFQ
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              CASFOD enforces a withholding tax deduction on the total
-              contractual sum. CASFOD reserves the right to validate
-              documentation accuracy. Inquiries or clarifications on tax matters
-              should be communicated before the RFQ submission deadline.
-              Participation implies vendor agreement to the outlined withholding
-              tax and VAT exemption policies
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Language in which Quotation will be submitted must be in English.
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      {/* Evaluation Criteria */}
-      <div className="mb-6">
-        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
-          Evaluation Criteria
-        </h3>
-        <ul className="text-sm text-gray-700 space-y-2">
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Bidder can legally operate in Nigeria as a business entity (attach
-              copies of proof of business registration CAC)
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Completely filled, signed and stamped Quotation page to page to be
-              submitted
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>Evidence of TIN Registration</span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>Delivery Period</span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>Best Price</span>
-          </li>
-        </ul>
       </div>
 
       {/* Attachments */}

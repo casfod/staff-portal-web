@@ -25,6 +25,7 @@ export type PdfOptions = {
     color?: string;
     marginBottom?: number;
   };
+  save?: boolean;
 };
 
 const defaultOptions: PdfOptions = {
@@ -50,6 +51,7 @@ const defaultOptions: PdfOptions = {
     color: "#000000",
     marginBottom: 5,
   },
+  save: true,
 };
 
 const getPdfDimensions = (format: string, orientation: string) => {
@@ -82,6 +84,7 @@ export const generatePdf = async (
     pagebreak = { mode: "css", avoid: [".pdf-avoid-break"] },
     multiPage = false,
     compression = "FAST",
+    save,
     titleOptions = {
       text: "",
       fontSize: 16,
@@ -259,7 +262,7 @@ export const generatePdf = async (
       );
     }
 
-    pdf.save(filename);
+    save === true && pdf.save(filename);
   } catch (error) {
     console.error("PDF generation failed:", error);
     throw error;

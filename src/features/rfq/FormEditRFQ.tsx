@@ -1,13 +1,18 @@
-// Add PDF preview functionality to FormEditRFQ.tsx
+// FormEditRFQ.tsx - Updated with useCreateAndSendRFQ hook
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
-import { UpdateRFQType, RFQType, ItemGroupType } from "../../interfaces";
+import {
+  UpdateRFQType,
+  RFQType,
+  ItemGroupType,
+  CreateRFQType,
+} from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useUpdateRFQ } from "./Hooks/useRFQ";
+import { useUpdateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2, Eye } from "lucide-react";
 import RFQPDFTemplate from "./RFQPDFTemplate";
@@ -21,6 +26,7 @@ interface FormEditRFQProps {
 const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
   const navigate = useNavigate();
   const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [isSendMode, setIsSendMode] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<UpdateRFQType>({
@@ -38,7 +44,10 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const { updateRFQ, isPending } = useUpdateRFQ();
+  const { updateRFQ, isPending: isUpdating } = useUpdateRFQ();
+  const { createAndSendRFQ, isPending: isSending } = useCreateAndSendRFQ();
+
+  const isPending = isUpdating || isSending;
 
   // Item Groups Management
   const [itemGroups, setItemGroups] = useState<ItemGroupType[]>(
@@ -155,22 +164,37 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
       files: selectedFiles,
     };
 
-    updateRFQ(
-      {
-        rfqId: rfq?.id!,
-        data: submitData,
-      },
-      {
+    if (isSendMode) {
+      // Use createAndSendRFQ hook for "Save & Prepare for Sending"
+      createAndSendRFQ(submitData as CreateRFQType, {
         onSuccess: (data: any) => {
-          if (data.status === 200) {
+          if (data.status === 200 || data.status === 201) {
             navigate("/procurement/rfq");
           }
         },
-      }
-    );
+      });
+    } else {
+      // Regular update for draft
+      updateRFQ(
+        {
+          rfqId: rfq?.id!,
+          data: submitData,
+        },
+        {
+          onSuccess: (data: any) => {
+            if (data.status === 200) {
+              navigate("/procurement/rfq");
+            }
+          },
+        }
+      );
+    }
   };
 
   const totalAmount = itemGroups.reduce((sum, item) => sum + item.total, 0);
+
+  // Check if RFQ is in draft status to show "Save & Prepare for Sending" button
+  const isDraftStatus = rfq?.status === "draft";
 
   return (
     <>
@@ -382,19 +406,55 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
 
         {/* Action Buttons */}
         <div className="flex justify-center w-full gap-4 pt-6">
-          <Button type="submit" size="medium" disabled={isPending}>
-            {isPending ? <SpinnerMini /> : "Update RFQ"}
-          </Button>
+          <div className="flex flex-col md:flex-row gap-4">
+            <Button
+              type="submit"
+              size="medium"
+              disabled={isPending}
+              onClick={() => setIsSendMode(false)}
+            >
+              {isPending && !isSendMode ? <SpinnerMini /> : "Update RFQ"}
+            </Button>
 
-          <Button
-            type="button"
-            size="medium"
-            variant="secondary"
-            onClick={() => navigate(-1)}
-          >
-            Cancel
-          </Button>
+            {/* Show "Save & Prepare for Sending" only for draft RFQs */}
+            {isDraftStatus && (
+              <Button
+                type="submit"
+                size="medium"
+                disabled={isPending}
+                onClick={() => setIsSendMode(true)}
+              >
+                {isPending && isSendMode ? (
+                  <SpinnerMini />
+                ) : (
+                  "Save & Prepare for Sending"
+                )}
+              </Button>
+            )}
+
+            <Button
+              type="button"
+              size="medium"
+              variant="secondary"
+              onClick={() => navigate(-1)}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
+
+        {/* Status Information */}
+        {rfq?.status && (
+          <div className="text-center text-sm text-gray-600">
+            Current Status:{" "}
+            <span className="font-semibold capitalize">{rfq.status}</span>
+            {!isDraftStatus && (
+              <p className="mt-1 text-xs">
+                "Save & Prepare for Sending" is only available for draft RFQs
+              </p>
+            )}
+          </div>
+        )}
       </form>
 
       {/* PDF Preview Modal */}

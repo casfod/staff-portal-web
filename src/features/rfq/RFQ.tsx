@@ -1,6 +1,6 @@
 // RFQ.tsx - Updated version
 import { List } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
@@ -15,6 +15,7 @@ import PDFPreviewModal from "../../ui/PDFPreviewModal";
 import RFQPDFTemplate from "./RFQPDFTemplate";
 import { localStorageUser } from "../../utils/localStorageUser";
 import toast from "react-hot-toast";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
 
 const RFQ = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const RFQ = () => {
   // Modular PDF system
   const {
     pdfRef,
-    isGenerating,
+    isGenerating: isGeneratingRFQPDF,
     showPreview,
     setShowPreview,
     generatePDF,
@@ -66,11 +67,20 @@ const RFQ = () => {
       });
 
       // Call the copyRFQToVendors mutation with FormData
-      await copyRFQToVendors({
-        rfqId: rfq.id,
-        vendorIds,
-        file: pdfFile, // Pass the generated PDF file
-      });
+      await copyRFQToVendors(
+        {
+          rfqId: rfq.id,
+          vendorIds,
+          file: pdfFile, // Pass the generated PDF file
+        },
+        {
+          onSuccess: (data: any) => {
+            if (data.status === 200 || data.status === 201) {
+              navigate("/procurement/rfq");
+            }
+          },
+        }
+      );
 
       // toast.success("RFQ sent to vendors successfully");
     } catch (error) {
@@ -79,19 +89,18 @@ const RFQ = () => {
     }
   };
 
-  const handleDownloadPDF = async () => {
-    const pdfFile = await generatePDF();
-    if (pdfFile) {
-      // Create download link
-      const url = URL.createObjectURL(pdfFile);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = pdfFile.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+
+  const { downloadPdf, isGenerating: isDownloadingPDF } = usePdfDownload({
+    filename: `PaymentRequest-${rfq?.id}`,
+    multiPage: true,
+    titleOptions: {
+      text: "Request For Quotation",
+    },
+  });
+
+  const handleDownloadPDF = () => {
+    downloadPdf(pdfContentRef);
   };
 
   // Permission checks
@@ -107,13 +116,7 @@ const RFQ = () => {
     return <div>No RFQ data available.</div>;
   }
 
-  const tableHeadData = [
-    "RFQ Title",
-    "RFQ Code",
-    "Status",
-    // "Delivery Period",
-    "Actions",
-  ];
+  const tableHeadData = ["RFQ Title", "RFQ Code", "Status", "Actions"];
 
   const tableRowData = [
     { id: "RFQTitle", content: truncateText(rfq.RFQTitle, 40) },
@@ -136,7 +139,6 @@ const RFQ = () => {
         </span>
       ),
     },
-    // { id: "deliveryPeriod", content: rfq.deliveryPeriod || "N/A" },
     {
       id: "action",
       content: (
@@ -144,7 +146,7 @@ const RFQ = () => {
           copyToVendors={handleCopyToVendors}
           isCopying={isCopying}
           canShareRequest={canShareRequest!}
-          isGeneratingPDF={isGenerating}
+          isGeneratingPDF={isDownloadingPDF}
           onDownloadPDF={handleDownloadPDF}
           onPreviewPDF={previewPDF}
           showTagDropdown={showTagDropdown}
@@ -172,49 +174,49 @@ const RFQ = () => {
         </div>
 
         {/* Main Table Section */}
-        <div>
-          <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {tableHeadData.map((title, index) => (
-                    <th
-                      key={index}
-                      className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
-                    >
-                      {title}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+        <div
+          ref={pdfContentRef}
+          className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll"
+        >
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {tableHeadData.map((title, index) => (
+                  <th
+                    key={index}
+                    className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  >
+                    {title}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr key={rfq.id}>
-                  {tableRowData.map((data) => (
-                    <td
-                      key={data.id}
-                      className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
-                    >
-                      {data.content}
-                    </td>
-                  ))}
-                </tr>
-
-                <tr>
-                  <td colSpan={5}>
-                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                      <RFQDetails rfq={rfq} />
-                    </div>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr key={rfq.id}>
+                {tableRowData.map((data) => (
+                  <td
+                    key={data.id}
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
+                  >
+                    {data.content}
                   </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                ))}
+              </tr>
+
+              <tr>
+                <td colSpan={5}>
+                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                    <RFQDetails rfq={rfq} />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Always render PDF template but hide it */}
-      {/* <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}> */}
       <div
         ref={pdfRef}
         style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
@@ -238,7 +240,7 @@ const RFQ = () => {
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
         onDownload={handleDownloadPDF}
-        isGenerating={isGenerating}
+        isGenerating={isGeneratingRFQPDF}
         title={`RFQ Preview - ${rfq.RFQCode}`}
       >
         <RFQPDFTemplate
