@@ -14,10 +14,11 @@ import {
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useUpdateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
-import { Plus, Trash2, Eye } from "lucide-react";
-import RFQPDFTemplate from "./RFQPDFTemplate";
-import PDFPreviewModal from "../../ui/PDFPreviewModal";
-import toast from "react-hot-toast";
+import { Plus, Trash2 } from "lucide-react";
+// import { Plus, Trash2, Eye } from "lucide-react";
+// import RFQPDFTemplate from "./RFQPDFTemplate";
+// import PDFPreviewModal from "../../ui/PDFPreviewModal";
+// import toast from "react-hot-toast";
 
 interface FormEditRFQProps {
   rfq: RFQType | null;
@@ -25,7 +26,7 @@ interface FormEditRFQProps {
 
 const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
   const navigate = useNavigate();
-  const [showPDFPreview, setShowPDFPreview] = useState(false);
+  // const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [isSendMode, setIsSendMode] = useState(false);
 
   // Form state
@@ -137,22 +138,22 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
     }
   };
 
-  const handlePreviewPDF = () => {
-    if (!formData.RFQTitle) {
-      toast.error("Please enter RFQ title first");
-      return;
-    }
+  // const handlePreviewPDF = () => {
+  //   if (!formData.RFQTitle) {
+  //     toast.error("Please enter RFQ title first");
+  //     return;
+  //   }
 
-    if (
-      itemGroups.length === 0 ||
-      itemGroups.some((item) => !item.description)
-    ) {
-      toast.error("Please add at least one item with description");
-      return;
-    }
+  //   if (
+  //     itemGroups.length === 0 ||
+  //     itemGroups.some((item) => !item.description)
+  //   ) {
+  //     toast.error("Please add at least one item with description");
+  //     return;
+  //   }
 
-    setShowPDFPreview(true);
-  };
+  //   // setShowPDFPreview(true);
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -391,7 +392,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
         />
 
         {/* PDF Preview Button */}
-        <div className="flex justify-end border-t pt-4">
+        {/* <div className="flex justify-end border-t pt-4">
           <Button
             type="button"
             variant="primary"
@@ -402,7 +403,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
             <Eye className="h-4 w-4" />
             Preview PDF
           </Button>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="flex justify-center w-full gap-4 pt-6">
@@ -458,7 +459,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
       </form>
 
       {/* PDF Preview Modal */}
-      <PDFPreviewModal
+      {/* <PDFPreviewModal
         isOpen={showPDFPreview}
         onClose={() => setShowPDFPreview(false)}
         onDownload={() => {
@@ -487,7 +488,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
             createdAt: rfq?.createdAt,
           }}
         />
-      </PDFPreviewModal>
+      </PDFPreviewModal> */}
     </>
   );
 };

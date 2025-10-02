@@ -9,10 +9,11 @@ import { CreateRFQType, ItemGroupType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useCreateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
-import { Plus, Trash2, Eye } from "lucide-react";
-import RFQPDFTemplate from "./RFQPDFTemplate";
-import toast from "react-hot-toast";
-import PDFPreviewModal from "../../ui/PDFPreviewModal";
+import { Plus, Trash2 } from "lucide-react";
+// import { Plus, Trash2, Eye } from "lucide-react";
+// import RFQPDFTemplate from "./RFQPDFTemplate";
+// import toast from "react-hot-toast";
+// import PDFPreviewModal from "../../ui/PDFPreviewModal";
 
 const FormAddRFQ: React.FC = () => {
   const navigate = useNavigate();
@@ -29,10 +30,10 @@ const FormAddRFQ: React.FC = () => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSendMode, setIsSendMode] = useState(false);
-  const [showPDFPreview, setShowPDFPreview] = useState(false);
+  // const [showPDFPreview, setShowPDFPreview] = useState(false);
 
   // const pdfRef = useRef<HTMLDivElement>(null);
-  const [previewRFQCode] = useState("RFQ-CASFOD-PREVIEW");
+  // const [previewRFQCode] = useState("RFQ-CASFOD-PREVIEW");
 
   const { createRFQ, isPending: isCreating } = useCreateRFQ();
   const { createAndSendRFQ, isPending: isSending } = useCreateAndSendRFQ();
@@ -117,22 +118,22 @@ const FormAddRFQ: React.FC = () => {
   };
 
   // Simple PDF preview handler
-  const handlePreviewPDF = () => {
-    if (!formData.RFQTitle) {
-      toast.error("Please enter RFQ title first");
-      return;
-    }
+  // const handlePreviewPDF = () => {
+  //   if (!formData.RFQTitle) {
+  //     toast.error("Please enter RFQ title first");
+  //     return;
+  //   }
 
-    if (
-      itemGroups.length === 0 ||
-      itemGroups.some((item) => !item.description)
-    ) {
-      toast.error("Please add at least one item with description");
-      return;
-    }
+  //   if (
+  //     itemGroups.length === 0 ||
+  //     itemGroups.some((item) => !item.description)
+  //   ) {
+  //     toast.error("Please add at least one item with description");
+  //     return;
+  //   }
 
-    setShowPDFPreview(true);
-  };
+  //   // setShowPDFPreview(true);
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,7 +363,7 @@ const FormAddRFQ: React.FC = () => {
         />
 
         {/* PDF Preview Button */}
-        <div className="flex justify-end border-t pt-4">
+        {/* <div className="flex justify-end border-t pt-4">
           <Button
             type="button"
             variant="primary"
@@ -373,7 +374,7 @@ const FormAddRFQ: React.FC = () => {
             <Eye className="h-4 w-4" />
             Preview PDF
           </Button>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="flex justify-center w-full gap-4 pt-6">
@@ -413,7 +414,7 @@ const FormAddRFQ: React.FC = () => {
       </form>
 
       {/* PDF Preview Modal */}
-      <PDFPreviewModal
+      {/* <PDFPreviewModal
         isOpen={showPDFPreview}
         onClose={() => setShowPDFPreview(false)}
         onDownload={() => {
@@ -440,7 +441,7 @@ const FormAddRFQ: React.FC = () => {
             guaranteePeriod: formData.guaranteePeriod || "",
           }}
         />
-      </PDFPreviewModal>
+      </PDFPreviewModal> */}
     </>
   );
 };
