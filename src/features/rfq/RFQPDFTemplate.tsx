@@ -239,10 +239,10 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
                   {item.unit || "-"}
                 </td>
                 <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.unitCost.toLocaleString()}
+                  {item.unitCost > 0 ? item.unitCost.toLocaleString() : ""}
                 </td>
                 <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.total.toLocaleString()}
+                  {item.total > 0 ? item.unitCost.toLocaleString() : ""}
                 </td>
               </tr>
             ))}
@@ -254,8 +254,8 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
               >
                 GRAND TOTAL:
               </td>
-              <td className="border border-gray-300 p-2 text-right text-sm">
-                ₦{grandTotal.toLocaleString()}
+              <td className="flex items-start border border-gray-300 p-2 text-right text-sm ">
+                ₦{grandTotal > 0 ? grandTotal.toLocaleString() : ""}
               </td>
             </tr>
           </tbody>
