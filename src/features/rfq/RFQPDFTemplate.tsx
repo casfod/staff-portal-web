@@ -6,7 +6,7 @@ import { UserType } from "../../interfaces";
 
 interface RFQPDFTemplateProps {
   pdfRef?: any;
-  isPreview?: boolean;
+  isGenerating?: boolean;
   rfqData: {
     RFQTitle: string;
     RFQCode: string;
@@ -27,7 +27,7 @@ interface RFQPDFTemplateProps {
 }
 
 const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
-  isPreview = true,
+  isGenerating = false,
   rfqData,
   pdfRef,
 }) => {
@@ -52,17 +52,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
         <div className="flex items-start">
           <div className="mr-4">
             <img src={logo} alt="logo" className="w-44 h-22" />
-            {/* Logo placeholder - you can replace with actual logo */}
-            {/* <div className="w-16 h-16 bg-blue-600 flex items-center justify-center text-white font-bold text-xs text-center">
-              CASFOD LOGO
-            </div> */}
           </div>
-          {/* <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">CASFOD</h1>
-            <p className="text-sm text-gray-600 font-medium">
-              UNIQUE CARE AND SUPPORT FOUNDATION
-            </p>
-          </div> */}
         </div>
         <div className="text-right">
           <h2 className="text-lg font-bold text-gray-700">
@@ -79,8 +69,10 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-blue-500">
-        <h3 className="font-bold mb-2 text-gray-700">Delivery address:</h3>
-        <p className="text-sm text-gray-600">
+        <h3 className="font-bold mb-2 text-lg text-gray-700">
+          Delivery address:
+        </h3>
+        <p className="text-md text-gray-600">
           Unique Care and Support Foundation
           <br />
           No B84 Mandau Street Bulunkutu
@@ -93,7 +85,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
       {/* Introduction */}
       <div className="mb-6">
-        <p className="text-sm leading-relaxed text-gray-700">
+        <p className="leading-relaxed text-md text-gray-700">
           The Unique Care and Support Foundation (CASFOD) invites your company
           to submit a price quotation for the following items in accordance with
           the requirements detailed below. You may use your company format, or
@@ -103,10 +95,10 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
       {/* Terms and Conditions */}
       <div className="mb-6">
-        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
+        <h3 className="font-bold mb-3 text-gray-800 border-b pb-1">
           Terms and Conditions as per CASFOD's Policy
         </h3>
-        <ul className="text-sm text-gray-700 space-y-2">
+        <ul className="text-md text-gray-700 space-y-2">
           <li className="flex items-start">
             <span className="mr-2">•</span>
             <span>
@@ -154,10 +146,10 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
       {/* Evaluation Criteria */}
       <div className="mb-6">
-        <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
+        <h3 className="font-bold mb-3 text-gray-800 border-b pb-1">
           Evaluation Criteria
         </h3>
-        <ul className="text-sm text-gray-700 space-y-2">
+        <ul className=" text-gray-700 space-y-2">
           <li className="flex items-start">
             <span className="mr-2">•</span>
             <span>
@@ -187,7 +179,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
         </ul>
       </div>
 
-      {isPreview && <div>SPACE</div>}
+      {isGenerating && <div className="h-40"></div>}
 
       {/* Items Table */}
       <div className="mb-6">
@@ -208,7 +200,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
                 QUANTITY
               </th>
               <th className="border border-gray-300 p-2 text-left font-bold">
-                FREQUECY
+                FREQUENCY
               </th>
               <th className="border border-gray-300 p-2 text-left font-bold">
                 UNIT

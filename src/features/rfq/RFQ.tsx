@@ -222,6 +222,7 @@ const RFQ = () => {
         style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
       >
         <RFQPDFTemplate
+          isGenerating={isGeneratingRFQPDF}
           rfqData={{
             RFQTitle: rfq.RFQTitle,
             RFQCode: rfq.RFQCode,

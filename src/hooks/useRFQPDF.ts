@@ -89,19 +89,19 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
     const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
     // Add title to first page
-    const titleHeight = rfqData.RFQCode ? 15 : 0;
+    const titleHeight = 0;
     if (rfqData.RFQCode) {
       pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
       pdf.setTextColor("#000000");
 
       // const titleText = `Request for Quotation - ${rfqData.RFQCode}`;
-      const titleText = ``;
-      const titleWidth = pdf.getTextWidth(titleText);
-      const titleX = margin + (contentWidth - titleWidth) / 2;
-      const titleY = margin + 8;
+      // const titleText = ``;
+      // const titleWidth = pdf.getTextWidth(titleText);
+      // const titleX = margin + (contentWidth - titleWidth) / 2;
+      // const titleY = margin + 8;
 
-      pdf.text(titleText, titleX, titleY);
+      // pdf.text(titleText, titleX, titleY);
     }
 
     // Process each page
@@ -115,13 +115,13 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor("#000000");
 
-          const titleText = ``;
+          // const titleText = ``;
           // const titleText = `Request for Quotation - ${rfqData.RFQCode}`;
-          const titleWidth = pdf.getTextWidth(titleText);
-          const titleX = margin + (contentWidth - titleWidth) / 2;
-          const titleY = margin + 8;
+          // const titleWidth = pdf.getTextWidth(titleText);
+          // const titleX = margin + (contentWidth - titleWidth) / 2;
+          // const titleY = margin + 8;
 
-          pdf.text(titleText, titleX, titleY);
+          // pdf.text(titleText, titleX, titleY);
         }
       }
 
