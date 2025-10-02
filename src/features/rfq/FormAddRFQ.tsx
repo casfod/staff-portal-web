@@ -1,5 +1,5 @@
-// FormAddRFQ.tsx - Updated version
-import React, { useRef, useState } from "react";
+// FormAddRFQ.tsx - Cleaned up version
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
@@ -9,12 +9,10 @@ import { CreateRFQType, ItemGroupType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useCreateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
-import { Plus, Trash2, Eye, Download, X } from "lucide-react";
-import { useVendors } from "../Vendor/Hooks/useVendor";
-import { useRFQPDFDownload } from "../../hooks/useRFQPDFDownload";
+import { Plus, Trash2, Eye } from "lucide-react";
 import RFQPDFTemplate from "./RFQPDFTemplate";
 import toast from "react-hot-toast";
-import html2canvas from "html2canvas";
+import PDFPreviewModal from "../../ui/PDFPreviewModal";
 
 const FormAddRFQ: React.FC = () => {
   const navigate = useNavigate();
@@ -30,23 +28,11 @@ const FormAddRFQ: React.FC = () => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [isSendMode, setIsSendMode] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
-  const [generatedPDFFile, setGeneratedPDFFile] = useState<File | null>(null);
 
-  const pdfRef = useRef<HTMLDivElement>(null);
-  const {
-    downloadRFQPDF,
-    isGenerating: isGeneratingPDF,
-    error: pdfError,
-  } = useRFQPDFDownload();
-
+  // const pdfRef = useRef<HTMLDivElement>(null);
   const [previewRFQCode] = useState("RFQ-CASFOD-PREVIEW");
-
-  // Get vendors for selection
-  const { data: vendorsData } = useVendors({ page: 1, limit: 1000 });
-  const vendors = vendorsData?.data?.vendors || [];
 
   const { createRFQ, isPending: isCreating } = useCreateRFQ();
   const { createAndSendRFQ, isPending: isSending } = useCreateAndSendRFQ();
@@ -73,21 +59,6 @@ const FormAddRFQ: React.FC = () => {
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handleVendorChange = (vendorId: string) => {
-    setSelectedVendors((prev) => {
-      const newVendorIds = prev.includes(vendorId)
-        ? prev.filter((id) => id !== vendorId)
-        : [...prev, vendorId];
-
-      setFormData((prev) => ({
-        ...prev,
-        copiedTo: newVendorIds,
-      }));
-
-      return newVendorIds;
-    });
   };
 
   // Item Group Handlers
@@ -145,11 +116,11 @@ const FormAddRFQ: React.FC = () => {
     }
   };
 
-  // Generate PDF and add to selected files
-  const generateAndAddPDF = async (): Promise<File | null> => {
+  // Simple PDF preview handler
+  const handlePreviewPDF = () => {
     if (!formData.RFQTitle) {
       toast.error("Please enter RFQ title first");
-      return null;
+      return;
     }
 
     if (
@@ -157,70 +128,12 @@ const FormAddRFQ: React.FC = () => {
       itemGroups.some((item) => !item.description)
     ) {
       toast.error("Please add at least one item with description");
-      return null;
+      return;
     }
 
-    try {
-      // Generate PDF blob
-      const element = pdfRef.current;
-      if (!element) {
-        toast.error("PDF template not found");
-        return null;
-      }
-
-      // Create a temporary canvas to generate PDF blob
-      const canvas = await html2canvas(element);
-      const pdfBlob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-        }, "application/pdf");
-      });
-
-      // Create File object from blob
-      const pdfFile = new File([pdfBlob], `${previewRFQCode}.pdf`, {
-        type: "application/pdf",
-      });
-
-      return pdfFile;
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF");
-      return null;
-    }
+    setShowPDFPreview(true);
   };
 
-  // Updated preview handler that adds PDF to selected files
-  // const handlePreviewPDF = async () => {
-  //   const pdfFile = await generateAndAddPDF();
-  //   if (pdfFile) {
-  //     // Add generated PDF to selected files
-  //     setSelectedFiles((prev) => {
-  //       // Remove any previously generated PDF
-  //       const filteredFiles = prev.filter(
-  //         (file) =>
-  //           !file.name.startsWith("RFQ-CASFOD-PREVIEW") &&
-  //           !file.name.startsWith("RFQ-CASFOD")
-  //       );
-  //       return [...filteredFiles, pdfFile];
-  //     });
-  //     setGeneratedPDFFile(pdfFile);
-  //     setShowPDFPreview(true);
-  //     toast.success("PDF generated and added to attachments");
-  //   }
-  // };
-
-  // Remove generated PDF from selected files
-  const removeGeneratedPDF = () => {
-    if (generatedPDFFile) {
-      setSelectedFiles((prev) =>
-        prev.filter((file) => file !== generatedPDFFile)
-      );
-      setGeneratedPDFFile(null);
-      toast.success("Generated PDF removed from attachments");
-    }
-  };
-
-  // Remove the complex PDF generation from form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
@@ -232,19 +145,16 @@ const FormAddRFQ: React.FC = () => {
     };
 
     if (isSendMode) {
-      // This now just creates a preview RFQ
+      // This creates a preview RFQ (status: "preview")
       createAndSendRFQ(submitData, {
         onSuccess: (data: any) => {
           if (data.status === 200 || data.status === 201) {
-            toast.success(
-              "RFQ prepared successfully. You can now send it to vendors."
-            );
             navigate("/procurement/rfq");
           }
         },
       });
     } else {
-      // Save as draft
+      // Save as draft (status: "draft")
       createRFQ(submitData, {
         onSuccess: (data: any) => {
           if (data.status === 200 || data.status === 201) {
@@ -254,50 +164,6 @@ const FormAddRFQ: React.FC = () => {
       });
     }
   };
-
-  // Keep PDF preview for user review, but don't attach it
-  const handlePreviewPDF = async () => {
-    // Just show preview, don't add to files
-    setShowPDFPreview(true);
-  };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const isFormValid = (e.target as HTMLFormElement).reportValidity();
-  //   if (!isFormValid) return;
-
-  //   // Auto-generate PDF if in send mode and no PDF exists
-  //   if (isSendMode && !generatedPDFFile) {
-  //     const pdfFile = await generateAndAddPDF();
-  //     if (pdfFile) {
-  //       setSelectedFiles((prev) => [...prev, pdfFile]);
-  //       setGeneratedPDFFile(pdfFile);
-  //     }
-  //   }
-
-  //   const submitData = {
-  //     ...formData,
-  //     files: selectedFiles,
-  //   };
-
-  //   if (isSendMode) {
-  //     createAndSendRFQ(submitData, {
-  //       onSuccess: (data: any) => {
-  //         if (data.status === 200 || data.status === 201) {
-  //           navigate("/procurement/rfq");
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     createRFQ(submitData, {
-  //       onSuccess: (data: any) => {
-  //         if (data.status === 200 || data.status === 201) {
-  //           navigate("/procurement/rfq");
-  //         }
-  //       },
-  //     });
-  //   }
-  // };
 
   const totalAmount = itemGroups.reduce((sum, item) => sum + item.total, 0);
 
@@ -323,7 +189,6 @@ const FormAddRFQ: React.FC = () => {
               <Input
                 type="text"
                 id="deliveryPeriod"
-                required
                 value={formData.deliveryPeriod}
                 onChange={(e) =>
                   handleFormChange("deliveryPeriod", e.target.value)
@@ -336,7 +201,6 @@ const FormAddRFQ: React.FC = () => {
               <Input
                 type="text"
                 id="bidValidityPeriod"
-                required
                 value={formData.bidValidityPeriod}
                 onChange={(e) =>
                   handleFormChange("bidValidityPeriod", e.target.value)
@@ -453,7 +317,6 @@ const FormAddRFQ: React.FC = () => {
                               parseFloat(e.target.value)
                             )
                           }
-                          required
                         />
                       </FormRow>
 
@@ -488,47 +351,6 @@ const FormAddRFQ: React.FC = () => {
               </div>
             </FormRow>
           </Row>
-
-          {/* Vendor Selection */}
-          <Row>
-            <FormRow label="Select Vendors">
-              <div className="space-y-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 border rounded">
-                  {vendors.map((vendor) => (
-                    <label
-                      key={vendor.id}
-                      className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedVendors.includes(vendor.id)}
-                        onChange={() => handleVendorChange(vendor.id)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div>
-                        <span className="text-sm font-medium text-gray-700">
-                          {vendor.businessName}
-                        </span>
-                        <span className="text-xs text-gray-500 block">
-                          {vendor.vendorCode}
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                {selectedVendors.length > 0 && (
-                  <p className="text-xs text-gray-500">
-                    Selected: {selectedVendors.length} vendor(s)
-                  </p>
-                )}
-                {vendors.length === 0 && (
-                  <p className="text-sm text-gray-500">
-                    No vendors available. Please create vendors first.
-                  </p>
-                )}
-              </div>
-            </FormRow>
-          </Row>
         </div>
 
         {/* File Upload */}
@@ -539,90 +361,19 @@ const FormAddRFQ: React.FC = () => {
           multiple={true}
         />
 
-        {/* Generated PDF Preview Section */}
-        {generatedPDFFile && (
-          <div className="border rounded-lg p-4 bg-blue-50">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-blue-800">Generated RFQ PDF</h3>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="small"
-                  onClick={() => setShowPDFPreview(!showPDFPreview)}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  {showPDFPreview ? "Hide Preview" : "Show Preview"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="small"
-                  onClick={removeGeneratedPDF}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Remove
-                </Button>
-              </div>
-            </div>
-            <p className="text-sm text-blue-600">
-              {generatedPDFFile.name} -{" "}
-              {(generatedPDFFile.size / 1024).toFixed(2)} KB
-            </p>
-          </div>
-        )}
-
-        {/* PDF Preview Section */}
-        {showPDFPreview && (
-          <div className="border rounded-lg p-4 bg-white shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-gray-700">PDF Preview</h3>
-              <Button
-                type="button"
-                variant="secondary"
-                size="small"
-                onClick={() => setShowPDFPreview(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="border rounded overflow-auto max-h-96">
-              <RFQPDFTemplate
-                rfqData={{
-                  RFQTitle: formData.RFQTitle || "Preview RFQ",
-                  RFQCode: previewRFQCode,
-                  itemGroups: itemGroups,
-                  deliveryPeriod: formData.deliveryPeriod || "",
-                  bidValidityPeriod: formData.bidValidityPeriod || "",
-                  guaranteePeriod: formData.guaranteePeriod || "",
-                }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* PDF Preview Button */}
         <div className="flex justify-end border-t pt-4">
           <Button
             type="button"
             variant="primary"
             onClick={handlePreviewPDF}
-            disabled={
-              isGeneratingPDF || !formData.RFQTitle || itemGroups.length === 0
-            }
+            disabled={!formData.RFQTitle || itemGroups.length === 0}
             className="flex items-center gap-2"
           >
-            <Download className="h-4 w-4" />
-            {isGeneratingPDF ? "Generating PDF..." : "Generate & Add PDF"}
+            <Eye className="h-4 w-4" />
+            Preview PDF
           </Button>
         </div>
-
-        {/* PDF Error Display */}
-        {pdfError && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-red-700 text-sm">PDF Error: {pdfError}</p>
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div className="flex justify-center w-full gap-4 pt-6">
@@ -639,13 +390,13 @@ const FormAddRFQ: React.FC = () => {
             <Button
               type="submit"
               size="medium"
-              disabled={isPending || selectedVendors.length === 0}
+              disabled={isPending}
               onClick={() => setIsSendMode(true)}
             >
               {isPending && isSendMode ? (
                 <SpinnerMini />
               ) : (
-                "Save & Send to Vendors"
+                "Save & Prepare for Sending"
               )}
             </Button>
 
@@ -661,21 +412,35 @@ const FormAddRFQ: React.FC = () => {
         </div>
       </form>
 
-      {/* Hidden PDF Template for generation */}
-      <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-        <div ref={pdfRef}>
-          <RFQPDFTemplate
-            rfqData={{
-              RFQTitle: formData.RFQTitle || "Preview RFQ",
-              RFQCode: previewRFQCode,
-              itemGroups: itemGroups,
-              deliveryPeriod: formData.deliveryPeriod || "",
-              bidValidityPeriod: formData.bidValidityPeriod || "",
-              guaranteePeriod: formData.guaranteePeriod || "",
-            }}
-          />
-        </div>
-      </div>
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPDFPreview}
+        onClose={() => setShowPDFPreview(false)}
+        onDownload={() => {
+          // Simple download handler for form preview
+          const element = document.createElement("a");
+          const text = "PDF download would be available after saving the RFQ";
+          const blob = new Blob([text], { type: "text/plain" });
+          element.href = URL.createObjectURL(blob);
+          element.download = "readme.txt";
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+        }}
+        isGenerating={false}
+        title={`RFQ Preview - ${previewRFQCode}`}
+      >
+        <RFQPDFTemplate
+          rfqData={{
+            RFQTitle: formData.RFQTitle || "Preview RFQ",
+            RFQCode: previewRFQCode,
+            itemGroups: itemGroups,
+            deliveryPeriod: formData.deliveryPeriod || "",
+            bidValidityPeriod: formData.bidValidityPeriod || "",
+            guaranteePeriod: formData.guaranteePeriod || "",
+          }}
+        />
+      </PDFPreviewModal>
     </>
   );
 };

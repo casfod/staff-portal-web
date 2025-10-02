@@ -85,7 +85,7 @@ export function AllRFQs() {
     "RFQ Title",
     "RFQ Code",
     "Status",
-    "Delivery Period",
+    // "Delivery Period",
     "Actions",
   ];
 

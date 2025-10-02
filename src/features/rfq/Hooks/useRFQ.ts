@@ -244,10 +244,12 @@ export const useCopyRFQToVendors = () => {
     mutationFn: ({
       rfqId,
       vendorIds,
+      file,
     }: {
       rfqId: string;
       vendorIds: string[];
-    }) => copyRFQToVendors(rfqId, vendorIds),
+      file: File;
+    }) => copyRFQToVendors(rfqId, vendorIds, file),
 
     onSuccess: (data, variables) => {
       if (data.status === 200) {

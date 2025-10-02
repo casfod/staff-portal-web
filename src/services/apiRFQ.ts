@@ -201,7 +201,7 @@ export const createAndSendRFQ = async function (
     });
 
     const response = await axiosInstance.post<UseRFQ>(
-      `/rfqs/save-and-send`,
+      `/rfqs/save-to-send`,
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
@@ -280,16 +280,57 @@ export const updateRFQStatus = async function (
   }
 };
 
+// Update copyRFQToVendors function in apiRFQ.ts
 export const copyRFQToVendors = async function (
   rfqId: string,
-  vendorIds: string[]
+  vendorIds: string[],
+  file?: File
 ): Promise<UseRFQ> {
   try {
-    const response = await axiosInstance.patch<UseRFQ>(`/rfqs/copy/${rfqId}`, {
+    console.log("RFQ Data:", {
+      rfqId,
       vendorIds,
+      vendorIdsType: typeof vendorIds,
+      vendorIdsLength: vendorIds?.length,
+      file,
     });
+
+    const formData = new FormData();
+
+    // Append vendor IDs - try different formats to see what works
+    if (vendorIds && Array.isArray(vendorIds)) {
+      vendorIds.forEach((vendorId, index) => {
+        console.log(`Appending vendorId[${index}]:`, vendorId);
+        // Try both formats
+        formData.append("vendorIds", vendorId); // Standard format
+        formData.append("vendorIds[]", vendorId); // Array format
+      });
+    } else {
+      throw new Error("vendorIds must be an array");
+    }
+
+    // Append PDF file if provided
+    if (file) {
+      console.log("Appending file:", file.name, file.type);
+      formData.append("files", file);
+    }
+
+    // Log FormData contents for debugging
+    console.log("FormData entries:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    const response = await axiosInstance.patch<UseRFQ>(
+      `/rfqs/copy/${rfqId}`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
     return response.data;
   } catch (err) {
+    console.error("Error in copyRFQToVendors:", err);
     return handleError(err);
   }
 };

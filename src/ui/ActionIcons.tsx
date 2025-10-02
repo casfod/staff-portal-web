@@ -1,4 +1,4 @@
-// Update the existing ActionIcons component to support vendors
+// ActionIcons.tsx - Updated with explicit RFQ status handling
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Download, Edit, Trash2, Users } from "lucide-react";
 import LoadingDots from "./LoadingDots";
@@ -8,6 +8,9 @@ import { useUsers } from "../features/user/Hooks/useUsers";
 import { useVendors } from "../features/Vendor/Hooks/useVendor";
 import TagVendorsDropdown from "./TagVendorsDropdown";
 import TagUsersDropdown from "./TagUsersDropdown";
+
+// RFQ-specific status type
+type RFQStatus = "draft" | "preview" | "sent" | "cancelled";
 
 interface ActionIconsProps {
   copyTo?: ({ userIds }: { userIds: string[] }) => void;
@@ -35,7 +38,8 @@ interface ActionIconsProps {
   downloadIcon?: React.ReactNode;
   previewIcon?: React.ReactNode;
   TagIcon?: React.ReactNode;
-  mode?: "users" | "vendors"; // New prop to specify dropdown mode
+  rfqStatus?: RFQStatus; // More specific type for RFQ status
+  mode?: "users" | "vendors";
 }
 
 const ActionIcons = ({
@@ -61,14 +65,15 @@ const ActionIcons = ({
   deleteIcon = <Trash2 className={`h-${iconSize} w-${iconSize}`} />,
   viewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   hideIcon = <HiMiniEyeSlash className={`h-${iconSize} w-${iconSize}`} />,
-  TagIcon = <Users className={`h-${iconSize} w-${iconSize}`} />, // Changed to Users icon for vendors
+  TagIcon = <Users className={`h-${iconSize} w-${iconSize}`} />,
   downloadIcon = isGeneratingPDF ? (
     <LoadingDots />
   ) : (
     <Download className={`h-${iconSize} w-${iconSize}`} />
   ),
   previewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
-  mode = "users", // Default to vendors for RFQ
+  rfqStatus,
+  mode = "users",
 }: ActionIconsProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
@@ -107,6 +112,52 @@ const ActionIcons = ({
   const isError = mode === "vendors" ? vendorsError : usersError;
   const data =
     mode === "vendors" ? vendorsData?.data?.vendors : usersData?.data?.users;
+
+  // RFQ-specific shareability logic
+  const isRFQShareable =
+    mode === "vendors" &&
+    canShareRequest &&
+    rfqStatus &&
+    rfqStatus !== "sent" &&
+    rfqStatus !== "cancelled";
+
+  // General share button visibility logic
+  const shouldShowShareButton =
+    setShowTagDropdown && (mode === "users" ? canShareRequest : isRFQShareable);
+
+  // Get appropriate tooltip based on mode and status
+  const getShareButtonTooltip = () => {
+    if (mode === "users") {
+      return "Share with users";
+    }
+
+    // RFQ-specific tooltips
+    if (!canShareRequest) {
+      return "You don't have permission to share this RFQ";
+    }
+
+    switch (rfqStatus) {
+      case "sent":
+        return "RFQ already sent to vendors";
+      case "cancelled":
+        return "Cancelled RFQ cannot be shared";
+      case "draft":
+      case "preview":
+        return "Share with vendors";
+      default:
+        return "Share with vendors";
+    }
+  };
+
+  // Get appropriate disabled state for RFQs
+  const getRFQDisabledState = () => {
+    if (mode !== "vendors") return false;
+
+    return !isRFQShareable && canShareRequest;
+  };
+
+  const isRFQDisabled = getRFQDisabledState();
+  const shareButtonTooltip = getShareButtonTooltip();
 
   return (
     <div className="flex space-x-4">
@@ -176,26 +227,24 @@ const ActionIcons = ({
           </button>
         )}
 
-        {/* Share with Vendors Button */}
-        {setShowTagDropdown && (
+        {/* Share Button - Conditionally Rendered with RFQ-specific logic */}
+        {shouldShowShareButton && (
           <div className="relative">
-            {canShareRequest ? (
-              <button
-                className="hover:cursor-pointer text-purple-600"
-                onClick={handleTagClick}
-                title={`Share with ${mode}`}
-              >
-                {isCopying ? <LoadingDots /> : TagIcon}
-              </button>
-            ) : (
-              <span
-                className={`text-xl font-extrabold h-${iconSize} w-${iconSize} text-gray-400`}
-              >
-                --
-              </span>
-            )}
+            <button
+              className={`hover:cursor-pointer ${
+                mode === "vendors" && isRFQDisabled
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              }`}
+              onClick={isRFQDisabled ? undefined : handleTagClick}
+              title={shareButtonTooltip}
+              disabled={isRFQDisabled}
+            >
+              {isCopying ? <LoadingDots /> : TagIcon}
+            </button>
 
             {showTagDropdown &&
+              !isRFQDisabled &&
               (mode === "vendors" ? (
                 <TagVendorsDropdown
                   vendors={data || []}
@@ -214,6 +263,26 @@ const ActionIcons = ({
                 />
               ))}
           </div>
+        )}
+
+        {/* Show disabled state specifically for RFQs when they can't be shared */}
+        {mode === "vendors" && isRFQDisabled && (
+          <span
+            className={`text-xl font-extrabold h-${iconSize} w-${iconSize} text-gray-400 cursor-not-allowed`}
+            title={shareButtonTooltip}
+          >
+            <Users className={`h-${iconSize} w-${iconSize} text-gray-400`} />
+          </span>
+        )}
+
+        {/* Show permission denied state */}
+        {mode === "vendors" && !canShareRequest && (
+          <span
+            className={`text-xl font-extrabold h-${iconSize} w-${iconSize} text-gray-400 cursor-not-allowed`}
+            title={shareButtonTooltip}
+          >
+            --
+          </span>
         )}
       </div>
     </div>

@@ -19,7 +19,7 @@ export type PdfOptions = {
   };
   multiPage?: boolean;
   titleOptions?: {
-    text: string;
+    text?: string;
     fontSize?: number;
     fontStyle?: "normal" | "bold" | "italic" | "bolditalic";
     color?: string;

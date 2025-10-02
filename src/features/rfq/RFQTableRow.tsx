@@ -1,6 +1,6 @@
 import { RFQType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
-import { dateformat } from "../../utils/dateFormat";
+// import { dateformat } from "../../utils/dateFormat";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import TableRowMain from "../../ui/TableRowMain";
 import ActionIcons from "../../ui/ActionIcons";
@@ -25,18 +25,31 @@ const RFQTableRow = ({
 }) => {
   const currentUser = localStorageUser();
 
+  // const isEditable =
+  //   currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canUpdate;
+  // const isDeletable =
+  //   currentUser.role === "SUPER-ADMIN" ||
+  //   (currentUser.procurementRole.canDelete && rfq.status !== "sent");
+
   const isEditable =
-    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canUpdate;
+    (currentUser.role === "SUPER-ADMIN" ||
+      currentUser.procurementRole.canUpdate) &&
+    rfq.status !== "sent" &&
+    rfq.status !== "cancelled";
+
   const isDeletable =
-    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canDelete;
+    (currentUser.role === "SUPER-ADMIN" ||
+      currentUser.procurementRole.canDelete) &&
+    rfq.status !== "sent" &&
+    rfq.status !== "cancelled";
 
   const rfqId = rfq.id ?? "";
-  const rfqCreatedAt = rfq.createdAt ?? "";
+  // const rfqCreatedAt = rfq.createdAt ?? "";
 
   const isVisible = !!visibleItems[rfqId];
 
   // Calculate total amount
-  const totalAmount = rfq.itemGroups.reduce((sum, item) => sum + item.total, 0);
+  // const totalAmount = rfq.itemGroups.reduce((sum, item) => sum + item.total, 0);
 
   const rowData = [
     {
@@ -56,6 +69,8 @@ const RFQTableRow = ({
               ? "bg-green-100 text-green-800"
               : rfq.status === "draft"
               ? "bg-yellow-100 text-yellow-800"
+              : rfq.status === "preview"
+              ? "bg-blue-100 text-blue-800"
               : "bg-red-100 text-red-800"
           }`}
         >
@@ -63,10 +78,10 @@ const RFQTableRow = ({
         </span>
       ),
     },
-    {
-      id: "deliveryPeriod",
-      content: rfq.deliveryPeriod || "N/A",
-    },
+    // {
+    //   id: "deliveryPeriod",
+    //   content: rfq.deliveryPeriod || "N/A",
+    // },
     {
       id: "actions",
       content: (

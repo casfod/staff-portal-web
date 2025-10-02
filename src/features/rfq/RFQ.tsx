@@ -1,6 +1,6 @@
 // RFQ.tsx - Updated version
 import { List } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
@@ -49,16 +49,33 @@ const RFQ = () => {
     vendorIds: string[];
   }) => {
     if (!rfq?.id) return;
-
+    // setShowPreview(true);
     try {
+      // Generate PDF first
+      const pdfFile = await generatePDF();
+      if (!pdfFile) {
+        toast.error("Failed to generate PDF for RFQ");
+        return;
+      }
+
+      // Create FormData to include the PDF file
+      const formData = new FormData();
+      formData.append("file", pdfFile);
+      vendorIds.forEach((vendorId) => {
+        formData.append("vendorIds", vendorId);
+      });
+
+      // Call the copyRFQToVendors mutation with FormData
       await copyRFQToVendors({
         rfqId: rfq.id,
         vendorIds,
+        file: pdfFile, // Pass the generated PDF file
       });
 
-      toast.success("RFQ sent to vendors successfully");
+      // toast.success("RFQ sent to vendors successfully");
     } catch (error) {
       console.error("Failed to send RFQ to vendors:", error);
+      toast.error("Failed to send RFQ to vendors");
     }
   };
 
@@ -94,7 +111,7 @@ const RFQ = () => {
     "RFQ Title",
     "RFQ Code",
     "Status",
-    "Delivery Period",
+    // "Delivery Period",
     "Actions",
   ];
 
@@ -119,7 +136,7 @@ const RFQ = () => {
         </span>
       ),
     },
-    { id: "deliveryPeriod", content: rfq.deliveryPeriod || "N/A" },
+    // { id: "deliveryPeriod", content: rfq.deliveryPeriod || "N/A" },
     {
       id: "action",
       content: (
@@ -133,6 +150,7 @@ const RFQ = () => {
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
           requestId={rfq.id}
+          rfqStatus={rfq.status}
           mode="vendors"
         />
       ),
@@ -154,7 +172,7 @@ const RFQ = () => {
         </div>
 
         {/* Main Table Section */}
-        <div ref={pdfRef}>
+        <div>
           <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -195,13 +213,11 @@ const RFQ = () => {
         </div>
       </div>
 
-      {/* PDF Preview Modal */}
-      <PDFPreviewModal
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-        onDownload={handleDownloadPDF}
-        isGenerating={isGenerating}
-        title={`RFQ Preview - ${rfq.RFQCode}`}
+      {/* Always render PDF template but hide it */}
+      {/* <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}> */}
+      <div
+        ref={pdfRef}
+        style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
       >
         <RFQPDFTemplate
           rfqData={{
@@ -215,25 +231,30 @@ const RFQ = () => {
             createdAt: rfq.createdAt,
           }}
         />
-      </PDFPreviewModal>
-
-      {/* Hidden PDF Template for generation */}
-      <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-        <div>
-          <RFQPDFTemplate
-            rfqData={{
-              RFQTitle: rfq.RFQTitle,
-              RFQCode: rfq.RFQCode,
-              itemGroups: rfq.itemGroups,
-              deliveryPeriod: rfq.deliveryPeriod,
-              bidValidityPeriod: rfq.bidValidityPeriod,
-              guaranteePeriod: rfq.guaranteePeriod,
-              createdBy: rfq.createdBy,
-              createdAt: rfq.createdAt,
-            }}
-          />
-        </div>
       </div>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        onDownload={handleDownloadPDF}
+        isGenerating={isGenerating}
+        title={`RFQ Preview - ${rfq.RFQCode}`}
+      >
+        <RFQPDFTemplate
+          pdfRef={null}
+          rfqData={{
+            RFQTitle: rfq.RFQTitle,
+            RFQCode: rfq.RFQCode,
+            itemGroups: rfq.itemGroups,
+            deliveryPeriod: rfq.deliveryPeriod,
+            bidValidityPeriod: rfq.bidValidityPeriod,
+            guaranteePeriod: rfq.guaranteePeriod,
+            createdBy: rfq.createdBy,
+            createdAt: rfq.createdAt,
+          }}
+        />
+      </PDFPreviewModal>
     </>
   );
 };

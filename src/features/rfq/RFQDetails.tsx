@@ -40,10 +40,10 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
 
   // Calculate totals
   const totalAmount = rfq.itemGroups.reduce((sum, item) => sum + item.total, 0);
-  const totalItems = rfq.itemGroups.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+  // const totalItems = rfq.itemGroups.reduce(
+  //   (sum, item) => sum + item.quantity,
+  //   0
+  // );
 
   const rfqSections: RFQSection[] = [
     {
@@ -140,11 +140,11 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
           content: dateformat(rfq.updatedAt),
           icon: <Calendar className="w-4 h-4" />,
         },
-        {
-          id: "totalItems",
-          label: "Total Items",
-          content: totalItems,
-        },
+        // {
+        //   id: "totalItems",
+        //   label: "Total Items",
+        //   content: totalItems,
+        // },
       ],
     },
   ];

@@ -1,6 +1,7 @@
 // ui/PDFPreviewModal.tsx
 import React from "react";
-import { X, Download } from "lucide-react";
+// import { X, Download } from "lucide-react";
+import { X } from "lucide-react";
 import Button from "./Button";
 
 interface PDFPreviewModalProps {
@@ -15,8 +16,8 @@ interface PDFPreviewModalProps {
 const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   isOpen,
   onClose,
-  onDownload,
-  isGenerating,
+  // onDownload,
+  // isGenerating,
   title,
   children,
 }) => {
@@ -29,7 +30,7 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="primary"
               size="small"
@@ -38,7 +39,7 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
             >
               <Download className="h-4 w-4 mr-1" />
               {isGenerating ? "Generating..." : "Download PDF"}
-            </Button>
+            </Button> */}
             <Button
               type="button"
               variant="secondary"

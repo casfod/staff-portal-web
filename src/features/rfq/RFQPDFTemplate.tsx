@@ -2,8 +2,10 @@
 import React from "react";
 import logo from "../../assets/logo.webp";
 import { UserType } from "../../interfaces";
+// import { useRFQPDF } from "../../hooks/useRFQPDF";
 
 interface RFQPDFTemplateProps {
+  pdfRef?: any;
   rfqData: {
     RFQTitle: string;
     RFQCode: string;
@@ -23,7 +25,7 @@ interface RFQPDFTemplateProps {
   };
 }
 
-const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
+const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData, pdfRef }) => {
   const grandTotal = rfqData.itemGroups.reduce(
     (sum, item) => sum + item.total,
     0
@@ -31,6 +33,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
 
   return (
     <div
+      ref={pdfRef}
       className="pdf-container bg-white p-8"
       style={{
         fontFamily: "Arial, sans-serif",
@@ -104,14 +107,18 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
               <th className="border border-gray-300 p-2 text-left font-bold">
                 ITEM NAME
               </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
+              {/* <th className="border border-gray-300 p-2 text-left font-bold">
                 DETAIL DESCRIPTION
+              </th> */}
+
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                QUANTITY
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                FREQUECY
               </th>
               <th className="border border-gray-300 p-2 text-left font-bold">
                 UNIT
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                QUANTITY
               </th>
               <th className="border border-gray-300 p-2 text-left font-bold">
                 UNIT COST
@@ -133,20 +140,24 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
                 <td className="border border-gray-300 p-2 text-sm">
                   {item.description.split(" ").slice(0, 2).join(" ")}
                 </td>
-                <td className="border border-gray-300 p-2 text-sm">
+                {/* <td className="border border-gray-300 p-2 text-sm">
                   {item.description}
+                </td> */}
+
+                <td className="border border-gray-300 p-2 text-sm text-right">
+                  {item.quantity.toLocaleString()}
+                </td>
+                <td className="border border-gray-300 p-2 text-sm text-right">
+                  {item.frequency.toLocaleString()}
                 </td>
                 <td className="border border-gray-300 p-2 text-sm">
                   {item.unit || "-"}
                 </td>
                 <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.quantity.toLocaleString()}
+                  {item.unitCost.toLocaleString()}
                 </td>
                 <td className="border border-gray-300 p-2 text-sm text-right">
-                  ₦{item.unitCost.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  ₦{item.total.toLocaleString()}
+                  {item.total.toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -175,7 +186,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
                 Delivery Period (in days, from receipt of CASFOD Purchase Order)
               </td>
               <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.deliveryPeriod || "Not specified"}
+                {rfqData.deliveryPeriod || ""}
               </td>
             </tr>
             <tr>
@@ -184,7 +195,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
                 Order):
               </td>
               <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.bidValidityPeriod || "Not specified"}
+                {rfqData.bidValidityPeriod || ""}
               </td>
             </tr>
             <tr>
@@ -192,7 +203,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({ rfqData }) => {
                 Guarantee period:
               </td>
               <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.guaranteePeriod || "Not specified"}
+                {rfqData.guaranteePeriod || ""}
               </td>
             </tr>
           </tbody>
