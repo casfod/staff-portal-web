@@ -317,7 +317,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
         <p className="text-sm text-gray-700">
           For any clarification regarding the RFQ, please send an email to{" "}
           <span className="font-semibold text-blue-600">
-            Procurement@casfod.org
+            procurement@casfod.org
           </span>
           .
         </p>
