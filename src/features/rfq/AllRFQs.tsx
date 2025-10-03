@@ -1,8 +1,8 @@
-import { Download, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 
-import { useRFQs, useExportRFQsToExcel, useDeleteRFQ } from "./Hooks/useRFQ";
+import { useRFQs, useDeleteRFQ } from "./Hooks/useRFQ";
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { RootState } from "../../store/store";
@@ -18,7 +18,7 @@ import { localStorageUser } from "../../utils/localStorageUser";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import RFQTableRow from "./RFQTableRow";
-import SpinnerMini from "../../ui/SpinnerMini";
+// import SpinnerMini from "../../ui/SpinnerMini";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 export function AllRFQs() {
@@ -38,7 +38,7 @@ export function AllRFQs() {
     limit,
   });
 
-  const { exportRFQs, isExporting } = useExportRFQsToExcel();
+  // const { exportRFQs, isExporting } = useExportRFQsToExcel();
   const { deleteRFQ } = useDeleteRFQ();
 
   // State for toggling nested tables
@@ -73,9 +73,9 @@ export function AllRFQs() {
     entityName: "RFQ",
   });
 
-  const handleExportExcel = () => {
-    exportRFQs();
-  };
+  // const handleExportExcel = () => {
+  //   exportRFQs();
+  // };
 
   if (isError) {
     return <NetworkErrorUI />;
@@ -105,7 +105,7 @@ export function AllRFQs() {
               </Button>
             )}
 
-            {(currentUser.role === "SUPER-ADMIN" ||
+            {/* {(currentUser.role === "SUPER-ADMIN" ||
               currentUser.procurementRole.canView) && (
               <Button onClick={handleExportExcel} disabled={isExporting}>
                 {isExporting ? (
@@ -120,7 +120,7 @@ export function AllRFQs() {
                   </>
                 )}
               </Button>
-            )}
+            )} */}
           </div>
         </div>
 
