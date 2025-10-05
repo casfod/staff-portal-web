@@ -24,6 +24,7 @@ import navigationSliceReducer from "./navigationSlice";
 import expenseClaimReducer from "./expenseClaimSlice";
 import vendorReducer from "./vendorSlice";
 import rfqReducer from "./rfqSlice";
+import purchaseOrderReducer from "./purchaseOrderSlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -39,6 +40,7 @@ const rootReducer = combineReducers({
   expenseClaim: expenseClaimReducer,
   vendor: vendorReducer,
   rfq: rfqReducer,
+  purchaseOrder: purchaseOrderReducer,
 });
 
 // Create persist config

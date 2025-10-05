@@ -45,7 +45,7 @@ const FormAddConceptNotes = () => {
   );
 
   // Fetch admins data
-  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+  const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   const handleNestedChange = (
@@ -365,10 +365,10 @@ const FormAddConceptNotes = () => {
       </Row>
 
       {/* Approver Selection */}
-      {!isLoadingAmins && (
+      {!isLoadingAdmins && (
         <Row>
           <FormRow label="Approved By *">
-            {isLoadingAmins ? (
+            {isLoadingAdmins ? (
               <SpinnerMini /> // Show a spinner while loading admins
             ) : (
               <Select

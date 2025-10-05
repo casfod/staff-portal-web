@@ -653,7 +653,6 @@ export interface UpdateVendorType {
 ///////////////////////
 //RFQ //
 ///////////////////////
-// Add these to your existing interfaces.ts file
 
 export interface ItemGroupType {
   description: string;
@@ -679,6 +678,7 @@ export interface RFQType {
   createdBy: UserType;
   createdAt: string;
   updatedAt: string;
+  approvedBy: Partial<UserType> | string;
   files?: FileType[];
 }
 
@@ -728,5 +728,109 @@ export interface UseRFQStatsType {
     totalRFQs: number;
     totalSentRFQs: number;
     totalDraftRFQs: number;
+  };
+}
+
+///////////////////////////////////
+// PURCHASE ORDER
+///////////////////////////////////
+// Add to your interfaces file
+// purchaseOrderInterfaces.ts
+
+export interface Comment {
+  user: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+  text: string;
+  createdAt?: string;
+}
+
+export interface PurchaseOrderType {
+  id: string;
+  RFQTitle: string;
+  RFQCode: string;
+  POCode: string;
+  itemGroups: ItemGroupType[];
+  copiedTo: Array<{
+    id: string;
+    businessName: string;
+    email: string;
+    contactPerson: string;
+    businessPhoneNumber?: string;
+    address?: string;
+  }>;
+  selectedVendor: {
+    id: string;
+    businessName: string;
+    email: string;
+    contactPerson: string;
+    businessPhoneNumber?: string;
+    address?: string;
+  };
+  deliveryPeriod: string;
+  bidValidityPeriod: string;
+  guaranteePeriod: string;
+  totalAmount: number;
+  pdfUrl: string;
+  cloudinaryId: string;
+  createdBy: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+  status: "pending" | "approved" | "rejected";
+  isFromRFQ: boolean;
+  comments: Comment[];
+  approvedBy?: Partial<UserType>;
+  createdAt: string;
+  updatedAt: string;
+  files?: FileType[];
+}
+
+export interface CreatePurchaseOrderType {
+  RFQTitle: string;
+  itemGroups: ItemGroupType[];
+  copiedTo?: string[];
+  selectedVendor: string;
+  approvedBy?: Partial<UserType> | string;
+  deliveryPeriod: string;
+  bidValidityPeriod: string;
+  guaranteePeriod: string;
+  files?: FileType[];
+}
+
+export interface UpdatePurchaseOrderType {
+  RFQTitle?: string;
+  itemGroups?: ItemGroupType[];
+  copiedTo?: string[];
+  selectedVendor?: string;
+  approvedBy: Partial<UserType> | string;
+  deliveryPeriod?: string;
+  bidValidityPeriod?: string;
+  guaranteePeriod?: string;
+  files?: File[];
+  comment?: string;
+}
+
+export interface UsePurchaseOrder {
+  status: string;
+  message: string;
+  data: PurchaseOrderType;
+}
+
+export interface UsePurchaseOrderType {
+  status: string;
+  message: string;
+  data: {
+    purchaseOrders: PurchaseOrderType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
   };
 }

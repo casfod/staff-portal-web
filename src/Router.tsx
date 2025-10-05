@@ -54,6 +54,12 @@ import RFQ from "./features/rfq/RFQ.tsx";
 import CreateRFQ from "./features/rfq/CreateRFQ.tsx";
 import EditRFQ from "./features/rfq/EditRFQ.tsx";
 import { AllRFQs } from "./features/rfq/AllRFQs.tsx";
+import POManagement from "./pages/POManagement.tsx";
+import PurchaseOrder from "./features/purchase-order/PurchaseOrder.tsx";
+import CreatePurchaseOrder from "./features/purchase-order/CreatePurchaseOrder.tsx";
+import CreatePurchaseOrderFromRFQ from "./features/purchase-order/CreatePurchaseOrderFromRFQ.tsx";
+import EditPurchaseOrder from "./features/purchase-order/EditPurchaseOrder.tsx";
+import { AllPurchaseOrders } from "./features/purchase-order/AllPurchaseOrders.tsx";
 
 const router = createBrowserRouter([
   {
@@ -450,6 +456,37 @@ const router = createBrowserRouter([
               },
             ],
           },
+
+          {
+            path: "purchase-order",
+            element: (
+              <AnimatedRoute key="purchase-order" element={<POManagement />} />
+            ),
+            children: [
+              { index: true, element: <Navigate to="purchase-orders" /> },
+              {
+                path: ":purchaseOrderId",
+                element: <PurchaseOrder />,
+              },
+              {
+                path: "purchase-orders",
+                element: <AllPurchaseOrders />,
+              },
+              {
+                path: "create",
+                element: <CreatePurchaseOrder />,
+              },
+              {
+                path: "create/:rfqId", // Changed from :purchaseOrderId to :rfqId
+                element: <CreatePurchaseOrderFromRFQ />,
+              },
+              {
+                path: "edit/:purchaseOrderId",
+                element: <EditPurchaseOrder />,
+              },
+            ],
+          },
+
           {
             path: "goods-received",
 
@@ -471,29 +508,6 @@ const router = createBrowserRouter([
               {
                 path: "goods-received/edit-goods-received/:id",
                 element: <div>Edit good received</div>,
-              },
-            ],
-          },
-          {
-            path: "purchase-order",
-            element: (
-              <AnimatedRoute
-                key="purchase-order"
-                element={<div>Purchase Order Page - To be implemented</div>}
-              />
-            ),
-            children: [
-              {
-                path: ":id", // Simplified path
-                element: <div>View purchase-order</div>,
-              },
-              {
-                path: "create-purchase-order/:id",
-                element: <div>Create purchase-order</div>,
-              },
-              {
-                path: "edit-purchase-order/:id",
-                element: <div>Edit purchase-order</div>,
               },
             ],
           },

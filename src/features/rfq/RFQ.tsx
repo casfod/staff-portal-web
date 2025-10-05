@@ -116,6 +116,10 @@ const RFQ = () => {
     return <div>No RFQ data available.</div>;
   }
 
+  const handleCreatePOFromRFQ = () => {
+    navigate(`/procurement/purchase-order/create/${rfq.id}`);
+  };
+
   const tableHeadData = ["RFQ Title", "RFQ Code", "Status", "Actions"];
 
   const tableRowData = [
@@ -166,10 +170,17 @@ const RFQ = () => {
           <div className="flex justify-between items-center">
             <TextHeader>RFQ Details</TextHeader>
 
-            <Button onClick={() => navigate(-1)}>
-              <List className="h-4 w-4 mr-1 md:mr-2" />
-              Back to List
-            </Button>
+            <div className="flex gap-2">
+              {/* Add Create PO Button */}
+              <Button onClick={handleCreatePOFromRFQ} variant="primary">
+                Create Purchase Order
+              </Button>
+
+              <Button onClick={() => navigate(-1)}>
+                <List className="h-4 w-4 mr-1 md:mr-2" />
+                Back to List
+              </Button>
+            </div>
           </div>
         </div>
 
