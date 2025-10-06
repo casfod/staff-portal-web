@@ -240,6 +240,7 @@ const RFQ = () => {
             itemGroups: rfq.itemGroups,
             rfqDate: rfq.rfqDate,
             deadlineDate: rfq.deadlineDate,
+            casfodAddressId: rfq.casfodAddressId,
 
             createdBy: rfq.createdBy,
             createdAt: rfq.createdAt,
@@ -261,6 +262,7 @@ const RFQ = () => {
             RFQTitle: rfq.RFQTitle,
             RFQCode: rfq.RFQCode,
             itemGroups: rfq.itemGroups,
+            casfodAddressId: rfq.casfodAddressId,
             rfqDate: rfq.rfqDate,
             deadlineDate: rfq.deadlineDate,
             createdBy: rfq.createdBy,

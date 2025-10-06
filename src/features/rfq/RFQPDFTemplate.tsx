@@ -65,9 +65,6 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
   const address = getAddress();
 
-  console.log("rfqData:", rfqData);
-  console.log("Selected address:", address);
-
   return (
     <div
       ref={pdfRef}
