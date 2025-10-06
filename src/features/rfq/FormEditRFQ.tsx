@@ -8,13 +8,16 @@ import Row from "../../ui/Row";
 import {
   UpdateRFQType,
   RFQType,
-  ItemGroupType,
+  RFQItemGroupType,
   CreateRFQType,
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useUpdateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2 } from "lucide-react";
+import DatePicker from "../../ui/DatePicker";
+import Select from "../../ui/Select";
+import { casfodAddress } from "./FormAddRFQ";
 // import { Plus, Trash2, Eye } from "lucide-react";
 // import RFQPDFTemplate from "./RFQPDFTemplate";
 // import PDFPreviewModal from "../../ui/PDFPreviewModal";
@@ -32,9 +35,9 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
   // Form state
   const [formData, setFormData] = useState<UpdateRFQType>({
     RFQTitle: rfq?.RFQTitle,
-    deliveryPeriod: rfq?.deliveryPeriod,
-    bidValidityPeriod: rfq?.bidValidityPeriod,
-    guaranteePeriod: rfq?.guaranteePeriod,
+    rfqDate: rfq?.rfqDate,
+    deadlineDate: rfq?.deadlineDate,
+    casfodAddressId: rfq?.casfodAddressId,
     itemGroups: rfq?.itemGroups || [],
     copiedTo: Array.isArray(rfq?.copiedTo)
       ? rfq.copiedTo.map((vendor) =>
@@ -51,7 +54,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
   const isPending = isUpdating || isSending;
 
   // Item Groups Management
-  const [itemGroups, setItemGroups] = useState<ItemGroupType[]>(
+  const [itemGroups, setItemGroups] = useState<RFQItemGroupType[]>(
     rfq?.itemGroups || []
   );
 
@@ -59,9 +62,9 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
     if (rfq) {
       setFormData({
         RFQTitle: rfq.RFQTitle,
-        deliveryPeriod: rfq.deliveryPeriod,
-        bidValidityPeriod: rfq.bidValidityPeriod,
-        guaranteePeriod: rfq.guaranteePeriod,
+        rfqDate: rfq.rfqDate,
+        deadlineDate: rfq.deadlineDate,
+        casfodAddressId: rfq?.casfodAddressId,
         itemGroups: rfq.itemGroups,
         copiedTo: Array.isArray(rfq.copiedTo)
           ? rfq.copiedTo.map((vendor) =>
@@ -86,7 +89,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
   // Item Group Handlers
   const handleItemGroupChange = (
     index: number,
-    field: keyof ItemGroupType,
+    field: keyof RFQItemGroupType,
     value: string | number
   ) => {
     const updatedItems = [...itemGroups];
@@ -118,6 +121,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
       ...itemGroups,
       {
         description: "",
+        itemName: "",
         frequency: 1,
         quantity: 1,
         unit: "",
@@ -214,40 +218,63 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
             </FormRow>
           </Row>
 
-          <Row cols="grid-cols-1 md:grid-cols-3">
-            <FormRow label="Delivery Period *">
-              <Input
-                type="text"
-                id="deliveryPeriod"
-                value={formData.deliveryPeriod}
-                onChange={(e) =>
-                  handleFormChange("deliveryPeriod", e.target.value)
+          <Row>
+            <FormRow label="Select CASFOD Address *">
+              <Select
+                clearable={true}
+                id="casfodAddressId"
+                customLabel="Select a State"
+                value={formData.casfodAddressId || ""}
+                onChange={(value) => handleFormChange("casfodAddressId", value)} // Direct value now
+                options={
+                  casfodAddress
+                    ? casfodAddress.map((bank) => ({
+                        id: bank.id as string,
+                        name: `${bank.name}`,
+                      }))
+                    : []
                 }
-                placeholder="e.g., 30 days"
+                optionsHeight={220}
+                filterable={true}
+                required
+              />
+            </FormRow>
+          </Row>
+
+          <Row cols="grid-cols-1 md:grid-cols-4">
+            <FormRow label="RFQ Date *">
+              <DatePicker
+                selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+                onChange={(date) =>
+                  handleFormChange("rfqDate", date ? date.toISOString() : "")
+                }
+                variant="secondary"
+                size="md" // or "sm"/"lg" based on your form size
+                placeholder="Select date"
+                // className="custom-class-if-needed"
+                clearable={true}
+                // minDate={new Date()}
               />
             </FormRow>
 
-            <FormRow label="Bid Validity Period *">
-              <Input
-                type="text"
-                id="bidValidityPeriod"
-                value={formData.bidValidityPeriod}
-                onChange={(e) =>
-                  handleFormChange("bidValidityPeriod", e.target.value)
+            <FormRow label="Deadline Date *">
+              <DatePicker
+                selected={
+                  formData.deadlineDate ? new Date(formData.deadlineDate) : null
                 }
-                placeholder="e.g., 60 days"
-              />
-            </FormRow>
-
-            <FormRow label="Guarantee Period">
-              <Input
-                type="text"
-                id="guaranteePeriod"
-                value={formData.guaranteePeriod}
-                onChange={(e) =>
-                  handleFormChange("guaranteePeriod", e.target.value)
+                onChange={(date) =>
+                  handleFormChange(
+                    "deadlineDate",
+                    date ? date.toISOString() : ""
+                  )
                 }
-                placeholder="e.g., 12 months"
+                variant="secondary"
+                size="md" // or "sm"/"lg" based on your form size
+                placeholder="Select date"
+                // className="custom-class-if-needed"
+                clearable={true}
+                minDate={Date.now()}
+                // requiredTrigger={!!formData.dayOfDeparture}
               />
             </FormRow>
           </Row>
@@ -257,7 +284,10 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
             <FormRow label="Items *" type="wide">
               <div className="space-y-4">
                 {itemGroups.map((item, index) => (
-                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div
+                    key={index}
+                    className="space-y-3 border rounded-lg p-4 bg-gray-50"
+                  >
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="font-semibold text-gray-700">
                         Item {index + 1}
@@ -275,18 +305,18 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
                     </div>
 
                     <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                      <FormRow label="Description">
+                      <FormRow label="Item Name">
                         <Input
                           type="text"
-                          value={item.description}
+                          value={item.itemName}
                           onChange={(e) =>
                             handleItemGroupChange(
                               index,
-                              "description",
+                              "itemName",
                               e.target.value
                             )
                           }
-                          placeholder="Item description"
+                          placeholder="Item Name"
                           required
                         />
                       </FormRow>
@@ -340,6 +370,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
                           min="0"
                           step="0.01"
                           value={item.unitCost}
+                          disabled
                           onChange={(e) =>
                             handleItemGroupChange(
                               index,
@@ -356,6 +387,25 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
                           value={item.total}
                           disabled
                           className="bg-gray-100 font-semibold"
+                        />
+                      </FormRow>
+                    </Row>
+
+                    <Row>
+                      <FormRow label="Description*" type="wide">
+                        <textarea
+                          className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+                          maxLength={4000}
+                          id="description"
+                          required
+                          value={item.description}
+                          onChange={(e) =>
+                            handleItemGroupChange(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
                         />
                       </FormRow>
                     </Row>

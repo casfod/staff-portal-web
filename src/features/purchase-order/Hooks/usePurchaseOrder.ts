@@ -72,6 +72,7 @@ export const usePurchaseOrder = (
   });
 };
 
+// UPDATED: Now properly handles timeline fields
 export const useCreatePurchaseOrderFromRFQ = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -90,14 +91,22 @@ export const useCreatePurchaseOrderFromRFQ = () => {
     }: {
       rfqId: string;
       vendorId: string;
-      data: { itemGroups: any[] };
+      data: {
+        itemGroups: any[];
+        deliveryPeriod: string;
+        bidValidityPeriod: string;
+        guaranteePeriod: string;
+      };
       approvedBy: string;
       files?: File[];
     }) =>
       createPurchaseOrderFromRFQ(
         rfqId,
         vendorId,
-        { ...data, approvedBy },
+        {
+          ...data,
+          approvedBy,
+        },
         files
       ),
 
@@ -126,6 +135,7 @@ export const useCreatePurchaseOrderFromRFQ = () => {
   };
 };
 
+// UPDATED: Now properly handles the data structure
 export const useCreateIndependentPurchaseOrder = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -168,6 +178,7 @@ export const useCreateIndependentPurchaseOrder = () => {
   };
 };
 
+// UPDATED: Now properly handles the data structure
 export const useUpdatePurchaseOrder = () => {
   const queryClient = useQueryClient();
 

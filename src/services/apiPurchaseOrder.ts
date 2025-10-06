@@ -107,10 +107,17 @@ export const getPurchaseOrder = async function (
   }
 };
 
+// UPDATED: Now properly handles timeline fields
 export const createPurchaseOrderFromRFQ = async function (
   rfqId: string,
   vendorId: string,
-  data: { itemGroups: any[]; approvedBy: string },
+  data: {
+    itemGroups: any[];
+    approvedBy: string;
+    deliveryPeriod: string;
+    bidValidityPeriod: string;
+    guaranteePeriod: string;
+  },
   files: File[] = []
 ): Promise<UsePurchaseOrder> {
   try {
@@ -120,7 +127,12 @@ export const createPurchaseOrderFromRFQ = async function (
 
     // Append item groups as JSON
     formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    formData.append("approvedBy", JSON.stringify(data.approvedBy));
+    formData.append("approvedBy", data.approvedBy);
+
+    // Append timeline fields
+    formData.append("deliveryPeriod", data.deliveryPeriod);
+    formData.append("bidValidityPeriod", data.bidValidityPeriod);
+    formData.append("guaranteePeriod", data.guaranteePeriod);
 
     // Append files
     files.forEach((file) => {
@@ -141,6 +153,7 @@ export const createPurchaseOrderFromRFQ = async function (
   }
 };
 
+// UPDATED: Now properly handles approvedBy field
 export const createIndependentPurchaseOrder = async function (
   data: CreatePurchaseOrderType,
   files: File[] = []
@@ -162,6 +175,11 @@ export const createIndependentPurchaseOrder = async function (
         formData.append(key, String(data[key]));
       }
     });
+
+    // Append approvedBy if exists
+    if (data.approvedBy) {
+      formData.append("approvedBy", String(data.approvedBy));
+    }
 
     // Append item groups as JSON
     if (data.itemGroups && Array.isArray(data.itemGroups)) {
@@ -194,6 +212,7 @@ export const createIndependentPurchaseOrder = async function (
   }
 };
 
+// UPDATED: Now properly handles approvedBy field
 export const updatePurchaseOrder = async function (
   purchaseOrderId: string,
   data: UpdatePurchaseOrderType,
@@ -216,6 +235,11 @@ export const updatePurchaseOrder = async function (
         formData.append(key, String(data[key]));
       }
     });
+
+    // Append approvedBy if exists
+    if (data.approvedBy) {
+      formData.append("approvedBy", String(data.approvedBy));
+    }
 
     // Append item groups as JSON
     if (data.itemGroups && Array.isArray(data.itemGroups)) {

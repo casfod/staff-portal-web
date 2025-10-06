@@ -31,8 +31,6 @@ export function AllVendors() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  console.log("currentUser:", currentUser);
-
   const { searchTerm, sort, page, limit } = useSelector(
     (state: RootState) => state.genericQuerySlice
   );

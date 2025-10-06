@@ -1,17 +1,8 @@
-import { ItemGroupType, RFQType, VendorType } from "../../interfaces";
+import { RFQItemGroupType, RFQType, VendorType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import DetailContainer from "../../ui/DetailContainer";
-import {
-  FileText,
-  Calendar,
-  Tag,
-  Users,
-  Clock,
-  Shield,
-  DollarSign,
-  Package,
-} from "lucide-react";
+import { FileText, Calendar, Tag, Users, Clock, Package } from "lucide-react";
 import { ReactElement } from "react";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 
@@ -22,7 +13,7 @@ interface RFQDetailsProps {
 interface RFQField {
   id: string;
   label: string;
-  content: string | number | ItemGroupType | any[];
+  content: string | number | RFQItemGroupType | any[];
   icon?: ReactElement;
   isBlock?: boolean;
   isArray?: boolean;
@@ -70,7 +61,12 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
           id: "totalAmount",
           label: "Total Amount",
           content: `₦${totalAmount.toLocaleString()}`,
-          icon: <DollarSign className="w-4 h-4" />,
+          // icon: <DollarSign className="w-4 h-4" />,
+        },
+        {
+          id: "casfodAddressId",
+          label: "Casfod Address",
+          content: rfq.casfodAddressId,
         },
       ],
     },
@@ -79,20 +75,14 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
       icon: <Clock className="w-4 h-4" />,
       fields: [
         {
-          id: "deliveryPeriod",
-          label: "Delivery Period",
-          content: rfq.deliveryPeriod || "N/A",
+          id: "rfqDate",
+          label: "RFQ Date",
+          content: dateformat(rfq.rfqDate) || "N/A",
         },
         {
-          id: "bidValidityPeriod",
-          label: "Bid Validity Period",
-          content: rfq.bidValidityPeriod || "N/A",
-        },
-        {
-          id: "guaranteePeriod",
-          label: "Guarantee Period",
-          content: rfq.guaranteePeriod || "N/A",
-          icon: <Shield className="w-4 h-4" />,
+          id: "deadlineDate",
+          label: "Deadline Date",
+          content: dateformat(rfq.deadlineDate) || "N/A",
         },
       ],
     },
@@ -140,11 +130,6 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
           content: dateformat(rfq.updatedAt),
           icon: <Calendar className="w-4 h-4" />,
         },
-        // {
-        //   id: "totalItems",
-        //   label: "Total Items",
-        //   content: totalItems,
-        // },
       ],
     },
   ];
@@ -244,7 +229,7 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
                       {/* Special handling for item groups */}
                       {field.isItemGroups ? (
                         <div className="space-y-3">
-                          {(field.content as ItemGroupType[]).map(
+                          {(field.content as RFQItemGroupType[]).map(
                             (item, index) => (
                               <div
                                 key={index}
@@ -253,9 +238,9 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
                                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                                   <div>
                                     <span className="font-semibold text-gray-600">
-                                      Description:
+                                      Item Name:
                                     </span>
-                                    <p className="mt-1">{item.description}</p>
+                                    <p className="mt-1">{item.itemName}</p>
                                   </div>
                                   <div>
                                     <span className="font-semibold text-gray-600">
@@ -292,6 +277,15 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
                                     </p>
                                   </div>
                                 </div>
+
+                                {item.description && (
+                                  <div className="w-full">
+                                    <span className="font-semibold text-gray-600">
+                                      Description:
+                                    </span>
+                                    <p className="mt-1">{item.description}</p>
+                                  </div>
+                                )}
                               </div>
                             )
                           )}

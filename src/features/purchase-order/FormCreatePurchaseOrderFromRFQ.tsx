@@ -39,6 +39,11 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
   const [itemGroups, setItemGroups] = useState<ItemGroupType[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
+  // Timeline fields state
+  const [deliveryPeriod, setDeliveryPeriod] = useState<string>("");
+  const [bidValidityPeriod, setBidValidityPeriod] = useState<string>("");
+  const [guaranteePeriod, setGuaranteePeriod] = useState<string>("");
+
   // Fetch admins data
   // const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
   const { data: adminsData } = useAdmins();
@@ -63,7 +68,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
 
   useEffect(() => {
     if (rfqData?.itemGroups) {
-      // Initialize item groups with RFQ data but allow price editing
+      // Initialize item groups with RFQ data but allow price, quantity, and frequency editing
       setItemGroups(
         rfqData.itemGroups.map((item) => ({
           ...item,
@@ -85,13 +90,14 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       [field]: value,
     };
 
-    // Calculate total if unitCost or quantity changes
-    if (field === "unitCost" || field === "quantity") {
+    // Calculate total if unitCost, quantity, or frequency changes
+    if (field === "unitCost" || field === "quantity" || field === "frequency") {
       const unitCost =
         field === "unitCost" ? Number(value) : updatedItems[index].unitCost;
       const quantity =
         field === "quantity" ? Number(value) : updatedItems[index].quantity;
-      const frequency = updatedItems[index].frequency;
+      const frequency =
+        field === "frequency" ? Number(value) : updatedItems[index].frequency;
 
       updatedItems[index].total = unitCost * quantity * frequency;
     }
@@ -101,6 +107,22 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required timeline fields
+    if (!deliveryPeriod.trim()) {
+      alert("Please enter a delivery period");
+      return;
+    }
+
+    if (!bidValidityPeriod.trim()) {
+      alert("Please enter a bid validity period");
+      return;
+    }
+
+    if (!guaranteePeriod.trim()) {
+      alert("Please enter a guarantee period");
+      return;
+    }
 
     if (!selectedVendor) {
       alert("Please select a vendor");
@@ -121,11 +143,33 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       return;
     }
 
+    // Validate that all items have valid quantity and frequency
+    const hasInvalidQuantity = itemGroups.some(
+      (item) => !item.quantity || item.quantity <= 0
+    );
+    if (hasInvalidQuantity) {
+      alert("Please enter valid quantities for all items");
+      return;
+    }
+
+    const hasInvalidFrequency = itemGroups.some(
+      (item) => !item.frequency || item.frequency <= 0
+    );
+    if (hasInvalidFrequency) {
+      alert("Please enter valid frequencies for all items");
+      return;
+    }
+
     createPurchaseOrderFromRFQ(
       {
         rfqId: rfqId,
         vendorId: selectedVendor,
-        data: { itemGroups },
+        data: {
+          itemGroups,
+          deliveryPeriod,
+          bidValidityPeriod,
+          guaranteePeriod,
+        },
         files: selectedFiles,
         approvedBy: selectedAdmin, // Include approvedBy
       },
@@ -196,6 +240,44 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
         </FormRow>
       </Row>
 
+      {/* Timeline & Validity Section */}
+      <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4">
+          Timeline & Validity
+        </h3>
+        <Row cols="grid-cols-1 md:grid-cols-3">
+          <FormRow label="Delivery Period *">
+            <Input
+              type="text"
+              value={deliveryPeriod}
+              onChange={(e) => setDeliveryPeriod(e.target.value)}
+              placeholder="e.g., 30 days"
+              required
+            />
+          </FormRow>
+
+          <FormRow label="Bid Validity Period *">
+            <Input
+              type="text"
+              value={bidValidityPeriod}
+              onChange={(e) => setBidValidityPeriod(e.target.value)}
+              placeholder="e.g., 60 days"
+              required
+            />
+          </FormRow>
+
+          <FormRow label="Guarantee Period *">
+            <Input
+              type="text"
+              value={guaranteePeriod}
+              onChange={(e) => setGuaranteePeriod(e.target.value)}
+              placeholder="e.g., 12 months"
+              required
+            />
+          </FormRow>
+        </Row>
+      </div>
+
       {/* Admin Approval Selection */}
       <Row>
         <FormRow label="Approved By *" type="wide">
@@ -235,21 +317,35 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                     />
                   </FormRow>
 
-                  <FormRow label="Frequency">
+                  <FormRow label="Frequency *">
                     <Input
                       type="number"
+                      min="1"
                       value={item.frequency}
-                      disabled
-                      className="bg-gray-100"
+                      onChange={(e) =>
+                        handleItemGroupChange(
+                          index,
+                          "frequency",
+                          parseFloat(e.target.value)
+                        )
+                      }
+                      required
                     />
                   </FormRow>
 
-                  <FormRow label="Quantity">
+                  <FormRow label="Quantity *">
                     <Input
                       type="number"
+                      min="1"
                       value={item.quantity}
-                      disabled
-                      className="bg-gray-100"
+                      onChange={(e) =>
+                        handleItemGroupChange(
+                          index,
+                          "quantity",
+                          parseFloat(e.target.value)
+                        )
+                      }
+                      required
                     />
                   </FormRow>
 

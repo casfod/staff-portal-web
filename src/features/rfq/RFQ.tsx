@@ -238,9 +238,9 @@ const RFQ = () => {
             RFQTitle: rfq.RFQTitle,
             RFQCode: rfq.RFQCode,
             itemGroups: rfq.itemGroups,
-            deliveryPeriod: rfq.deliveryPeriod,
-            bidValidityPeriod: rfq.bidValidityPeriod,
-            guaranteePeriod: rfq.guaranteePeriod,
+            rfqDate: rfq.rfqDate,
+            deadlineDate: rfq.deadlineDate,
+
             createdBy: rfq.createdBy,
             createdAt: rfq.createdAt,
           }}
@@ -261,9 +261,8 @@ const RFQ = () => {
             RFQTitle: rfq.RFQTitle,
             RFQCode: rfq.RFQCode,
             itemGroups: rfq.itemGroups,
-            deliveryPeriod: rfq.deliveryPeriod,
-            bidValidityPeriod: rfq.bidValidityPeriod,
-            guaranteePeriod: rfq.guaranteePeriod,
+            rfqDate: rfq.rfqDate,
+            deadlineDate: rfq.deadlineDate,
             createdBy: rfq.createdBy,
             createdAt: rfq.createdAt,
           }}

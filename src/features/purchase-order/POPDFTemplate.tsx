@@ -247,7 +247,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               <p>
                 {poData.createdBy.first_name} {poData.createdBy.last_name}
               </p>
-              <p className="text-sm text-gray-600">{poData.createdBy.role}</p>
+              {/* <p className="text-sm text-gray-600">{poData.createdBy.role}</p> */}
             </div>
           </div>
 
@@ -258,9 +258,9 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
                 <p>
                   {poData.approvedBy.first_name} {poData.approvedBy.last_name}
                 </p>
-                <p className="text-sm text-gray-600">
+                {/* <p className="text-sm text-gray-600">
                   {poData.approvedBy.role}
-                </p>
+                </p> */}
               </div>
             </div>
           )}

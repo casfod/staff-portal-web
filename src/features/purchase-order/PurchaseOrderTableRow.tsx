@@ -6,6 +6,7 @@ import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
 import { PurchaseOrderDetails } from "./PurchaseOrderDetails";
 import { truncateText } from "../../utils/truncateText";
+import { dateformat } from "../../utils/dateFormat";
 
 const PurchaseOrderTableRow = ({
   purchaseOrder,
@@ -48,12 +49,8 @@ const PurchaseOrderTableRow = ({
 
   const rowData = [
     {
-      id: "RFQTitle",
-      content: truncateText(purchaseOrder.RFQTitle, 40),
-    },
-    {
-      id: "RFQCode",
-      content: purchaseOrder.RFQCode,
+      id: "vendor",
+      content: truncateText(vendorName, 20),
     },
     {
       id: "status",
@@ -71,13 +68,23 @@ const PurchaseOrderTableRow = ({
         </span>
       ),
     },
-    {
-      id: "vendor",
-      content: truncateText(vendorName, 20),
-    },
+    // {
+    //   id: "RFQTitle",
+    //   content: truncateText(purchaseOrder.RFQTitle, 40),
+    // },
+    // {
+    //   id: "RFQCode",
+    //   content: purchaseOrder.RFQCode,
+    // },
+
     {
       id: "totalAmount",
       content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
+    },
+
+    {
+      id: "createdAt",
+      content: dateformat(purchaseOrder?.createdAt!),
     },
     {
       id: "actions",

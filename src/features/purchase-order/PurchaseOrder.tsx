@@ -131,35 +131,38 @@ const PurchaseOrder = () => {
   //     currentUser.approvedBy === currentUser.id);
   const showStatusUpdate =
     requestData?.status === "pending" &&
-    currentUser.approvedBy === currentUser.id;
+    requestData?.approvedBy?.id === currentUser.id;
 
-  const tableHeadData = [
-    "Created By",
-    "Status",
-    "Vendor",
-    "Total Amount",
-    "Date",
-    "Actions",
-  ];
+  const tableHeadData = ["Vendor", "Status", "Date", "Actions"];
+
+  // const tableHeadData = [
+  //   "Vendor",
+  //   // "Created By",
+  //   "Status",
+  //   // "Total Amount",
+  //   "Date",
+  //   "Actions",
+  // ];
 
   const tableRowData = [
-    {
-      id: "createdBy",
-      content: `${requestData?.createdBy?.first_name} ${requestData?.createdBy?.last_name}`,
-    },
-    {
-      id: "status",
-      content: <StatusBadge status={requestData?.status!} key="status-badge" />,
-    },
     {
       id: "vendor",
       content:
         requestData?.selectedVendor?.businessName || "No vendor selected",
     },
+    // {
+    //   id: "createdBy",
+    //   content: `${requestData?.createdBy?.first_name} ${requestData?.createdBy?.last_name}`,
+    // },
     {
-      id: "totalAmount",
-      content: `₦${requestData?.totalAmount?.toLocaleString() || "0"}`,
+      id: "status",
+      content: <StatusBadge status={requestData?.status!} key="status-badge" />,
     },
+
+    // {
+    //   id: "totalAmount",
+    //   content: `₦${requestData?.totalAmount?.toLocaleString() || "0"}`,
+    // },
     {
       id: "createdAt",
       content: dateformat(requestData?.createdAt!),

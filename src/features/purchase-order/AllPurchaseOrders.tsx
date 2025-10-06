@@ -81,14 +81,7 @@ export function AllPurchaseOrders() {
     return <NetworkErrorUI />;
   }
 
-  const tableHeadData = [
-    "PO Title",
-    "PO Code",
-    "Status",
-    "Vendor",
-    "Total Amount",
-    "Actions",
-  ];
+  const tableHeadData = ["Vendor", "Status", "Amount", "Date", "Actions"];
 
   return (
     <div className="flex flex-col space-y-3 pb-80">

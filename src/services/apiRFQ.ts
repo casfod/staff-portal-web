@@ -129,9 +129,9 @@ export const createRFQ = async function (
     // Append all RFQ fields
     const rfqFields: (keyof CreateRFQType)[] = [
       "RFQTitle",
-      "deliveryPeriod",
-      "bidValidityPeriod",
-      "guaranteePeriod",
+      "casfodAddressId",
+      "deadlineDate",
+      "rfqDate",
       "itemGroups",
       "copiedTo",
     ];
@@ -174,9 +174,9 @@ export const createAndSendRFQ = async function (
     // Append all RFQ fields
     const rfqFields: (keyof CreateRFQType)[] = [
       "RFQTitle",
-      "deliveryPeriod",
-      "bidValidityPeriod",
-      "guaranteePeriod",
+      "casfodAddressId",
+      "deadlineDate",
+      "rfqDate",
       "itemGroups",
       "copiedTo",
     ];
@@ -225,9 +225,9 @@ export const updateRFQ = async function (
     // Append all RFQ fields
     const rfqFields: (keyof UpdateRFQType)[] = [
       "RFQTitle",
-      "deliveryPeriod",
-      "bidValidityPeriod",
-      "guaranteePeriod",
+      "casfodAddressId",
+      "deadlineDate",
+      "rfqDate",
       "itemGroups",
       "copiedTo",
     ];

@@ -1,8 +1,30 @@
 // components/RFQ/RFQPDFTemplate.tsx
 import React from "react";
 import logo from "../../assets/logo.webp";
-import { UserType } from "../../interfaces";
+import { RFQItemGroupType, UserType } from "../../interfaces";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 // import { useRFQPDF } from "../../hooks/useRFQPDF";
+
+const casfodAddress = {
+  adamawa: {
+    street: "Suite 2 Hajja Asmau Plaza",
+    city: "Yola",
+    state: "Adamawa State",
+    country: "Nigeria",
+  },
+  borno: {
+    street: "B84 Mandau Street",
+    city: "Bulunkutu Maiduguri",
+    state: "Borno State",
+    country: "Nigeria",
+  },
+  sokoto: {
+    street: "No. 16 Garba Mohammud Road",
+    city: "Runjin Sambo Area Sokoto",
+    state: "Sokoto State",
+    country: "Nigeria",
+  },
+};
 
 interface RFQPDFTemplateProps {
   pdfRef?: any;
@@ -10,17 +32,11 @@ interface RFQPDFTemplateProps {
   rfqData: {
     RFQTitle: string;
     RFQCode: string;
-    itemGroups: Array<{
-      description: string;
-      frequency: number;
-      quantity: number;
-      unit: string;
-      unitCost: number;
-      total: number;
-    }>;
-    deliveryPeriod: string;
-    bidValidityPeriod: string;
-    guaranteePeriod: string;
+    itemGroups: RFQItemGroupType[];
+    rfqDate: string;
+    casfodAddressId: string;
+    deadlineDate: string;
+
     createdBy?: UserType;
     createdAt?: string;
   };
@@ -35,6 +51,22 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
     (sum, item) => sum + item.total,
     0
   );
+
+  // Get the address based on casfodAddressId
+  const getAddress = () => {
+    const address =
+      casfodAddress[rfqData.casfodAddressId as keyof typeof casfodAddress];
+    if (!address) {
+      // Fallback to Borno address if not found
+      return casfodAddress.borno;
+    }
+    return address;
+  };
+
+  const address = getAddress();
+
+  console.log("rfqData:", rfqData);
+  console.log("Selected address:", address);
 
   return (
     <div
@@ -62,7 +94,8 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
             {rfqData.RFQCode}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Date: {new Date().toLocaleDateString()}
+            RFQ Date:{" "}
+            {rfqData.rfqDate ? formatToDDMMYYYY(rfqData.rfqDate) : "N/A"}
           </p>
         </div>
       </div>
@@ -75,11 +108,13 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
         <p className="text-md text-gray-600">
           Unique Care and Support Foundation
           <br />
-          No B84 Mandau Street Bulunkutu
+          {address.street}
           <br />
-          Maiduguri Borno State
+          {address.city}
           <br />
-          Nigeria
+          {address.state}
+          <br />
+          {address.country}
         </p>
       </div>
 
@@ -192,10 +227,6 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
               <th className="border border-gray-300 p-2 text-left font-bold">
                 ITEM NAME
               </th>
-              {/* <th className="border border-gray-300 p-2 text-left font-bold">
-                DETAIL DESCRIPTION
-              </th> */}
-
               <th className="border border-gray-300 p-2 text-left font-bold">
                 QUANTITY
               </th>
@@ -215,36 +246,47 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
           </thead>
           <tbody>
             {rfqData.itemGroups.map((item, index) => (
-              <tr
-                key={index}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-300 p-2 text-sm">
-                  {index + 1}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm">
-                  {item.description.split(" ").slice(0, 2).join(" ")}
-                </td>
-                {/* <td className="border border-gray-300 p-2 text-sm">
-                  {item.description}
-                </td> */}
-
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.quantity.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.frequency.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm">
-                  {item.unit || "-"}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.unitCost > 0 ? item.unitCost.toLocaleString() : ""}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.total > 0 ? item.unitCost.toLocaleString() : ""}
-                </td>
-              </tr>
+              <React.Fragment key={index}>
+                <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {item.itemName}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.quantity.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.frequency.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {item.unit || "-"}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.unitCost > 0 ? item.unitCost.toLocaleString() : ""}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.total > 0 ? item.total.toLocaleString() : ""}
+                  </td>
+                </tr>
+                {/* Description row spanning all columns */}
+                {item.description && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="border border-gray-300 p-2 text-sm"
+                    >
+                      <div className="w-full">
+                        <span className="font-semibold text-gray-600">
+                          Description:
+                        </span>
+                        <p className="mt-1">{item.description}</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
             {/* Grand Total Row */}
             <tr className="bg-gray-100 font-bold">
@@ -270,26 +312,20 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
               <td className="border border-gray-300 p-2 font-semibold bg-gray-100 w-1/3 text-sm">
                 Delivery Period (in days, from receipt of CASFOD Purchase Order)
               </td>
-              <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.deliveryPeriod || ""}
-              </td>
+              <td className="border border-gray-300 p-2 text-sm"></td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 font-semibold bg-gray-100 text-sm">
                 Bid Validity Period (in days from receipt of CASFOD Purchase
                 Order):
               </td>
-              <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.bidValidityPeriod || ""}
-              </td>
+              <td className="border border-gray-300 p-2 text-sm"></td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 font-semibold bg-gray-100 text-sm">
                 Guarantee period:
               </td>
-              <td className="border border-gray-300 p-2 text-sm">
-                {rfqData.guaranteePeriod || ""}
-              </td>
+              <td className="border border-gray-300 p-2 text-sm"></td>
             </tr>
           </tbody>
         </table>

@@ -83,13 +83,14 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
       [field]: value,
     };
 
-    // Calculate total if unitCost or quantity changes
-    if (field === "unitCost" || field === "quantity") {
+    // Calculate total if unitCost, quantity, or frequency changes
+    if (field === "unitCost" || field === "quantity" || field === "frequency") {
       const unitCost =
         field === "unitCost" ? Number(value) : updatedItems[index].unitCost;
       const quantity =
         field === "quantity" ? Number(value) : updatedItems[index].quantity;
-      const frequency = updatedItems[index].frequency;
+      const frequency =
+        field === "frequency" ? Number(value) : updatedItems[index].frequency;
 
       updatedItems[index].total = unitCost * quantity * frequency;
     }
@@ -131,12 +132,50 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
+    // Validate required timeline fields
+    if (!formData.RFQTitle?.trim()) {
+      alert("Please enter a purchase order title");
+      return;
+    }
+
+    if (!formData.deliveryPeriod?.trim()) {
+      alert("Please enter a delivery period");
+      return;
+    }
+
+    if (!formData.bidValidityPeriod?.trim()) {
+      alert("Please enter a bid validity period");
+      return;
+    }
+
+    if (!formData.guaranteePeriod?.trim()) {
+      alert("Please enter a guarantee period");
+      return;
+    }
+
     // Validate that all items have prices
     const hasEmptyPrices = itemGroups.some(
       (item) => !item.unitCost || item.unitCost <= 0
     );
     if (hasEmptyPrices) {
       alert("Please fill in all unit costs");
+      return;
+    }
+
+    // Validate that all items have valid quantity and frequency
+    const hasInvalidQuantity = itemGroups.some(
+      (item) => !item.quantity || item.quantity <= 0
+    );
+    if (hasInvalidQuantity) {
+      alert("Please enter valid quantities for all items");
+      return;
+    }
+
+    const hasInvalidFrequency = itemGroups.some(
+      (item) => !item.frequency || item.frequency <= 0
+    );
+    if (hasInvalidFrequency) {
+      alert("Please enter valid frequencies for all items");
       return;
     }
 
@@ -188,6 +227,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-6">
+        {/* Basic Information */}
         <Row>
           <FormRow label="Purchase Order Title *" type="wide">
             <Input
@@ -201,45 +241,52 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
           </FormRow>
         </Row>
 
-        <Row cols="grid-cols-1 md:grid-cols-3">
-          <FormRow label="Delivery Period *">
-            <Input
-              type="text"
-              id="deliveryPeriod"
-              value={formData.deliveryPeriod}
-              onChange={(e) =>
-                handleFormChange("deliveryPeriod", e.target.value)
-              }
-              placeholder="e.g., 30 days"
-              required
-            />
-          </FormRow>
+        {/* Timeline & Validity Section */}
+        <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+          <h3 className="text-lg font-semibold text-blue-800 mb-4">
+            Timeline & Validity
+          </h3>
+          <Row cols="grid-cols-1 md:grid-cols-3">
+            <FormRow label="Delivery Period *">
+              <Input
+                type="text"
+                id="deliveryPeriod"
+                value={formData.deliveryPeriod}
+                onChange={(e) =>
+                  handleFormChange("deliveryPeriod", e.target.value)
+                }
+                placeholder="e.g., 30 days"
+                required
+              />
+            </FormRow>
 
-          <FormRow label="Bid Validity Period *">
-            <Input
-              type="text"
-              id="bidValidityPeriod"
-              value={formData.bidValidityPeriod}
-              onChange={(e) =>
-                handleFormChange("bidValidityPeriod", e.target.value)
-              }
-              placeholder="e.g., 60 days"
-              required
-            />
-          </FormRow>
+            <FormRow label="Bid Validity Period *">
+              <Input
+                type="text"
+                id="bidValidityPeriod"
+                value={formData.bidValidityPeriod}
+                onChange={(e) =>
+                  handleFormChange("bidValidityPeriod", e.target.value)
+                }
+                placeholder="e.g., 60 days"
+                required
+              />
+            </FormRow>
 
-          <FormRow label="Guarantee Period">
-            <Input
-              type="text"
-              id="guaranteePeriod"
-              value={formData.guaranteePeriod}
-              onChange={(e) =>
-                handleFormChange("guaranteePeriod", e.target.value)
-              }
-              placeholder="e.g., 12 months"
-            />
-          </FormRow>
-        </Row>
+            <FormRow label="Guarantee Period *">
+              <Input
+                type="text"
+                id="guaranteePeriod"
+                value={formData.guaranteePeriod}
+                onChange={(e) =>
+                  handleFormChange("guaranteePeriod", e.target.value)
+                }
+                placeholder="e.g., 12 months"
+                required
+              />
+            </FormRow>
+          </Row>
+        </div>
 
         {/* Vendor Information (Read-only) */}
         {purchaseOrder?.selectedVendor && (
@@ -292,7 +339,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                   </div>
 
                   <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                    <FormRow label="Description">
+                    <FormRow label="Description *">
                       <Input
                         type="text"
                         value={item.description}
@@ -308,7 +355,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                       />
                     </FormRow>
 
-                    <FormRow label="Frequency">
+                    <FormRow label="Frequency *">
                       <Input
                         type="number"
                         min="1"
@@ -324,7 +371,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                       />
                     </FormRow>
 
-                    <FormRow label="Quantity">
+                    <FormRow label="Quantity *">
                       <Input
                         type="number"
                         min="1"

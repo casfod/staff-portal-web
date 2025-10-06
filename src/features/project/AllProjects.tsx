@@ -42,8 +42,6 @@ export function AllProjects() {
   const projects = useMemo(() => data?.data?.projects ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
-  console.log(projects);
-
   // Toggle nested table visibility
   const toggleViewItems = (id: string) => {
     setVisibleItems((prev) => ({

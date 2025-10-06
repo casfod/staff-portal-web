@@ -663,16 +663,26 @@ export interface ItemGroupType {
   total: number;
 }
 
+export interface RFQItemGroupType {
+  description: string;
+  itemName: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
+
 export interface RFQType {
   id: string;
   RFQTitle: string;
   RFQCode: string;
-  itemGroups: ItemGroupType[];
+  itemGroups: RFQItemGroupType[];
   copiedTo: string[] | VendorType[];
-  deliveryPeriod: string;
-  bidValidityPeriod: string;
-  guaranteePeriod: string;
+  deadlineDate: string;
+  rfqDate: string;
   pdfUrl?: string;
+  casfodAddressId: string;
   cloudinaryId?: string;
   status: "draft" | "preview" | "sent" | "cancelled";
   createdBy: UserType;
@@ -684,20 +694,20 @@ export interface RFQType {
 
 export interface CreateRFQType {
   RFQTitle: string;
-  deliveryPeriod: string;
-  bidValidityPeriod: string;
-  guaranteePeriod: string;
-  itemGroups: ItemGroupType[];
+  deadlineDate: string;
+  rfqDate: string;
+  casfodAddressId: string;
+  itemGroups: RFQItemGroupType[];
   copiedTo: string[];
   files?: File[];
 }
 
 export interface UpdateRFQType {
   RFQTitle?: string;
-  deliveryPeriod?: string;
-  bidValidityPeriod?: string;
-  guaranteePeriod?: string;
-  itemGroups?: ItemGroupType[];
+  deadlineDate?: string;
+  rfqDate?: string;
+  casfodAddressId?: string;
+  itemGroups?: RFQItemGroupType[];
   copiedTo?: string[];
   files?: File[];
 }
@@ -754,7 +764,7 @@ export interface PurchaseOrderType {
   RFQTitle: string;
   RFQCode: string;
   POCode: string;
-  itemGroups: ItemGroupType[];
+  itemGroups: RFQItemGroupType[];
   copiedTo: Array<{
     id: string;
     businessName: string;
@@ -795,7 +805,7 @@ export interface PurchaseOrderType {
 
 export interface CreatePurchaseOrderType {
   RFQTitle: string;
-  itemGroups: ItemGroupType[];
+  itemGroups: RFQItemGroupType[];
   copiedTo?: string[];
   selectedVendor: string;
   approvedBy?: Partial<UserType> | string;
@@ -807,7 +817,7 @@ export interface CreatePurchaseOrderType {
 
 export interface UpdatePurchaseOrderType {
   RFQTitle?: string;
-  itemGroups?: ItemGroupType[];
+  itemGroups?: RFQItemGroupType[];
   copiedTo?: string[];
   selectedVendor?: string;
   approvedBy: Partial<UserType> | string;

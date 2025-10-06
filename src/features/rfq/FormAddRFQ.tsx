@@ -5,15 +5,22 @@ import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
-import { CreateRFQType, ItemGroupType } from "../../interfaces";
+import { CreateRFQType, RFQItemGroupType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useCreateRFQ, useCreateAndSendRFQ } from "./Hooks/useRFQ";
 import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2 } from "lucide-react";
-// import { Plus, Trash2, Eye } from "lucide-react";
-// import RFQPDFTemplate from "./RFQPDFTemplate";
-// import toast from "react-hot-toast";
-// import PDFPreviewModal from "../../ui/PDFPreviewModal";
+import DatePicker from "../../ui/DatePicker";
+import Select from "../../ui/Select";
+
+export const casfodAddress = [
+  {
+    id: "adamawa",
+    name: "Adamawa",
+  },
+  { id: "borno", name: "Borno" },
+  { id: "sokoto", name: "Sokoto" },
+];
 
 const FormAddRFQ: React.FC = () => {
   const navigate = useNavigate();
@@ -21,9 +28,9 @@ const FormAddRFQ: React.FC = () => {
   // Form state
   const [formData, setFormData] = useState<CreateRFQType>({
     RFQTitle: "",
-    deliveryPeriod: "",
-    bidValidityPeriod: "",
-    guaranteePeriod: "",
+    deadlineDate: "",
+    rfqDate: "",
+    casfodAddressId: "",
     itemGroups: [],
     copiedTo: [],
   });
@@ -41,8 +48,9 @@ const FormAddRFQ: React.FC = () => {
   const isPending = isCreating || isSending;
 
   // Item Groups Management
-  const [itemGroups, setItemGroups] = useState<ItemGroupType[]>([
+  const [itemGroups, setItemGroups] = useState<RFQItemGroupType[]>([
     {
+      itemName: "",
       description: "",
       frequency: 1,
       quantity: 1,
@@ -65,7 +73,7 @@ const FormAddRFQ: React.FC = () => {
   // Item Group Handlers
   const handleItemGroupChange = (
     index: number,
-    field: keyof ItemGroupType,
+    field: keyof RFQItemGroupType,
     value: string | number
   ) => {
     const updatedItems = [...itemGroups];
@@ -96,6 +104,7 @@ const FormAddRFQ: React.FC = () => {
     setItemGroups([
       ...itemGroups,
       {
+        itemName: "",
         description: "",
         frequency: 1,
         quantity: 1,
@@ -184,51 +193,75 @@ const FormAddRFQ: React.FC = () => {
               />
             </FormRow>
           </Row>
-
-          <Row cols="grid-cols-1 md:grid-cols-3">
-            <FormRow label="Delivery Period *">
-              <Input
-                type="text"
-                id="deliveryPeriod"
-                value={formData.deliveryPeriod}
-                onChange={(e) =>
-                  handleFormChange("deliveryPeriod", e.target.value)
+          <Row>
+            <FormRow label="Select CASFOD Address *">
+              <Select
+                clearable={true}
+                id="casfodAddressId"
+                customLabel="Select a State"
+                value={formData.casfodAddressId || ""}
+                onChange={(value) => handleFormChange("casfodAddressId", value)} // Direct value now
+                options={
+                  casfodAddress
+                    ? casfodAddress.map((bank) => ({
+                        id: bank.id as string,
+                        name: `${bank.name}`,
+                      }))
+                    : []
                 }
-                placeholder="e.g., 30 days"
-              />
-            </FormRow>
-
-            <FormRow label="Bid Validity Period *">
-              <Input
-                type="text"
-                id="bidValidityPeriod"
-                value={formData.bidValidityPeriod}
-                onChange={(e) =>
-                  handleFormChange("bidValidityPeriod", e.target.value)
-                }
-                placeholder="e.g., 60 days"
-              />
-            </FormRow>
-
-            <FormRow label="Guarantee Period">
-              <Input
-                type="text"
-                id="guaranteePeriod"
-                value={formData.guaranteePeriod}
-                onChange={(e) =>
-                  handleFormChange("guaranteePeriod", e.target.value)
-                }
-                placeholder="e.g., 12 months"
+                optionsHeight={220}
+                filterable={true}
+                required
               />
             </FormRow>
           </Row>
 
+          <Row cols="grid-cols-1 md:grid-cols-4">
+            <FormRow label="RFQ Date *">
+              <DatePicker
+                selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+                onChange={(date) =>
+                  handleFormChange("rfqDate", date ? date.toISOString() : "")
+                }
+                variant="secondary"
+                size="md" // or "sm"/"lg" based on your form size
+                placeholder="Select date"
+                // className="custom-class-if-needed"
+                clearable={true}
+                // minDate={new Date()}
+              />
+            </FormRow>
+
+            <FormRow label="Deadline Date *">
+              <DatePicker
+                selected={
+                  formData.deadlineDate ? new Date(formData.deadlineDate) : null
+                }
+                onChange={(date) =>
+                  handleFormChange(
+                    "deadlineDate",
+                    date ? date.toISOString() : ""
+                  )
+                }
+                variant="secondary"
+                size="md" // or "sm"/"lg" based on your form size
+                placeholder="Select date"
+                // className="custom-class-if-needed"
+                clearable={true}
+                minDate={Date.now()}
+                // requiredTrigger={!!formData.dayOfDeparture}
+              />
+            </FormRow>
+          </Row>
           {/* Item Groups Section */}
           <Row>
             <FormRow label="Items *" type="wide">
               <div className="space-y-4">
                 {itemGroups.map((item, index) => (
-                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div
+                    key={index}
+                    className="space-y-3 border rounded-lg p-4 bg-gray-50"
+                  >
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="font-semibold text-gray-700">
                         Item {index + 1}
@@ -246,18 +279,18 @@ const FormAddRFQ: React.FC = () => {
                     </div>
 
                     <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                      <FormRow label="Description">
+                      <FormRow label="Item Name">
                         <Input
                           type="text"
-                          value={item.description}
+                          value={item.itemName}
                           onChange={(e) =>
                             handleItemGroupChange(
                               index,
-                              "description",
+                              "itemName",
                               e.target.value
                             )
                           }
-                          placeholder="Item description"
+                          placeholder="Item Name"
                           required
                         />
                       </FormRow>
@@ -311,6 +344,7 @@ const FormAddRFQ: React.FC = () => {
                           min="0"
                           step="0.01"
                           value={item.unitCost}
+                          disabled
                           onChange={(e) =>
                             handleItemGroupChange(
                               index,
@@ -327,6 +361,25 @@ const FormAddRFQ: React.FC = () => {
                           value={item.total}
                           disabled
                           className="bg-gray-100 font-semibold"
+                        />
+                      </FormRow>
+                    </Row>
+
+                    <Row>
+                      <FormRow label="Description*" type="wide">
+                        <textarea
+                          className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+                          maxLength={4000}
+                          id="description"
+                          required
+                          value={item.description}
+                          onChange={(e) =>
+                            handleItemGroupChange(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
                         />
                       </FormRow>
                     </Row>

@@ -9,12 +9,12 @@ import {
   Users,
   Clock,
   Shield,
-  DollarSign,
   Package,
   UserCheck,
 } from "lucide-react";
 import { ReactElement } from "react";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
+import { GoPerson } from "react-icons/go";
 
 interface PurchaseOrderDetailsProps {
   purchaseOrder: PurchaseOrderType;
@@ -41,14 +41,20 @@ export const PurchaseOrderDetails = ({
 }: PurchaseOrderDetailsProps) => {
   const { purchaseOrderId } = useParams();
 
-  const vendorName =
-    purchaseOrder.copiedTo &&
-    Array.isArray(purchaseOrder.copiedTo) &&
-    purchaseOrder.copiedTo.length > 0
-      ? typeof purchaseOrder.copiedTo[0] === "object"
-        ? (purchaseOrder.copiedTo[0] as any).businessName
-        : "Vendor"
-      : "No Vendor";
+  // Updated vendor name logic to handle both copiedTo and selectedVendor
+  const vendorName = purchaseOrder.selectedVendor
+    ? purchaseOrder.selectedVendor.businessName
+    : purchaseOrder.copiedTo &&
+      Array.isArray(purchaseOrder.copiedTo) &&
+      purchaseOrder.copiedTo.length > 0
+    ? typeof purchaseOrder.copiedTo[0] === "object"
+      ? (purchaseOrder.copiedTo[0] as any).businessName
+      : "Vendor"
+    : "No Vendor";
+
+  // Use POCode if available, otherwise fall back to RFQCode
+  const purchaseOrderCode = purchaseOrder.POCode;
+  const RFQReferenceCode = purchaseOrder.RFQCode;
 
   const purchaseOrderSections: PurchaseOrderSection[] = [
     {
@@ -61,21 +67,28 @@ export const PurchaseOrderDetails = ({
           content: purchaseOrder.RFQTitle,
         },
         {
-          id: "RFQCode",
-          label: "PO Code",
-          content: purchaseOrder.RFQCode,
-        },
-        {
           id: "status",
           label: "Status",
           content: purchaseOrder.status.toUpperCase(),
           icon: <Tag className="w-4 h-4" />,
         },
+
+        {
+          id: "purchaseOrderCode",
+          label: "PO Code",
+          content: purchaseOrderCode,
+        },
+        {
+          id: "RFQReferenceCode",
+          label: "RFQ Reference Code",
+          content: RFQReferenceCode,
+        },
+
         {
           id: "totalAmount",
           label: "Total Amount",
           content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
-          icon: <DollarSign className="w-4 h-4" />,
+          // icon: <DollarSign className="w-4 h-4" />,
         },
       ],
     },
@@ -140,11 +153,6 @@ export const PurchaseOrderDetails = ({
       icon: <Calendar className="w-4 h-4" />,
       fields: [
         {
-          id: "createdBy",
-          label: "Created By",
-          content: `${purchaseOrder.createdBy.first_name} ${purchaseOrder.createdBy.last_name}`,
-        },
-        {
           id: "createdAt",
           label: "Created Date",
           content: dateformat(purchaseOrder.createdAt),
@@ -155,6 +163,21 @@ export const PurchaseOrderDetails = ({
           label: "Last Updated",
           content: dateformat(purchaseOrder.updatedAt),
           icon: <Calendar className="w-4 h-4" />,
+        },
+
+        {
+          id: "createdBy",
+          label: "Created By",
+          content: `${purchaseOrder.createdBy.first_name} ${purchaseOrder.createdBy.last_name}`,
+          icon: <GoPerson className="w-4 h-4" />,
+        },
+        {
+          id: "createdBy",
+          label: "Aprroved By",
+          content: purchaseOrder?.approvedBy
+            ? `${purchaseOrder?.approvedBy?.first_name} ${purchaseOrder?.approvedBy?.last_name}`
+            : "N/A",
+          icon: <GoPerson className="w-4 h-4" />,
         },
       ],
     },
@@ -272,7 +295,9 @@ export const PurchaseOrderDetails = ({
                                     <span className="font-semibold text-gray-600">
                                       Frequency:
                                     </span>
-                                    <p className="mt-1">{item.frequency}</p>
+                                    <p className="mt-1">
+                                      {String(item.frequency)}
+                                    </p>
                                   </div>
                                   <div>
                                     <span className="font-semibold text-gray-600">
