@@ -113,7 +113,7 @@ const PurchaseOrder = () => {
     filename: `PurchaseOrder-${requestData?.POCode || requestData?.id}`,
     multiPage: true,
     titleOptions: {
-      text: "Purchase Order",
+      text: "CASFOD Purchase Order",
     },
   });
 
