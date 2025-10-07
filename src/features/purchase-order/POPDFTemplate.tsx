@@ -2,6 +2,8 @@
 import React from "react";
 import logo from "../../assets/logo.webp";
 import { PurchaseOrderType } from "../../interfaces";
+import { casfodAddress } from "../rfq/RFQPDFTemplate";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 
 interface POPDFTemplateProps {
   pdfRef?: any;
@@ -26,6 +28,19 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
       day: "numeric",
     });
   };
+
+  // Get the address based on casfodAddressId
+  const getAddress = () => {
+    const address =
+      casfodAddress[poData.casfodAddressId as keyof typeof casfodAddress];
+    if (!address) {
+      // Fallback to Borno address if not found
+      return casfodAddress.borno;
+    }
+    return address;
+  };
+
+  const address = getAddress();
 
   return (
     <div
@@ -79,16 +94,18 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-green-500">
         <h3 className="font-bold mb-2 text-lg text-gray-700">
-          Delivery Address:
+          Delivery address:
         </h3>
         <p className="text-md text-gray-600">
           Unique Care and Support Foundation
           <br />
-          No B84 Mandau Street Bulunkutu
+          {address.street}
           <br />
-          Maiduguri Borno State
+          {address.city}
           <br />
-          Nigeria
+          {address.state}
+          <br />
+          {address.country}
         </p>
       </div>
 
@@ -104,7 +121,8 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
             <strong>PO Number:</strong> {poData.POCode}
           </div>
           <div>
-            <strong>RFQ Reference:</strong> {poData.RFQCode}
+            <strong>RFQ Reference:</strong>{" "}
+            {poData.RFQCode ? poData.RFQCode : "N/A"}
           </div>
           <div>
             <strong>Delivery Period:</strong> {poData.deliveryPeriod}
@@ -117,82 +135,13 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               <strong>Guarantee Period:</strong> {poData.guaranteePeriod}
             </div>
           )}
+          {poData.deadlineDate && (
+            <div>
+              <strong>Deadline Date:</strong>{" "}
+              {formatToDDMMYYYY(poData.deadlineDate)}
+            </div>
+          )}
         </div>
-      </div>
-
-      {isGenerating && <div className="h-40"></div>}
-
-      {/* Items Table */}
-      <div className="mb-6">
-        <table className="w-full border-collapse border border-gray-300 text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                SN
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                ITEM DESCRIPTION
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                QUANTITY
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                FREQUENCY
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                UNIT
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                UNIT COST (₦)
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                TOTAL COST (₦)
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {poData.itemGroups.map((item, index) => (
-              <tr
-                key={index}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-300 p-2 text-sm">
-                  {index + 1}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm">
-                  {item.description}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.quantity.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.frequency.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm">
-                  {item.unit || "-"}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.unitCost.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.total.toLocaleString()}
-                </td>
-              </tr>
-            ))}
-            {/* Grand Total Row */}
-            <tr className="bg-gray-100 font-bold">
-              <td
-                colSpan={6}
-                className="border border-gray-300 p-2 text-right text-sm"
-              >
-                GRAND TOTAL:
-              </td>
-              <td className="border border-gray-300 p-2 text-right text-sm">
-                ₦{grandTotal.toLocaleString()}
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
 
       {/* Terms and Conditions */}
@@ -238,6 +187,121 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
         </ul>
       </div>
 
+      {isGenerating && <div className="h-40"></div>}
+
+      {/* Items Table */}
+      <div className="mb-6">
+        <table className="w-full border-collapse border border-gray-300 text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                SN
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                ITEM NAME
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                QUANTITY
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                FREQUENCY
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                UNIT
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                UNIT COST (₦)
+              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">
+                TOTAL COST (₦)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {poData.itemGroups.map((item, index) => (
+              <React.Fragment key={index}>
+                <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {item.itemName}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.quantity.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.frequency.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {item.unit || "-"}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.unitCost > 0 ? item.unitCost.toLocaleString() : ""}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.total > 0 ? item.total.toLocaleString() : ""}
+                  </td>
+                </tr>
+                {/* Description row spanning all columns */}
+                {item.description && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="border border-gray-300 p-2 text-sm"
+                    >
+                      <div className="w-full">
+                        <span className="font-semibold text-gray-600">
+                          Detailed Description:
+                        </span>
+                        <p className="mt-1">{item.description}</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+            {/* Grand Total Row */}
+            <tr className="bg-gray-100 font-bold">
+              <td
+                colSpan={6}
+                className="border border-gray-300 p-2 text-right text-sm"
+              >
+                VAT:
+              </td>
+              <td className="border border-gray-300 p-2 text-right text-sm">
+                ₦{poData.VAT ? poData.VAT.toLocaleString() : 0}
+              </td>
+            </tr>
+            <tr className="bg-gray-100 font-bold">
+              <td
+                colSpan={6}
+                className="border border-gray-300 p-2 text-right text-sm"
+              >
+                GROSS TOTAL:
+              </td>
+              <td className="border border-gray-300 p-2 text-right text-sm">
+                ₦{grandTotal.toLocaleString()}
+              </td>
+            </tr>
+            <tr className="bg-gray-100 font-bold">
+              <td
+                colSpan={6}
+                className="border border-gray-300 p-2 text-right text-sm"
+              >
+                NET TOTAL:
+              </td>
+              <td className="border border-gray-300 p-2 text-right text-sm">
+                ₦
+                {poData.VAT
+                  ? (grandTotal - poData.VAT).toLocaleString()
+                  : grandTotal.toLocaleString()}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       {/* Approval Section */}
       <div className="mt-12 pt-8 border-t border-gray-300">
         <div className="grid grid-cols-2 gap-8">
@@ -247,7 +311,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               <p>
                 {poData.createdBy.first_name} {poData.createdBy.last_name}
               </p>
-              {/* <p className="text-sm text-gray-600">{poData.createdBy.role}</p> */}
+              <p className="text-sm text-gray-600">{poData.createdBy.email}</p>
             </div>
           </div>
 
@@ -258,9 +322,9 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
                 <p>
                   {poData.approvedBy.first_name} {poData.approvedBy.last_name}
                 </p>
-                {/* <p className="text-sm text-gray-600">
-                  {poData.approvedBy.role}
-                </p> */}
+                <p className="text-sm text-gray-600">
+                  {poData.approvedBy.email}
+                </p>
               </div>
             </div>
           )}
@@ -270,7 +334,10 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-gray-300 text-center">
         <p className="text-sm text-gray-700">
-          Unique Care and Support Foundation | procurement@casfod.org
+          Unique Care and Support Foundation |{" "}
+          <span className="font-semibold text-blue-600">
+            procurement@casfod.org
+          </span>
         </p>
       </div>
     </div>

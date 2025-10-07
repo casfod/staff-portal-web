@@ -1,3 +1,4 @@
+// apiPurchaseOrder.ts
 import axios from "axios";
 import Cookies from "js-cookie";
 import { localStorageUser } from "../utils/localStorageUser";
@@ -107,13 +108,16 @@ export const getPurchaseOrder = async function (
   }
 };
 
-// UPDATED: Now properly handles timeline fields
 export const createPurchaseOrderFromRFQ = async function (
   rfqId: string,
   vendorId: string,
   data: {
     itemGroups: any[];
-    approvedBy: string;
+    approvedBy?: string;
+    deadlineDate?: string;
+    rfqDate?: string;
+    casfodAddressId: string;
+    VAT: number;
     deliveryPeriod: string;
     bidValidityPeriod: string;
     guaranteePeriod: string;
@@ -121,29 +125,30 @@ export const createPurchaseOrderFromRFQ = async function (
   files: File[] = []
 ): Promise<UsePurchaseOrder> {
   try {
-    console.log("createPurchaseOrderFromRFQ:", data);
-
     const formData = new FormData();
 
-    // Append item groups as JSON
+    // Append JSON and scalar fields
     formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    formData.append("approvedBy", data.approvedBy);
-
-    // Append timeline fields
+    formData.append("casfodAddressId", data.casfodAddressId);
     formData.append("deliveryPeriod", data.deliveryPeriod);
     formData.append("bidValidityPeriod", data.bidValidityPeriod);
     formData.append("guaranteePeriod", data.guaranteePeriod);
+    formData.append("VAT", data.VAT.toString());
+
+    if (data.approvedBy) formData.append("approvedBy", data.approvedBy);
+    if (data.deadlineDate) formData.append("deadlineDate", data.deadlineDate);
+    if (data.rfqDate) formData.append("rfqDate", data.rfqDate);
 
     // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
+    files.forEach((file) => formData.append("files", file));
 
     const response = await axiosInstance.post<UsePurchaseOrder>(
       `/purchase-orders/create-from-rfq/${rfqId}/${vendorId}`,
       formData,
       {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       }
     );
 
@@ -153,40 +158,34 @@ export const createPurchaseOrderFromRFQ = async function (
   }
 };
 
-// UPDATED: Now properly handles approvedBy field
 export const createIndependentPurchaseOrder = async function (
   data: CreatePurchaseOrderType,
   files: File[] = []
 ): Promise<UsePurchaseOrder> {
+  console.log("CreatePurchaseOrderType:", data);
+
   try {
     const formData = new FormData();
 
-    // Append all purchase order fields
-    const poFields: (keyof CreatePurchaseOrderType)[] = [
-      "RFQTitle",
-      "deliveryPeriod",
-      "bidValidityPeriod",
-      "guaranteePeriod",
-      "selectedVendor",
-    ];
+    // Append scalar fields
+    formData.append("RFQTitle", data.RFQTitle);
+    formData.append("deliveryPeriod", data.deliveryPeriod);
+    formData.append("bidValidityPeriod", data.bidValidityPeriod);
+    formData.append("guaranteePeriod", data.guaranteePeriod);
+    formData.append("casfodAddressId", data.casfodAddressId);
+    formData.append("selectedVendor", data.selectedVendor);
+    formData.append("VAT", data.VAT.toString());
 
-    poFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append approvedBy if exists
-    if (data.approvedBy) {
-      formData.append("approvedBy", String(data.approvedBy));
-    }
+    if (data.approvedBy) formData.append("approvedBy", String(data.approvedBy));
+    if (data.rfqDate) formData.append("rfqDate", data.rfqDate);
+    if (data.deadlineDate) formData.append("deadlineDate", data.deadlineDate);
 
     // Append item groups as JSON
     if (data.itemGroups && Array.isArray(data.itemGroups)) {
       formData.append("itemGroups", JSON.stringify(data.itemGroups));
     }
 
-    // Append copiedTo as array
+    // Append copiedTo as multiple values
     if (data.copiedTo && Array.isArray(data.copiedTo)) {
       data.copiedTo.forEach((vendorId) => {
         formData.append("copiedTo", vendorId);
@@ -212,7 +211,6 @@ export const createIndependentPurchaseOrder = async function (
   }
 };
 
-// UPDATED: Now properly handles approvedBy field
 export const updatePurchaseOrder = async function (
   purchaseOrderId: string,
   data: UpdatePurchaseOrderType,
@@ -221,39 +219,39 @@ export const updatePurchaseOrder = async function (
   try {
     const formData = new FormData();
 
-    // Append all purchase order fields
-    const poFields: (keyof UpdatePurchaseOrderType)[] = [
-      "RFQTitle",
-      "deliveryPeriod",
-      "bidValidityPeriod",
-      "guaranteePeriod",
-      "selectedVendor",
-    ];
-
-    poFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append approvedBy if exists
-    if (data.approvedBy) {
+    // Append updated scalar fields if present
+    if (data.RFQTitle !== undefined) formData.append("RFQTitle", data.RFQTitle);
+    if (data.deliveryPeriod !== undefined)
+      formData.append("deliveryPeriod", data.deliveryPeriod);
+    if (data.bidValidityPeriod !== undefined)
+      formData.append("bidValidityPeriod", data.bidValidityPeriod);
+    if (data.guaranteePeriod !== undefined)
+      formData.append("guaranteePeriod", data.guaranteePeriod);
+    if (data.VAT !== undefined) formData.append("VAT", data.VAT.toString());
+    if (data.status !== undefined) formData.append("status", data.status);
+    if (data.casfodAddressId !== undefined)
+      formData.append("casfodAddressId", data.casfodAddressId);
+    if (data.selectedVendor !== undefined)
+      formData.append("selectedVendor", String(data.selectedVendor));
+    if (data.approvedBy !== undefined)
       formData.append("approvedBy", String(data.approvedBy));
-    }
+    if (data.rfqDate !== undefined) formData.append("rfqDate", data.rfqDate);
+    if (data.deadlineDate !== undefined)
+      formData.append("deadlineDate", data.deadlineDate);
 
-    // Append item groups as JSON
+    // Append item groups as JSON if present
     if (data.itemGroups && Array.isArray(data.itemGroups)) {
       formData.append("itemGroups", JSON.stringify(data.itemGroups));
     }
 
-    // Append copiedTo as array
+    // Append copiedTo as multiple values if present
     if (data.copiedTo && Array.isArray(data.copiedTo)) {
       data.copiedTo.forEach((vendorId) => {
         formData.append("copiedTo", vendorId);
       });
     }
 
-    // Append comment if exists
+    // Append comment if present
     if (data.comment) {
       formData.append("comment", data.comment);
     }
@@ -277,12 +275,11 @@ export const updatePurchaseOrder = async function (
   }
 };
 
-// UPDATED: Now accepts PDF file for status update
 export const updatePurchaseOrderStatus = async function (
   purchaseOrderId: string,
   status: string,
   comment?: string,
-  pdfFile?: File // NEW: Accept PDF file
+  pdfFile?: File
 ): Promise<UsePurchaseOrder> {
   try {
     const formData = new FormData();
@@ -293,7 +290,7 @@ export const updatePurchaseOrderStatus = async function (
     }
 
     if (pdfFile) {
-      formData.append("pdfFile", pdfFile); // NEW: Append PDF file
+      formData.append("pdfFile", pdfFile);
     }
 
     const response = await axiosInstance.patch<UsePurchaseOrder>(

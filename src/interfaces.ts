@@ -744,8 +744,6 @@ export interface UseRFQStatsType {
 ///////////////////////////////////
 // PURCHASE ORDER
 ///////////////////////////////////
-// Add to your interfaces file
-// purchaseOrderInterfaces.ts
 
 export interface Comment {
   user: {
@@ -764,6 +762,8 @@ export interface PurchaseOrderType {
   RFQTitle: string;
   RFQCode: string;
   POCode: string;
+  deadlineDate?: string;
+  rfqDate?: string;
   itemGroups: RFQItemGroupType[];
   copiedTo: Array<{
     id: string;
@@ -784,7 +784,9 @@ export interface PurchaseOrderType {
   deliveryPeriod: string;
   bidValidityPeriod: string;
   guaranteePeriod: string;
+  casfodAddressId: string;
   totalAmount: number;
+  VAT: number;
   pdfUrl: string;
   cloudinaryId: string;
   createdBy: {
@@ -806,6 +808,10 @@ export interface PurchaseOrderType {
 export interface CreatePurchaseOrderType {
   RFQTitle: string;
   itemGroups: RFQItemGroupType[];
+  deadlineDate?: string;
+  casfodAddressId: string;
+  VAT: number;
+  rfqDate?: string;
   copiedTo?: string[];
   selectedVendor: string;
   approvedBy?: Partial<UserType> | string;
@@ -818,6 +824,11 @@ export interface CreatePurchaseOrderType {
 export interface UpdatePurchaseOrderType {
   RFQTitle?: string;
   itemGroups?: RFQItemGroupType[];
+  deadlineDate?: string;
+  rfqDate?: string;
+  casfodAddressId: string;
+  VAT: number;
+  status?: string;
   copiedTo?: string[];
   selectedVendor?: string;
   approvedBy: Partial<UserType> | string;

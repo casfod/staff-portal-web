@@ -66,7 +66,7 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
         {
           id: "casfodAddressId",
           label: "Casfod Address",
-          content: rfq.casfodAddressId,
+          content: rfq.casfodAddressId.toUpperCase(),
         },
       ],
     },

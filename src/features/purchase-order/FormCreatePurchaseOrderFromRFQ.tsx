@@ -1,3 +1,4 @@
+// FormCreatePurchaseOrderFromRFQ.tsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -6,17 +7,17 @@ import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
-// import { CreatePurchaseOrderType, ItemGroupType } from "../../interfaces";
-import { ItemGroupType } from "../../interfaces";
+import { CreatePurchaseOrderType, RFQItemGroupType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useCreatePurchaseOrderFromRFQ } from "./Hooks/usePurchaseOrder";
 import { FileUpload } from "../../ui/FileUpload";
 import { useRFQ } from "../rfq/Hooks/useRFQ";
-
 import Select from "../../ui/Select";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { useVendors } from "../Vendor/Hooks/useVendor";
 import { useAdmins } from "../user/Hooks/useAdmins";
+import DatePicker from "../../ui/DatePicker";
+import { casfodAddress } from "../rfq/FormAddRFQ";
 
 interface FormCreatePurchaseOrderFromRFQProps {
   rfqId: string;
@@ -34,29 +35,37 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
   const { createPurchaseOrderFromRFQ, isPending: isCreating } =
     useCreatePurchaseOrderFromRFQ();
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<string>("");
   const [selectedAdmin, setSelectedAdmin] = useState<string>("");
-  const [itemGroups, setItemGroups] = useState<ItemGroupType[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [itemGroups, setItemGroups] = useState<RFQItemGroupType[]>([]);
 
-  // Timeline fields state
+  // In FormCreatePurchaseOrderFromRFQ.tsx
+  const [formData, setFormData] = useState<{
+    casfodAddressId: string;
+    rfqDate: string;
+    deadlineDate: string;
+    VAT: number;
+  }>({
+    casfodAddressId: "",
+    rfqDate: "",
+    deadlineDate: "",
+    VAT: 0,
+  });
+  // Timeline fields
   const [deliveryPeriod, setDeliveryPeriod] = useState<string>("");
   const [bidValidityPeriod, setBidValidityPeriod] = useState<string>("");
   const [guaranteePeriod, setGuaranteePeriod] = useState<string>("");
 
-  // Fetch admins data
-  // const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
   const { data: adminsData } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   const rfqData = remoteRFQData?.data?.rfq || rfq;
-
   const vendors = vendorsData?.data?.vendors || [];
 
-  // Get vendors from RFQ's copiedTo array
+  // Filter vendors from RFQ's copiedTo
   const rfqVendors = useMemo(() => {
     if (!rfqData?.copiedTo) return [];
-
     return vendors.filter((vendor) =>
       rfqData.copiedTo.some((copiedVendor) =>
         typeof copiedVendor === "object"
@@ -66,22 +75,38 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
     );
   }, [rfqData?.copiedTo, vendors]);
 
+  // Sync itemGroups from RFQ, resetting prices
   useEffect(() => {
     if (rfqData?.itemGroups) {
-      // Initialize item groups with RFQ data but allow price, quantity, and frequency editing
-      setItemGroups(
-        rfqData.itemGroups.map((item) => ({
-          ...item,
-          unitCost: 0, // Reset unit cost for vendor to fill
-          total: 0, // Reset total
-        }))
-      );
+      const resetItems = rfqData.itemGroups.map((item) => ({
+        ...item,
+        unitCost: 0,
+        total: 0,
+      }));
+      setItemGroups(resetItems);
+      setFormData((prev) => ({
+        ...prev,
+        rfqDate: rfqData.rfqDate || "",
+        deadlineDate: rfqData.deadlineDate || "",
+        casfodAddressId: rfqData.casfodAddressId || "",
+      }));
     }
   }, [rfqData]);
 
+  const handleFormChange = (
+    field: keyof CreatePurchaseOrderType,
+    value: string | string[]
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Item Group Handlers
   const handleItemGroupChange = (
     index: number,
-    field: keyof ItemGroupType,
+    field: keyof RFQItemGroupType,
     value: string | number
   ) => {
     const updatedItems = [...itemGroups];
@@ -90,15 +115,14 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       [field]: value,
     };
 
-    // Calculate total if unitCost, quantity, or frequency changes
-    if (field === "unitCost" || field === "quantity" || field === "frequency") {
+    // Recalculate total on relevant changes
+    if (["unitCost", "quantity", "frequency"].includes(field as string)) {
       const unitCost =
         field === "unitCost" ? Number(value) : updatedItems[index].unitCost;
       const quantity =
         field === "quantity" ? Number(value) : updatedItems[index].quantity;
       const frequency =
         field === "frequency" ? Number(value) : updatedItems[index].frequency;
-
       updatedItems[index].total = unitCost * quantity * frequency;
     }
 
@@ -108,53 +132,44 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required timeline fields
+    // Validate timeline fields
     if (!deliveryPeriod.trim()) {
       alert("Please enter a delivery period");
       return;
     }
-
     if (!bidValidityPeriod.trim()) {
       alert("Please enter a bid validity period");
       return;
     }
-
     if (!guaranteePeriod.trim()) {
       alert("Please enter a guarantee period");
       return;
     }
-
     if (!selectedVendor) {
       alert("Please select a vendor");
       return;
     }
-
     if (!selectedAdmin) {
       alert("Please select an admin for approval");
       return;
     }
+    if (!formData.casfodAddressId) {
+      alert("Please select a CASFOD address");
+      return;
+    }
 
-    // Validate that all items have prices
-    const hasEmptyPrices = itemGroups.some(
-      (item) => !item.unitCost || item.unitCost <= 0
-    );
+    // Validate item groups
+    const hasEmptyPrices = itemGroups.some((item) => item.unitCost <= 0);
     if (hasEmptyPrices) {
       alert("Please fill in all unit costs");
       return;
     }
-
-    // Validate that all items have valid quantity and frequency
-    const hasInvalidQuantity = itemGroups.some(
-      (item) => !item.quantity || item.quantity <= 0
-    );
+    const hasInvalidQuantity = itemGroups.some((item) => item.quantity <= 0);
     if (hasInvalidQuantity) {
       alert("Please enter valid quantities for all items");
       return;
     }
-
-    const hasInvalidFrequency = itemGroups.some(
-      (item) => !item.frequency || item.frequency <= 0
-    );
+    const hasInvalidFrequency = itemGroups.some((item) => item.frequency <= 0);
     if (hasInvalidFrequency) {
       alert("Please enter valid frequencies for all items");
       return;
@@ -162,16 +177,17 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
 
     createPurchaseOrderFromRFQ(
       {
-        rfqId: rfqId,
+        rfqId,
         vendorId: selectedVendor,
         data: {
+          ...formData,
           itemGroups,
           deliveryPeriod,
           bidValidityPeriod,
           guaranteePeriod,
         },
         files: selectedFiles,
-        approvedBy: selectedAdmin, // Include approvedBy
+        approvedBy: selectedAdmin,
       },
       {
         onSuccess: (data: any) => {
@@ -183,7 +199,11 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
     );
   };
 
-  const totalAmount = itemGroups.reduce((sum, item) => sum + item.total, 0);
+  // Memoized total calculation
+  const totalAmount = useMemo(
+    () => itemGroups.reduce((sum, item) => sum + item.total, 0),
+    [itemGroups]
+  );
 
   if (isLoadingRFQ) {
     return (
@@ -199,7 +219,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* RFQ Information */}
+      {/* RFQ Information (Read-only) */}
       <Row>
         <FormRow label="RFQ Title" type="wide">
           <Input
@@ -211,16 +231,72 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
         </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      <Row>
         <FormRow label="RFQ Code">
           <Input
             type="text"
-            value={rfqData.RFQCode}
+            value={rfqData.RFQCode || ""}
             disabled
             className="bg-gray-100"
           />
         </FormRow>
+      </Row>
 
+      <Row>
+        <FormRow label="Select CASFOD Address *">
+          <Select
+            clearable={true}
+            id="casfodAddressId"
+            customLabel="Select a State"
+            value={formData.casfodAddressId || ""}
+            onChange={(value) => handleFormChange("casfodAddressId", value)}
+            options={
+              casfodAddress
+                ? casfodAddress.map((addr) => ({
+                    id: addr.id as string,
+                    name: `${addr.name}`,
+                  }))
+                : []
+            }
+            optionsHeight={220}
+            filterable={true}
+            required
+          />
+        </FormRow>
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="RFQ Date">
+          <DatePicker
+            selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+            onChange={(date) =>
+              handleFormChange("rfqDate", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md"
+            placeholder="Select date"
+            clearable={true}
+          />
+        </FormRow>
+
+        <FormRow label="Deadline Date">
+          <DatePicker
+            selected={
+              formData.deadlineDate ? new Date(formData.deadlineDate) : null
+            }
+            onChange={(date) =>
+              handleFormChange("deadlineDate", date ? date.toISOString() : "")
+            }
+            variant="secondary"
+            size="md"
+            placeholder="Select date"
+            clearable={true}
+            minDate={new Date()}
+          />
+        </FormRow>
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Select Vendor *">
           {isLoadingVendors ? (
             <SpinnerMini />
@@ -304,16 +380,19 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
             {itemGroups.map((item, index) => (
               <div key={index} className="border rounded-lg p-4 bg-gray-50">
                 <h4 className="font-semibold text-gray-700 mb-3">
-                  Item {index + 1}: {item.description}
+                  Item {index + 1}: {item.itemName}
                 </h4>
 
                 <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                  <FormRow label="Description">
+                  <FormRow label="Item Name">
                     <Input
                       type="text"
-                      value={item.description}
-                      disabled
-                      className="bg-gray-100"
+                      value={item.itemName}
+                      onChange={(e) =>
+                        handleItemGroupChange(index, "itemName", e.target.value)
+                      }
+                      placeholder="Item Name"
+                      required
                     />
                   </FormRow>
 
@@ -326,7 +405,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                         handleItemGroupChange(
                           index,
                           "frequency",
-                          parseFloat(e.target.value)
+                          parseInt(e.target.value) || 1
                         )
                       }
                       required
@@ -342,7 +421,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                         handleItemGroupChange(
                           index,
                           "quantity",
-                          parseFloat(e.target.value)
+                          parseInt(e.target.value) || 1
                         )
                       }
                       required
@@ -368,7 +447,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                         handleItemGroupChange(
                           index,
                           "unitCost",
-                          parseFloat(e.target.value)
+                          parseFloat(e.target.value) || 0
                         )
                       }
                       required
@@ -384,13 +463,52 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                     />
                   </FormRow>
                 </Row>
+
+                <Row>
+                  <FormRow label="Description *" type="wide">
+                    <textarea
+                      className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
+                      maxLength={4000}
+                      id={`description-${index}`}
+                      value={item.description}
+                      onChange={(e) =>
+                        handleItemGroupChange(
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </FormRow>
+                </Row>
               </div>
             ))}
 
             {itemGroups.length > 0 && (
-              <div className="text-right">
-                <div className="text-lg font-bold border-t pt-2">
-                  Grand Total: ₦{totalAmount.toLocaleString()}
+              <div className="flex flex-col border-t pt-2 gap-2 text-right">
+                <div className="flex justify-end justify-self-end">
+                  {/* VAT Input */}
+
+                  <FormRow label="VAT (₦)" type="small">
+                    <Input
+                      id="VAT"
+                      type="number"
+                      min="0"
+                      max={totalAmount}
+                      disabled={totalAmount <= 0}
+                      step="0.01"
+                      value={Math.min(formData.VAT || 0, totalAmount)}
+                      onChange={(e) => handleFormChange("VAT", e.target.value)} // Keep as string
+                    />
+                  </FormRow>
+                </div>
+                {/* Grand Total */}
+                <div className="text-lg font-bold ">
+                  Grand Total: ₦
+                  {Math.max(
+                    0,
+                    totalAmount - (formData.VAT || 0)
+                  ).toLocaleString()}
                 </div>
               </div>
             )}

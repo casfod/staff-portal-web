@@ -95,7 +95,7 @@ const RFQ = () => {
     filename: `PaymentRequest-${rfq?.id}`,
     multiPage: true,
     titleOptions: {
-      text: "Request For Quotation",
+      text: "CASFOD Request For Quotation",
     },
   });
 
@@ -172,9 +172,11 @@ const RFQ = () => {
 
             <div className="flex gap-2">
               {/* Add Create PO Button */}
-              <Button onClick={handleCreatePOFromRFQ} variant="primary">
-                Create Purchase Order
-              </Button>
+              {rfq.status === "sent" && (
+                <Button onClick={handleCreatePOFromRFQ} variant="primary">
+                  Create Purchase Order
+                </Button>
+              )}
 
               <Button onClick={() => navigate(-1)}>
                 <List className="h-4 w-4 mr-1 md:mr-2" />

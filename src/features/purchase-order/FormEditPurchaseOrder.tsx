@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from "react";
+// FormEditPurchaseOrder.tsx
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import {
-  UpdatePurchaseOrderType,
+  CreatePurchaseOrderType,
   PurchaseOrderType,
-  ItemGroupType,
+  RFQItemGroupType,
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useUpdatePurchaseOrder } from "./Hooks/usePurchaseOrder";
+import { useCreateIndependentPurchaseOrder } from "./Hooks/usePurchaseOrder";
 import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2 } from "lucide-react";
+import DatePicker from "../../ui/DatePicker";
+import Select from "../../ui/Select";
+import { casfodAddress } from "../rfq/FormAddRFQ";
+import toast from "react-hot-toast";
+import { useVendors } from "../Vendor/Hooks/useVendor";
+import { useAdmins } from "../user/Hooks/useAdmins";
 
 interface FormEditPurchaseOrderProps {
   purchaseOrder: PurchaseOrderType | null;
@@ -23,46 +30,64 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Form state
-  const [formData, setFormData] = useState<UpdatePurchaseOrderType>({
-    RFQTitle: purchaseOrder?.RFQTitle || "",
-    deliveryPeriod: purchaseOrder?.deliveryPeriod || "",
-    bidValidityPeriod: purchaseOrder?.bidValidityPeriod || "",
-    guaranteePeriod: purchaseOrder?.guaranteePeriod || "",
-    itemGroups: purchaseOrder?.itemGroups || [],
-    selectedVendor: purchaseOrder?.selectedVendor?.id || "",
-    copiedTo: purchaseOrder?.copiedTo?.map((vendor) => vendor.id) || [],
-    approvedBy: purchaseOrder?.approvedBy as string,
+  // Unified form state
+  const [formData, setFormData] = useState<CreatePurchaseOrderType>({
+    RFQTitle: "",
+    deliveryPeriod: "",
+    bidValidityPeriod: "",
+    guaranteePeriod: "",
+    casfodAddressId: "",
+    rfqDate: "",
+    deadlineDate: "",
+    VAT: 0,
+    itemGroups: [],
+    selectedVendor: "",
+    copiedTo: [],
+    approvedBy: "",
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const { updatePurchaseOrder, isPending: isUpdating } =
-    useUpdatePurchaseOrder();
+  const { createIndependentPurchaseOrder, isPending: isUpdating } =
+    useCreateIndependentPurchaseOrder();
 
-  // Item Groups Management
-  const [itemGroups, setItemGroups] = useState<ItemGroupType[]>(
-    purchaseOrder?.itemGroups || []
-  );
+  // Item Groups - synchronized with formData
+  const [itemGroups, setItemGroups] = useState<RFQItemGroupType[]>([]);
 
+  // Initialize form data from purchaseOrder
   useEffect(() => {
     if (purchaseOrder) {
-      setFormData({
+      const initialData: CreatePurchaseOrderType = {
         RFQTitle: purchaseOrder.RFQTitle,
         deliveryPeriod: purchaseOrder.deliveryPeriod,
         bidValidityPeriod: purchaseOrder.bidValidityPeriod,
         guaranteePeriod: purchaseOrder.guaranteePeriod,
+        casfodAddressId: purchaseOrder.casfodAddressId,
+        rfqDate: purchaseOrder.rfqDate || "",
+        VAT: purchaseOrder.VAT || 0,
+        deadlineDate: purchaseOrder.deadlineDate || "",
         itemGroups: purchaseOrder.itemGroups,
-        selectedVendor: purchaseOrder.selectedVendor?.id,
+        selectedVendor: "",
         copiedTo: purchaseOrder.copiedTo?.map((vendor) => vendor.id) || [],
-        approvedBy: purchaseOrder?.approvedBy as string,
-      });
+        approvedBy: "",
+      };
+      setFormData(initialData);
       setItemGroups(purchaseOrder.itemGroups);
     }
   }, [purchaseOrder]);
 
+  // Fetch vendors and admins
+  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({});
+  const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
+
+  const vendors = useMemo(
+    () => vendorsData?.data?.vendors ?? [],
+    [vendorsData]
+  );
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
   const handleFormChange = (
-    field: keyof UpdatePurchaseOrderType,
+    field: keyof CreatePurchaseOrderType,
     value: string | string[]
   ) => {
     setFormData((prev) => ({
@@ -71,10 +96,10 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
     }));
   };
 
-  // Item Group Handlers
+  // Item Group Handlers - updates both local state and formData
   const handleItemGroupChange = (
     index: number,
-    field: keyof ItemGroupType,
+    field: keyof RFQItemGroupType,
     value: string | number
   ) => {
     const updatedItems = [...itemGroups];
@@ -83,15 +108,14 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
       [field]: value,
     };
 
-    // Calculate total if unitCost, quantity, or frequency changes
-    if (field === "unitCost" || field === "quantity" || field === "frequency") {
+    // Recalculate total on relevant changes
+    if (["unitCost", "quantity", "frequency"].includes(field as string)) {
       const unitCost =
         field === "unitCost" ? Number(value) : updatedItems[index].unitCost;
       const quantity =
         field === "quantity" ? Number(value) : updatedItems[index].quantity;
       const frequency =
         field === "frequency" ? Number(value) : updatedItems[index].frequency;
-
       updatedItems[index].total = unitCost * quantity * frequency;
     }
 
@@ -103,17 +127,21 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
   };
 
   const addItemGroup = () => {
-    setItemGroups([
-      ...itemGroups,
-      {
-        description: "",
-        frequency: 1,
-        quantity: 1,
-        unit: "",
-        unitCost: 0,
-        total: 0,
-      },
-    ]);
+    const newItemGroup: RFQItemGroupType = {
+      description: "",
+      itemName: "",
+      frequency: 1,
+      quantity: 1,
+      unit: "",
+      unitCost: 0,
+      total: 0,
+    };
+    const updatedItems = [...itemGroups, newItemGroup];
+    setItemGroups(updatedItems);
+    setFormData((prev) => ({
+      ...prev,
+      itemGroups: updatedItems,
+    }));
   };
 
   const removeItemGroup = (index: number) => {
@@ -132,84 +160,89 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
-    // Validate required timeline fields
+    // Validate core fields
     if (!formData.RFQTitle?.trim()) {
-      alert("Please enter a purchase order title");
+      toast.error("Please enter a purchase order title");
       return;
     }
-
     if (!formData.deliveryPeriod?.trim()) {
-      alert("Please enter a delivery period");
+      toast.error("Please enter a delivery period");
       return;
     }
-
     if (!formData.bidValidityPeriod?.trim()) {
-      alert("Please enter a bid validity period");
+      toast.error("Please enter a bid validity period");
       return;
     }
-
     if (!formData.guaranteePeriod?.trim()) {
-      alert("Please enter a guarantee period");
+      toast.error("Please enter a guarantee period");
+      return;
+    }
+    if (!formData.casfodAddressId) {
+      toast.error("Please select a CASFOD address");
       return;
     }
 
-    // Validate that all items have prices
-    const hasEmptyPrices = itemGroups.some(
-      (item) => !item.unitCost || item.unitCost <= 0
-    );
+    // Validate item groups
+    const hasEmptyPrices = itemGroups.some((item) => item.unitCost <= 0);
     if (hasEmptyPrices) {
-      alert("Please fill in all unit costs");
+      toast.error("Please fill in all unit costs");
       return;
     }
-
-    // Validate that all items have valid quantity and frequency
-    const hasInvalidQuantity = itemGroups.some(
-      (item) => !item.quantity || item.quantity <= 0
-    );
+    const hasInvalidQuantity = itemGroups.some((item) => item.quantity <= 0);
     if (hasInvalidQuantity) {
-      alert("Please enter valid quantities for all items");
+      toast.error("Please enter valid quantities for all items");
       return;
     }
-
-    const hasInvalidFrequency = itemGroups.some(
-      (item) => !item.frequency || item.frequency <= 0
-    );
+    const hasInvalidFrequency = itemGroups.some((item) => item.frequency <= 0);
     if (hasInvalidFrequency) {
-      alert("Please enter valid frequencies for all items");
+      toast.error("Please enter valid frequencies for all items");
       return;
     }
+    // const hasEmptyDescriptions = itemGroups.some(
+    //   (item) => !item.description.trim()
+    // );
+    // if (hasEmptyDescriptions) {
+    //   toast.error("Please enter descriptions for all items");
+    //   return;
+    // }
 
     const submitData = {
       ...formData,
-      files: selectedFiles,
+      itemGroups,
+      // files: selectedFiles,
     };
 
-    updatePurchaseOrder(
+    createIndependentPurchaseOrder(
       {
-        purchaseOrderId: purchaseOrder?.id!,
+        // purchaseOrderId: purchaseOrder?.id!,
         data: submitData,
+        files: selectedFiles,
       },
       {
         onSuccess: (data: any) => {
           if (data.status === 200) {
-            navigate("/procurement/purchase-orders");
+            navigate("/procurement/purchase-order/purchase-orders");
           }
         },
       }
     );
   };
 
-  const totalAmount = itemGroups.reduce((sum, item) => sum + item.total, 0);
+  // Memoized total calculation
+  const totalAmount = useMemo(
+    () => itemGroups.reduce((sum, item) => sum + item.total, 0),
+    [itemGroups]
+  );
 
-  // Check if PO is editable (only pending POs can be edited)
-  const isEditable = purchaseOrder?.status === "pending";
+  // Check editability
+  const isEditable = purchaseOrder?.status === "rejected";
 
-  if (!isEditable) {
+  if (!purchaseOrder || !isEditable) {
     return (
       <div className="text-center py-8">
         <p className="text-lg text-gray-600">
           This purchase order cannot be edited because it is{" "}
-          {purchaseOrder?.status}.
+          {purchaseOrder?.status || "not available"}.
         </p>
         <Button
           type="button"
@@ -220,6 +253,14 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
         >
           Go Back
         </Button>
+      </div>
+    );
+  }
+
+  if (isLoadingVendors || isLoadingAdmins) {
+    return (
+      <div className="flex justify-center py-8">
+        <SpinnerMini />
       </div>
     );
   }
@@ -237,6 +278,60 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
               value={formData.RFQTitle}
               onChange={(e) => handleFormChange("RFQTitle", e.target.value)}
               placeholder="Enter purchase order title"
+            />
+          </FormRow>
+        </Row>
+
+        <Row>
+          <FormRow label="Select CASFOD Address *">
+            <Select
+              clearable={true}
+              id="casfodAddressId"
+              customLabel="Select a State"
+              value={formData.casfodAddressId || ""}
+              onChange={(value) => handleFormChange("casfodAddressId", value)}
+              options={
+                casfodAddress
+                  ? casfodAddress.map((addr) => ({
+                      id: addr.id as string,
+                      name: `${addr.name}`,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              filterable={true}
+              required
+            />
+          </FormRow>
+        </Row>
+
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="RFQ Date">
+            <DatePicker
+              selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+              onChange={(date) =>
+                handleFormChange("rfqDate", date ? date.toISOString() : "")
+              }
+              variant="secondary"
+              size="md"
+              placeholder="Select date"
+              clearable={true}
+            />
+          </FormRow>
+
+          <FormRow label="Deadline Date">
+            <DatePicker
+              selected={
+                formData.deadlineDate ? new Date(formData.deadlineDate) : null
+              }
+              onChange={(date) =>
+                handleFormChange("deadlineDate", date ? date.toISOString() : "")
+              }
+              variant="secondary"
+              size="md"
+              placeholder="Select date"
+              clearable={true}
+              minDate={new Date()}
             />
           </FormRow>
         </Row>
@@ -289,39 +384,49 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
         </div>
 
         {/* Vendor Information (Read-only) */}
-        {purchaseOrder?.selectedVendor && (
-          <Row>
-            <FormRow label="Selected Vendor" type="wide">
-              <Input
-                type="text"
-                value={purchaseOrder.selectedVendor.businessName}
-                disabled
-                className="bg-gray-100"
-              />
-            </FormRow>
-          </Row>
-        )}
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Select Vendor *" type="wide">
+            <Select
+              id="vendor"
+              customLabel="Select Vendor"
+              value={formData.selectedVendor}
+              onChange={(value) => handleFormChange("selectedVendor", value)}
+              options={vendors.map((vendor) => ({
+                id: vendor.id,
+                name: vendor.businessName,
+              }))}
+              required
+            />
+          </FormRow>
+
+          <FormRow label="Approved By *" type="wide">
+            <Select
+              id="approvedBy"
+              customLabel="Select Admin for Approval"
+              value={(formData.approvedBy as string) || ""}
+              onChange={(value) => handleFormChange("approvedBy", value)}
+              options={admins
+                .filter((admin) => admin.id)
+                .map((admin) => ({
+                  id: admin.id as string,
+                  name: `${admin.first_name} ${admin.last_name} (${admin.role})`,
+                }))}
+              required
+            />
+          </FormRow>
+        </Row>
 
         {/* Approved By Information (Read-only) */}
-        {purchaseOrder?.approvedBy && (
-          <Row>
-            <FormRow label="Approved By" type="wide">
-              <Input
-                type="text"
-                value={`${purchaseOrder.approvedBy.first_name} ${purchaseOrder.approvedBy.last_name}`}
-                disabled
-                className="bg-gray-100"
-              />
-            </FormRow>
-          </Row>
-        )}
 
         {/* Item Groups Section */}
         <Row>
           <FormRow label="Items *" type="wide">
             <div className="space-y-4">
               {itemGroups.map((item, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                <div
+                  key={index}
+                  className="space-y-3 border rounded-lg p-4 bg-gray-50"
+                >
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-gray-700">
                       Item {index + 1}
@@ -339,23 +444,23 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                   </div>
 
                   <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                    <FormRow label="Description *">
+                    <FormRow label="Item Name">
                       <Input
                         type="text"
-                        value={item.description}
+                        value={item.itemName}
                         onChange={(e) =>
                           handleItemGroupChange(
                             index,
-                            "description",
+                            "itemName",
                             e.target.value
                           )
                         }
-                        placeholder="Item description"
+                        placeholder="Item Name"
                         required
                       />
                     </FormRow>
 
-                    <FormRow label="Frequency *">
+                    <FormRow label="Frequency">
                       <Input
                         type="number"
                         min="1"
@@ -364,14 +469,14 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                           handleItemGroupChange(
                             index,
                             "frequency",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value) || 1
                           )
                         }
                         required
                       />
                     </FormRow>
 
-                    <FormRow label="Quantity *">
+                    <FormRow label="Quantity">
                       <Input
                         type="number"
                         min="1"
@@ -380,7 +485,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                           handleItemGroupChange(
                             index,
                             "quantity",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value) || 1
                           )
                         }
                         required
@@ -398,7 +503,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                       />
                     </FormRow>
 
-                    <FormRow label="Unit Cost (₦) *">
+                    <FormRow label="Unit Cost (₦)">
                       <Input
                         type="number"
                         min="0"
@@ -408,10 +513,9 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                           handleItemGroupChange(
                             index,
                             "unitCost",
-                            parseFloat(e.target.value)
+                            parseFloat(e.target.value) || 0
                           )
                         }
-                        required
                       />
                     </FormRow>
 
@@ -424,6 +528,24 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                       />
                     </FormRow>
                   </Row>
+
+                  <Row>
+                    <FormRow label="Description *" type="wide">
+                      <textarea
+                        className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
+                        maxLength={4000}
+                        id={`description-${index}`}
+                        value={item.description}
+                        onChange={(e) =>
+                          handleItemGroupChange(
+                            index,
+                            "description",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </FormRow>
+                  </Row>
                 </div>
               ))}
 
@@ -431,11 +553,33 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
               </Button>
-
               {itemGroups.length > 0 && (
-                <div className="text-right">
-                  <div className="text-lg font-bold border-t pt-2">
-                    Grand Total: ₦{totalAmount.toLocaleString()}
+                <div className="flex flex-col border-t pt-2 gap-2 text-right">
+                  <div className="flex justify-end justify-self-end">
+                    {/* VAT Input */}
+
+                    <FormRow label="VAT (₦)" type="small">
+                      <Input
+                        id="VAT"
+                        type="number"
+                        min="0"
+                        max={totalAmount}
+                        disabled={totalAmount <= 0}
+                        step="0.01"
+                        value={Math.min(formData.VAT || 0, totalAmount)}
+                        onChange={(e) =>
+                          handleFormChange("VAT", e.target.value)
+                        } // Keep as string
+                      />
+                    </FormRow>
+                  </div>
+                  {/* Grand Total */}
+                  <div className="text-lg font-bold ">
+                    Grand Total: ₦
+                    {Math.max(
+                      0,
+                      totalAmount - (formData.VAT || 0)
+                    ).toLocaleString()}
                   </div>
                 </div>
               )}
@@ -460,7 +604,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
       <div className="flex justify-center w-full gap-4 pt-6">
         <div className="flex flex-col md:flex-row gap-4">
           <Button type="submit" size="medium" disabled={isUpdating}>
-            {isUpdating ? <SpinnerMini /> : "Update Purchase Order"}
+            {isUpdating ? <SpinnerMini /> : "Create New PO From This."}
           </Button>
 
           <Button
@@ -475,14 +619,10 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
       </div>
 
       {/* Status Information */}
-      {purchaseOrder?.status && (
-        <div className="text-center text-sm text-gray-600">
-          Current Status:{" "}
-          <span className="font-semibold capitalize">
-            {purchaseOrder.status}
-          </span>
-        </div>
-      )}
+      <div className="text-center text-sm text-gray-600">
+        Current Status:{" "}
+        <span className="font-semibold capitalize">{purchaseOrder.status}</span>
+      </div>
     </form>
   );
 };

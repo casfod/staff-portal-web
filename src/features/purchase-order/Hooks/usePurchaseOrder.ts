@@ -1,3 +1,4 @@
+// usePurchaseOrder.ts
 import {
   useQuery,
   useMutation,
@@ -72,16 +73,11 @@ export const usePurchaseOrder = (
   });
 };
 
-// UPDATED: Now properly handles timeline fields
 export const useCreatePurchaseOrderFromRFQ = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const {
-    mutate: createPurchaseOrderFromRFQMutation,
-    isPending,
-    isError,
-  } = useMutation({
+  const mutation = useMutation({
     mutationFn: ({
       rfqId,
       vendorId,
@@ -92,6 +88,10 @@ export const useCreatePurchaseOrderFromRFQ = () => {
       rfqId: string;
       vendorId: string;
       data: {
+        deadlineDate?: string;
+        VAT: number;
+        rfqDate?: string;
+        casfodAddressId: string;
         itemGroups: any[];
         deliveryPeriod: string;
         bidValidityPeriod: string;
@@ -129,22 +129,17 @@ export const useCreatePurchaseOrderFromRFQ = () => {
   });
 
   return {
-    createPurchaseOrderFromRFQ: createPurchaseOrderFromRFQMutation,
-    isPending,
-    isError,
+    createPurchaseOrderFromRFQ: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
   };
 };
 
-// UPDATED: Now properly handles the data structure
 export const useCreateIndependentPurchaseOrder = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const {
-    mutate: createIndependentPurchaseOrderMutation,
-    isPending,
-    isError,
-  } = useMutation({
+  const mutation = useMutation({
     mutationFn: ({
       data,
       files = [],
@@ -172,21 +167,16 @@ export const useCreateIndependentPurchaseOrder = () => {
   });
 
   return {
-    createIndependentPurchaseOrder: createIndependentPurchaseOrderMutation,
-    isPending,
-    isError,
+    createIndependentPurchaseOrder: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
   };
 };
 
-// UPDATED: Now properly handles the data structure
 export const useUpdatePurchaseOrder = () => {
   const queryClient = useQueryClient();
 
-  const {
-    mutate: updatePurchaseOrderMutation,
-    isPending,
-    isError,
-  } = useMutation({
+  const mutation = useMutation({
     mutationFn: ({
       purchaseOrderId,
       data,
@@ -218,31 +208,26 @@ export const useUpdatePurchaseOrder = () => {
   });
 
   return {
-    updatePurchaseOrder: updatePurchaseOrderMutation,
-    isPending,
-    isError,
+    updatePurchaseOrder: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
   };
 };
 
-// UPDATED: Status update hook with PDF support
 export const useUpdatePurchaseOrderStatus = () => {
   const queryClient = useQueryClient();
 
-  const {
-    mutate: updatePurchaseOrderStatusMutation,
-    isPending,
-    isError,
-  } = useMutation({
+  const mutation = useMutation({
     mutationFn: ({
       purchaseOrderId,
       status,
       comment,
-      pdfFile, // NEW: Accept PDF file
+      pdfFile,
     }: {
       purchaseOrderId: string;
       status: string;
       comment?: string;
-      pdfFile?: File; // NEW: PDF file parameter
+      pdfFile?: File;
     }) => updatePurchaseOrderStatus(purchaseOrderId, status, comment, pdfFile),
 
     onSuccess: (data, variables) => {
@@ -266,20 +251,16 @@ export const useUpdatePurchaseOrderStatus = () => {
   });
 
   return {
-    updatePurchaseOrderStatus: updatePurchaseOrderStatusMutation,
-    isPending,
-    isError,
+    updatePurchaseOrderStatus: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
   };
 };
 
 export const useDeletePurchaseOrder = () => {
   const queryClient = useQueryClient();
 
-  const {
-    mutate: deletePurchaseOrderMutation,
-    isPending,
-    isError,
-  } = useMutation({
+  const mutation = useMutation({
     mutationFn: (purchaseOrderId: string) =>
       deletePurchaseOrder(purchaseOrderId),
 
@@ -301,8 +282,8 @@ export const useDeletePurchaseOrder = () => {
   });
 
   return {
-    deletePurchaseOrder: deletePurchaseOrderMutation,
-    isPending,
-    isError,
+    deletePurchaseOrder: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
   };
 };

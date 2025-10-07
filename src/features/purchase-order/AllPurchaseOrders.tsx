@@ -70,7 +70,7 @@ export function AllPurchaseOrders() {
 
   const handleEdit = (purchaseOrder: PurchaseOrderType) => {
     dispatch(setPurchaseOrder(purchaseOrder));
-    navigate(`/procurement/purchase-orders/edit/${purchaseOrder.id}`);
+    navigate(`/procurement/purchase-order/edit/${purchaseOrder.id}`);
   };
 
   const handleDelete = useDeleteRequest(deletePurchaseOrder, {

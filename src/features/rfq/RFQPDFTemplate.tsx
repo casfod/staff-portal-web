@@ -5,7 +5,7 @@ import { RFQItemGroupType, UserType } from "../../interfaces";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 // import { useRFQPDF } from "../../hooks/useRFQPDF";
 
-const casfodAddress = {
+export const casfodAddress = {
   adamawa: {
     street: "Suite 2 Hajja Asmau Plaza",
     city: "Yola",
@@ -276,7 +276,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
                     >
                       <div className="w-full">
                         <span className="font-semibold text-gray-600">
-                          Description:
+                          Detailed Description:
                         </span>
                         <p className="mt-1">{item.description}</p>
                       </div>
@@ -285,6 +285,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
                 )}
               </React.Fragment>
             ))}
+
             {/* Grand Total Row */}
             <tr className="bg-gray-100 font-bold">
               <td
@@ -324,6 +325,18 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
               </td>
               <td className="border border-gray-300 p-2 text-sm"></td>
             </tr>
+            <tr>
+              <td className="border border-gray-300 p-2 font-semibold bg-gray-100 text-sm">
+                Deadline Date:{" "}
+              </td>
+              <td className="border border-gray-300 p-2 text-sm">
+                <p className="text-sm text-gray-500 mt-1">
+                  {rfqData.deadlineDate
+                    ? formatToDDMMYYYY(rfqData.deadlineDate)
+                    : "N/A"}
+                </p>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -331,7 +344,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
       {/* Attachments */}
       <div className="mb-6">
         <h3 className="font-bold mb-3 text-sm text-gray-800 border-b pb-1">
-          Kindly Attached the following:
+          Kindly attach the following:
         </h3>
         <ul className="text-sm text-gray-700 space-y-1">
           <li className="flex items-start">

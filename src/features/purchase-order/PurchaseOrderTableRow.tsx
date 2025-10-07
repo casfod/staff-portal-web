@@ -26,14 +26,15 @@ const PurchaseOrderTableRow = ({
   const currentUser = localStorageUser();
 
   const isEditable =
-    (currentUser.role === "SUPER-ADMIN" ||
+    ((currentUser.role === "SUPER-ADMIN" && !purchaseOrder.RFQCode) ||
       currentUser.procurementRole.canUpdate) &&
-    purchaseOrder.status === "pending";
+    purchaseOrder.status === "rejected" &&
+    !purchaseOrder.RFQCode;
 
   const isDeletable =
     (currentUser.role === "SUPER-ADMIN" ||
       currentUser.procurementRole.canDelete) &&
-    purchaseOrder.status === "pending";
+    purchaseOrder.status === "rejected";
 
   const purchaseOrderId = purchaseOrder.id ?? "";
   const isVisible = !!visibleItems[purchaseOrderId];

@@ -1,4 +1,9 @@
-import { PurchaseOrderType, ItemGroupType } from "../../interfaces";
+import {
+  PurchaseOrderType,
+  ItemGroupType,
+  RFQItemGroupType,
+  VendorType,
+} from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { dateformat } from "../../utils/dateFormat";
 import DetailContainer from "../../ui/DetailContainer";
@@ -15,6 +20,7 @@ import {
 import { ReactElement } from "react";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { GoPerson } from "react-icons/go";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 
 interface PurchaseOrderDetailsProps {
   purchaseOrder: PurchaseOrderType;
@@ -85,9 +91,33 @@ export const PurchaseOrderDetails = ({
         },
 
         {
-          id: "totalAmount",
-          label: "Total Amount",
+          id: "casfodAddressId",
+          label: "Casfod Address",
+          content: purchaseOrder.casfodAddressId.toUpperCase(),
+        },
+
+        {
+          id: "VAT",
+          label: "VAT",
+          content: `₦${
+            purchaseOrder.VAT ? purchaseOrder.VAT.toLocaleString() : 0
+          }`,
+        },
+        {
+          id: "grossTotal",
+          label: "Gross Total",
           content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
+          // icon: <DollarSign className="w-4 h-4" />,
+        },
+
+        {
+          id: "netTotal",
+          label: "Net Total",
+          content: `₦${
+            purchaseOrder.VAT
+              ? (purchaseOrder.totalAmount - purchaseOrder.VAT).toLocaleString()
+              : purchaseOrder.totalAmount.toLocaleString()
+          }`,
           // icon: <DollarSign className="w-4 h-4" />,
         },
       ],
@@ -131,6 +161,14 @@ export const PurchaseOrderDetails = ({
           label: "Guarantee Period",
           content: purchaseOrder.guaranteePeriod || "N/A",
           icon: <Shield className="w-4 h-4" />,
+        },
+        {
+          id: "deadlineDate",
+          label: "Deadline Date",
+          content: purchaseOrder?.deadlineDate
+            ? formatToDDMMYYYY(purchaseOrder?.deadlineDate)
+            : "N/A",
+          icon: <Clock className="w-4 h-4" />,
         },
       ],
     },
@@ -182,6 +220,11 @@ export const PurchaseOrderDetails = ({
       ],
     },
   ];
+
+  const totalAmount = purchaseOrder.itemGroups.reduce(
+    (sum, item) => sum + item.total,
+    0
+  );
 
   return (
     <DetailContainer>
@@ -278,7 +321,7 @@ export const PurchaseOrderDetails = ({
                       {/* Special handling for item groups */}
                       {field.isItemGroups ? (
                         <div className="space-y-3">
-                          {(field.content as ItemGroupType[]).map(
+                          {(field.content as RFQItemGroupType[]).map(
                             (item, index) => (
                               <div
                                 key={index}
@@ -287,17 +330,15 @@ export const PurchaseOrderDetails = ({
                                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                                   <div>
                                     <span className="font-semibold text-gray-600">
-                                      Description:
+                                      Item Name:
                                     </span>
-                                    <p className="mt-1">{item.description}</p>
+                                    <p className="mt-1">{item.itemName}</p>
                                   </div>
                                   <div>
                                     <span className="font-semibold text-gray-600">
                                       Frequency:
                                     </span>
-                                    <p className="mt-1">
-                                      {String(item.frequency)}
-                                    </p>
+                                    <p className="mt-1">{item.frequency}</p>
                                   </div>
                                   <div>
                                     <span className="font-semibold text-gray-600">
@@ -328,15 +369,43 @@ export const PurchaseOrderDetails = ({
                                     </p>
                                   </div>
                                 </div>
+
+                                {item.description && (
+                                  <div className="w-full">
+                                    <span className="font-semibold text-gray-600">
+                                      Description:
+                                    </span>
+                                    <p className="mt-1">{item.description}</p>
+                                  </div>
+                                )}
                               </div>
                             )
                           )}
                           <div className="text-right pt-2 border-t">
                             <span className="text-lg font-bold">
-                              Grand Total: ₦
-                              {purchaseOrder.totalAmount.toLocaleString()}
+                              Grand Total: ₦{totalAmount.toLocaleString()}
                             </span>
                           </div>
+                        </div>
+                      ) : field.isArray ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(field.content as any[]).length > 0 ? (
+                            (field.content as any[]).map((item, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                              >
+                                {typeof item === "object" &&
+                                "businessName" in item
+                                  ? (item as VendorType).businessName
+                                  : String(item)}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-gray-500">
+                              No vendors selected
+                            </span>
+                          )}
                         </div>
                       ) : (
                         <div
@@ -347,7 +416,7 @@ export const PurchaseOrderDetails = ({
                           } ${
                             section.title === "Timeline & Validity"
                               ? "text-slate-800 font-medium"
-                              : section.title === "Vendor & Approval"
+                              : section.title === "Vendor Distribution"
                               ? "text-slate-800"
                               : "text-gray-800"
                           }`}
