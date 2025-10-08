@@ -1,6 +1,6 @@
 import { RFQItemGroupType, RFQType, VendorType } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import DetailContainer from "../../ui/DetailContainer";
 import { FileText, Calendar, Tag, Users, Clock, Package } from "lucide-react";
 import { ReactElement } from "react";
@@ -77,12 +77,12 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
         {
           id: "rfqDate",
           label: "RFQ Date",
-          content: dateformat(rfq.rfqDate) || "N/A",
+          content: formatToDDMMYYYY(rfq.rfqDate) || "N/A",
         },
         {
           id: "deadlineDate",
           label: "Deadline Date",
-          content: dateformat(rfq.deadlineDate) || "N/A",
+          content: formatToDDMMYYYY(rfq.deadlineDate) || "N/A",
         },
       ],
     },
@@ -121,13 +121,13 @@ export const RFQDetails = ({ rfq }: RFQDetailsProps) => {
         {
           id: "createdAt",
           label: "Created Date",
-          content: dateformat(rfq.createdAt),
+          content: formatToDDMMYYYY(rfq.createdAt),
           icon: <Calendar className="w-4 h-4" />,
         },
         {
           id: "updatedAt",
           label: "Last Updated",
-          content: dateformat(rfq.updatedAt),
+          content: formatToDDMMYYYY(rfq.updatedAt),
           icon: <Calendar className="w-4 h-4" />,
         },
       ],

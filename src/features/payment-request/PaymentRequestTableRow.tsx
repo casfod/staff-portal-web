@@ -1,7 +1,7 @@
 import { PaymentRequestType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
@@ -43,7 +43,7 @@ const PaymentRequestTableRow = ({
     { id: "requestBy", content: request.requestBy },
     { id: "status", content: <StatusBadge status={request.status!} /> },
     { id: "amount", content: moneyFormat(request.amountInFigure, "NGN") },
-    { id: "date", content: dateformat(requestCreatedAt) },
+    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
       id: "actions",
       content: (

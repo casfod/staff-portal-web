@@ -674,6 +674,8 @@ export interface RFQItemGroupType {
 }
 
 export interface RFQType {
+  deliveryDate: string;
+  poDate: string;
   id: string;
   RFQTitle: string;
   RFQCode: string;
@@ -762,8 +764,8 @@ export interface PurchaseOrderType {
   RFQTitle: string;
   RFQCode: string;
   POCode: string;
-  deadlineDate?: string;
-  rfqDate?: string;
+  deliveryDate?: string;
+  poDate?: string;
   itemGroups: RFQItemGroupType[];
   copiedTo: Array<{
     id: string;
@@ -781,9 +783,7 @@ export interface PurchaseOrderType {
     businessPhoneNumber?: string;
     address?: string;
   };
-  deliveryPeriod: string;
-  bidValidityPeriod: string;
-  guaranteePeriod: string;
+
   casfodAddressId: string;
   totalAmount: number;
   VAT: number;
@@ -808,33 +808,28 @@ export interface PurchaseOrderType {
 export interface CreatePurchaseOrderType {
   RFQTitle: string;
   itemGroups: RFQItemGroupType[];
-  deadlineDate?: string;
+  deliveryDate?: string;
   casfodAddressId: string;
   VAT: number;
-  rfqDate?: string;
+  poDate?: string;
   copiedTo?: string[];
   selectedVendor: string;
   approvedBy?: Partial<UserType> | string;
-  deliveryPeriod: string;
-  bidValidityPeriod: string;
-  guaranteePeriod: string;
+
   files?: FileType[];
 }
 
 export interface UpdatePurchaseOrderType {
   RFQTitle?: string;
   itemGroups?: RFQItemGroupType[];
-  deadlineDate?: string;
-  rfqDate?: string;
+  deliveryDate?: string;
+  poDate?: string;
   casfodAddressId: string;
   VAT: number;
   status?: string;
   copiedTo?: string[];
   selectedVendor?: string;
   approvedBy: Partial<UserType> | string;
-  deliveryPeriod?: string;
-  bidValidityPeriod?: string;
-  guaranteePeriod?: string;
   files?: File[];
   comment?: string;
 }

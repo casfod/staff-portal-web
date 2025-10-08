@@ -5,7 +5,6 @@ import {
   VendorType,
 } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
 import DetailContainer from "../../ui/DetailContainer";
 import {
   FileText,
@@ -13,7 +12,6 @@ import {
   Tag,
   Users,
   Clock,
-  Shield,
   Package,
   UserCheck,
 } from "lucide-react";
@@ -98,16 +96,26 @@ export const PurchaseOrderDetails = ({
 
         {
           id: "VAT",
-          label: "VAT",
-          content: `₦${
+          label: "VHT (%)",
+          content: `${
             purchaseOrder.VAT ? purchaseOrder.VAT.toLocaleString() : 0
           }`,
         },
+
         {
           id: "grossTotal",
           label: "Gross Total",
           content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
           // icon: <DollarSign className="w-4 h-4" />,
+        },
+        {
+          id: "VHT",
+          label: "VHT AMOUNT",
+          content: `₦${
+            purchaseOrder.VAT
+              ? (purchaseOrder.totalAmount / 100) * purchaseOrder.VAT
+              : 0
+          }`,
         },
 
         {
@@ -115,7 +123,10 @@ export const PurchaseOrderDetails = ({
           label: "Net Total",
           content: `₦${
             purchaseOrder.VAT
-              ? (purchaseOrder.totalAmount - purchaseOrder.VAT).toLocaleString()
+              ? (
+                  purchaseOrder.totalAmount -
+                  (purchaseOrder.totalAmount / 100) * purchaseOrder.VAT
+                ).toLocaleString()
               : purchaseOrder.totalAmount.toLocaleString()
           }`,
           // icon: <DollarSign className="w-4 h-4" />,
@@ -143,30 +154,14 @@ export const PurchaseOrderDetails = ({
       ],
     },
     {
-      title: "Timeline & Validity",
+      title: "Timeline",
       icon: <Clock className="w-4 h-4" />,
       fields: [
         {
-          id: "deliveryPeriod",
-          label: "Delivery Period",
-          content: purchaseOrder.deliveryPeriod || "N/A",
-        },
-        {
-          id: "bidValidityPeriod",
-          label: "Bid Validity Period",
-          content: purchaseOrder.bidValidityPeriod || "N/A",
-        },
-        {
-          id: "guaranteePeriod",
-          label: "Guarantee Period",
-          content: purchaseOrder.guaranteePeriod || "N/A",
-          icon: <Shield className="w-4 h-4" />,
-        },
-        {
-          id: "deadlineDate",
-          label: "Deadline Date",
-          content: purchaseOrder?.deadlineDate
-            ? formatToDDMMYYYY(purchaseOrder?.deadlineDate)
+          id: "deliveryDate",
+          label: "Delivery Date",
+          content: purchaseOrder?.deliveryDate
+            ? formatToDDMMYYYY(purchaseOrder?.deliveryDate)
             : "N/A",
           icon: <Clock className="w-4 h-4" />,
         },
@@ -193,13 +188,13 @@ export const PurchaseOrderDetails = ({
         {
           id: "createdAt",
           label: "Created Date",
-          content: dateformat(purchaseOrder.createdAt),
+          content: formatToDDMMYYYY(purchaseOrder.createdAt),
           icon: <Calendar className="w-4 h-4" />,
         },
         {
           id: "updatedAt",
           label: "Last Updated",
-          content: dateformat(purchaseOrder.updatedAt),
+          content: formatToDDMMYYYY(purchaseOrder.updatedAt),
           icon: <Calendar className="w-4 h-4" />,
         },
 

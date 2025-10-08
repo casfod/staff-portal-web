@@ -6,7 +6,7 @@ import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
 import { PurchaseOrderDetails } from "./PurchaseOrderDetails";
 import { truncateText } from "../../utils/truncateText";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 
 const PurchaseOrderTableRow = ({
   purchaseOrder,
@@ -85,7 +85,7 @@ const PurchaseOrderTableRow = ({
 
     {
       id: "createdAt",
-      content: dateformat(purchaseOrder?.createdAt!),
+      content: formatToDDMMYYYY(purchaseOrder?.createdAt!),
     },
     {
       id: "actions",

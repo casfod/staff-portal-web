@@ -1,7 +1,7 @@
 import { ConceptNoteType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import { ConceptNoteDetails } from "./ConceptNoteDetails";
 import TableRowMain from "../../ui/TableRowMain";
@@ -41,7 +41,7 @@ const ConceptNoteTableRow = ({
     { id: "staff_name", content: request.staff_name },
     { id: "status", content: <StatusBadge status={request.status!} /> },
     // { id: "account_Code", content: truncateText(request.account_Code, 25) },
-    { id: "date", content: dateformat(requestCreatedAt) },
+    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
       id: "actions",
       content: (

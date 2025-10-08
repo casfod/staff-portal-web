@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import { localStorageUser } from "../../utils/localStorageUser";
@@ -155,7 +155,7 @@ const Request = () => {
     { id: "requestedBy", content: requestData?.requestedBy },
     { id: "status", content: <StatusBadge status={requestData?.status!} /> },
     { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
-    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
       content: (

@@ -1,8 +1,8 @@
-// import { dateformat } from "../../utils/dateFormat";
+// import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PurChaseRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
@@ -100,9 +100,9 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
     {
       id: "periodOfActivity",
       label: "Period Of Activity :",
-      content: `${dateformat(request.periodOfActivity.from)} - ${dateformat(
-        request.periodOfActivity.to
-      )}`,
+      content: `${formatToDDMMYYYY(
+        request.periodOfActivity.from
+      )} - ${formatToDDMMYYYY(request.periodOfActivity.to)}`,
     },
     {
       id: "activityDescription",

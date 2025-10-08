@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 import { moneyFormat } from "../../utils/moneyFormat";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import { ProjectDetails } from "./ProjectDetails";
@@ -50,7 +50,7 @@ const Project = () => {
       id: "project_budget",
       content: moneyFormat(Number(project.project_budget), "USD"),
     },
-    { id: "date", content: dateformat(requestCreatedAt) },
+    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
       id: "action",
       content: (

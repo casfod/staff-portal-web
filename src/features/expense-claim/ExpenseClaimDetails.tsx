@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { ExpenseClaimType } from "../../interfaces";
 import DetailContainer from "../../ui/DetailContainer";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import CopiedTo from "../../ui/CopiedTo";
 
@@ -74,7 +74,7 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
   // Helper function to format content safely
   const formatContent = (content: any): React.ReactNode => {
     if (content instanceof Date) {
-      return dateformat(content); // or any other date formatting you prefer
+      return formatToDDMMYYYY(content); // or any other date formatting you prefer
     }
     if (content === null || content === undefined) {
       return "-"; // or any other placeholder you prefer
@@ -91,12 +91,12 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
     {
       id: "dayOfDeparture",
       label: "Day Of Departure :",
-      content: dateformat(request.dayOfDeparture),
+      content: formatToDDMMYYYY(request.dayOfDeparture!),
     },
     {
       id: "dayOfReturn",
       label: "Day Of Return :",
-      content: dateformat(request.dayOfReturn),
+      content: formatToDDMMYYYY(request.dayOfReturn!),
     },
     {
       id: "amountInWords",

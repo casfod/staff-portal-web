@@ -194,7 +194,7 @@ const FormAddRFQ: React.FC = () => {
             </FormRow>
           </Row>
           <Row>
-            <FormRow label="Select CASFOD Address *">
+            <FormRow label="Select CASFOD Delivery Address *">
               <Select
                 clearable={true}
                 id="casfodAddressId"

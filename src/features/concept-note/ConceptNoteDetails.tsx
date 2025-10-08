@@ -1,7 +1,7 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { ConceptNoteType } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
@@ -66,9 +66,9 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
     {
       id: "period",
       label: "Activity Period",
-      content: `${dateformat(request.activity_period.from)} - ${dateformat(
-        request.activity_period.to
-      )}`,
+      content: `${formatToDDMMYYYY(
+        request.activity_period.from
+      )} - ${formatToDDMMYYYY(request.activity_period.to)}`,
     },
     {
       id: "verification",

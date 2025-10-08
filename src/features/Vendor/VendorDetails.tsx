@@ -1,6 +1,6 @@
 import { VendorType } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import DetailContainer from "../../ui/DetailContainer";
 import {
   MapPin,
@@ -179,13 +179,13 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
         {
           id: "createdAt",
           label: "Created Date",
-          content: dateformat(vendor.createdAt),
+          content: formatToDDMMYYYY(vendor.createdAt),
           icon: <FileText className="w-4 h-4" />,
         },
         {
           id: "updatedAt",
           label: "Last Updated",
-          content: dateformat(vendor.updatedAt),
+          content: formatToDDMMYYYY(vendor.updatedAt),
           icon: <FileText className="w-4 h-4" />,
         },
       ],

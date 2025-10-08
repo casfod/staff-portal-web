@@ -9,7 +9,7 @@ import { useAdmins } from "../user/Hooks/useAdmins";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import { useUpdateTravelRequest } from "./Hooks/useUpdateTravelRequest";
 
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import TravelRequestDetails from "./TravelRequestDetails";
 import StatusBadge from "../../ui/StatusBadge";
@@ -149,7 +149,7 @@ const TravelRequest = () => {
 
     { id: "staffName", content: moneyFormat(requestData?.budget!, "NGN") },
 
-    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
       content: (

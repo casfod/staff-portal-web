@@ -39,7 +39,7 @@ interface ActionIconsProps {
   previewIcon?: React.ReactNode;
   TagIcon?: React.ReactNode;
   rfqStatus?: RFQStatus; // More specific type for RFQ status
-  mode?: "users" | "vendors";
+  mode?: "users" | "vendors" | "purchase-order";
 }
 
 const ActionIcons = ({
@@ -123,7 +123,9 @@ const ActionIcons = ({
 
   // General share button visibility logic
   const shouldShowShareButton =
-    setShowTagDropdown && (mode === "users" ? canShareRequest : isRFQShareable);
+    setShowTagDropdown &&
+    (mode === "users" ? canShareRequest : isRFQShareable) &&
+    mode !== "purchase-order";
 
   // Get appropriate tooltip based on mode and status
   const getShareButtonTooltip = () => {

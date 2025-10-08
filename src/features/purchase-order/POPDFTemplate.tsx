@@ -21,14 +21,6 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
     0
   );
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   // Get the address based on casfodAddressId
   const getAddress = () => {
     const address =
@@ -66,7 +58,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
             {poData.POCode}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Date: {formatDate(poData.createdAt)}
+            PO Date: {formatToDDMMYYYY(poData?.poDate || "")}
           </p>
         </div>
       </div>
@@ -94,7 +86,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-green-500">
         <h3 className="font-bold mb-2 text-lg text-gray-700">
-          Delivery address:
+          CASFOD Delivery address:
         </h3>
         <p className="text-md text-gray-600">
           Unique Care and Support Foundation
@@ -124,67 +116,14 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
             <strong>RFQ Reference:</strong>{" "}
             {poData.RFQCode ? poData.RFQCode : "N/A"}
           </div>
-          <div>
-            <strong>Delivery Period:</strong> {poData.deliveryPeriod}
-          </div>
-          <div>
-            <strong>Bid Validity:</strong> {poData.bidValidityPeriod}
-          </div>
-          {poData.guaranteePeriod && (
+
+          {poData.deliveryDate && (
             <div>
-              <strong>Guarantee Period:</strong> {poData.guaranteePeriod}
-            </div>
-          )}
-          {poData.deadlineDate && (
-            <div>
-              <strong>Deadline Date:</strong>{" "}
-              {formatToDDMMYYYY(poData.deadlineDate)}
+              <strong>Delivery Date:</strong>{" "}
+              {formatToDDMMYYYY(poData.deliveryDate)}
             </div>
           )}
         </div>
-      </div>
-
-      {/* Terms and Conditions */}
-      <div className="mb-6">
-        <h3 className="font-bold mb-3 text-gray-800 border-b pb-1">
-          Terms and Conditions
-        </h3>
-        <ul className="text-md text-gray-700 space-y-2">
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              All goods must be delivered in accordance with the specifications
-              and delivery schedule mentioned above.
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              Payment will be made upon satisfactory delivery and acceptance of
-              goods.
-            </span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>All invoices must reference this Purchase Order number.</span>
-          </li>
-          <li className="flex items-start">
-            <span className="mr-2">•</span>
-            <span>
-              CASFOD reserves the right to cancel this order if terms are not
-              met.
-            </span>
-          </li>
-          {poData.guaranteePeriod && (
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
-              <span>
-                Goods are guaranteed for {poData.guaranteePeriod} from date of
-                delivery.
-              </span>
-            </li>
-          )}
-        </ul>
       </div>
 
       {isGenerating && <div className="h-40"></div>}
@@ -262,17 +201,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               </React.Fragment>
             ))}
             {/* Grand Total Row */}
-            <tr className="bg-gray-100 font-bold">
-              <td
-                colSpan={6}
-                className="border border-gray-300 p-2 text-right text-sm"
-              >
-                VAT:
-              </td>
-              <td className="border border-gray-300 p-2 text-right text-sm">
-                ₦{poData.VAT ? poData.VAT.toLocaleString() : 0}
-              </td>
-            </tr>
+
             <tr className="bg-gray-100 font-bold">
               <td
                 colSpan={6}
@@ -284,6 +213,22 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
                 ₦{grandTotal.toLocaleString()}
               </td>
             </tr>
+
+            <tr className="bg-gray-100 font-bold">
+              <td
+                colSpan={6}
+                className="border border-gray-300 p-2 text-right text-sm"
+              >
+                VHT:
+              </td>
+              <td className="border border-gray-300 p-2 text-right text-sm">
+                ₦
+                {poData.VAT
+                  ? ((grandTotal / 100) * poData.VAT).toLocaleString()
+                  : 0}
+              </td>
+            </tr>
+
             <tr className="bg-gray-100 font-bold">
               <td
                 colSpan={6}
@@ -294,7 +239,10 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               <td className="border border-gray-300 p-2 text-right text-sm">
                 ₦
                 {poData.VAT
-                  ? (grandTotal - poData.VAT).toLocaleString()
+                  ? (
+                      grandTotal -
+                      (grandTotal / 100) * poData.VAT
+                    ).toLocaleString()
                   : grandTotal.toLocaleString()}
               </td>
             </tr>
@@ -302,9 +250,52 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
         </table>
       </div>
 
+      {/* Terms and Conditions */}
+      <div className="mb-6">
+        <h3 className="font-bold mb-3 text-gray-800 border-b pb-1">
+          Terms and Conditions
+        </h3>
+        <ul className="text-md text-gray-700 space-y-2">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              All goods must be delivered in accordance with the specifications
+              and delivery schedule mentioned above.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Payment will be made upon satisfactory delivery and acceptance of
+              goods.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>All invoices must reference this Purchase Order number.</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              CASFOD reserves the right to cancel this order if terms are not
+              met.
+            </span>
+          </li>
+          {poData.deliveryDate && (
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>
+                Goods are guaranteed for delivery on{" "}
+                {formatToDDMMYYYY(poData.deliveryDate)}.
+              </span>
+            </li>
+          )}
+        </ul>
+      </div>
+
       {/* Approval Section */}
       <div className="mt-12 pt-8 border-t border-gray-300">
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-3 gap-8">
           <div>
             <p className="font-semibold mb-2">Prepared By:</p>
             <div className="border-t border-gray-300 pt-8 mt-2">
@@ -328,6 +319,24 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
               </div>
             </div>
           )}
+
+          {/* Vendor Representative Section - For Handwritten Input */}
+          <div>
+            <p className="font-semibold mb-2">Vendor Representative:</p>
+            <div className="border-t border-gray-300 pt-8 mt-2 space-y-6">
+              <div>
+                <p className="font-medium text-sm text-gray-700 mb-2">Name</p>
+                <div className="h-8 border-b border-gray-400"></div>
+              </div>
+              <div>
+                <p className="font-medium text-sm text-gray-700 mb-2">
+                  Signature
+                </p>
+                <div className="h-12 border-b border-gray-400"></div>
+                <p className="text-xs text-gray-500 mt-1">(Sign here)</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

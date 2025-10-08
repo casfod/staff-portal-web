@@ -9,7 +9,7 @@ import { useAdmins } from "../user/Hooks/useAdmins";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import { useUpdateExpenseClaim } from "./Hooks/useUpdateExpenseClaim";
 
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import ExpenseClaimDetails from "./ExpenseClaimDetails";
 import StatusBadge from "../../ui/StatusBadge";
@@ -150,7 +150,7 @@ const ExpenseClaim = () => {
 
     { id: "staffName", content: moneyFormat(requestData?.budget!, "NGN") },
 
-    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
       content: (

@@ -1,7 +1,7 @@
 import { Project } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 // import { ConceptNoteDetails } from "./ConceptNoteDetails";
 import TableRowMain from "../../ui/TableRowMain";
@@ -44,7 +44,7 @@ const ProjectTableRow = ({
       id: "project_budget",
       content: moneyFormat(Number(request.project_budget), "USD"),
     },
-    { id: "date", content: dateformat(requestCreatedAt) },
+    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
       id: "actions",
       content: (

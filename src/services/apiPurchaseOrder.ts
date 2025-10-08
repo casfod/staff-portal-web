@@ -114,30 +114,26 @@ export const createPurchaseOrderFromRFQ = async function (
   data: {
     itemGroups: any[];
     approvedBy?: string;
-    deadlineDate?: string;
-    rfqDate?: string;
+    deliveryDate?: string;
+    poDate?: string;
     casfodAddressId: string;
     VAT: number;
-    deliveryPeriod: string;
-    bidValidityPeriod: string;
-    guaranteePeriod: string;
   },
   files: File[] = []
 ): Promise<UsePurchaseOrder> {
+  console.log("createPurchaseOrderFromRFQ:::::>", data);
+
   try {
     const formData = new FormData();
 
     // Append JSON and scalar fields
     formData.append("itemGroups", JSON.stringify(data.itemGroups));
     formData.append("casfodAddressId", data.casfodAddressId);
-    formData.append("deliveryPeriod", data.deliveryPeriod);
-    formData.append("bidValidityPeriod", data.bidValidityPeriod);
-    formData.append("guaranteePeriod", data.guaranteePeriod);
     formData.append("VAT", data.VAT.toString());
 
     if (data.approvedBy) formData.append("approvedBy", data.approvedBy);
-    if (data.deadlineDate) formData.append("deadlineDate", data.deadlineDate);
-    if (data.rfqDate) formData.append("rfqDate", data.rfqDate);
+    if (data.deliveryDate) formData.append("deliveryDate", data.deliveryDate);
+    if (data.poDate) formData.append("poDate", data.poDate);
 
     // Append files
     files.forEach((file) => formData.append("files", file));
@@ -169,16 +165,13 @@ export const createIndependentPurchaseOrder = async function (
 
     // Append scalar fields
     formData.append("RFQTitle", data.RFQTitle);
-    formData.append("deliveryPeriod", data.deliveryPeriod);
-    formData.append("bidValidityPeriod", data.bidValidityPeriod);
-    formData.append("guaranteePeriod", data.guaranteePeriod);
     formData.append("casfodAddressId", data.casfodAddressId);
     formData.append("selectedVendor", data.selectedVendor);
     formData.append("VAT", data.VAT.toString());
 
     if (data.approvedBy) formData.append("approvedBy", String(data.approvedBy));
-    if (data.rfqDate) formData.append("rfqDate", data.rfqDate);
-    if (data.deadlineDate) formData.append("deadlineDate", data.deadlineDate);
+    if (data.poDate) formData.append("poDate", data.poDate);
+    if (data.deliveryDate) formData.append("deliveryDate", data.deliveryDate);
 
     // Append item groups as JSON
     if (data.itemGroups && Array.isArray(data.itemGroups)) {
@@ -221,12 +214,6 @@ export const updatePurchaseOrder = async function (
 
     // Append updated scalar fields if present
     if (data.RFQTitle !== undefined) formData.append("RFQTitle", data.RFQTitle);
-    if (data.deliveryPeriod !== undefined)
-      formData.append("deliveryPeriod", data.deliveryPeriod);
-    if (data.bidValidityPeriod !== undefined)
-      formData.append("bidValidityPeriod", data.bidValidityPeriod);
-    if (data.guaranteePeriod !== undefined)
-      formData.append("guaranteePeriod", data.guaranteePeriod);
     if (data.VAT !== undefined) formData.append("VAT", data.VAT.toString());
     if (data.status !== undefined) formData.append("status", data.status);
     if (data.casfodAddressId !== undefined)
@@ -235,9 +222,9 @@ export const updatePurchaseOrder = async function (
       formData.append("selectedVendor", String(data.selectedVendor));
     if (data.approvedBy !== undefined)
       formData.append("approvedBy", String(data.approvedBy));
-    if (data.rfqDate !== undefined) formData.append("rfqDate", data.rfqDate);
-    if (data.deadlineDate !== undefined)
-      formData.append("deadlineDate", data.deadlineDate);
+    if (data.poDate !== undefined) formData.append("poDate", data.poDate);
+    if (data.deliveryDate !== undefined)
+      formData.append("deliveryDate", data.deliveryDate);
 
     // Append item groups as JSON if present
     if (data.itemGroups && Array.isArray(data.itemGroups)) {

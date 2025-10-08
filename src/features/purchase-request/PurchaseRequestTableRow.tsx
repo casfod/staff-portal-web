@@ -1,7 +1,7 @@
 import { PurChaseRequestType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
@@ -45,7 +45,7 @@ const PurchaseRequestTableRow = ({
     { id: "status", content: <StatusBadge status={request.status!} /> },
     // { id: "department", content: request.department },
     { id: "amount", content: moneyFormat(totalAmount, "NGN") },
-    { id: "date", content: dateformat(requestCreatedAt) },
+    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
       id: "actions",
       content: (

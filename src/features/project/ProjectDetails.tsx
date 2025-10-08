@@ -1,7 +1,7 @@
 import { moneyFormat } from "../../utils/moneyFormat";
 import { Project } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { Dot } from "lucide-react";
 import DetailContainer from "../../ui/DetailContainer";
@@ -123,9 +123,9 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
     {
       id: "implementation_period",
       label: "Implementation Period",
-      content: `${dateformat(
+      content: `${formatToDDMMYYYY(
         request.implementation_period.from
-      )} - ${dateformat(request.implementation_period.to)}`,
+      )} - ${formatToDDMMYYYY(request.implementation_period.to)}`,
       isBlock: true,
     },
 

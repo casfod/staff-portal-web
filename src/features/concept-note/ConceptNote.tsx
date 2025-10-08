@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Button from "../../ui/Button";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
@@ -126,7 +126,7 @@ const ConceptNote = () => {
       content: <StatusBadge status={requestData?.status!} key="status-badge" />,
     },
 
-    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
       content: (

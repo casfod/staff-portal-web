@@ -88,14 +88,11 @@ export const useCreatePurchaseOrderFromRFQ = () => {
       rfqId: string;
       vendorId: string;
       data: {
-        deadlineDate?: string;
         VAT: number;
-        rfqDate?: string;
+        poDate?: string;
         casfodAddressId: string;
         itemGroups: any[];
-        deliveryPeriod: string;
-        bidValidityPeriod: string;
-        guaranteePeriod: string;
+        deliveryDate: string;
       };
       approvedBy: string;
       files?: File[];

@@ -9,7 +9,7 @@ import { useAdmins } from "../user/Hooks/useAdmins";
 import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import { useUpdatePaymentRequest } from "./Hooks/useUpdatePaymentRequest";
 
-import { dateformat } from "../../utils/dateFormat";
+import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import PaymentRequestDetails from "./PaymentRequestDetails";
 import StatusBadge from "../../ui/StatusBadge";
@@ -156,7 +156,7 @@ const PaymentRequest = () => {
       id: "amountInFigure",
       content: moneyFormat(requestData?.amountInFigure!, "NGN"),
     },
-    { id: "createdAt", content: dateformat(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
       content: (

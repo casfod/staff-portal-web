@@ -18,6 +18,7 @@ import { useVendors } from "../Vendor/Hooks/useVendor";
 import { useAdmins } from "../user/Hooks/useAdmins";
 import DatePicker from "../../ui/DatePicker";
 import { casfodAddress } from "../rfq/FormAddRFQ";
+import toast from "react-hot-toast";
 
 interface FormCreatePurchaseOrderFromRFQProps {
   rfqId: string;
@@ -43,19 +44,15 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
   // In FormCreatePurchaseOrderFromRFQ.tsx
   const [formData, setFormData] = useState<{
     casfodAddressId: string;
-    rfqDate: string;
-    deadlineDate: string;
+    poDate: string;
+    deliveryDate: string;
     VAT: number;
   }>({
     casfodAddressId: "",
-    rfqDate: "",
-    deadlineDate: "",
+    poDate: "",
+    deliveryDate: "",
     VAT: 0,
   });
-  // Timeline fields
-  const [deliveryPeriod, setDeliveryPeriod] = useState<string>("");
-  const [bidValidityPeriod, setBidValidityPeriod] = useState<string>("");
-  const [guaranteePeriod, setGuaranteePeriod] = useState<string>("");
 
   const { data: adminsData } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
@@ -86,8 +83,8 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       setItemGroups(resetItems);
       setFormData((prev) => ({
         ...prev,
-        rfqDate: rfqData.rfqDate || "",
-        deadlineDate: rfqData.deadlineDate || "",
+        poDate: rfqData.poDate || "",
+        deliveryDate: rfqData.deliveryDate || "",
         casfodAddressId: rfqData.casfodAddressId || "",
       }));
     }
@@ -133,45 +130,34 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
     e.preventDefault();
 
     // Validate timeline fields
-    if (!deliveryPeriod.trim()) {
-      alert("Please enter a delivery period");
-      return;
-    }
-    if (!bidValidityPeriod.trim()) {
-      alert("Please enter a bid validity period");
-      return;
-    }
-    if (!guaranteePeriod.trim()) {
-      alert("Please enter a guarantee period");
-      return;
-    }
+
     if (!selectedVendor) {
-      alert("Please select a vendor");
+      toast.error("Please select a vendor");
       return;
     }
     if (!selectedAdmin) {
-      alert("Please select an admin for approval");
+      toast.error("Please select an admin for approval");
       return;
     }
     if (!formData.casfodAddressId) {
-      alert("Please select a CASFOD address");
+      toast.error("Please select a CASFOD address");
       return;
     }
 
     // Validate item groups
     const hasEmptyPrices = itemGroups.some((item) => item.unitCost <= 0);
     if (hasEmptyPrices) {
-      alert("Please fill in all unit costs");
+      toast.error("Please fill in all unit costs");
       return;
     }
     const hasInvalidQuantity = itemGroups.some((item) => item.quantity <= 0);
     if (hasInvalidQuantity) {
-      alert("Please enter valid quantities for all items");
+      toast.error("Please enter valid quantities for all items");
       return;
     }
     const hasInvalidFrequency = itemGroups.some((item) => item.frequency <= 0);
     if (hasInvalidFrequency) {
-      alert("Please enter valid frequencies for all items");
+      toast.error("Please enter valid frequencies for all items");
       return;
     }
 
@@ -182,9 +168,6 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
         data: {
           ...formData,
           itemGroups,
-          deliveryPeriod,
-          bidValidityPeriod,
-          guaranteePeriod,
         },
         files: selectedFiles,
         approvedBy: selectedAdmin,
@@ -243,7 +226,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       </Row>
 
       <Row>
-        <FormRow label="Select CASFOD Address *">
+        <FormRow label="Select CASFOD Delivery Address *">
           <Select
             clearable={true}
             id="casfodAddressId"
@@ -266,11 +249,11 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="RFQ Date">
+        <FormRow label="PO Date">
           <DatePicker
-            selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+            selected={formData.poDate ? new Date(formData.poDate) : null}
             onChange={(date) =>
-              handleFormChange("rfqDate", date ? date.toISOString() : "")
+              handleFormChange("poDate", date ? date.toISOString() : "")
             }
             variant="secondary"
             size="md"
@@ -279,13 +262,13 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
           />
         </FormRow>
 
-        <FormRow label="Deadline Date">
+        <FormRow label="Delivery Date">
           <DatePicker
             selected={
-              formData.deadlineDate ? new Date(formData.deadlineDate) : null
+              formData.deliveryDate ? new Date(formData.deliveryDate) : null
             }
             onChange={(date) =>
-              handleFormChange("deadlineDate", date ? date.toISOString() : "")
+              handleFormChange("deliveryDate", date ? date.toISOString() : "")
             }
             variant="secondary"
             size="md"
@@ -310,52 +293,12 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                 id: vendor.id,
                 name: vendor.businessName,
               }))}
+              filterable={true}
               required
             />
           )}
         </FormRow>
-      </Row>
 
-      {/* Timeline & Validity Section */}
-      <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-        <h3 className="text-lg font-semibold text-blue-800 mb-4">
-          Timeline & Validity
-        </h3>
-        <Row cols="grid-cols-1 md:grid-cols-3">
-          <FormRow label="Delivery Period *">
-            <Input
-              type="text"
-              value={deliveryPeriod}
-              onChange={(e) => setDeliveryPeriod(e.target.value)}
-              placeholder="e.g., 30 days"
-              required
-            />
-          </FormRow>
-
-          <FormRow label="Bid Validity Period *">
-            <Input
-              type="text"
-              value={bidValidityPeriod}
-              onChange={(e) => setBidValidityPeriod(e.target.value)}
-              placeholder="e.g., 60 days"
-              required
-            />
-          </FormRow>
-
-          <FormRow label="Guarantee Period *">
-            <Input
-              type="text"
-              value={guaranteePeriod}
-              onChange={(e) => setGuaranteePeriod(e.target.value)}
-              placeholder="e.g., 12 months"
-              required
-            />
-          </FormRow>
-        </Row>
-      </div>
-
-      {/* Admin Approval Selection */}
-      <Row>
         <FormRow label="Approved By *" type="wide">
           <Select
             id="approvedBy"
@@ -368,6 +311,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                 id: admin.id as string,
                 name: `${admin.first_name} ${admin.last_name} (${admin.role})`,
               }))}
+            filterable={true}
             required
           />
         </FormRow>
@@ -486,29 +430,55 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
 
             {itemGroups.length > 0 && (
               <div className="flex flex-col border-t pt-2 gap-2 text-right">
-                <div className="flex justify-end justify-self-end">
+                <div className="flex justify-end gap-4">
                   {/* VAT Input */}
-
-                  <FormRow label="VAT (₦)" type="small">
+                  <FormRow label="VHT (%)" type="small">
                     <Input
                       id="VAT"
                       type="number"
                       min="0"
-                      max={totalAmount}
-                      disabled={totalAmount <= 0}
+                      max="100"
                       step="0.01"
-                      value={Math.min(formData.VAT || 0, totalAmount)}
-                      onChange={(e) => handleFormChange("VAT", e.target.value)} // Keep as string
+                      value={formData.VAT}
+                      onChange={(e) => handleFormChange("VAT", e.target.value)}
+                      placeholder="0.00"
                     />
                   </FormRow>
                 </div>
+
                 {/* Grand Total */}
-                <div className="text-lg font-bold ">
-                  Grand Total: ₦
-                  {Math.max(
-                    0,
-                    totalAmount - (formData.VAT || 0)
-                  ).toLocaleString()}
+                <div className="text-lg font-bold  text-gray-600">
+                  GROSS TOTAL: ₦
+                  {totalAmount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+
+                {/* VAT Amount */}
+                {formData.VAT > 0 && (
+                  <div className="text-lg font-semibold text-gray-600">
+                    {`(${formData.VAT}%) VHT Amount: ₦`}
+                    {(
+                      (totalAmount * Number(formData.VAT)) /
+                      100
+                    ).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </div>
+                )}
+
+                {/* NET Total */}
+                <div className="text-lg font-bold  text-gray-600">
+                  NET Total: ₦
+                  {(
+                    totalAmount -
+                    (totalAmount * Number(formData.VAT || 0)) / 100
+                  ).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </div>
               </div>
             )}

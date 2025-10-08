@@ -33,12 +33,9 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
   // Unified form state
   const [formData, setFormData] = useState<CreatePurchaseOrderType>({
     RFQTitle: "",
-    deliveryPeriod: "",
-    bidValidityPeriod: "",
-    guaranteePeriod: "",
     casfodAddressId: "",
-    rfqDate: "",
-    deadlineDate: "",
+    poDate: "",
+    deliveryDate: "",
     VAT: 0,
     itemGroups: [],
     selectedVendor: "",
@@ -59,13 +56,10 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
     if (purchaseOrder) {
       const initialData: CreatePurchaseOrderType = {
         RFQTitle: purchaseOrder.RFQTitle,
-        deliveryPeriod: purchaseOrder.deliveryPeriod,
-        bidValidityPeriod: purchaseOrder.bidValidityPeriod,
-        guaranteePeriod: purchaseOrder.guaranteePeriod,
         casfodAddressId: purchaseOrder.casfodAddressId,
-        rfqDate: purchaseOrder.rfqDate || "",
+        poDate: purchaseOrder.poDate || "",
         VAT: purchaseOrder.VAT || 0,
-        deadlineDate: purchaseOrder.deadlineDate || "",
+        deliveryDate: purchaseOrder.deliveryDate || "",
         itemGroups: purchaseOrder.itemGroups,
         selectedVendor: "",
         copiedTo: purchaseOrder.copiedTo?.map((vendor) => vendor.id) || [],
@@ -163,18 +157,6 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
     // Validate core fields
     if (!formData.RFQTitle?.trim()) {
       toast.error("Please enter a purchase order title");
-      return;
-    }
-    if (!formData.deliveryPeriod?.trim()) {
-      toast.error("Please enter a delivery period");
-      return;
-    }
-    if (!formData.bidValidityPeriod?.trim()) {
-      toast.error("Please enter a bid validity period");
-      return;
-    }
-    if (!formData.guaranteePeriod?.trim()) {
-      toast.error("Please enter a guarantee period");
       return;
     }
     if (!formData.casfodAddressId) {
@@ -283,7 +265,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
         </Row>
 
         <Row>
-          <FormRow label="Select CASFOD Address *">
+          <FormRow label="Select CASFOD Delivery Address *">
             <Select
               clearable={true}
               id="casfodAddressId"
@@ -306,11 +288,11 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
         </Row>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
-          <FormRow label="RFQ Date">
+          <FormRow label="PO Date">
             <DatePicker
-              selected={formData.rfqDate ? new Date(formData.rfqDate) : null}
+              selected={formData.poDate ? new Date(formData.poDate) : null}
               onChange={(date) =>
-                handleFormChange("rfqDate", date ? date.toISOString() : "")
+                handleFormChange("poDate", date ? date.toISOString() : "")
               }
               variant="secondary"
               size="md"
@@ -322,10 +304,10 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
           <FormRow label="Deadline Date">
             <DatePicker
               selected={
-                formData.deadlineDate ? new Date(formData.deadlineDate) : null
+                formData.deliveryDate ? new Date(formData.deliveryDate) : null
               }
               onChange={(date) =>
-                handleFormChange("deadlineDate", date ? date.toISOString() : "")
+                handleFormChange("deliveryDate", date ? date.toISOString() : "")
               }
               variant="secondary"
               size="md"
@@ -335,53 +317,6 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
             />
           </FormRow>
         </Row>
-
-        {/* Timeline & Validity Section */}
-        <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-800 mb-4">
-            Timeline & Validity
-          </h3>
-          <Row cols="grid-cols-1 md:grid-cols-3">
-            <FormRow label="Delivery Period *">
-              <Input
-                type="text"
-                id="deliveryPeriod"
-                value={formData.deliveryPeriod}
-                onChange={(e) =>
-                  handleFormChange("deliveryPeriod", e.target.value)
-                }
-                placeholder="e.g., 30 days"
-                required
-              />
-            </FormRow>
-
-            <FormRow label="Bid Validity Period *">
-              <Input
-                type="text"
-                id="bidValidityPeriod"
-                value={formData.bidValidityPeriod}
-                onChange={(e) =>
-                  handleFormChange("bidValidityPeriod", e.target.value)
-                }
-                placeholder="e.g., 60 days"
-                required
-              />
-            </FormRow>
-
-            <FormRow label="Guarantee Period *">
-              <Input
-                type="text"
-                id="guaranteePeriod"
-                value={formData.guaranteePeriod}
-                onChange={(e) =>
-                  handleFormChange("guaranteePeriod", e.target.value)
-                }
-                placeholder="e.g., 12 months"
-                required
-              />
-            </FormRow>
-          </Row>
-        </div>
 
         {/* Vendor Information (Read-only) */}
         <Row cols="grid-cols-1 md:grid-cols-2">
@@ -395,6 +330,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                 id: vendor.id,
                 name: vendor.businessName,
               }))}
+              filterable={true}
               required
             />
           </FormRow>
@@ -411,6 +347,7 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                   id: admin.id as string,
                   name: `${admin.first_name} ${admin.last_name} (${admin.role})`,
                 }))}
+              filterable={true}
               required
             />
           </FormRow>
@@ -553,33 +490,60 @@ const FormEditPurchaseOrder: React.FC<FormEditPurchaseOrderProps> = ({
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
               </Button>
+
               {itemGroups.length > 0 && (
                 <div className="flex flex-col border-t pt-2 gap-2 text-right">
-                  <div className="flex justify-end justify-self-end">
+                  <div className="flex justify-end gap-4">
                     {/* VAT Input */}
-
-                    <FormRow label="VAT (₦)" type="small">
+                    <FormRow label="VHT (%)" type="small">
                       <Input
                         id="VAT"
                         type="number"
                         min="0"
-                        max={totalAmount}
-                        disabled={totalAmount <= 0}
+                        max="100"
                         step="0.01"
-                        value={Math.min(formData.VAT || 0, totalAmount)}
+                        value={formData.VAT}
                         onChange={(e) =>
                           handleFormChange("VAT", e.target.value)
-                        } // Keep as string
+                        }
+                        placeholder="0.00"
                       />
                     </FormRow>
                   </div>
+
                   {/* Grand Total */}
-                  <div className="text-lg font-bold ">
-                    Grand Total: ₦
-                    {Math.max(
-                      0,
-                      totalAmount - (formData.VAT || 0)
-                    ).toLocaleString()}
+                  <div className="text-lg font-bold  text-gray-600">
+                    GROSS TOTAL: ₦
+                    {totalAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </div>
+
+                  {/* VAT Amount */}
+                  {formData.VAT > 0 && (
+                    <div className="text-lg font-semibold text-gray-600">
+                      {`(${formData.VAT}%) VHT Amount: ₦`}
+                      {(
+                        (totalAmount * Number(formData.VAT)) /
+                        100
+                      ).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </div>
+                  )}
+
+                  {/* NET Total */}
+                  <div className="text-lg font-bold  text-gray-600">
+                    NET Total: ₦
+                    {(
+                      totalAmount -
+                      (totalAmount * Number(formData.VAT || 0)) / 100
+                    ).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
               )}
