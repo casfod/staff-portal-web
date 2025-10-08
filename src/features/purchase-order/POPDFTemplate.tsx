@@ -12,7 +12,7 @@ interface POPDFTemplateProps {
 }
 
 const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
-  isGenerating = false,
+  // isGenerating = false,
   poData,
   pdfRef,
 }) => {
@@ -58,7 +58,8 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
             {poData.POCode}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            PO Date: {formatToDDMMYYYY(poData?.poDate || "")}
+            PO Date:{" "}
+            {poData?.poDate ? formatToDDMMYYYY(poData?.poDate || "") : "N/A"}
           </p>
         </div>
       </div>
@@ -126,7 +127,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
         </div>
       </div>
 
-      {isGenerating && <div className="h-40"></div>}
+      {/* {isGenerating && <div className="h-40"></div>} */}
 
       {/* Items Table */}
       <div className="mb-6">
