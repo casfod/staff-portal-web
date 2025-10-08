@@ -12,7 +12,7 @@ interface POPDFTemplateProps {
 }
 
 const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
-  // isGenerating = false,
+  isGenerating = false,
   poData,
   pdfRef,
 }) => {
@@ -127,7 +127,50 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
         </div>
       </div>
 
-      {/* {isGenerating && <div className="h-40"></div>} */}
+      {/* Terms and Conditions */}
+      <div className="mb-6">
+        <h3 className="font-bold mb-3 text-gray-800 border-b pb-1">
+          Terms and Conditions
+        </h3>
+        <ul className="text-md text-gray-700 space-y-2">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              All goods must be delivered in accordance with the specifications
+              and delivery schedule mentioned above.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              Payment will be made upon satisfactory delivery and acceptance of
+              goods.
+            </span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>All invoices must reference this Purchase Order number.</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>
+              CASFOD reserves the right to cancel this order if terms are not
+              met.
+            </span>
+          </li>
+          {poData.deliveryDate && (
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>
+                Goods are guaranteed for delivery on{" "}
+                {formatToDDMMYYYY(poData.deliveryDate)}.
+              </span>
+            </li>
+          )}
+        </ul>
+      </div>
+
+      {isGenerating && <div className="h-40"></div>}
 
       {/* Items Table */}
       <div className="mb-6">
@@ -220,7 +263,7 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
                 colSpan={6}
                 className="border border-gray-300 p-2 text-right text-sm"
               >
-                VHT:
+                WHT:
               </td>
               <td className="border border-gray-300 p-2 text-right text-sm">
                 ₦

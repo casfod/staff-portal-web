@@ -432,7 +432,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
               <div className="flex flex-col border-t pt-2 gap-2 text-right">
                 <div className="flex justify-end gap-4">
                   {/* VAT Input */}
-                  <FormRow label="VHT (%)" type="small">
+                  <FormRow label="WHT (%)" type="small">
                     <Input
                       id="VAT"
                       type="number"
@@ -458,7 +458,7 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
                 {/* VAT Amount */}
                 {formData.VAT > 0 && (
                   <div className="text-lg font-semibold text-gray-600">
-                    {`(${formData.VAT}%) VHT Amount: ₦`}
+                    {`(${formData.VAT}%) WHT Amount: ₦`}
                     {(
                       (totalAmount * Number(formData.VAT)) /
                       100

@@ -96,7 +96,7 @@ export const PurchaseOrderDetails = ({
 
         {
           id: "VAT",
-          label: "VHT (%)",
+          label: "WHT (%)",
           content: `${
             purchaseOrder.VAT ? purchaseOrder.VAT.toLocaleString() : 0
           }`,
@@ -109,8 +109,8 @@ export const PurchaseOrderDetails = ({
           // icon: <DollarSign className="w-4 h-4" />,
         },
         {
-          id: "VHT",
-          label: "VHT AMOUNT",
+          id: "WHT",
+          label: "WHT AMOUNT",
           content: `₦${
             purchaseOrder.VAT
               ? (purchaseOrder.totalAmount / 100) * purchaseOrder.VAT
