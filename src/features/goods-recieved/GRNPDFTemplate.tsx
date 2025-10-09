@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../../assets/logo.webp";
-import { GoodsReceivedType, PurchaseOrderType } from "../../interfaces";
+import { GoodsReceivedType } from "../../interfaces";
 import { casfodAddress } from "../rfq/RFQPDFTemplate";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 
@@ -11,7 +11,7 @@ interface GRNPDFTemplateProps {
 }
 
 const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
-  isGenerating = false,
+  // isGenerating = false,
   grnData,
   pdfRef,
 }) => {
@@ -37,6 +37,15 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
       (poItem) => poItem._id === itemid
     );
     return item?.itemName || "Unknown Item";
+  };
+
+  const getItemDescription = (itemid: string): string => {
+    if (!purchaseOrder) return "";
+
+    const item = purchaseOrder.itemGroups.find(
+      (poItem) => poItem._id === itemid
+    );
+    return item?.description || "";
   };
 
   const totalOrdered = grnData.GRNitems.reduce(
@@ -147,7 +156,7 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
         </div>
       </div>
 
-      {isGenerating && <div className="h-80"></div>}
+      {/* {isGenerating && <div className="h-80"></div>} */}
 
       {/* Items Table */}
       <div className="mb-6">
@@ -176,37 +185,48 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           </thead>
           <tbody>
             {grnData.GRNitems.map((item, index) => (
-              <tr
-                key={index}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-300 p-2 text-sm">
-                  {index + 1}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm">
-                  {getItemName(item.itemid)}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.numberOrdered.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.numberReceived.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-right">
-                  {item.difference.toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2 text-sm text-center">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      item.isFullyReceived
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {item.isFullyReceived ? "Fully Received" : "Partial"}
-                  </span>
-                </td>
-              </tr>
+              <React.Fragment key={index}>
+                <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm">
+                    {getItemName(item.itemid)}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.numberOrdered.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.numberReceived.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-right">
+                    {item.difference.toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-sm text-center">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        item.isFullyReceived
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {item.isFullyReceived ? "Fully Received" : "Partial"}
+                    </span>
+                  </td>
+                </tr>
+                {/* Item Description Row */}
+                {getItemDescription(item.itemid) && (
+                  <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td
+                      colSpan={6}
+                      className="border border-gray-300 p-2 text-sm text-gray-600 italic"
+                    >
+                      <strong>Description:</strong>{" "}
+                      {getItemDescription(item.itemid)}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
 
             {/* Summary Row */}
@@ -234,30 +254,105 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
         </table>
       </div>
 
-      {/* Receipt Confirmation */}
+      {/* Receipt Confirmation - Three Sections */}
       <div className="mt-12 pt-8 border-t border-gray-300">
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-3 gap-6">
+          {/* Delivered By (Vendor) */}
           <div>
-            <p className="font-semibold mb-2">Received By (CASFOD):</p>
-            <div className="border-t border-gray-300 pt-8 mt-2">
-              <div className="h-8 border-b border-gray-400"></div>
-              <p className="text-sm text-gray-600 mt-1">Name & Signature</p>
+            <p className="font-semibold mb-3 text-gray-700">
+              DELIVERED BY (VENDOR):
+            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Vendor Name</p>
+                <div className="h-6 border-b border-gray-400 text-center font-medium">
+                  {purchaseOrder?.selectedVendor?.businessName || "N/A"}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Contact Person</p>
+                <div className="h-6 border-b border-gray-400 text-center">
+                  {purchaseOrder?.selectedVendor?.contactPerson || "N/A"}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Phone Number</p>
+                <div className="h-6 border-b border-gray-400 text-center">
+                  {purchaseOrder?.selectedVendor?.contactPhoneNumber || "N/A"}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-1">Signature</p>
+                <div className="h-12 border-b border-gray-400"></div>
+                <p className="text-xs text-gray-500 mt-1 text-center">
+                  (Vendor's Signature)
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Date</p>
+                <div className="h-6 border-b border-gray-400"></div>
+              </div>
             </div>
           </div>
 
+          {/* Verified By (CASFOD) */}
           <div>
-            <p className="font-semibold mb-2">Delivered By (Vendor):</p>
-            <div className="border-t border-gray-300 pt-8 mt-2 space-y-6">
+            <p className="font-semibold mb-3 text-gray-700">
+              VERIFIED BY (CASFOD):
+            </p>
+            <div className="space-y-4">
               <div>
-                <p className="font-medium text-sm text-gray-700 mb-2">Name</p>
-                <div className="h-8 border-b border-gray-400"></div>
+                <p className="text-sm text-gray-600 mb-1">Name</p>
+                <div className="h-6 border-b border-gray-400"></div>
               </div>
               <div>
-                <p className="font-medium text-sm text-gray-700 mb-2">
-                  Signature
-                </p>
+                <p className="text-sm text-gray-600 mb-1">Position</p>
+                <div className="h-6 border-b border-gray-400"></div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-1">Signature</p>
                 <div className="h-12 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-1">(Sign here)</p>
+                <p className="text-xs text-gray-500 mt-1 text-center">
+                  (Verifier's Signature)
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Date</p>
+                <div className="h-6 border-b border-gray-400"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Received By (CASFOD) */}
+          <div>
+            <p className="font-semibold mb-3 text-gray-700">
+              RECEIVED BY (CASFOD):
+            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Name</p>
+                <div className="h-6 border-b border-gray-400 text-center font-medium">
+                  {grnData.createdBy?.first_name} {grnData.createdBy?.last_name}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Position</p>
+                <div className="h-6 border-b border-gray-400 text-center">
+                  {grnData.createdBy?.role || "N/A"}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-1">Signature</p>
+                <div className="h-12 border-b border-gray-400"></div>
+                <p className="text-xs text-gray-500 mt-1 text-center">
+                  (Receiver's Signature)
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Date</p>
+                <div className="h-6 border-b border-gray-400 text-center">
+                  {formatToDDMMYYYY(grnData.createdAt)}
+                </div>
               </div>
             </div>
           </div>

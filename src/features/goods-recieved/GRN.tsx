@@ -9,7 +9,7 @@ import Button from "../../ui/Button";
 import StatusBadge from "../../ui/StatusBadge";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import TextHeader from "../../ui/TextHeader";
-import { FileUpload } from "../../ui/FileUpload";
+// import { FileUpload } from "../../ui/FileUpload";
 import { useGoodsReceivedDetail } from "./Hooks/useGoodsReceived";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
@@ -51,7 +51,7 @@ const GRN = () => {
     }
   }, [requestData, grnId, navigate, isLoading]);
 
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  // const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // PDF generation logic

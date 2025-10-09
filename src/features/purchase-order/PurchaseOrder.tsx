@@ -10,7 +10,7 @@ import StatusBadge from "../../ui/StatusBadge";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import TextHeader from "../../ui/TextHeader";
-import { FileUpload } from "../../ui/FileUpload";
+// import { FileUpload } from "../../ui/FileUpload";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import { usePurchaseOrder } from "./Hooks/usePurchaseOrder";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
@@ -73,7 +73,7 @@ const PurchaseOrder = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  // const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // PDF generation logic
@@ -140,8 +140,8 @@ const PurchaseOrder = () => {
   };
 
   const isCreator = requestData?.createdBy?.id === currentUser.id;
-  const requestStatus = requestData?.status;
-  const canUploadFiles = isCreator && requestStatus === "approved";
+  // const requestStatus = requestData?.status;
+  // const canUploadFiles = isCreator && requestStatus === "approved";
 
   const showStatusUpdate =
     requestData?.status === "pending" &&

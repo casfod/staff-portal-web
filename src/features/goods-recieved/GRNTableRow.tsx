@@ -38,9 +38,9 @@ const GRNTableRow = ({
   const grnId = grn.id ?? "";
   const isVisible = !!visibleItems[grnId];
 
-  const purchaseOrder =
-    typeof grn.purchaseOrder === "object" ? grn.purchaseOrder : null;
-  const vendorName = purchaseOrder?.selectedVendor?.businessName || "N/A";
+  // const purchaseOrder =
+  //   typeof grn.purchaseOrder === "object" ? grn.purchaseOrder : null;
+  // const vendorName = purchaseOrder?.selectedVendor?.businessName || "N/A";
 
   const receivedItems = grn.GRNitems.filter(
     (item) => item.isFullyReceived

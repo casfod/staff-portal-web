@@ -1,4 +1,4 @@
-import { GoodsReceivedType, PurchaseOrderType } from "../../interfaces";
+import { GoodsReceivedType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import DetailContainer from "../../ui/DetailContainer";
 import {
@@ -6,7 +6,6 @@ import {
   Calendar,
   Tag,
   Package,
-  User,
   CheckCircle,
   XCircle,
 } from "lucide-react";

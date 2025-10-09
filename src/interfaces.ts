@@ -783,6 +783,7 @@ export interface PurchaseOrderType {
     email: string;
     contactPerson: string;
     businessPhoneNumber?: string;
+    contactPhoneNumber?: string;
     address?: string;
   };
 
@@ -872,7 +873,7 @@ export interface GoodsReceivedType {
   files?: FileType[];
   purchaseOrder: PurchaseOrderType | string;
   GRNitems: GoodsReceivedItemsType[];
-  createdBy: UserType | string;
+  createdBy: UserType;
   createdAt: string;
   updatedAt: string;
 }

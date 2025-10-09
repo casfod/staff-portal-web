@@ -55,6 +55,8 @@ export const useGRNPDF = (
     const { jsPDF } = await import("jspdf");
     const html2canvas = (await import("html2canvas")).default;
 
+    console.log(grnData);
+
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
