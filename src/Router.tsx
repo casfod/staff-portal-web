@@ -60,6 +60,9 @@ import CreatePurchaseOrder from "./features/purchase-order/CreatePurchaseOrder.t
 import CreatePurchaseOrderFromRFQ from "./features/purchase-order/CreatePurchaseOrderFromRFQ.tsx";
 import EditPurchaseOrder from "./features/purchase-order/EditPurchaseOrder.tsx";
 import { AllPurchaseOrders } from "./features/purchase-order/AllPurchaseOrders.tsx";
+import GRNManagement from "./pages/GRNManagement.tsx";
+import GRN from "./features/goods-recieved/GRN.tsx";
+import { AllGRN } from "./features/goods-recieved/AllGRN.tsx";
 
 const router = createBrowserRouter([
   {
@@ -484,6 +487,35 @@ const router = createBrowserRouter([
                 path: "edit/:purchaseOrderId",
                 element: <EditPurchaseOrder />,
               },
+            ],
+          },
+          {
+            path: "goods-received",
+            element: (
+              <AnimatedRoute key="goods-received" element={<GRNManagement />} />
+            ),
+            children: [
+              { index: true, element: <Navigate to="all-goods-received" /> },
+              {
+                path: ":grnId",
+                element: <GRN />,
+              },
+              {
+                path: "all-goods-received",
+                element: <AllGRN />,
+              },
+              // {
+              //   path: "create",
+              //   element: <CreatePurchaseOrder />,
+              // },
+              // {
+              //   path: "create/:rfqId", // Changed from :purchaseOrderId to :rfqId
+              //   element: <CreatePurchaseOrderFromRFQ />,
+              // },
+              // {
+              //   path: "edit/:purchaseOrderId",
+              //   element: <EditPurchaseOrder />,
+              // },
             ],
           },
 

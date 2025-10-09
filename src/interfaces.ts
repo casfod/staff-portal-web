@@ -671,6 +671,7 @@ export interface RFQItemGroupType {
   unit: string;
   unitCost: number;
   total: number;
+  _id?: string;
 }
 
 export interface RFQType {
@@ -776,6 +777,7 @@ export interface PurchaseOrderType {
     address?: string;
   }>;
   selectedVendor: {
+    vendorName: string;
     id: string;
     businessName: string;
     email: string;
@@ -848,5 +850,56 @@ export interface UsePurchaseOrderType {
     total: number;
     totalPages: number;
     currentPage: number;
+  };
+}
+
+///////////////////////////////////
+// GOODS RECIEVED
+///////////////////////////////////
+// Add to your existing interfaces.ts
+export interface GoodsReceivedItemsType {
+  isFullyReceived: boolean;
+  itemid: string;
+  numberOrdered: number;
+  numberReceived: number;
+  difference: number;
+}
+
+export interface GoodsReceivedType {
+  isCompleted: boolean; // Changed from 'any' to 'boolean'
+  id: string;
+  GRDCode: string;
+  files?: FileType[];
+  purchaseOrder: PurchaseOrderType | string;
+  GRNitems: GoodsReceivedItemsType[];
+  createdBy: UserType | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateGoodsReceivedType {
+  purchaseOrder: string;
+  files?: File[];
+  GRNitems: {
+    itemid: string;
+    numberOrdered: number;
+    numberReceived: number;
+  }[];
+}
+
+export interface UseGoodsReceived {
+  status: string;
+  message: string;
+  data: GoodsReceivedType;
+}
+
+export interface UseGoodsReceivedType {
+  status: string;
+  message: string;
+  data: {
+    goodsReceived: GoodsReceivedType[];
+    totalPages: number;
+    currentPage: number;
+    totalCount: number;
   };
 }
