@@ -39,14 +39,16 @@ const PurchaseOrderTableRow = ({
   const purchaseOrderId = purchaseOrder.id ?? "";
   const isVisible = !!visibleItems[purchaseOrderId];
 
-  const vendorName =
-    purchaseOrder.copiedTo &&
-    Array.isArray(purchaseOrder.copiedTo) &&
-    purchaseOrder.copiedTo.length > 0
-      ? typeof purchaseOrder.copiedTo[0] === "object"
-        ? (purchaseOrder.copiedTo[0] as any).businessName
-        : "Vendor"
-      : "No Vendor";
+  // const vendorName =
+  //   purchaseOrder.copiedTo &&
+  //   Array.isArray(purchaseOrder.copiedTo) &&
+  //   purchaseOrder.copiedTo.length > 0
+  //     ? typeof purchaseOrder.copiedTo[0] === "object"
+  //       ? (purchaseOrder.copiedTo[0] as any).businessName
+  //       : "Vendor"
+  //     : "No Vendor";
+
+  const vendorName = purchaseOrder.selectedVendor.businessName;
 
   const rowData = [
     {
