@@ -39,7 +39,10 @@ const FormCreatePurchaseOrder: React.FC = () => {
     useCreateIndependentPurchaseOrder();
 
   // Fetch vendors and admins
-  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({});
+  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({
+    page: 1,
+    limit: 1000,
+  });
   const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
 
   const vendors = useMemo(

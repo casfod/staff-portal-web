@@ -31,7 +31,10 @@ const FormCreatePurchaseOrderFromRFQ: React.FC<
   const rfq = useSelector((state: RootState) => state.rfq.rfq);
 
   const { data: remoteRFQData, isLoading: isLoadingRFQ } = useRFQ(rfqId);
-  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({});
+  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({
+    page: 1,
+    limit: 1000,
+  });
 
   const { createPurchaseOrderFromRFQ, isPending: isCreating } =
     useCreatePurchaseOrderFromRFQ();
