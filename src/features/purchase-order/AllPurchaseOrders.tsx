@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   usePurchaseOrders,
@@ -33,7 +33,7 @@ export function AllPurchaseOrders() {
   );
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
 
-  const { data, isLoading, isError } = usePurchaseOrders({
+  const { data, isLoading, isError, refetch } = usePurchaseOrders({
     search: debouncedSearchTerm,
     sort,
     page,
@@ -44,11 +44,15 @@ export function AllPurchaseOrders() {
 
   // State for toggling nested tables
   const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const purchaseOrders = useMemo(
     () => data?.data?.purchaseOrders ?? [],
     [data]
   );
+
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
   // Toggle nested table visibility
