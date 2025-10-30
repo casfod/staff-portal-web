@@ -6,10 +6,35 @@ import Swal from "sweetalert2";
 import Button from "../../ui/Button";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Input from "../../ui/Input";
+import { CustomSelect } from "../../ui/CustomSelect";
+import { positions, role } from "./AddUserForm";
 
 interface UserCardProps {
   user: UserType;
 }
+
+const procurementPermissions = [
+  {
+    key: "canView" as const,
+    label: "View",
+    description: "Can view procurement data",
+  },
+  {
+    key: "canCreate" as const,
+    label: "Create",
+    description: "Can create new procurement",
+  },
+  {
+    key: "canUpdate" as const,
+    label: "Update",
+    description: "Can update procurement",
+  },
+  {
+    key: "canDelete" as const,
+    label: "Delete",
+    description: "Can delete procurement",
+  },
+] as const;
 
 const UserCard: React.FC<UserCardProps> = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,6 +43,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     lastName: user.last_name,
     email: user.email,
     role: user.role,
+    position: user.position || "",
     procurementRole: {
       canCreate: user.procurementRole?.canCreate || false,
       canView: user.procurementRole?.canView || false,
@@ -29,31 +55,15 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
 
   const { UpdateUser, isPending } = useUpdateUser(user?.id!);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
 
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
-      // Handle nested procurementRole properties
-      if (name.startsWith("procurementRole.")) {
-        const roleKey = name.split(
-          "."
-        )[1] as keyof typeof editedUser.procurementRole;
-        setEditedUser((prev) => ({
-          ...prev,
-          procurementRole: {
-            ...prev.procurementRole,
-            [roleKey]: checked,
-          },
-        }));
-      } else {
-        setEditedUser((prev) => ({
-          ...prev,
-          [name]: checked,
-        }));
-      }
+      setEditedUser((prev) => ({
+        ...prev,
+        [name]: checked,
+      }));
     } else {
       setEditedUser((prev) => ({
         ...prev,
@@ -62,9 +72,18 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     }
   };
 
+  const handleSelectChange = (field: string) => (value: string) => {
+    setEditedUser((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const handleProcurementRoleToggle = (
     key: keyof typeof editedUser.procurementRole
   ) => {
+    if (!isEditing) return;
+
     setEditedUser((prev) => ({
       ...prev,
       procurementRole: {
@@ -84,13 +103,12 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       cancelButtonColor: "#DC3340",
       confirmButtonText: "Yes, update it!",
       cancelButtonText: "Cancel",
-      customClass: { popup: "custom-style" },
-      animation: false,
     }).then((result) => {
       if (result.isConfirmed) {
         UpdateUser(
           {
             role: editedUser.role,
+            position: editedUser.position,
             procurementRole: editedUser.procurementRole,
             first_name: editedUser.firstName,
             last_name: editedUser.lastName,
@@ -106,7 +124,6 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                 icon: "success",
                 timer: 2000,
                 showConfirmButton: false,
-                animation: false,
               });
             },
             onError: (error) => {
@@ -114,22 +131,8 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                 title: "Error!",
                 text: error.message,
                 icon: "error",
-                animation: false,
               });
-              // Reset to original values on error
-              setEditedUser({
-                firstName: user.first_name,
-                lastName: user.last_name,
-                email: user.email,
-                role: user.role,
-                procurementRole: {
-                  canCreate: user.procurementRole?.canCreate || false,
-                  canView: user.procurementRole?.canView || false,
-                  canUpdate: user.procurementRole?.canUpdate || false,
-                  canDelete: user.procurementRole?.canDelete || false,
-                },
-                isDeleted: user.isDeleted,
-              });
+              resetForm();
             },
           }
         );
@@ -137,13 +140,13 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     });
   };
 
-  const handleCancelEdit = () => {
-    setIsEditing(false);
+  const resetForm = () => {
     setEditedUser({
       firstName: user.first_name,
       lastName: user.last_name,
       email: user.email,
       role: user.role,
+      position: user.position || "",
       procurementRole: {
         canCreate: user.procurementRole?.canCreate || false,
         canView: user.procurementRole?.canView || false,
@@ -154,33 +157,19 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     });
   };
 
-  const procurementPermissions = [
-    { key: "canView", label: "View", description: "Can view procurement data" },
-    {
-      key: "canCreate",
-      label: "Create",
-      description: "Can create new procurement",
-    },
-    {
-      key: "canUpdate",
-      label: "Update",
-      description: "Can update procurement",
-    },
-    {
-      key: "canDelete",
-      label: "Delete",
-      description: "Can delete procurement",
-    },
-  ] as const;
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    resetForm();
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
       {/* Header Section */}
-      <div className="flex items-start space-x-4 mb-6">
+      <div className="flex items-start gap-4 mb-6">
         <img
           src={profilePlaceHolder}
-          alt={`Photo of ${user?.first_name} ${user?.last_name}`}
-          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+          alt={`${user.first_name} ${user.last_name}`}
+          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
           {isEditing ? (
@@ -216,9 +205,9 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           ) : (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 truncate">
-                {`${user?.first_name} ${user?.last_name}`}
+                {`${user.first_name} ${user.last_name}`}
               </h2>
-              <p className="text-gray-600 truncate">{user?.email}</p>
+              <p className="text-gray-600 truncate">{user.email}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -227,47 +216,65 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                       : "bg-green-100 text-green-800"
                   }`}
                 >
-                  {user?.isDeleted ? "Inactive" : "Active"}
+                  {user.isDeleted ? "Inactive" : "Active"}
                 </span>
                 <span className="text-sm text-gray-500">•</span>
                 <span className="text-sm text-gray-600 capitalize">
                   {user.role.toLowerCase().replace("-", " ")}
                 </span>
               </div>
+              {user.position && (
+                <p className="text-sm text-gray-600 mt-1">{user.position}</p>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Role and Status Section */}
+      {/* Role, Position and Status Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             User Role
           </label>
           {isEditing ? (
-            <select
-              name="role"
+            <CustomSelect
               value={editedUser.role}
-              onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={isPending}
-            >
-              <option value="STAFF">Staff</option>
-              <option value="REVIEWER">Reviewer</option>
-              <option value="ADMIN">Admin</option>
-              <option value="SUPER-ADMIN">Super Admin</option>
-            </select>
+              onChange={handleSelectChange("role")}
+              options={role}
+              placeholder="Select role"
+              required
+              // disabled={isPending}
+            />
+          ) : (
+            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded-md capitalize">
+              {user.role.toLowerCase().replace("-", " ")}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Position
+          </label>
+          {isEditing ? (
+            <CustomSelect
+              value={editedUser.position}
+              onChange={handleSelectChange("position")}
+              options={positions}
+              placeholder="Select position"
+              required
+              // disabled={isPending}
+            />
           ) : (
             <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded-md">
-              {user.role}
+              {user.position || "Not specified"}
             </p>
           )}
         </div>
 
         {user.isDeleted && isEditing && (
-          <div className="flex items-center">
-            <label className="flex items-center space-x-2">
+          <div className="flex items-center md:col-span-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="isDeleted"
@@ -293,41 +300,29 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           {procurementPermissions.map((permission) => (
             <div
               key={permission.key}
-              className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all ${
+              className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
                 isEditing
-                  ? "hover:border-blue-300 hover:bg-blue-50"
+                  ? "cursor-pointer hover:border-blue-300 hover:bg-blue-50"
                   : "cursor-default"
               } ${
                 editedUser.procurementRole[permission.key]
                   ? "border-blue-300 bg-blue-50"
                   : "border-gray-200"
               }`}
-              onClick={() =>
-                isEditing && handleProcurementRoleToggle(permission.key)
-              }
+              onClick={() => handleProcurementRoleToggle(permission.key)}
             >
-              <div className="flex items-center space-x-3">
-                {isEditing ? (
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      editedUser.procurementRole[permission.key]
-                        ? "bg-blue-500 border-blue-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    {editedUser.procurementRole[permission.key] && (
-                      <div className="w-2 h-2 bg-white rounded-full" />
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      editedUser.procurementRole[permission.key]
-                        ? "bg-green-500"
-                        : "bg-gray-300"
-                    }`}
-                  />
-                )}
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center justify-center w-5 h-5 rounded-full border-2 transition-colors ${
+                    editedUser.procurementRole[permission.key]
+                      ? "bg-blue-500 border-blue-500"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {editedUser.procurementRole[permission.key] && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
                 <div>
                   <div className="text-sm font-medium text-gray-900">
                     {permission.label}

@@ -48,6 +48,7 @@ export interface UserType {
     canDelete?: boolean;
   };
   isDeleted?: boolean;
+  position?: string;
   password?: string;
   passwordConfirm?: string;
 }
