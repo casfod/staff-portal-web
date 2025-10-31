@@ -75,6 +75,18 @@ const Navigation: React.FC = () => {
         { to: "/procurement/goods-received", label: "Goods Received" },
       ],
     },
+
+    {
+      to: "/finance",
+      label: "Finance",
+      icon: Banknote, // You might want to use a different icon like DollarSign
+      dropdown: [
+        {
+          to: "/finance/payment-voucher/payment-vouchers",
+          label: "Payment Vouchers",
+        },
+      ],
+    },
     { to: "/user-management", label: "User Management", icon: Users },
   ];
 

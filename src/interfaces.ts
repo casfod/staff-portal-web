@@ -905,3 +905,92 @@ export interface UseGoodsReceivedType {
     totalCount: number;
   };
 }
+
+///////////////////////////////////
+//Payment Voucher
+///////////////////////////////////
+// interfaces.ts - Update the PaymentVoucherType interface
+export interface PaymentVoucherType {
+  id?: string;
+  departmentalCode: string;
+  pvNumber: string;
+  payingStation: string;
+  payTo: string;
+  being: string;
+  amountInWords: string;
+  grantCode: string;
+  grossAmount: number;
+  vat: number;
+  wht: number;
+  devLevy: number;
+  otherDeductions: number;
+  netAmount: number;
+  chartOfAccountCategories: string;
+  chartOfAccount: string;
+  chartOfAccountCode: string;
+  projBudgetLine: string;
+  note: string;
+  mandateReference: string;
+  createdBy?: Partial<UserType>; // Made optional for form creation
+  reviewedBy?: UserType[] | any; // Changed to string for form handling
+  approvedBy?: UserType[] | any; // Changed to string for form handling
+  status?: "draft" | "pending" | "reviewed" | "approved" | "rejected" | "paid"; // Made optional
+  comments?: Comment[];
+  copiedTo?: UserType[];
+  files?: FileType[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Add a separate interface for form data
+export interface PaymentVoucherFormData {
+  departmentalCode: string;
+  pvNumber?: string;
+  payingStation: string;
+  payTo: string;
+  being: string;
+  amountInWords: string;
+  grantCode: string;
+  grossAmount: number;
+  vat: number;
+  wht: number;
+  devLevy: number;
+  otherDeductions: number;
+  netAmount: number;
+  chartOfAccountCategories: string;
+  chartOfAccount: string;
+  chartOfAccountCode: string;
+  projBudgetLine: string;
+  note: string;
+  mandateReference: string;
+  reviewedBy?: string | null;
+  approvedBy?: string | null;
+}
+
+export interface UsePaymentVoucherStatsType {
+  status: number;
+  message: string;
+  data: {
+    totalVouchers: number;
+    totalApprovedVouchers: number;
+    totalPaidVouchers: number;
+    totalAmount: number;
+  };
+}
+
+export interface usePaymentVoucherType {
+  status: number;
+  message: string;
+  data: {
+    paymentVouchers: PaymentVoucherType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UsePaymentVoucher {
+  status: number;
+  message: string;
+  data: PaymentVoucherType;
+}

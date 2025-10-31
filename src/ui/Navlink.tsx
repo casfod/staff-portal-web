@@ -28,8 +28,8 @@ const Navlink: React.FC<NavLinkProps> = ({ to, label, icon: Icon }) => {
         }
         style={{ lineHeight: "24px", fontWeight: "500" }}
       >
-        <Icon className="mr-2 h-5 2xl:h-7 w-7" />
-        <span className="w-full tracking-[0.8px] text-xs lg:text-sm 2xl:text-base">
+        <Icon className="mr-2 h-4 2xl:h-5 w-5" />
+        <span className="w-full tracking-[0.8px] text-xs lg:text-sm">
           {label}
         </span>
       </NavLink>

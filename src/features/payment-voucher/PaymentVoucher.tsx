@@ -1,3 +1,4 @@
+// components/payment-vouchers/PaymentVoucher.tsx
 import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,7 +8,7 @@ import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
-import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
+import { PaymentVoucherDetails } from "./PaymentVoucherDetails";
 import StatusBadge from "../../ui/StatusBadge";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
@@ -25,40 +26,38 @@ import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import {
   useCopy,
-  usePurchaseRequest,
-  useUpdatePurChaseRequest,
+  usePaymentVoucher,
+  useUpdatePaymentVoucher,
   useUpdateStatus,
-} from "./Hooks/PRHook";
+} from "./Hooks/PVHook";
 
-const PurchaseRequest = () => {
-  const isUnderMaintenance = false; // Set this based on your maintenance status
+const PaymentVoucher = () => {
+  const isUnderMaintenance = false;
 
   const currentUser = localStorageUser();
   const navigate = useNavigate();
-  const { requestId } = useParams();
+  const { voucherId } = useParams();
 
-  // Data fetching and reconciliation
   const {
     data: remoteData,
     isLoading,
     isError,
-  } = usePurchaseRequest(requestId!);
+  } = usePaymentVoucher(voucherId!);
 
-  const purchaseRequest = useSelector(
-    (state: RootState) => state.purchaseRequest.purchaseRequest
+  const paymentVoucher = useSelector(
+    (state: RootState) => state.paymentVoucher.paymentVoucher
   );
 
-  const requestData = useMemo(
-    () => remoteData?.data || purchaseRequest,
-    [remoteData, purchaseRequest]
+  const voucherData = useMemo(
+    () => remoteData?.data || paymentVoucher,
+    [remoteData, paymentVoucher]
   );
 
-  // Redirect logic - PLACE IT HERE
   useEffect(() => {
-    if (!requestId || (!isLoading && !requestData)) {
-      navigate("/purchase-requests");
+    if (!voucherId || (!isLoading && !voucherData)) {
+      navigate("/payment-vouchers");
     }
-  }, [requestData, requestId, navigate, isLoading]);
+  }, [voucherData, voucherId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -66,19 +65,17 @@ const PurchaseRequest = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
-  // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
 
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
-    requestId!
+    voucherId!
   );
-  const { updatePurchaseRequest, isPending: isUpdating } =
-    useUpdatePurChaseRequest(requestId!);
+  const { updatePaymentVoucher, isPending: isUpdating } =
+    useUpdatePaymentVoucher(voucherId!);
 
-  // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
-  const { copyto, isPending: isCopying } = useCopy(requestId!);
+  const { copyto, isPending: isCopying } = useCopy(voucherId!);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -89,12 +86,10 @@ const PurchaseRequest = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
@@ -102,70 +97,76 @@ const PurchaseRequest = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePurchaseRequest({ data: formData, files: selectedFiles });
+    updatePaymentVoucher({ data: formData, files: selectedFiles });
   };
 
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `PurchaseRequest-${purchaseRequest?.id}`,
+    filename: `PaymentVoucher-${paymentVoucher?.id}`,
     multiPage: true,
     titleOptions: {
-      text: "Purchase Request",
+      text: "Payment Voucher",
     },
   });
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);
   };
 
-  // Calculate total amount once
-  const totalAmount =
-    requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
-
   // User role checks
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = requestData?.status;
+  const voucherStatus = voucherData?.status;
 
   // Permission flags
-  const isCreator = requestData?.createdBy?.id === currentUserId;
-  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
-  const isApprover = requestData?.approvedBy?.id === currentUserId;
+  const isCreator = voucherData?.createdBy?.id === currentUserId;
+  const isReviewer = voucherData?.reviewedBy?.id === currentUserId;
+  const isApprover = voucherData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
   // Conditional rendering flags
-  const canUploadFiles = isCreator && requestStatus === "approved";
-  const canShareRequest =
+  const canUploadFiles = isCreator && voucherStatus === "approved";
+  const canShareVoucher =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
   const canUpdateStatus =
     !isCreator &&
-    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
-      (isAdmin && requestStatus === "reviewed" && isApprover));
+    ((userRole === "REVIEWER" && voucherStatus === "pending" && isReviewer) ||
+      (isAdmin && voucherStatus === "reviewed" && isApprover));
 
   const showAdminApproval =
-    !requestData?.approvedBy &&
-    requestStatus === "reviewed" &&
+    !voucherData?.approvedBy &&
+    voucherStatus === "reviewed" &&
     (isCreator ||
-      (isReviewer && !requestData?.reviewedBy) ||
-      (isApprover && !requestData?.approvedBy));
+      (isReviewer && !voucherData?.reviewedBy) ||
+      (isApprover && !voucherData?.approvedBy));
 
   // Table data
-  // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
-  const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
+  const tableHeadData = [
+    "Voucher",
+    "Status",
+    "Pay To",
+    "Amount",
+    "Date",
+    "Actions",
+  ];
   const tableRowData = [
-    { id: "requestedBy", content: requestData?.requestedBy },
-    { id: "status", content: <StatusBadge status={requestData?.status!} /> },
-    { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
-    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
+    { id: "pvNumber", content: voucherData?.pvNumber },
+    { id: "status", content: <StatusBadge status={voucherData?.status!} /> },
+    { id: "payTo", content: voucherData?.payTo },
+    {
+      id: "netAmount",
+      content: moneyFormat(voucherData?.netAmount || 0, "NGN"),
+    },
+    { id: "createdAt", content: formatToDDMMYYYY(voucherData?.createdAt!) },
     {
       id: "action",
       content: (
         <ActionIcons
           copyTo={copyto}
           isCopying={isCopying}
-          canShareRequest={canShareRequest}
-          requestId={requestData?.id}
+          canShareRequest={canShareVoucher}
+          requestId={voucherData?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
@@ -179,28 +180,27 @@ const PurchaseRequest = () => {
     <>
       {isUnderMaintenance ? (
         <MaintenanceBanner
-          title="Purchase Requests Under Maintenance"
-          message="We're addressing a purchase request error."
+          title="Payment Vouchers Under Maintenance"
+          message="We're addressing a payment voucher error."
           expectedCompletion="Will Be Back Very soon "
         />
       ) : (
         <div className="flex flex-col space-y-3 pb-80">
           <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
             <div className="flex justify-between items-center">
-              <TextHeader>Purchase Request</TextHeader>
-              <Button onClick={() => navigate("/purchase-requests")}>
+              <TextHeader>Payment Voucher</TextHeader>
+              <Button onClick={() => navigate("/payment-vouchers")}>
                 <List className="h-4 w-4 mr-1 md:mr-2" />
                 List
               </Button>
             </div>
           </div>
 
-          {/* Main Table Section */}
           <div ref={pdfContentRef}>
             <DataStateContainer
               isLoading={isLoading}
               isError={isError}
-              data={requestData}
+              data={voucherData}
               errorComponent={<NetworkErrorUI />}
               loadingComponent={<Spinner />}
               emptyComponent={<div>No data available</div>}
@@ -211,7 +211,7 @@ const PurchaseRequest = () => {
                     {tableHeadData.map((title, index) => (
                       <th
                         key={index}
-                        className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                        className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
                       >
                         {title}
                       </th>
@@ -220,11 +220,11 @@ const PurchaseRequest = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <tr key={requestData?.id} className="h-[40px] max-h-[40px]">
+                  <tr key={voucherData?.id} className="h-[40px] max-h-[40px]">
                     {tableRowData.map((data) => (
                       <td
                         key={data.id}
-                        className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                        className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
                       >
                         {data.content}
                       </td>
@@ -232,9 +232,9 @@ const PurchaseRequest = () => {
                   </tr>
 
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                        <PurchaseRequestDetails request={requestData!} />
+                        <PaymentVoucherDetails voucher={voucherData!} />
 
                         {canUploadFiles && (
                           <div className="flex flex-col gap-3 mt-3">
@@ -258,16 +258,16 @@ const PurchaseRequest = () => {
                           </div>
                         )}
 
-                        {requestData?.reviewedBy &&
-                          requestStatus !== "draft" && (
-                            <div className="  mt-4 tracking-wide">
+                        {voucherData?.reviewedBy &&
+                          voucherStatus !== "draft" && (
+                            <div className="mt-4 tracking-wide">
                               <RequestCommentsAndActions
-                                request={requestData}
+                                request={voucherData}
                               />
 
                               {canUpdateStatus && (
                                 <StatusUpdateForm
-                                  requestStatus={requestStatus}
+                                  requestStatus={voucherStatus}
                                   status={status}
                                   setStatus={setStatus}
                                   comment={comment}
@@ -304,4 +304,4 @@ const PurchaseRequest = () => {
   );
 };
 
-export default PurchaseRequest;
+export default PaymentVoucher;

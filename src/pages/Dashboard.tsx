@@ -4,7 +4,7 @@ import NetworkErrorUI from "../ui/NetworkErrorUI";
 import SpinnerMini from "../ui/SpinnerMini";
 import TextHeader from "../ui/TextHeader";
 // Import all your hooks
-import { usePurchaseStats } from "../features/purchase-request/Hooks/usePurchaseStats";
+import { usePurchaseStats } from "../features/purchase-request/Hooks/PRHook";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
 import { useConceptNotesStats } from "../features/concept-note/Hooks/useConceptNotesStats";
 import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";

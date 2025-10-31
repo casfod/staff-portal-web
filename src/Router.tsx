@@ -63,6 +63,11 @@ import { AllPurchaseOrders } from "./features/purchase-order/AllPurchaseOrders.t
 import GRNManagement from "./pages/GRNManagement.tsx";
 import GRN from "./features/goods-recieved/GRN.tsx";
 import { AllGRN } from "./features/goods-recieved/AllGRN.tsx";
+import { Finance } from "./pages/Finance.tsx";
+import AllPaymentVouchers from "./features/payment-voucher/AllPaymentVouchers.tsx";
+import { PaymentVoucher } from "./pages/PaymentVoucher.tsx";
+import CreatePaymentVoucher from "./features/payment-voucher/CreatePaymentVoucher.tsx";
+import EditPaymentVoucher from "./features/payment-voucher/EditPaymentVoucher.tsx";
 
 const router = createBrowserRouter([
   {
@@ -540,6 +545,62 @@ const router = createBrowserRouter([
               {
                 path: "goods-received/edit-goods-received/:id",
                 element: <div>Edit good received</div>,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "finance",
+        element: <AnimatedRoute key="finance" element={<Finance />} />,
+        children: [
+          { index: true, element: <Navigate to="payment-voucher" /> },
+          {
+            path: "payment-voucher",
+            element: (
+              <AnimatedRoute
+                key="payment-voucher"
+                element={<PaymentVoucher />}
+              />
+            ),
+            children: [
+              { index: true, element: <Navigate to="payment-vouchers" /> },
+              {
+                path: "payment-vouchers",
+                element: (
+                  <AnimatedRoute
+                    key="all-payment-voucher"
+                    element={<AllPaymentVouchers />}
+                  />
+                ),
+              },
+              {
+                path: "payment-vouchers/create-payment-voucher", // Changed from absolute path
+                element: (
+                  <AnimatedRoute
+                    key="/payment-vouchers/create-payment-voucher"
+                    element={<CreatePaymentVoucher />}
+                  />
+                ),
+              },
+
+              {
+                path: "payment-vouchers/voucher/:voucherId", // Changed from absolute path
+                element: (
+                  <AnimatedRoute
+                    key="/payment-vouchers/voucher/:voucherId"
+                    element={<PaymentVoucher />}
+                  />
+                ),
+              },
+              {
+                path: "payment-vouchers/edit-voucher/:voucherId", // Changed from absolute path
+                element: (
+                  <AnimatedRoute
+                    key="/payment-vouchers/edit-voucher/:voucherId"
+                    element={<EditPaymentVoucher />}
+                  />
+                ),
               },
             ],
           },

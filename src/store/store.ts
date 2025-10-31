@@ -26,6 +26,7 @@ import vendorReducer from "./vendorSlice";
 import rfqReducer from "./rfqSlice";
 import purchaseOrderReducer from "./purchaseOrderSlice";
 import goodsReceivedSliceReducer from "./goodsReceivedSlice";
+import paymentVoucherSliceReducer from "./paymentVoucherSlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -43,6 +44,7 @@ const rootReducer = combineReducers({
   rfq: rfqReducer,
   purchaseOrder: purchaseOrderReducer,
   goodsReceived: goodsReceivedSliceReducer,
+  paymentVoucher: paymentVoucherSliceReducer,
 });
 
 // Create persist config
