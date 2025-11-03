@@ -1,5 +1,5 @@
 export const accounts = [
-  { position: "--", code: "--" },
+  // { position: "--", code: "--" },
   { position: "Executive Director ", code: "5000.B1.001.e" },
   { position: "Program Manager", code: "5000.B1.002.e" },
   { position: "Programs Officer", code: "5000.B1.003.e" },
@@ -75,7 +75,7 @@ export const accounts = [
 ];
 
 export const categories = [
-  { position: "--", code: "--" },
+  // { position: "--", code: "--" },
   { position: "B.1. Personnel", code: "5000" },
   { position: "B.2. Consultants and External Contributors", code: "6002" },
   { position: "B.3. Equipment and Capital Purchases", code: "6001" },
