@@ -18,7 +18,7 @@ const EditPaymentVoucher = () => {
 
   useEffect(() => {
     if (!param || !paymentVoucher) {
-      navigate("/finance/payment-vouchers");
+      navigate("/finance/payment-voucher");
     }
   }, [paymentVoucher, param, navigate]);
 

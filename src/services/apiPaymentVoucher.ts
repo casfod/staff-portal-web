@@ -8,6 +8,7 @@ import {
   UsePaymentVoucher,
   usePaymentVoucherType,
   UsePaymentVoucherStatsType,
+  PaymentVoucherFormData,
 } from "../interfaces.ts";
 
 const url = baseUrl();
@@ -122,10 +123,10 @@ export const getPaymentVoucherStats = async function () {
 
 // services/apiPaymentVoucher.ts - Update the mutation functions
 export const savePaymentVouchers = async function (
-  data: Partial<PaymentVoucherType>
+  data: Partial<PaymentVoucherFormData>
 ) {
   try {
-    const response = await axiosInstance.post<PaymentVoucherType>(
+    const response = await axiosInstance.post<PaymentVoucherFormData>(
       `/payment-vouchers/save`,
       data
     );
@@ -140,10 +141,12 @@ export const sendPaymentVouchers = async function (
   files: File[]
 ) {
   try {
+    console.log("PaymentVoucherType:", data);
+
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof PaymentVoucherType)[] = [
+    const simpleFields: (keyof PaymentVoucherFormData)[] = [
       "departmentalCode",
       "payingStation",
       "payTo",
@@ -263,6 +266,31 @@ export const deletePaymentVoucher = async function (voucherID: string) {
   try {
     const response = await axiosInstance.delete<PaymentVoucherType>(
       `/payment-vouchers/${voucherID}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const addFilesTosPaymentVoucher = async function (
+  paymentVoucherId: string,
+  files: File[] = []
+): Promise<UsePaymentVoucher> {
+  try {
+    const formData = new FormData();
+
+    // Append files
+    files.forEach((file) => formData.append("files", file));
+
+    const response = await axiosInstance.post<UsePaymentVoucher>(
+      `/payment-vouchers/${paymentVoucherId}/files`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
     return response.data;
   } catch (err) {

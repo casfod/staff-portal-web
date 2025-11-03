@@ -945,7 +945,7 @@ export interface PaymentVoucherType {
 // Add a separate interface for form data
 export interface PaymentVoucherFormData {
   departmentalCode: string;
-  pvNumber?: string;
+  // pvNumber?: string;
   payingStation: string;
   payTo: string;
   being: string;

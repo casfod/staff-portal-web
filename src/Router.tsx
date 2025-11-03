@@ -65,9 +65,10 @@ import GRN from "./features/goods-recieved/GRN.tsx";
 import { AllGRN } from "./features/goods-recieved/AllGRN.tsx";
 import { Finance } from "./pages/Finance.tsx";
 import AllPaymentVouchers from "./features/payment-voucher/AllPaymentVouchers.tsx";
-import { PaymentVoucher } from "./pages/PaymentVoucher.tsx";
+import { PaymentVoucherManagement } from "./pages/PaymentVoucherManagement.tsx";
 import CreatePaymentVoucher from "./features/payment-voucher/CreatePaymentVoucher.tsx";
 import EditPaymentVoucher from "./features/payment-voucher/EditPaymentVoucher.tsx";
+import PaymentVoucher from "./features/payment-voucher/PaymentVoucher.tsx";
 
 const router = createBrowserRouter([
   {
@@ -560,7 +561,7 @@ const router = createBrowserRouter([
             element: (
               <AnimatedRoute
                 key="payment-voucher"
-                element={<PaymentVoucher />}
+                element={<PaymentVoucherManagement />}
               />
             ),
             children: [

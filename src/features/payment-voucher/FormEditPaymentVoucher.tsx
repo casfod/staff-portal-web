@@ -30,7 +30,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
 
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
     departmentalCode: paymentVoucher.departmentalCode,
-    pvNumber: paymentVoucher.pvNumber,
+    // pvNumber: paymentVoucher.pvNumber,
     payingStation: paymentVoucher.payingStation,
     payTo: paymentVoucher.payTo,
     being: paymentVoucher.being,
@@ -70,8 +70,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
-
-  // Calculate net amount whenever financial fields change
+  // In both FormAddPaymentVoucher.tsx and FormEditPaymentVoucher.tsx
   const calculateNetAmount = () => {
     const grossAmount = formData.grossAmount || 0;
     const vat = formData.vat || 0;
@@ -79,14 +78,22 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     const devLevy = formData.devLevy || 0;
     const otherDeductions = formData.otherDeductions || 0;
 
-    const netAmount = grossAmount - (vat + wht + devLevy + otherDeductions);
+    const totalDeductions = vat + wht + devLevy + otherDeductions;
+
+    // Prevent negative net amount
+    const netAmount = Math.max(0, grossAmount - totalDeductions);
 
     setFormData((prev) => ({
       ...prev,
-      netAmount: Math.max(0, netAmount),
+      netAmount: netAmount,
     }));
-  };
 
+    // Show warning if deductions exceed gross amount
+    if (totalDeductions > grossAmount) {
+      console.warn("Total deductions exceed gross amount");
+      // You can also show a toast notification here
+    }
+  };
   useEffect(() => {
     calculateNetAmount();
   }, [
