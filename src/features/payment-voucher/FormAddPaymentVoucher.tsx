@@ -16,8 +16,9 @@ import { FileUpload } from "../../ui/FileUpload";
 import {
   useSavePaymentVoucher,
   useSendPaymentVoucher,
-} from "./Hooks/usePaymentVoucher"; // Fixed import
+} from "./Hooks/usePaymentVoucher";
 import { useProjects } from "../project/Hooks/useProjects";
+import { categories, accounts } from "./data"; // Import the data
 
 const FormAddPaymentVoucher: React.FC = () => {
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
@@ -44,6 +45,7 @@ const FormAddPaymentVoucher: React.FC = () => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [filteredAccounts, setFilteredAccounts] = useState<typeof accounts>([]);
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
@@ -58,6 +60,47 @@ const FormAddPaymentVoucher: React.FC = () => {
     [projectData]
   );
 
+  // Filter accounts when category changes
+  useEffect(() => {
+    if (formData.chartOfAccountCategories) {
+      const selectedCategory = categories.find(
+        (cat) => cat.position === formData.chartOfAccountCategories
+      );
+
+      if (selectedCategory && selectedCategory.code !== "--") {
+        const filtered = accounts.filter((account) =>
+          account.code.includes(selectedCategory.code)
+        );
+        setFilteredAccounts(filtered);
+      } else {
+        setFilteredAccounts([]);
+      }
+
+      // Reset chart of account and code when category changes
+      setFormData((prev) => ({
+        ...prev,
+        chartOfAccount: "",
+        chartOfAccountCode: "",
+      }));
+    }
+  }, [formData.chartOfAccountCategories]);
+
+  // Set chart of account code when account is selected
+  useEffect(() => {
+    if (formData.chartOfAccount) {
+      const selectedAccount = accounts.find(
+        (acc) => acc.position === formData.chartOfAccount
+      );
+
+      if (selectedAccount) {
+        setFormData((prev) => ({
+          ...prev,
+          chartOfAccountCode: selectedAccount.code,
+        }));
+      }
+    }
+  }, [formData.chartOfAccount]);
+
   const calculateNetAmount = () => {
     const grossAmount = formData.grossAmount || 0;
     const vat = formData.vat || 0;
@@ -66,8 +109,6 @@ const FormAddPaymentVoucher: React.FC = () => {
     const otherDeductions = formData.otherDeductions || 0;
 
     const totalDeductions = vat + wht + devLevy + otherDeductions;
-
-    // Prevent negative net amount
     const netAmount = Math.max(0, grossAmount - totalDeductions);
 
     setFormData((prev) => ({
@@ -75,7 +116,6 @@ const FormAddPaymentVoucher: React.FC = () => {
       netAmount: netAmount,
     }));
 
-    // Show warning if deductions exceed gross amount
     if (totalDeductions > grossAmount) {
       console.warn("Total deductions exceed gross amount");
     }
@@ -339,26 +379,65 @@ const FormAddPaymentVoucher: React.FC = () => {
       {/* Chart of Accounts */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Chart of Account Categories *">
-          <Input
+          <Select
             id="chartOfAccountCategories"
-            required
+            customLabel="Select Category"
             value={formData.chartOfAccountCategories}
-            onChange={(e) =>
-              handleFormChange("chartOfAccountCategories", e.target.value)
+            onChange={(value) =>
+              handleFormChange("chartOfAccountCategories", value)
             }
+            options={categories.map((cat) => ({
+              id: cat.position,
+              name: cat.position,
+            }))}
+            required
           />
         </FormRow>
+
         <FormRow label="Chart of Account *">
-          <Input
+          <Select
             id="chartOfAccount"
-            required
+            customLabel="Select Account"
             value={formData.chartOfAccount}
-            onChange={(e) => handleFormChange("chartOfAccount", e.target.value)}
+            onChange={(value) => handleFormChange("chartOfAccount", value)}
+            options={filteredAccounts.map((acc) => ({
+              id: acc.position,
+              name: acc.position,
+            }))}
+            disabled={
+              !formData.chartOfAccountCategories ||
+              filteredAccounts.length === 0
+            }
+            required
           />
         </FormRow>
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Chart of Account Code *">
+          <Input
+            id="chartOfAccountCode"
+            required
+            value={formData.chartOfAccountCode}
+            onChange={(e) =>
+              handleFormChange("chartOfAccountCode", e.target.value)
+            }
+            disabled // This field is auto-populated
+            className="bg-gray-100"
+          />
+        </FormRow>
+
+        <FormRow label="Project Budget Line *">
+          <Input
+            id="projBudgetLine"
+            required
+            value={formData.projBudgetLine}
+            onChange={(e) => handleFormChange("projBudgetLine", e.target.value)}
+          />
+        </FormRow>
+      </Row>
+
+      {/* <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Chart of Account Code *">
           <Input
             id="chartOfAccountCode"
@@ -377,7 +456,7 @@ const FormAddPaymentVoucher: React.FC = () => {
             onChange={(e) => handleFormChange("projBudgetLine", e.target.value)}
           />
         </FormRow>
-      </Row>
+      </Row> */}
 
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Mandate Reference *">

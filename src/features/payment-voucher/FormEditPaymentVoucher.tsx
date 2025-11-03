@@ -22,6 +22,7 @@ import {
   // useUpdatePaymentVoucherLegacy,
 } from "./Hooks/usePaymentVoucher"; // Fixed imports
 import { useProjects } from "../project/Hooks/useProjects";
+import { accounts, categories } from "./data";
 
 interface FormEditVoucherProps {
   paymentVoucher: PaymentVoucherType;
@@ -57,6 +58,9 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [filteredAccounts, setFilteredAccounts] = useState<
+    { position: string; code: string }[]
+  >([]);
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
@@ -117,6 +121,55 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       [field]: value,
     }));
   };
+
+  // Filter accounts when category changes
+  useEffect(() => {
+    if (formData.chartOfAccountCategories) {
+      const selectedCategory = categories.find(
+        (cat) => cat.position === formData.chartOfAccountCategories
+      );
+
+      if (selectedCategory && selectedCategory.code !== "--") {
+        const filtered = accounts.filter((account) =>
+          account.code.includes(selectedCategory.code)
+        );
+        setFilteredAccounts(filtered);
+      } else {
+        setFilteredAccounts([]);
+      }
+
+      // Reset chart of account and code when category changes
+      if (
+        formData.chartOfAccountCategories !==
+        paymentVoucher.chartOfAccountCategories
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          chartOfAccount: "",
+          chartOfAccountCode: "",
+        }));
+      }
+    }
+  }, [
+    formData.chartOfAccountCategories,
+    paymentVoucher.chartOfAccountCategories,
+  ]);
+
+  // Set chart of account code when account is selected
+  useEffect(() => {
+    if (formData.chartOfAccount) {
+      const selectedAccount = accounts.find(
+        (acc) => acc.position === formData.chartOfAccount
+      );
+
+      if (selectedAccount) {
+        setFormData((prev) => ({
+          ...prev,
+          chartOfAccountCode: selectedAccount.code,
+        }));
+      }
+    }
+  }, [formData.chartOfAccount]);
 
   const handelProjectsChange = (value: string) => {
     if (value) {
@@ -370,21 +423,36 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       {/* Chart of Accounts */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Chart of Account Categories *">
-          <Input
+          <Select
             id="chartOfAccountCategories"
-            required
+            customLabel="Select Category"
             value={formData.chartOfAccountCategories}
-            onChange={(e) =>
-              handleFormChange("chartOfAccountCategories", e.target.value)
+            onChange={(value) =>
+              handleFormChange("chartOfAccountCategories", value)
             }
+            options={categories.map((cat) => ({
+              id: cat.position,
+              name: cat.position,
+            }))}
+            required
           />
         </FormRow>
+
         <FormRow label="Chart of Account *">
-          <Input
+          <Select
             id="chartOfAccount"
-            required
+            customLabel="Select Account"
             value={formData.chartOfAccount}
-            onChange={(e) => handleFormChange("chartOfAccount", e.target.value)}
+            onChange={(value) => handleFormChange("chartOfAccount", value)}
+            options={filteredAccounts.map((acc) => ({
+              id: acc.position,
+              name: acc.position,
+            }))}
+            disabled={
+              !formData.chartOfAccountCategories ||
+              filteredAccounts.length === 0
+            }
+            required
           />
         </FormRow>
       </Row>
@@ -398,8 +466,11 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
             onChange={(e) =>
               handleFormChange("chartOfAccountCode", e.target.value)
             }
+            disabled // This field is auto-populated
+            className="bg-gray-100"
           />
         </FormRow>
+
         <FormRow label="Project Budget Line *">
           <Input
             id="projBudgetLine"

@@ -17,6 +17,7 @@ interface SelectProps {
   customLabel: string;
   optionsHeight?: number | string;
   optionsWeight?: number | string;
+  disabled?: boolean;
   filterable?: boolean;
   clearable?: boolean; // New prop to enable/disable clear button
 }
