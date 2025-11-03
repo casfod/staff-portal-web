@@ -1,4 +1,4 @@
-// hooks/PVHook.ts - Fixed version
+// hooks/PVHook.ts - Fixed version with all missing hooks
 import {
   useQuery,
   useMutation,
@@ -26,6 +26,7 @@ import {
   updateStatus as updateStatusApi,
   addFilesTosPaymentVoucher,
 } from "../../../services/apiPaymentVoucher.ts";
+import { useState } from "react";
 
 interface ErrorResponse {
   message: string;
@@ -36,29 +37,33 @@ interface ApiError extends AxiosError {
 }
 
 // Query keys - Following the same pattern as useGoodsReceived.ts
+// Ensure query keys match the purchase request pattern
 export const paymentVoucherKeys = {
   all: ["payment-vouchers"] as const,
   lists: () => [...paymentVoucherKeys.all, "list"] as const,
-  list: (filters: any) => [...paymentVoucherKeys.lists(), filters] as const,
-  details: () => [...paymentVoucherKeys.all, "detail"] as const,
-  detail: (id: string) => [...paymentVoucherKeys.details(), id] as const,
-  stats: () => [...paymentVoucherKeys.all, "stats"] as const,
-};
-
-// Hooks - Following the same pattern as useGoodsReceived.ts
-
-export const useAllPaymentVouchers = (
-  queryParams: {
+  list: (filters: {
     search?: string;
     sort?: string;
     page?: number;
     limit?: number;
-  },
+  }) => [...paymentVoucherKeys.lists(), filters] as const,
+  details: () => [...paymentVoucherKeys.all, "detail"] as const,
+  detail: (id: string) => [...paymentVoucherKeys.details(), id] as const,
+  stats: () => [...paymentVoucherKeys.all, "stats"] as const,
+};
+// Hooks - Following the same pattern as useGoodsReceived.ts
+
+// Replace the current useAllPaymentVouchers hook to match purchase request pattern
+export const useAllPaymentVouchers = (
+  search?: string,
+  sort?: string,
+  page?: number,
+  limit?: number,
   options?: UseQueryOptions<usePaymentVoucherType, Error>
 ) => {
   return useQuery({
-    queryKey: paymentVoucherKeys.list(queryParams),
-    queryFn: () => getAllPaymentVouchers(queryParams),
+    queryKey: paymentVoucherKeys.list({ search, sort, page, limit }),
+    queryFn: () => getAllPaymentVouchers({ search, sort, page, limit }),
     staleTime: 2 * 60 * 1000,
     placeholderData: (previousData) => previousData,
     ...options,
@@ -89,9 +94,11 @@ export const usePaymentVoucherStats = (
   });
 };
 
-export const useCreatePaymentVoucher = () => {
+// Add proper error state handling to match purchase request hooks
+export const useSavePaymentVoucher = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: (data: Partial<PaymentVoucherType>) =>
@@ -101,30 +108,38 @@ export const useCreatePaymentVoucher = () => {
       if (data.status === 201) {
         toast.success("Payment Voucher saved successfully");
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
+        setErrorMessage(null);
+
         navigate(-1);
       } else {
-        toast.error(data.message || "Failed to save Payment Voucher");
+        const errorMsg = data.message || "Failed to save Payment Voucher";
+        toast.error(errorMsg);
+        setErrorMessage(errorMsg);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
+      const errorMsg =
         err.response?.data?.message ||
-          "An error occurred while saving Payment Voucher"
-      );
+        "An error occurred while saving Payment Voucher";
+      toast.error(errorMsg);
+      setErrorMessage(errorMsg);
     },
   });
 
   return {
-    createPaymentVoucher: mutation.mutate,
+    savePaymentVoucher: mutation.mutate,
     isPending: mutation.isPending,
     isError: mutation.isError,
+    errorMessage,
   };
 };
 
+// Add similar error handling to other mutation hooks
 export const useSendPaymentVoucher = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: ({
@@ -139,17 +154,21 @@ export const useSendPaymentVoucher = () => {
       if (data.status === 201) {
         toast.success("Payment Voucher sent successfully");
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
+        setErrorMessage(null);
         navigate(-1);
       } else {
-        toast.error(data.message || "Failed to send Payment Voucher");
+        const errorMsg = data.message || "Failed to send Payment Voucher";
+        toast.error(errorMsg);
+        setErrorMessage(errorMsg);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
+      const errorMsg =
         err.response?.data?.message ||
-          "An error occurred while sending Payment Voucher"
-      );
+        "An error occurred while sending Payment Voucher";
+      toast.error(errorMsg);
+      setErrorMessage(errorMsg);
     },
   });
 
@@ -157,6 +176,7 @@ export const useSendPaymentVoucher = () => {
     sendPaymentVoucher: mutation.mutate,
     isPending: mutation.isPending,
     isError: mutation.isError,
+    errorMessage,
   };
 };
 
@@ -276,7 +296,13 @@ export const useCopyPaymentVoucher = () => {
   };
 };
 
-export const useDeletePaymentVoucher = () => {
+// Update useDeletePaymentVoucher to match purchase request pattern
+export const useDeletePaymentVoucher = (
+  search?: string,
+  sort?: string,
+  page?: number,
+  limit?: number
+) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -285,7 +311,9 @@ export const useDeletePaymentVoucher = () => {
     onSuccess: (data) => {
       if (data.status === 200) {
         toast.success("Payment Voucher deleted successfully");
-        queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
+        queryClient.invalidateQueries({
+          queryKey: paymentVoucherKeys.list({ search, sort, page, limit }),
+        });
       } else {
         toast.error(data.message || "Failed to delete Payment Voucher");
       }
@@ -397,4 +425,13 @@ export const useUpdatePaymentVoucherLegacy = (voucherId: string) => {
     isPending,
     isError,
   };
+};
+
+// NEW HOOKS - Added the missing hooks that were being imported
+export const useCreatePaymentVoucher = () => {
+  return useSavePaymentVoucher();
+};
+
+export const useUpdatePaymentVoucherStatusLegacy = () => {
+  return useUpdatePaymentVoucherStatus();
 };

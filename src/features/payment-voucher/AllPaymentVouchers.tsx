@@ -23,7 +23,10 @@ import PaymentVoucherTableRow from "./PaymentVoucherTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
-import { useAllPaymentVouchers, useDeletePaymentVoucher } from "./Hooks/PVHook";
+import {
+  useAllPaymentVouchers,
+  useDeletePaymentVoucher,
+} from "./Hooks/usePaymentVoucher";
 
 const AllPaymentVouchers = () => {
   const navigate = useNavigate();
@@ -44,6 +47,7 @@ const AllPaymentVouchers = () => {
     };
   }, [dispatch]);
 
+  // Update the hook calls to match purchase request pattern
   const { data, isLoading, isError } = useAllPaymentVouchers(
     debouncedSearchTerm,
     sort,

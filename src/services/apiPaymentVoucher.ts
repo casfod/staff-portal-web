@@ -78,6 +78,7 @@ const handleError = (err: any) => {
 
 // API Functions
 
+// Update getAllPaymentVouchers to match purchase request parameter structure
 export const getAllPaymentVouchers = async function (queryParams: {
   search?: string;
   sort?: string;
@@ -91,7 +92,6 @@ export const getAllPaymentVouchers = async function (queryParams: {
         params: queryParams,
       }
     );
-    console.log("API Response:", response.data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -121,7 +121,7 @@ export const getPaymentVoucherStats = async function () {
   }
 };
 
-// services/apiPaymentVoucher.ts - Update the mutation functions
+// Add proper error handling and response structure to match purchase request
 export const savePaymentVouchers = async function (
   data: Partial<PaymentVoucherFormData>
 ) {

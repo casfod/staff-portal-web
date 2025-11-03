@@ -30,7 +30,7 @@ import {
   useUpdateStatus,
   useCopy,
   useAddFilesToPaymentVoucher,
-} from "./Hooks/PVHook";
+} from "./Hooks/usePaymentVoucher";
 import { usePVPDF } from "../../hooks/usePVPDF";
 import PVPDFTemplate from "./PVPDFTemplate";
 import PDFPreviewModal from "../../ui/PDFPreviewModal";

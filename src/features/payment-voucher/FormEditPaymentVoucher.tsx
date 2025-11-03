@@ -16,7 +16,11 @@ import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
-import { useSavePaymentVoucher, useSendPaymentVoucher } from "./Hooks/PVHook";
+import {
+  useSavePaymentVoucher,
+  useSendPaymentVoucher,
+  // useUpdatePaymentVoucherLegacy,
+} from "./Hooks/usePaymentVoucher"; // Fixed imports
 import { useProjects } from "../project/Hooks/useProjects";
 
 interface FormEditVoucherProps {
@@ -30,7 +34,6 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
 
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
     departmentalCode: paymentVoucher.departmentalCode,
-    // pvNumber: paymentVoucher.pvNumber,
     payingStation: paymentVoucher.payingStation,
     payTo: paymentVoucher.payTo,
     being: paymentVoucher.being,
@@ -53,10 +56,12 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  // const { updatePaymentVoucher, isPending: isUpdating } =
+  //   useUpdatePaymentVoucherLegacy(paymentVoucher.id!);
 
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
@@ -70,7 +75,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
-  // In both FormAddPaymentVoucher.tsx and FormEditPaymentVoucher.tsx
+
   const calculateNetAmount = () => {
     const grossAmount = formData.grossAmount || 0;
     const vat = formData.vat || 0;
@@ -88,12 +93,11 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       netAmount: netAmount,
     }));
 
-    // Show warning if deductions exceed gross amount
     if (totalDeductions > grossAmount) {
       console.warn("Total deductions exceed gross amount");
-      // You can also show a toast notification here
     }
   };
+
   useEffect(() => {
     calculateNetAmount();
   }, [
@@ -122,7 +126,6 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       );
       if (selectedProject) {
         setSelectedProject(selectedProject);
-        // Update both the selected project AND the form data
         setFormData((prev) => ({
           ...prev,
           grantCode: selectedProject.project_code,
@@ -155,6 +158,15 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     dispatch(resetPaymentVoucher());
   };
 
+  // const handleUpdate = (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const updateData: Partial<PaymentVoucherType> = {
+  //     ...formData,
+  //   };
+
+  //   updatePaymentVoucher({ data: updateData, files: selectedFiles });
+  // };
   return (
     <form className="space-y-6 uppercase">
       <Row>
@@ -513,7 +525,6 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
           multiple={true}
         />
       )}
-
       <div className="flex justify-center w-full gap-4">
         {(!formData.reviewedBy ||
           (paymentVoucher.status === "rejected" && formData.reviewedBy)) && (
