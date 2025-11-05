@@ -219,7 +219,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <tr>
                 <td className="border border-gray-300 p-0.5">VAT</td>
                 <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.vat || 0, "%")}
+                  {moneyFormat(pvData.vat || 0, "NGN")}
                 </td>
               </tr>
             )}
@@ -229,7 +229,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
                   Withholding Tax (WHT)
                 </td>
                 <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.wht || 0, "%")}
+                  {moneyFormat(pvData.wht || 0, "NGN")}
                 </td>
               </tr>
             )}
