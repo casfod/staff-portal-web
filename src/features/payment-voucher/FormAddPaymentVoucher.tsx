@@ -215,9 +215,7 @@ const FormAddPaymentVoucher: React.FC = () => {
             onChange={(e) => handleFormChange("payingStation", e.target.value)}
           />
         </FormRow>
-      </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Pay To *">
           <Input
             id="payTo"
@@ -226,6 +224,9 @@ const FormAddPaymentVoucher: React.FC = () => {
             onChange={(e) => handleFormChange("payTo", e.target.value)}
           />
         </FormRow>
+      </Row>
+
+      <Row>
         <FormRow label="Being *">
           <textarea
             className="border-2 h-16 min-h-16 rounded-lg focus:outline-none p-3 w-full"
