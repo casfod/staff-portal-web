@@ -185,9 +185,9 @@ export const PaymentVoucherDetails = ({
           content: voucher.chartOfAccountCategories,
         },
         {
-          id: "chartOfAccount",
-          label: "Chart of Account",
-          content: voucher.chartOfAccount,
+          id: "organisationalChartOfAccount",
+          label: "Organisational Chart of Account",
+          content: voucher.organisationalChartOfAccount,
         },
         {
           id: "chartOfAccountCode",
@@ -195,14 +195,9 @@ export const PaymentVoucherDetails = ({
           content: voucher.chartOfAccountCode,
         },
         {
-          id: "projBudgetLine",
-          label: "Project Budget Line",
-          content: voucher.projBudgetLine,
-        },
-        {
-          id: "mandateReference",
-          label: "Mandate Reference",
-          content: voucher.mandateReference,
+          id: "project",
+          label: "Project",
+          content: voucher.project,
         },
       ],
     },
