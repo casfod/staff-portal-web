@@ -922,7 +922,6 @@ export interface UseGoodsReceivedType {
 // interfaces.ts - Update the PaymentVoucherType interface
 export interface PaymentVoucherType {
   id?: string;
-  departmentalCode: string;
   pvNumber: string;
   payingStation: string;
   payTo: string;

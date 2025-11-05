@@ -170,11 +170,6 @@ export const PaymentVoucherDetails = ({
       icon: <Building className="w-4 h-4" />,
       fields: [
         {
-          id: "departmentalCode",
-          label: "Departmental Code",
-          content: voucher.departmentalCode,
-        },
-        {
           id: "grantCode",
           label: "Grant Code",
           content: voucher.grantCode,

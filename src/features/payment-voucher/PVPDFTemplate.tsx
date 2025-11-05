@@ -41,42 +41,31 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
     width: orientation === "landscape" ? "297mm" : "210mm",
     minHeight: orientation === "landscape" ? "210mm" : "297mm",
     margin: "0 auto",
-    fontSize: "10px", // Reduced from 12px
-    lineHeight: "1.1", // Reduced from 1.2
+    fontSize: "10px",
+    lineHeight: "1.1",
   };
 
   return (
     <div
       ref={pdfRef}
-      className="pdf-container bg-white p-3" // Reduced from p-4
+      className="pdf-container bg-white p-3"
       style={containerStyle}
     >
       {/* Header with Logo */}
-      <div className="flex justify-between items-start mb-3 border-b border-gray-300 pb-2">
-        {" "}
-        {/* Reduced margins */}
+      <div className="flex justify-between items-start mb-4 pb-3 bg-gradient-to-r from-blue-50 to-gray-50 rounded-lg p-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          {" "}
-          {/* Reduced gap */}
-          <div className="flex-shrink-0">
-            <img src={logo} alt="logo" className="w-40 h-12" />{" "}
-            {/* Reduced size */}
+          <div className="flex-shrink-0 bg-white p-1 rounded">
+            <img src={logo} alt="logo" className="w-40 h-12" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-bold text-gray-800 text-base text-center leading-tight">
-              {" "}
-              {/* Reduced from text-lg */}
               CASFOD Payment Voucher
             </h3>
           </div>
         </div>
-        <div className="text-right flex-shrink-0 min-w-0 ml-3">
-          {" "}
-          {/* Reduced margin */}
+        <div className="text-right flex-shrink-0 min-w-0 ml-3 bg-white p-2 rounded shadow-sm">
           <div className="whitespace-nowrap">
             <h3 className="text-sm font-bold text-blue-600 truncate">
-              {" "}
-              {/* Reduced from text-base */}
               {pvData.pvNumber}
             </h3>
           </div>
@@ -87,8 +76,6 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           </div>
           <div className="whitespace-nowrap">
             <p className="text-xs font-semibold mt-0.5 text-gray-700">
-              {" "}
-              {/* Reduced margin */}
               Status:{" "}
               <span className="uppercase text-blue-600">{pvData.status}</span>
             </p>
@@ -97,94 +84,74 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       </div>
 
       {/* Payment Details Section */}
-      <div className="mb-3">
-        {" "}
-        {/* Reduced margin */}
-        <div className="grid grid-cols-2 gap-3 mb-2">
-          {" "}
-          {/* Reduced gap and margin */}
+      <div className="mb-4">
+        <div className="grid grid-cols-2 gap-4 mb-3">
           {/* Left Column */}
-          <div className="space-y-1.5">
-            {" "}
-            {/* Reduced spacing */}
-            <div>
-              <strong className="text-gray-700 text-xs">
-                Departmental Code:
+          <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">
+                Paying Station:
               </strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
-                {pvData.departmentalCode}
-              </div>
-            </div>
-            <div>
-              <strong className="text-gray-700 text-xs">Paying Station:</strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.payingStation}
               </div>
             </div>
-            <div>
-              <strong className="text-gray-700 text-xs">Grant Code:</strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">
+                Grant Code:
+              </strong>
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.grantCode}
               </div>
             </div>
-            <div>
-              <strong className="text-gray-700 text-xs">
-                Chart of Account:
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">
+                Organisational Chart of Account:
               </strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.organisationalChartOfAccount}
               </div>
             </div>
           </div>
+
           {/* Right Column */}
-          <div className="space-y-1.5">
-            {" "}
-            {/* Reduced spacing */}
-            <div>
-              <strong className="text-gray-700 text-xs">Project:</strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+          <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">Project:</strong>
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.project}
               </div>
             </div>
-            <div>
-              <strong className="text-gray-700 text-xs">
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">
                 Chart of Account Code:
               </strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.chartOfAccountCode}
               </div>
             </div>
-            <div>
-              <strong className="text-gray-700 text-xs">Category:</strong>
-              <div className="border-b border-gray-300 py-0.5 text-xs">
+            <div className="space-y-1">
+              <strong className="text-gray-700 text-xs block">Category:</strong>
+              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
                 {pvData.chartOfAccountCategories}
               </div>
             </div>
           </div>
         </div>
+
         {/* Pay To and Being Sections */}
-        <div className="mb-2">
-          {" "}
-          {/* Reduced margin */}
-          <div className="mb-1.5">
-            {" "}
-            {/* Reduced margin */}
-            <strong className="text-gray-700 text-xs block mb-0.5">
-              {" "}
-              {/* Reduced margin */}
+        <div className="mb-3">
+          <div className="mb-2">
+            <strong className="text-gray-700 text-xs block mb-1">
               Pay To:
             </strong>
-            <div className="border border-gray-300 p-1 rounded min-h-[25px] bg-gray-50 text-xs">
-              {" "}
-              {/* Reduced padding and height */}
+            <div className="bg-white p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
               {pvData.payTo}
             </div>
           </div>
           <div>
-            <strong className="text-gray-700 text-xs block mb-0.5">
-              Being:
-            </strong>
-            <div className="border border-gray-300 p-1 rounded min-h-[25px] bg-gray-50 text-xs">
+            <strong className="text-gray-700 text-xs block mb-1">Being:</strong>
+            <div className="bg-white p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
               {pvData.being}
             </div>
           </div>
@@ -192,223 +159,185 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       </div>
 
       {/* Amount Details Table */}
-      <div className="mb-3">
-        {" "}
-        {/* Reduced margin */}
-        <table className="w-full border-collapse border border-gray-300 text-xs">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-0.5 text-left font-bold">
-                {" "}
-                {/* Reduced padding */}
-                Description
-              </th>
-              <th className="border border-gray-300 p-0.5 text-right font-bold">
-                Amount (NGN)
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-gray-300 p-0.5">Gross Amount</td>
-              <td className="border border-gray-300 p-0.5 text-right">
-                {moneyFormat(pvData.grossAmount, "NGN")}
-              </td>
-            </tr>
-            {pvData.vat && (
-              <tr>
-                <td className="border border-gray-300 p-0.5">VAT</td>
-                <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.vat || 0, "NGN")}
-                </td>
-              </tr>
-            )}
-            {pvData.wht && (
-              <tr>
-                <td className="border border-gray-300 p-0.5">
-                  Withholding Tax (WHT)
-                </td>
-                <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.wht || 0, "NGN")}
-                </td>
-              </tr>
-            )}
-            {pvData.devLevy && (
-              <tr>
-                <td className="border border-gray-300 p-0.5">
-                  Development Levy
-                </td>
-                <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.devLevy || 0, "NGN")}
-                </td>
-              </tr>
-            )}
-            {pvData.otherDeductions && (
-              <tr>
-                <td className="border border-gray-300 p-0.5">
-                  Other Deductions
-                </td>
-                <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(pvData.otherDeductions || 0, "NGN")}
-                </td>
-              </tr>
-            )}
-            {totalDeductions > 0 && (
-              <tr className="bg-gray-50 font-bold">
-                <td className="border border-gray-300 p-0.5">
-                  Total Deductions
-                </td>
-                <td className="border border-gray-300 p-0.5 text-right">
-                  {moneyFormat(totalDeductions, "NGN")}
-                </td>
-              </tr>
-            )}
-            <tr className="bg-green-50 font-bold text-green-800">
-              <td className="border border-gray-300 p-0.5">
-                NET AMOUNT PAYABLE
-              </td>
-              <td className="border border-gray-300 p-0.5 text-right">
-                {moneyFormat(pvData.netAmount, "NGN")}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="mb-4">
+        <div className="bg-gray-100 p-2 rounded-t-lg">
+          <strong className="text-gray-700 text-xs">Financial Breakdown</strong>
+        </div>
+        <div className="space-y-1 bg-white rounded-b-lg p-2 shadow-sm">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-xs">Gross Amount</span>
+            <span className="text-xs font-medium">
+              {moneyFormat(pvData.grossAmount, "NGN")}
+            </span>
+          </div>
+
+          {pvData.vat && (
+            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+              <span className="text-xs">VAT</span>
+              <span className="text-xs">
+                {moneyFormat(pvData.vat || 0, "NGN")}
+              </span>
+            </div>
+          )}
+
+          {pvData.wht && (
+            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+              <span className="text-xs">Withholding Tax (WHT)</span>
+              <span className="text-xs">
+                {moneyFormat(pvData.wht || 0, "NGN")}
+              </span>
+            </div>
+          )}
+
+          {pvData.devLevy && (
+            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+              <span className="text-xs">Development Levy</span>
+              <span className="text-xs">
+                {moneyFormat(pvData.devLevy || 0, "NGN")}
+              </span>
+            </div>
+          )}
+
+          {pvData.otherDeductions && (
+            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+              <span className="text-xs">Other Deductions</span>
+              <span className="text-xs">
+                {moneyFormat(pvData.otherDeductions || 0, "NGN")}
+              </span>
+            </div>
+          )}
+
+          {totalDeductions > 0 && (
+            <div className="flex justify-between items-center py-1 bg-gray-100 rounded px-2 font-bold">
+              <span className="text-xs">Total Deductions</span>
+              <span className="text-xs">
+                {moneyFormat(totalDeductions, "NGN")}
+              </span>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center py-2 bg-green-50 rounded px-2 font-bold text-green-800 mt-2">
+            <span className="text-xs">NET AMOUNT PAYABLE</span>
+            <span className="text-xs">
+              {moneyFormat(pvData.netAmount, "NGN")}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Amount in Words */}
-      <div className="mb-3 p-1.5 bg-yellow-50 border border-yellow-200 rounded text-xs">
-        {" "}
-        {/* Reduced padding and margin */}
-        <strong className="text-gray-700 block mb-0.5">
+      <div className="mb-4 p-3 bg-yellow-50 rounded-lg shadow-sm">
+        <strong className="text-gray-700 text-xs block mb-1">
           Amount in Words:
-        </strong>{" "}
-        {/* Reduced margin */}
-        <p className="italic">{pvData.amountInWords}</p>
+        </strong>
+        <p className="italic text-xs">{pvData.amountInWords}</p>
       </div>
 
       {/* Notes */}
       {pvData.note && (
-        <div className="mb-3 p-1.5 bg-blue-50 border border-blue-200 rounded text-xs">
-          {" "}
-          {/* Reduced padding and margin */}
-          <strong className="text-gray-700 block mb-0.5">Notes:</strong>{" "}
-          {/* Reduced margin */}
-          <p>{pvData.note}</p>
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg shadow-sm">
+          <strong className="text-gray-700 text-xs block mb-1">Notes:</strong>
+          <p className="text-xs">{pvData.note}</p>
         </div>
       )}
 
       {/* Approval Sections with Positions */}
-      <div className="mt-4 pt-3 border-t border-gray-300">
-        {" "}
-        {/* Reduced margins */}
-        <div className="grid grid-cols-3 gap-3">
-          {" "}
-          {/* Reduced gap */}
+      <div className="mt-5 pt-4">
+        <div className="grid grid-cols-3 gap-4">
           {/* Prepared By */}
-          <div>
-            <p className="font-semibold mb-1.5 text-gray-700 text-xs">
-              {" "}
-              {/* Reduced margin */}
-              PREPARED BY:
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+              PREPARED BY
             </p>
-            <div className="space-y-1.5">
-              {" "}
-              {/* Reduced spacing */}
+            <div className="space-y-2">
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Name</p>
-                <div className="h-4 border-b border-gray-400 text-center font-medium text-xs">
-                  {" "}
-                  {/* Reduced height */}
+                <p className="text-xs text-gray-600 mb-1">Name</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.createdBy)}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Position</p>
-                <div className="h-4 border-b border-gray-400 text-center text-xs">
-                  {" "}
-                  {/* Reduced height */}
+                <p className="text-xs text-gray-600 mb-1">Position</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.createdBy)}
                 </div>
               </div>
-              <div className="mt-1.5">
-                {" "}
-                {/* Reduced margin */}
-                <p className="text-xs text-gray-600 mb-0.5">Signature</p>
-                <div className="h-6 border-b border-gray-400"></div>{" "}
-                {/* Reduced height */}
-                <p className="text-xs text-gray-500 mt-0.5 text-center">
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-1">Signature</p>
+                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <p className="text-xs text-gray-500 mt-1 text-center">
                   (Preparer's Signature)
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Date</p>
-                <div className="h-4 border-b border-gray-400 text-center text-xs">
-                  {" "}
-                  {/* Reduced height */}
+                <p className="text-xs text-gray-600 mb-1">Date</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {formatToDDMMYYYY(pvData.createdAt!)}
                 </div>
               </div>
             </div>
           </div>
+
           {/* Reviewed By */}
-          <div>
-            <p className="font-semibold mb-1.5 text-gray-700 text-xs">
-              REVIEWED BY:
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+              REVIEWED BY
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Name</p>
-                <div className="h-4 border-b border-gray-400 text-center font-medium text-xs">
+                <p className="text-xs text-gray-600 mb-1">Name</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.reviewedBy)}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Position</p>
-                <div className="h-4 border-b border-gray-400 text-center text-xs">
+                <p className="text-xs text-gray-600 mb-1">Position</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.reviewedBy)}
                 </div>
               </div>
-              <div className="mt-1.5">
-                <p className="text-xs text-gray-600 mb-0.5">Signature</p>
-                <div className="h-6 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-0.5 text-center">
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-1">Signature</p>
+                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <p className="text-xs text-gray-500 mt-1 text-center">
                   (Reviewer's Signature)
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Date</p>
-                <div className="h-4 border-b border-gray-400"></div>
+                <p className="text-xs text-gray-600 mb-1">Date</p>
+                <div className="h-6 bg-white rounded shadow-sm"></div>
               </div>
             </div>
           </div>
+
           {/* Approved By */}
-          <div>
-            <p className="font-semibold mb-1.5 text-gray-700 text-xs">
-              APPROVED BY:
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+              APPROVED BY
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Name</p>
-                <div className="h-4 border-b border-gray-400 text-center font-medium text-xs">
+                <p className="text-xs text-gray-600 mb-1">Name</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.approvedBy)}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Position</p>
-                <div className="h-4 border-b border-gray-400 text-center text-xs">
+                <p className="text-xs text-gray-600 mb-1">Position</p>
+                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.approvedBy)}
                 </div>
               </div>
-              <div className="mt-1.5">
-                <p className="text-xs text-gray-600 mb-0.5">Signature</p>
-                <div className="h-6 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-0.5 text-center">
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-1">Signature</p>
+                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <p className="text-xs text-gray-500 mt-1 text-center">
                   (Approver's Signature)
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-0.5">Date</p>
-                <div className="h-4 border-b border-gray-400"></div>
+                <p className="text-xs text-gray-600 mb-1">Date</p>
+                <div className="h-6 bg-white rounded shadow-sm"></div>
               </div>
             </div>
           </div>
@@ -416,9 +345,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t border-gray-300 text-center">
-        {" "}
-        {/* Reduced margins */}
+      <div className="mt-5 pt-3 text-center bg-gradient-to-r from-blue-50 to-gray-50 rounded-lg p-2">
         <p className="text-xs text-gray-700">
           Unique Care and Support Foundation |{" "}
           <span className="font-semibold text-blue-600">
