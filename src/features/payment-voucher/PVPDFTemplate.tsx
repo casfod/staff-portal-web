@@ -46,15 +46,11 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   };
 
   return (
-    <div
-      ref={pdfRef}
-      className="pdf-container bg-white p-3"
-      style={containerStyle}
-    >
+    <div ref={pdfRef} className="pdf-container  p-3" style={containerStyle}>
       {/* Header with Logo */}
-      <div className="flex justify-between items-start mb-4 pb-3 bg-gradient-to-r from-blue-50 to-gray-50 rounded-lg p-3">
+      <div className="flex justify-between items-start mb-4 pb-3 rounded-lg p-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="flex-shrink-0 bg-white p-1 rounded">
+          <div className="flex-shrink-0  p-1 rounded">
             <img src={logo} alt="logo" className="w-40 h-12" />
           </div>
           <div className="min-w-0 flex-1">
@@ -63,7 +59,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
             </h3>
           </div>
         </div>
-        <div className="text-right flex-shrink-0 min-w-0 ml-3 bg-white p-2 rounded shadow-sm">
+        <div className="text-right flex-shrink-0 min-w-0 ml-3  p-2 rounded shadow-sm">
           <div className="whitespace-nowrap">
             <h3 className="text-sm font-bold text-blue-600 truncate">
               {pvData.pvNumber}
@@ -87,12 +83,12 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       <div className="mb-4">
         <div className="grid grid-cols-2 gap-4 mb-3">
           {/* Left Column */}
-          <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+          <div className="space-y-2  p-3 rounded-lg">
             <div className="space-y-1">
               <strong className="text-gray-700 text-xs block">
                 Paying Station:
               </strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.payingStation}
               </div>
             </div>
@@ -100,7 +96,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <strong className="text-gray-700 text-xs block">
                 Grant Code:
               </strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.grantCode}
               </div>
             </div>
@@ -108,17 +104,17 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <strong className="text-gray-700 text-xs block">
                 Organisational Chart of Account:
               </strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.organisationalChartOfAccount}
               </div>
             </div>
           </div>
 
           {/* Right Column */}
-          <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+          <div className="space-y-2  p-3 rounded-lg">
             <div className="space-y-1">
               <strong className="text-gray-700 text-xs block">Project:</strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.project}
               </div>
             </div>
@@ -126,13 +122,13 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <strong className="text-gray-700 text-xs block">
                 Chart of Account Code:
               </strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.chartOfAccountCode}
               </div>
             </div>
             <div className="space-y-1">
               <strong className="text-gray-700 text-xs block">Category:</strong>
-              <div className="text-xs bg-white p-1.5 rounded shadow-sm">
+              <div className="text-xs  p-1.5 rounded shadow-sm">
                 {pvData.chartOfAccountCategories}
               </div>
             </div>
@@ -145,13 +141,13 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
             <strong className="text-gray-700 text-xs block mb-1">
               Pay To:
             </strong>
-            <div className="bg-white p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
+            <div className=" p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
               {pvData.payTo}
             </div>
           </div>
           <div>
             <strong className="text-gray-700 text-xs block mb-1">Being:</strong>
-            <div className="bg-white p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
+            <div className=" p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
               {pvData.being}
             </div>
           </div>
@@ -163,7 +159,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
         <div className="bg-gray-100 p-2 rounded-t-lg">
           <strong className="text-gray-700 text-xs">Financial Breakdown</strong>
         </div>
-        <div className="space-y-1 bg-white rounded-b-lg p-2 shadow-sm">
+        <div className="space-y-1  rounded-b-lg p-2 shadow-sm">
           <div className="flex justify-between items-center py-1">
             <span className="text-xs">Gross Amount</span>
             <span className="text-xs font-medium">
@@ -172,7 +168,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           </div>
 
           {pvData.vat && (
-            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+            <div className="flex justify-between items-center py-1  rounded px-2">
               <span className="text-xs">VAT</span>
               <span className="text-xs">
                 {moneyFormat(pvData.vat || 0, "NGN")}
@@ -181,7 +177,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           )}
 
           {pvData.wht && (
-            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+            <div className="flex justify-between items-center py-1  rounded px-2">
               <span className="text-xs">Withholding Tax (WHT)</span>
               <span className="text-xs">
                 {moneyFormat(pvData.wht || 0, "NGN")}
@@ -190,7 +186,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           )}
 
           {pvData.devLevy && (
-            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+            <div className="flex justify-between items-center py-1  rounded px-2">
               <span className="text-xs">Development Levy</span>
               <span className="text-xs">
                 {moneyFormat(pvData.devLevy || 0, "NGN")}
@@ -199,7 +195,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           )}
 
           {pvData.otherDeductions && (
-            <div className="flex justify-between items-center py-1 bg-gray-50 rounded px-2">
+            <div className="flex justify-between items-center py-1  rounded px-2">
               <span className="text-xs">Other Deductions</span>
               <span className="text-xs">
                 {moneyFormat(pvData.otherDeductions || 0, "NGN")}
@@ -245,33 +241,33 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       <div className="mt-5 pt-4">
         <div className="grid grid-cols-3 gap-4">
           {/* Prepared By */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+          <div className=" p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
               PREPARED BY
             </p>
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.createdBy)}
                 </div>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.createdBy)}
                 </div>
               </div>
               <div className="mt-3">
                 <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <div className="h-8  rounded shadow-sm"></div>
                 <p className="text-xs text-gray-500 mt-1 text-center">
                   (Preparer's Signature)
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {formatToDDMMYYYY(pvData.createdAt!)}
                 </div>
               </div>
@@ -279,65 +275,65 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           </div>
 
           {/* Reviewed By */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+          <div className=" p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
               REVIEWED BY
             </p>
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.reviewedBy)}
                 </div>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.reviewedBy)}
                 </div>
               </div>
               <div className="mt-3">
                 <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <div className="h-8  rounded shadow-sm"></div>
                 <p className="text-xs text-gray-500 mt-1 text-center">
                   (Reviewer's Signature)
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6 bg-white rounded shadow-sm"></div>
+                <div className="h-6  rounded shadow-sm"></div>
               </div>
             </div>
           </div>
 
           {/* Approved By */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center bg-white py-1 rounded">
+          <div className=" p-3 rounded-lg">
+            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
               APPROVED BY
             </p>
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
                   {getDisplayName(pvData.approvedBy)}
                 </div>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6 bg-white rounded shadow-sm text-center text-xs flex items-center justify-center">
+                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
                   {getPosition(pvData.approvedBy)}
                 </div>
               </div>
               <div className="mt-3">
                 <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8 bg-white rounded shadow-sm"></div>
+                <div className="h-8  rounded shadow-sm"></div>
                 <p className="text-xs text-gray-500 mt-1 text-center">
                   (Approver's Signature)
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6 bg-white rounded shadow-sm"></div>
+                <div className="h-6  rounded shadow-sm"></div>
               </div>
             </div>
           </div>
