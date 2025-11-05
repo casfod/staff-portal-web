@@ -35,18 +35,28 @@ export interface useUsersType {
     currentPage: number;
   };
 }
+
 export interface UserType {
   id?: string;
   first_name: string;
   last_name: string;
   email: string;
   role: string;
+
   procurementRole?: {
     canCreate?: boolean;
     canView?: boolean;
     canUpdate?: boolean;
     canDelete?: boolean;
   };
+
+  financeRole?: {
+    canCreate?: boolean;
+    canView?: boolean;
+    canUpdate?: boolean;
+    canDelete?: boolean;
+  };
+
   isDeleted?: boolean;
   position?: string;
   password?: string;
@@ -926,11 +936,10 @@ export interface PaymentVoucherType {
   otherDeductions: number;
   netAmount: number;
   chartOfAccountCategories: string;
-  chartOfAccount: string;
+  organisationalChartOfAccount: string;
   chartOfAccountCode: string;
-  projBudgetLine: string;
+  project: string;
   note: string;
-  mandateReference: string;
   createdBy?: Partial<UserType>; // Made optional for form creation
   reviewedBy?: UserType[] | any; // Changed to string for form handling
   approvedBy?: UserType[] | any; // Changed to string for form handling
@@ -944,8 +953,6 @@ export interface PaymentVoucherType {
 
 // Add a separate interface for form data
 export interface PaymentVoucherFormData {
-  departmentalCode: string;
-  // pvNumber?: string;
   payingStation: string;
   payTo: string;
   being: string;
@@ -958,11 +965,10 @@ export interface PaymentVoucherFormData {
   otherDeductions: number;
   netAmount: number;
   chartOfAccountCategories: string;
-  chartOfAccount: string;
+  organisationalChartOfAccount: string;
   chartOfAccountCode: string;
-  projBudgetLine: string;
+  project: string;
   note: string;
-  mandateReference: string;
   reviewedBy?: string | null;
   approvedBy?: string | null;
 }

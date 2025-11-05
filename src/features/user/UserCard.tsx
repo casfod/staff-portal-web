@@ -36,6 +36,29 @@ const procurementPermissions = [
   },
 ] as const;
 
+const financePermissions = [
+  {
+    key: "canView" as const,
+    label: "View",
+    description: "Can view finance data",
+  },
+  {
+    key: "canCreate" as const,
+    label: "Create",
+    description: "Can create new finance records",
+  },
+  {
+    key: "canUpdate" as const,
+    label: "Update",
+    description: "Can update finance records",
+  },
+  {
+    key: "canDelete" as const,
+    label: "Delete",
+    description: "Can delete finance records",
+  },
+] as const;
+
 const UserCard: React.FC<UserCardProps> = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState({
@@ -49,6 +72,12 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       canView: user.procurementRole?.canView || false,
       canUpdate: user.procurementRole?.canUpdate || false,
       canDelete: user.procurementRole?.canDelete || false,
+    },
+    financeRole: {
+      canCreate: user.financeRole?.canCreate || false,
+      canView: user.financeRole?.canView || false,
+      canUpdate: user.financeRole?.canUpdate || false,
+      canDelete: user.financeRole?.canDelete || false,
     },
     isDeleted: user.isDeleted,
   });
@@ -79,16 +108,17 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     }));
   };
 
-  const handleProcurementRoleToggle = (
+  const handlePermissionToggle = (
+    roleType: "procurementRole" | "financeRole",
     key: keyof typeof editedUser.procurementRole
   ) => {
     if (!isEditing) return;
 
     setEditedUser((prev) => ({
       ...prev,
-      procurementRole: {
-        ...prev.procurementRole,
-        [key]: !prev.procurementRole[key],
+      [roleType]: {
+        ...prev[roleType],
+        [key]: !prev[roleType][key],
       },
     }));
   };
@@ -110,6 +140,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
             role: editedUser.role,
             position: editedUser.position,
             procurementRole: editedUser.procurementRole,
+            financeRole: editedUser.financeRole,
             first_name: editedUser.firstName,
             last_name: editedUser.lastName,
             email: editedUser.email,
@@ -153,6 +184,12 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
         canUpdate: user.procurementRole?.canUpdate || false,
         canDelete: user.procurementRole?.canDelete || false,
       },
+      financeRole: {
+        canCreate: user.financeRole?.canCreate || false,
+        canView: user.financeRole?.canView || false,
+        canUpdate: user.financeRole?.canUpdate || false,
+        canDelete: user.financeRole?.canDelete || false,
+      },
       isDeleted: user.isDeleted,
     });
   };
@@ -161,6 +198,58 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     setIsEditing(false);
     resetForm();
   };
+
+  const renderPermissionSection = (
+    title: string,
+    permissions: typeof procurementPermissions | typeof financePermissions,
+    roleType: "procurementRole" | "financeRole"
+  ) => (
+    <div className="mb-6">
+      <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {permissions.map((permission) => (
+          <div
+            key={permission.key}
+            className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
+              isEditing
+                ? "cursor-pointer hover:border-blue-300 hover:bg-blue-50"
+                : "cursor-default"
+            } ${
+              editedUser[roleType][permission.key]
+                ? "border-blue-300 bg-blue-50"
+                : "border-gray-200"
+            }`}
+            onClick={() => handlePermissionToggle(roleType, permission.key)}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-5 h-5 rounded-full border-2 transition-colors ${
+                  editedUser[roleType][permission.key]
+                    ? "bg-blue-500 border-blue-500"
+                    : "border-gray-300 bg-white"
+                }`}
+              >
+                {editedUser[roleType][permission.key] && (
+                  <div className="w-2 h-2 bg-white rounded-full" />
+                )}
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {permission.label}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {permission.description}
+                </div>
+              </div>
+            </div>
+            {isEditing && (
+              <span className="text-xs text-gray-400">Click to toggle</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
@@ -291,54 +380,17 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
         )}
       </div>
 
-      {/* Procurement Permissions Section */}
-      <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">
-          Procurement Permissions
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {procurementPermissions.map((permission) => (
-            <div
-              key={permission.key}
-              className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
-                isEditing
-                  ? "cursor-pointer hover:border-blue-300 hover:bg-blue-50"
-                  : "cursor-default"
-              } ${
-                editedUser.procurementRole[permission.key]
-                  ? "border-blue-300 bg-blue-50"
-                  : "border-gray-200"
-              }`}
-              onClick={() => handleProcurementRoleToggle(permission.key)}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex items-center justify-center w-5 h-5 rounded-full border-2 transition-colors ${
-                    editedUser.procurementRole[permission.key]
-                      ? "bg-blue-500 border-blue-500"
-                      : "border-gray-300 bg-white"
-                  }`}
-                >
-                  {editedUser.procurementRole[permission.key] && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  )}
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
-                    {permission.label}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {permission.description}
-                  </div>
-                </div>
-              </div>
-              {isEditing && (
-                <span className="text-xs text-gray-400">Click to toggle</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Permissions Sections */}
+      {renderPermissionSection(
+        "Procurement Permissions",
+        procurementPermissions,
+        "procurementRole"
+      )}
+      {renderPermissionSection(
+        "Finance Permissions",
+        financePermissions,
+        "financeRole"
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-200">

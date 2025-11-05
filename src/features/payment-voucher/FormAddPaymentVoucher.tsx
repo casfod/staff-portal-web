@@ -22,7 +22,6 @@ import { categories, accounts } from "./data"; // Import the data
 
 const FormAddPaymentVoucher: React.FC = () => {
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
-    departmentalCode: "",
     payingStation: "",
     payTo: "",
     being: "",
@@ -35,17 +34,19 @@ const FormAddPaymentVoucher: React.FC = () => {
     otherDeductions: 0,
     netAmount: 0,
     chartOfAccountCategories: "",
-    chartOfAccount: "",
+    organisationalChartOfAccount: "",
     chartOfAccountCode: "",
-    projBudgetLine: "",
+    project: "",
     note: "",
-    mandateReference: "",
     reviewedBy: null,
+    approvedBy: null,
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filteredAccounts, setFilteredAccounts] = useState<typeof accounts>([]);
+  const [vatPercentage, setVatPercentage] = useState(0);
+  const [whtPercentage, setWhtPercentage] = useState(0);
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
@@ -59,6 +60,57 @@ const FormAddPaymentVoucher: React.FC = () => {
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Calculate amounts based on percentages
+  const calculateDeductionsFromPercentages = () => {
+    const grossAmount = formData.grossAmount || 0;
+    const vatAmount = grossAmount * (vatPercentage / 100);
+    const whtAmount = grossAmount * (whtPercentage / 100);
+    const devLevy = formData.devLevy || 0;
+    const otherDeductions = formData.otherDeductions || 0;
+
+    const totalDeductions = vatAmount + whtAmount + devLevy + otherDeductions;
+    const netAmount = Math.max(0, grossAmount - totalDeductions);
+
+    setFormData((prev) => ({
+      ...prev,
+      vat: vatAmount,
+      wht: whtAmount,
+      netAmount: netAmount,
+    }));
+
+    if (totalDeductions > grossAmount) {
+      console.warn("Total deductions exceed gross amount");
+    }
+  };
+
+  useEffect(() => {
+    calculateDeductionsFromPercentages();
+  }, [
+    formData.grossAmount,
+    vatPercentage,
+    whtPercentage,
+    formData.devLevy,
+    formData.otherDeductions,
+  ]);
+
+  const handleFormChange = (
+    field: keyof PaymentVoucherFormData,
+    value: string | number | null
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handlePercentageChange = (type: "vat" | "wht", value: number) => {
+    if (type === "vat") {
+      setVatPercentage(value);
+    } else {
+      setWhtPercentage(value);
+    }
+  };
 
   // Filter accounts when category changes
   useEffect(() => {
@@ -79,7 +131,7 @@ const FormAddPaymentVoucher: React.FC = () => {
       // Reset chart of account and code when category changes
       setFormData((prev) => ({
         ...prev,
-        chartOfAccount: "",
+        organisationalChartOfAccount: "",
         chartOfAccountCode: "",
       }));
     }
@@ -87,9 +139,9 @@ const FormAddPaymentVoucher: React.FC = () => {
 
   // Set chart of account code when account is selected
   useEffect(() => {
-    if (formData.chartOfAccount) {
+    if (formData.organisationalChartOfAccount) {
       const selectedAccount = accounts.find(
-        (acc) => acc.position === formData.chartOfAccount
+        (acc) => acc.position === formData.organisationalChartOfAccount
       );
 
       if (selectedAccount) {
@@ -99,47 +151,7 @@ const FormAddPaymentVoucher: React.FC = () => {
         }));
       }
     }
-  }, [formData.chartOfAccount]);
-
-  const calculateNetAmount = () => {
-    const grossAmount = formData.grossAmount || 0;
-    const vat = formData.vat || 0;
-    const wht = formData.wht || 0;
-    const devLevy = formData.devLevy || 0;
-    const otherDeductions = formData.otherDeductions || 0;
-
-    const totalDeductions = vat + wht + devLevy + otherDeductions;
-    const netAmount = Math.max(0, grossAmount - totalDeductions);
-
-    setFormData((prev) => ({
-      ...prev,
-      netAmount: netAmount,
-    }));
-
-    if (totalDeductions > grossAmount) {
-      console.warn("Total deductions exceed gross amount");
-    }
-  };
-
-  useEffect(() => {
-    calculateNetAmount();
-  }, [
-    formData.grossAmount,
-    formData.vat,
-    formData.wht,
-    formData.devLevy,
-    formData.otherDeductions,
-  ]);
-
-  const handleFormChange = (
-    field: keyof PaymentVoucherFormData,
-    value: string | number | null
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  }, [formData.organisationalChartOfAccount]);
 
   const handelProjectsChange = (value: string) => {
     if (value) {
@@ -151,6 +163,7 @@ const FormAddPaymentVoucher: React.FC = () => {
         setSelectedProject(selectedProject);
         setFormData((prev) => ({
           ...prev,
+          project: `${selectedProject.project_title} - ${selectedProject.project_code}`,
           grantCode: selectedProject.project_code,
         }));
       }
@@ -168,6 +181,7 @@ const FormAddPaymentVoucher: React.FC = () => {
       ...formData,
       reviewedBy: null,
       status: "draft" as const,
+      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
     savePaymentVoucher(saveData);
@@ -175,11 +189,15 @@ const FormAddPaymentVoucher: React.FC = () => {
 
   // Handle form submission for send (pending)
   const handleSend = (e: React.FormEvent) => {
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+    if (!isFormValid) return;
+
     e.preventDefault();
 
     const sendData: Partial<PaymentVoucherType> = {
       ...formData,
       status: "pending" as const,
+      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
     sendPaymentVoucher({ data: sendData, files: selectedFiles });
@@ -189,17 +207,6 @@ const FormAddPaymentVoucher: React.FC = () => {
     <form className="space-y-6">
       {/* Basic Information */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Departmental Code *">
-          <Input
-            type="text"
-            id="departmentalCode"
-            required
-            value={formData.departmentalCode}
-            onChange={(e) =>
-              handleFormChange("departmentalCode", e.target.value)
-            }
-          />
-        </FormRow>
         <FormRow label="Paying Station *">
           <Input
             id="payingStation"
@@ -220,11 +227,15 @@ const FormAddPaymentVoucher: React.FC = () => {
           />
         </FormRow>
         <FormRow label="Being *">
-          <Input
+          <textarea
+            className="border-2 h-16 min-h-16 rounded-lg focus:outline-none p-3 w-full"
+            maxLength={500}
+            placeholder=""
             id="being"
-            required
             value={formData.being}
             onChange={(e) => handleFormChange("being", e.target.value)}
+            required
+            rows={2}
           />
         </FormRow>
       </Row>
@@ -253,7 +264,7 @@ const FormAddPaymentVoucher: React.FC = () => {
               key={projects.length}
               id="projects"
               customLabel="Select Project"
-              value={""}
+              value={formData.project || ""}
               onChange={(value) => handelProjectsChange(value)}
               options={
                 projects
@@ -261,7 +272,7 @@ const FormAddPaymentVoucher: React.FC = () => {
                       .filter((project) => project.id)
                       .map((project) => ({
                         id: `${project.project_title} - ${project.project_code}`,
-                        name: `${project.project_code}`,
+                        name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -271,32 +282,15 @@ const FormAddPaymentVoucher: React.FC = () => {
           )}
         </FormRow>
 
-        {/* Second Select: Account Code */}
-        {selectedProject && (
-          <FormRow label="Grant Code *">
-            {isLoadingProjects ? (
-              <SpinnerMini />
-            ) : (
-              <Select
-                clearable={true}
-                id="grantCode"
-                customLabel="Select Grant Code"
-                value={formData.grantCode || ""}
-                onChange={(value) => handleFormChange("grantCode", value)}
-                options={
-                  selectedProject
-                    ? selectedProject.account_code.map((account) => ({
-                        id: `${account.name}`,
-                        name: `${account.name}`,
-                      }))
-                    : []
-                }
-                optionsHeight={220}
-                required
-              />
-            )}
-          </FormRow>
-        )}
+        {/* Grant Code */}
+        <FormRow label="Grant Code *">
+          <Input
+            id="grantCode"
+            required
+            value={formData.grantCode}
+            onChange={(e) => handleFormChange("grantCode", e.target.value)}
+          />
+        </FormRow>
       </Row>
 
       {/* Financial Information */}
@@ -327,25 +321,27 @@ const FormAddPaymentVoucher: React.FC = () => {
 
       {/* Deductions */}
       <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <FormRow label="VAT (₦)">
+        <FormRow label="VAT (%)">
           <Input
             type="number"
             min="0"
-            step="0.01"
-            value={formData.vat}
+            max="100"
+            step="0.1"
+            value={vatPercentage}
             onChange={(e) =>
-              handleFormChange("vat", parseFloat(e.target.value) || 0)
+              handlePercentageChange("vat", parseFloat(e.target.value) || 0)
             }
           />
         </FormRow>
-        <FormRow label="WHT (₦)">
+        <FormRow label="WHT (%)">
           <Input
             type="number"
             min="0"
-            step="0.01"
-            value={formData.wht}
+            max="100"
+            step="0.1"
+            value={whtPercentage}
             onChange={(e) =>
-              handleFormChange("wht", parseFloat(e.target.value) || 0)
+              handlePercentageChange("wht", parseFloat(e.target.value) || 0)
             }
           />
         </FormRow>
@@ -376,6 +372,26 @@ const FormAddPaymentVoucher: React.FC = () => {
         </FormRow>
       </Row>
 
+      {/* Actual Deduction Amounts Display */}
+      <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <FormRow label="VAT Amount (₦)">
+          <Input
+            type="number"
+            value={formData.vat}
+            disabled
+            className="bg-gray-100"
+          />
+        </FormRow>
+        <FormRow label="WHT Amount (₦)">
+          <Input
+            type="number"
+            value={formData.wht}
+            disabled
+            className="bg-gray-100"
+          />
+        </FormRow>
+      </Row>
+
       {/* Chart of Accounts */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Chart of Account Categories *">
@@ -398,8 +414,10 @@ const FormAddPaymentVoucher: React.FC = () => {
           <Select
             id="chartOfAccount"
             customLabel="Select Account"
-            value={formData.chartOfAccount}
-            onChange={(value) => handleFormChange("chartOfAccount", value)}
+            value={formData.organisationalChartOfAccount}
+            onChange={(value) =>
+              handleFormChange("organisationalChartOfAccount", value)
+            }
             options={filteredAccounts.map((acc) => ({
               id: acc.position,
               name: acc.position,
@@ -424,49 +442,6 @@ const FormAddPaymentVoucher: React.FC = () => {
             }
             disabled // This field is auto-populated
             className="bg-gray-100"
-          />
-        </FormRow>
-
-        <FormRow label="Project Budget Line *">
-          <Input
-            id="projBudgetLine"
-            required
-            value={formData.projBudgetLine}
-            onChange={(e) => handleFormChange("projBudgetLine", e.target.value)}
-          />
-        </FormRow>
-      </Row>
-
-      {/* <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Chart of Account Code *">
-          <Input
-            id="chartOfAccountCode"
-            required
-            value={formData.chartOfAccountCode}
-            onChange={(e) =>
-              handleFormChange("chartOfAccountCode", e.target.value)
-            }
-          />
-        </FormRow>
-        <FormRow label="Project Budget Line *">
-          <Input
-            id="projBudgetLine"
-            required
-            value={formData.projBudgetLine}
-            onChange={(e) => handleFormChange("projBudgetLine", e.target.value)}
-          />
-        </FormRow>
-      </Row> */}
-
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Mandate Reference *">
-          <Input
-            id="mandateReference"
-            required
-            value={formData.mandateReference}
-            onChange={(e) =>
-              handleFormChange("mandateReference", e.target.value)
-            }
           />
         </FormRow>
       </Row>

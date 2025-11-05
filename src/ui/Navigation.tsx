@@ -49,12 +49,6 @@ const Navigation: React.FC = () => {
       to: "/purchase-requests",
       label: "Purchase Requests",
       icon: ShoppingCart,
-      // dropdown: [
-      //   {
-      //     to: "/purchase-requests/create-purchase-request",
-      //     label: "New Request",
-      //   },
-      // ],
     },
     {
       to: "/payment-requests",
@@ -92,37 +86,26 @@ const Navigation: React.FC = () => {
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
-    if (!currentUser) {
-      return true;
-    }
+    if (!currentUser) return false;
 
-    // User Management - Only for SUPER-ADMIN and ADMIN
-    if (item.label === "User Management") {
-      return currentUser.role === "SUPER-ADMIN" || currentUser.role === "ADMIN";
-    }
+    const { role, procurementRole, financeRole } = currentUser;
 
-    // Procurement - Show if user has any procurement permission or is SUPER-ADMIN
-    if (item.label === "Procurement") {
-      // SUPER-ADMIN always has access to procurement
-      if (currentUser.role === "SUPER-ADMIN") {
+    // SUPER-ADMIN sees everything
+    if (role === "SUPER-ADMIN") return true;
+
+    switch (item.label) {
+      case "User Management":
+        return role === "ADMIN";
+
+      case "Procurement":
+        return procurementRole?.canView === true;
+
+      case "Finance":
+        return financeRole?.canView === true;
+
+      default:
         return true;
-      }
-
-      // Check if user has any procurement permissions
-      const hasProcurementPermission =
-        currentUser.procurementRole && currentUser.procurementRole.canView;
-
-      // const hasProcurementPermission =
-      //   currentUser.procurementRole &&
-      //   (currentUser.procurementRole.canCreate ||
-      //     currentUser.procurementRole.canView ||
-      //     currentUser.procurementRole.canUpdate ||
-      //     currentUser.procurementRole.canDelete);
-
-      return hasProcurementPermission;
     }
-
-    return true;
   });
 
   return (

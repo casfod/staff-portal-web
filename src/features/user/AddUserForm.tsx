@@ -74,6 +74,18 @@ const AddUserForm = () => {
     position: "",
     password: "",
     passwordConfirm: "",
+    procurementRole: {
+      canCreate: false,
+      canView: false,
+      canUpdate: false,
+      canDelete: false,
+    },
+    financeRole: {
+      canCreate: false,
+      canView: false,
+      canUpdate: false,
+      canDelete: false,
+    },
   });
 
   const { addUser, isPending } = useAddUser();

@@ -147,7 +147,6 @@ export const sendPaymentVouchers = async function (
 
     // Append standard fields
     const simpleFields: (keyof PaymentVoucherFormData)[] = [
-      "departmentalCode",
       "payingStation",
       "payTo",
       "being",
@@ -160,11 +159,10 @@ export const sendPaymentVouchers = async function (
       "otherDeductions",
       "netAmount",
       "chartOfAccountCategories",
-      "chartOfAccount",
+      "organisationalChartOfAccount",
       "chartOfAccountCode",
-      "projBudgetLine",
+      "project",
       "note",
-      "mandateReference",
       "reviewedBy",
     ];
 
