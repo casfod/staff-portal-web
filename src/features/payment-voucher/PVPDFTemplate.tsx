@@ -38,7 +38,6 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   const containerStyle = {
     fontFamily: "Arial, sans-serif",
     width: "297mm",
-
     margin: "0 auto",
     // fontSize: "12px",
     lineHeight: "1.15",
@@ -172,7 +171,10 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           <div key={i} className="space-y-1">
             {section.fields.map((field, j) => (
               <div key={j} className="flex gap-1">
-                <span className="font-semibold text-[14px] uppercase">
+                <span
+                  className="font-semibold text-[14px] uppercase whitespace-nowrap"
+                  style={{ whiteSpace: "nowrap" }}
+                >
                   {field.label}:
                 </span>
                 <span className="text-[14px]">{field.value || "—"}</span>
@@ -188,7 +190,10 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
           (section, i) =>
             section.show !== false && (
               <div key={i} className="flex gap-1">
-                <span className="font-semibold text-[14px] uppercase">
+                <span
+                  className="font-semibold text-[14px] uppercase whitespace-nowrap"
+                  style={{ whiteSpace: "nowrap" }}
+                >
                   {section.label}:
                 </span>
                 <p className="text-[14px] leading-snug flex-1 break-words">
@@ -201,7 +206,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
 
       {/* ===== FINANCIAL SUMMARY ===== */}
       <div className="w-full mt-2 border-t  border-gray-300 pt-4 mb-4">
-        <h3 className="text-center font-semibold text-gray-900 mb-4 uppercase">
+        <h3 className="text-center font-semibold text-gray-900 mb-4 uppercase whitespace-nowrap">
           Financial Summary
         </h3>
         <div className="space-y-1">
@@ -209,7 +214,12 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
             (item, i) =>
               item.show !== false && (
                 <div key={i} className="grid grid-cols-2 gap-8 text-[14px]">
-                  <span className="text-right font-bold">{item.label}</span>
+                  <span
+                    className="text-right font-bold whitespace-nowrap"
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    {item.label}
+                  </span>
                   <span className={item.className}>
                     {moneyFormat(item.value, "NGN")}
                   </span>
@@ -223,14 +233,18 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center">
         {approvalSections.map((sec, i) => (
           <div key={i} className="w-full space-y-2.5">
-            <p className="text-[14px] font-semibold uppercase">{sec.title}</p>
+            <p
+              className="text-[14px] font-semibold uppercase whitespace-nowrap"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              {sec.title}
+            </p>
             <p className="text-[14px] font-semibold">
               {getDisplayName(sec.user)}
             </p>
             <p className="text-[11px] text-gray-600">{getPosition(sec.user)}</p>
             <div className="w-full h-6 border-t border-gray-300 pt-2"></div>
             <p className="text-[11px] text-gray-500">Signature</p>
-            {/* <div className=""></div> */}
           </div>
         ))}
       </div>
