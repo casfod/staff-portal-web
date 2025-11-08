@@ -14,7 +14,7 @@ interface PVPDFTemplateProps {
 const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   pvData,
   pdfRef,
-  orientation = "landscape",
+  // orientation = "landscape",
 }) => {
   const getDisplayName = (user: any): string => {
     if (!user) return "N/A";
@@ -28,325 +28,219 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
     return user.position || user.role || "N/A";
   };
 
-  // Calculate totals
   const totalDeductions =
     (pvData.vat || 0) +
     (pvData.wht || 0) +
     (pvData.devLevy || 0) +
     (pvData.otherDeductions || 0);
 
-  // Container dimensions based on orientation
+  // A4 landscape dimensions
   const containerStyle = {
     fontFamily: "Arial, sans-serif",
-    width: orientation === "landscape" ? "297mm" : "210mm",
-    minHeight: orientation === "landscape" ? "210mm" : "297mm",
+    width: "297mm",
+
     margin: "0 auto",
-    fontSize: "10px",
-    lineHeight: "1.1",
+    // fontSize: "12px",
+    lineHeight: "1.15",
+    color: "#111827",
+    backgroundColor: "#ffffff",
+    display: "flex",
+    flexDirection: "column" as const,
+    // justifyContent: "space-between",
+    padding: "5mm",
+    boxSizing: "border-box" as const,
   };
 
+  const paymentInfoSections = [
+    {
+      title: "Payment Details",
+      fields: [
+        { label: "Paying Station", value: pvData.payingStation },
+        { label: "Pay To", value: pvData.payTo },
+        { label: "Account Code", value: pvData.accountCode },
+        { label: "Chart Of Acc. Code", value: pvData.chartOfAccountCode },
+      ],
+    },
+    {
+      title: "Project & Chart Details",
+      fields: [
+        { label: "Project", value: pvData.project },
+        {
+          label: "Organisational Chart of Acc.",
+          value: pvData.organisationalChartOfAccount,
+        },
+        { label: "Category", value: pvData.chartOfAccountCategories },
+      ],
+    },
+  ];
+
+  const financialItems = [
+    { label: "Gross Amount", value: pvData.grossAmount },
+    { label: "VAT", value: pvData.vat, show: pvData.vat > 0 },
+    { label: "WHT", value: pvData.wht, show: pvData.wht > 0 },
+    {
+      label: "Development Levy",
+      value: pvData.devLevy,
+      show: pvData.devLevy > 0,
+    },
+    {
+      label: "Other Deductions",
+      value: pvData.otherDeductions,
+      show: pvData.otherDeductions > 0,
+    },
+    {
+      label: "Total Deductions",
+      value: totalDeductions,
+      show: totalDeductions > 0,
+      className: "w-fit font-semibold border-t-2 text-red-900 border-gray-300",
+    },
+    {
+      label: "NET AMOUNT PAYABLE",
+      value: pvData.netAmount,
+      show: true,
+      className: "font-bold text-teal-900 rounded",
+    },
+  ];
+
+  const approvalSections = [
+    {
+      title: "Prepared By",
+      user: pvData.createdBy,
+      date: pvData.createdAt,
+      showDate: true,
+    },
+    {
+      title: "Reviewed By",
+      user: pvData.reviewedBy,
+      date: null,
+      showDate: false,
+    },
+    {
+      title: "Approved By",
+      user: pvData.approvedBy,
+      date: null,
+      showDate: false,
+    },
+  ];
+
+  const additionalSections = [
+    { label: "Amount in Words", value: pvData.amountInWords },
+    { label: "Description", value: pvData.being },
+    { label: "Additional Notes", value: pvData.note, show: !!pvData.note },
+  ];
+
   return (
-    <div ref={pdfRef} className="pdf-container  p-3" style={containerStyle}>
-      {/* Header with Logo */}
-      <div className="flex justify-between items-start mb-4 pb-3 rounded-lg p-3">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="flex-shrink-0  p-1 rounded">
-            <img src={logo} alt="logo" className="w-40 h-12" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-gray-800 text-base text-center leading-tight">
-              CASFOD Payment Voucher
-            </h3>
-          </div>
-        </div>
-        <div className="text-right flex-shrink-0 min-w-0 ml-3  p-2 rounded shadow-sm">
-          <div className="whitespace-nowrap">
-            <h3 className="text-sm font-bold text-blue-600 truncate">
+    <div className="items-center" ref={pdfRef} style={containerStyle}>
+      {/* ===== HEADER ===== */}
+      <div className="bg-gray-50 w-full border-b py-2 mb-4">
+        <div className="w-full flex justify-between items-start">
+          <img src={logo} alt="CASFOD Logo" className="w-48 h-auto" />
+
+          <div className="text-right">
+            <h2 className="text-sm font-semibold text-blue-800">
               {pvData.pvNumber}
-            </h3>
-          </div>
-          <div className="whitespace-nowrap">
-            <p className="text-xs text-gray-500">
-              Date: {formatToDDMMYYYY(pvData.createdAt!)}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {formatToDDMMYYYY(pvData.pvDate!)}
             </p>
-          </div>
-          <div className="whitespace-nowrap">
-            <p className="text-xs font-semibold mt-0.5 text-gray-700">
-              Status:{" "}
-              <span className="uppercase text-blue-600">{pvData.status}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Payment Details Section */}
-      <div className="mb-4">
-        <div className="grid grid-cols-2 gap-4 mb-3">
-          {/* Left Column */}
-          <div className="space-y-2  p-3 rounded-lg">
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">
-                Paying Station:
-              </strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.payingStation}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">
-                Grant Code:
-              </strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.grantCode}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">
-                Organisational Chart of Account:
-              </strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.organisationalChartOfAccount}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-2  p-3 rounded-lg">
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">Project:</strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.project}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">
-                Chart of Account Code:
-              </strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.chartOfAccountCode}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <strong className="text-gray-700 text-xs block">Category:</strong>
-              <div className="text-xs  p-1.5 rounded shadow-sm">
-                {pvData.chartOfAccountCategories}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Pay To and Being Sections */}
-        <div className="mb-3">
-          <div className="mb-2">
-            <strong className="text-gray-700 text-xs block mb-1">
-              Pay To:
-            </strong>
-            <div className=" p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
-              {pvData.payTo}
-            </div>
-          </div>
-          <div>
-            <strong className="text-gray-700 text-xs block mb-1">Being:</strong>
-            <div className=" p-2 rounded-lg shadow-sm min-h-[30px] text-xs">
-              {pvData.being}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Amount Details Table */}
-      <div className="mb-4">
-        <div className="bg-gray-100 p-2 rounded-t-lg">
-          <strong className="text-gray-700 text-xs">Financial Breakdown</strong>
-        </div>
-        <div className="space-y-1  rounded-b-lg p-2 shadow-sm">
-          <div className="flex justify-between items-center py-1">
-            <span className="text-xs">Gross Amount</span>
-            <span className="text-xs font-medium">
-              {moneyFormat(pvData.grossAmount, "NGN")}
-            </span>
-          </div>
-
-          {pvData.vat && (
-            <div className="flex justify-between items-center py-1  rounded px-2">
-              <span className="text-xs">VAT</span>
-              <span className="text-xs">
-                {moneyFormat(pvData.vat || 0, "NGN")}
-              </span>
-            </div>
-          )}
-
-          {pvData.wht && (
-            <div className="flex justify-between items-center py-1  rounded px-2">
-              <span className="text-xs">Withholding Tax (WHT)</span>
-              <span className="text-xs">
-                {moneyFormat(pvData.wht || 0, "NGN")}
-              </span>
-            </div>
-          )}
-
-          {pvData.devLevy && (
-            <div className="flex justify-between items-center py-1  rounded px-2">
-              <span className="text-xs">Development Levy</span>
-              <span className="text-xs">
-                {moneyFormat(pvData.devLevy || 0, "NGN")}
-              </span>
-            </div>
-          )}
-
-          {pvData.otherDeductions && (
-            <div className="flex justify-between items-center py-1  rounded px-2">
-              <span className="text-xs">Other Deductions</span>
-              <span className="text-xs">
-                {moneyFormat(pvData.otherDeductions || 0, "NGN")}
-              </span>
-            </div>
-          )}
-
-          {totalDeductions > 0 && (
-            <div className="flex justify-between items-center py-1 bg-gray-100 rounded px-2 font-bold">
-              <span className="text-xs">Total Deductions</span>
-              <span className="text-xs">
-                {moneyFormat(totalDeductions, "NGN")}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center py-2 bg-green-50 rounded px-2 font-bold text-green-800 mt-2">
-            <span className="text-xs">NET AMOUNT PAYABLE</span>
-            <span className="text-xs">
-              {moneyFormat(pvData.netAmount, "NGN")}
+            <span
+              className={`inline-block mt-1 px-2 py-0.5 text-[14px] rounded-full ${
+                pvData.status === "approved"
+                  ? "bg-green-100 text-green-800"
+                  : pvData.status === "pending"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : pvData.status === "rejected"
+                  ? "bg-red-100 text-red-800"
+                  : pvData.status === "paid"
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {pvData.status?.toUpperCase()}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Amount in Words */}
-      <div className="mb-4 p-3 bg-yellow-50 rounded-lg shadow-sm">
-        <strong className="text-gray-700 text-xs block mb-1">
-          Amount in Words:
-        </strong>
-        <p className="italic text-xs">{pvData.amountInWords}</p>
+      <h1 className="text-center text-base font-semibold text-gray-900 uppercase tracking-wide mb-4">
+        CASFOD PAYMENT VOUCHER
+      </h1>
+
+      {/* ===== MAIN CONTENT ===== */}
+      <div className="w-full grid grid-cols-2 gap-2 pb-4">
+        {paymentInfoSections.map((section, i) => (
+          <div key={i} className="space-y-1">
+            {section.fields.map((field, j) => (
+              <div key={j} className="flex gap-1">
+                <span className="font-semibold text-[14px] uppercase">
+                  {field.label}:
+                </span>
+                <span className="text-[14px]">{field.value || "—"}</span>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
 
-      {/* Notes */}
-      {pvData.note && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg shadow-sm">
-          <strong className="text-gray-700 text-xs block mb-1">Notes:</strong>
-          <p className="text-xs">{pvData.note}</p>
-        </div>
-      )}
-
-      {/* Approval Sections with Positions */}
-      <div className="mt-5 pt-4">
-        <div className="grid grid-cols-3 gap-4">
-          {/* Prepared By */}
-          <div className=" p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
-              PREPARED BY
-            </p>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
-                  {getDisplayName(pvData.createdBy)}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
-                  {getPosition(pvData.createdBy)}
-                </div>
-              </div>
-              <div className="mt-3">
-                <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8  rounded shadow-sm"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Preparer's Signature)
+      {/* Additional Sections */}
+      <div className="w-full mt-1 space-y-1">
+        {additionalSections.map(
+          (section, i) =>
+            section.show !== false && (
+              <div key={i} className="flex gap-1">
+                <span className="font-semibold text-[14px] uppercase">
+                  {section.label}:
+                </span>
+                <p className="text-[14px] leading-snug flex-1 break-words">
+                  {section.value || "—"}
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
-                  {formatToDDMMYYYY(pvData.createdAt!)}
-                </div>
-              </div>
-            </div>
-          </div>
+            )
+        )}
+      </div>
 
-          {/* Reviewed By */}
-          <div className=" p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
-              REVIEWED BY
-            </p>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
-                  {getDisplayName(pvData.reviewedBy)}
+      {/* ===== FINANCIAL SUMMARY ===== */}
+      <div className="w-full mt-2 border-t  border-gray-300 pt-4 mb-4">
+        <h3 className="text-center font-semibold text-gray-900 mb-4 uppercase">
+          Financial Summary
+        </h3>
+        <div className="space-y-1">
+          {financialItems.map(
+            (item, i) =>
+              item.show !== false && (
+                <div key={i} className="grid grid-cols-2 gap-8 text-[14px]">
+                  <span className="text-right font-bold">{item.label}</span>
+                  <span className={item.className}>
+                    {moneyFormat(item.value, "NGN")}
+                  </span>
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
-                  {getPosition(pvData.reviewedBy)}
-                </div>
-              </div>
-              <div className="mt-3">
-                <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8  rounded shadow-sm"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Reviewer's Signature)
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6  rounded shadow-sm"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Approved By */}
-          <div className=" p-3 rounded-lg">
-            <p className="font-semibold mb-2 text-gray-700 text-xs text-center  py-1 rounded">
-              APPROVED BY
-            </p>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Name</p>
-                <div className="h-6  rounded shadow-sm text-center font-medium text-xs flex items-center justify-center">
-                  {getDisplayName(pvData.approvedBy)}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Position</p>
-                <div className="h-6  rounded shadow-sm text-center text-xs flex items-center justify-center">
-                  {getPosition(pvData.approvedBy)}
-                </div>
-              </div>
-              <div className="mt-3">
-                <p className="text-xs text-gray-600 mb-1">Signature</p>
-                <div className="h-8  rounded shadow-sm"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Approver's Signature)
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Date</p>
-                <div className="h-6  rounded shadow-sm"></div>
-              </div>
-            </div>
-          </div>
+              )
+          )}
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-5 pt-3 text-center bg-gradient-to-r from-blue-50 to-gray-50 rounded-lg p-2">
-        <p className="text-xs text-gray-700">
-          Unique Care and Support Foundation |{" "}
-          <span className="font-semibold text-blue-600">
-            finance@casfod.org
-          </span>
+      {/* ===== APPROVAL SECTION ===== */}
+      <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center">
+        {approvalSections.map((sec, i) => (
+          <div key={i} className="w-full space-y-2.5">
+            <p className="text-[14px] font-semibold uppercase">{sec.title}</p>
+            <p className="text-[14px] font-semibold">
+              {getDisplayName(sec.user)}
+            </p>
+            <p className="text-[11px] text-gray-600">{getPosition(sec.user)}</p>
+            <div className="w-full h-6 border-t border-gray-300 pt-2"></div>
+            <p className="text-[11px] text-gray-500">Signature</p>
+            {/* <div className=""></div> */}
+          </div>
+        ))}
+      </div>
+
+      {/* ===== FOOTER ===== */}
+      <div className="w-full text-center text-[12px] text-gray-500 mt-3 border-t border-gray-300 pt-4">
+        <p>Unique Care and Support Foundation • finance@casfod.org</p>
+        <p className="text-[11px] text-gray-400">
+          Generated on {new Date().toLocaleDateString()} at{" "}
+          {new Date().toLocaleTimeString()}
         </p>
       </div>
     </div>

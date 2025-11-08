@@ -119,7 +119,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
   const addAccountCode = () => {
     setFormData({
       ...formData,
-      account_code: [...formData.account_code, { name: "", code: "" }],
+      account_code: [...formData.account_code, { name: "" }],
     });
   };
 

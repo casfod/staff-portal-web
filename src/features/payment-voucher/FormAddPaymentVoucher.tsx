@@ -18,15 +18,22 @@ import {
   useSendPaymentVoucher,
 } from "./Hooks/usePaymentVoucher";
 import { useProjects } from "../project/Hooks/useProjects";
-import { categories, accounts } from "./data"; // Import the data
+import { categories, accounts } from "./data";
+import DatePicker from "../../ui/DatePicker";
+// import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const FormAddPaymentVoucher: React.FC = () => {
+  // const navigate = useNavigate();
+
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
     payingStation: "",
     payTo: "",
     being: "",
+    pvDate: new Date().toISOString().split("T")[0],
     amountInWords: "",
-    grantCode: "",
+    accountCode: "",
+    projectCode: "",
     grossAmount: 0,
     vat: 0,
     wht: 0,
@@ -47,6 +54,7 @@ const FormAddPaymentVoucher: React.FC = () => {
   const [filteredAccounts, setFilteredAccounts] = useState<typeof accounts>([]);
   const [vatPercentage, setVatPercentage] = useState(0);
   const [whtPercentage, setWhtPercentage] = useState(0);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
@@ -55,11 +63,38 @@ const FormAddPaymentVoucher: React.FC = () => {
   const reviewers = useMemo(() => data?.data ?? [], [data]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
-
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.payingStation.trim())
+      errors.payingStation = "Paying Station is required";
+    if (!formData.payTo.trim()) errors.payTo = "Pay To is required";
+    if (!formData.being.trim()) errors.being = "Being description is required";
+    if (!formData.amountInWords.trim())
+      errors.amountInWords = "Amount in words is required";
+    if (!formData.pvDate) errors.pvDate = "PV Date is required";
+    if (formData.grossAmount <= 0)
+      errors.grossAmount = "Gross Amount must be greater than 0";
+    if (!formData.chartOfAccountCategories)
+      errors.chartOfAccountCategories = "Chart of Account Category is required";
+    if (!formData.organisationalChartOfAccount)
+      errors.organisationalChartOfAccount =
+        "Organisational Chart of Account is required";
+    if (!formData.chartOfAccountCode)
+      errors.chartOfAccountCode = "Chart of Account Code is required";
+    if (!formData.project.trim()) errors.project = "Project is required";
+    if (!formData.projectCode.trim())
+      errors.projectCode = "Project code is required";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // Calculate amounts based on percentages
   const calculateDeductionsFromPercentages = () => {
@@ -74,9 +109,9 @@ const FormAddPaymentVoucher: React.FC = () => {
 
     setFormData((prev) => ({
       ...prev,
-      vat: vatAmount,
-      wht: whtAmount,
-      netAmount: netAmount,
+      vat: parseFloat(vatAmount.toFixed(2)),
+      wht: parseFloat(whtAmount.toFixed(2)),
+      netAmount: parseFloat(netAmount.toFixed(2)),
     }));
 
     if (totalDeductions > grossAmount) {
@@ -102,6 +137,15 @@ const FormAddPaymentVoucher: React.FC = () => {
       ...prev,
       [field]: value,
     }));
+
+    // Clear error when field is updated
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handlePercentageChange = (type: "vat" | "wht", value: number) => {
@@ -153,7 +197,8 @@ const FormAddPaymentVoucher: React.FC = () => {
     }
   }, [formData.organisationalChartOfAccount]);
 
-  const handelProjectsChange = (value: string) => {
+  // Updated handleProjectsChange function with auto-set project field
+  const handleProjectsChange = (value: string) => {
     if (value) {
       const selectedProject = projects?.find(
         (project) =>
@@ -163,51 +208,94 @@ const FormAddPaymentVoucher: React.FC = () => {
         setSelectedProject(selectedProject);
         setFormData((prev) => ({
           ...prev,
-          project: `${selectedProject.project_title} - ${selectedProject.project_code}`,
-          grantCode: selectedProject.project_code,
+          project: selectedProject.project_title, // Auto-set project title
+          projectCode: selectedProject.project_code, // Auto-set project code
         }));
       }
+    } else {
+      setSelectedProject(null);
+      setFormData((prev) => ({
+        ...prev,
+        project: "",
+        projectCode: "",
+        accountCode: "", // Reset account code when project is cleared
+      }));
     }
   };
 
-  // Handle form submission for save (draft)
-  const handleSave = (e: React.FormEvent) => {
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
-    if (!isFormValid) return;
+  const handleAccountCodeChange = (value: string) => {
+    handleFormChange("accountCode", value);
+  };
 
+  // Handle form submission for save (draft)
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      alert("Please fix the form errors before saving.");
+      return;
+    }
 
     const saveData: Partial<PaymentVoucherType> = {
       ...formData,
       reviewedBy: null,
       status: "draft" as const,
-      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
-    savePaymentVoucher(saveData);
+    try {
+      await savePaymentVoucher(saveData);
+    } catch (error) {
+      console.error("Failed to save payment voucher:", error);
+    }
   };
 
   // Handle form submission for send (pending)
-  const handleSend = (e: React.FormEvent) => {
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
-    if (!isFormValid) return;
-
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Please fix the form errors before sending.");
+      return;
+    }
+
+    if (!formData.reviewedBy) {
+      alert("Please select a reviewer before sending.");
+      return;
+    }
 
     const sendData: Partial<PaymentVoucherType> = {
       ...formData,
       status: "pending" as const,
-      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
-    sendPaymentVoucher({ data: sendData, files: selectedFiles });
+    try {
+      await sendPaymentVoucher({ data: sendData, files: selectedFiles });
+    } catch (error) {
+      console.error("Failed to send payment voucher:", error);
+    }
   };
 
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="PV Date*" error={formErrors.pvDate}>
+          <DatePicker
+            selected={formData.pvDate ? new Date(formData.pvDate) : new Date()}
+            onChange={(date) =>
+              handleFormChange(
+                "pvDate",
+                date ? date.toISOString().split("T")[0] : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
+          />
+        </FormRow>
+      </Row>
+
       {/* Basic Information */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Paying Station *">
+        <FormRow label="Paying Station *" error={formErrors.payingStation}>
           <Input
             id="payingStation"
             required
@@ -216,7 +304,7 @@ const FormAddPaymentVoucher: React.FC = () => {
           />
         </FormRow>
 
-        <FormRow label="Pay To *">
+        <FormRow label="Pay To *" error={formErrors.payTo}>
           <Input
             id="payTo"
             required
@@ -227,11 +315,11 @@ const FormAddPaymentVoucher: React.FC = () => {
       </Row>
 
       <Row>
-        <FormRow label="Being *">
+        <FormRow label="Being *" error={formErrors.being}>
           <textarea
             className="border-2 h-16 min-h-16 rounded-lg focus:outline-none p-3 w-full"
             maxLength={500}
-            placeholder=""
+            placeholder="Description of payment"
             id="being"
             value={formData.being}
             onChange={(e) => handleFormChange("being", e.target.value)}
@@ -242,11 +330,15 @@ const FormAddPaymentVoucher: React.FC = () => {
       </Row>
 
       <Row>
-        <FormRow label="Amount In Words *" type="wide">
+        <FormRow
+          label="Amount In Words *"
+          type="wide"
+          error={formErrors.amountInWords}
+        >
           <textarea
-            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3"
+            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
             maxLength={1000}
-            placeholder=""
+            placeholder="Enter amount in words"
             id="amountInWords"
             value={formData.amountInWords}
             onChange={(e) => handleFormChange("amountInWords", e.target.value)}
@@ -256,17 +348,20 @@ const FormAddPaymentVoucher: React.FC = () => {
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Projects">
+        <FormRow label="Projects *" error={formErrors.project}>
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              key={projects.length}
               id="projects"
               customLabel="Select Project"
-              value={formData.project || ""}
-              onChange={(value) => handelProjectsChange(value)}
+              value={
+                selectedProject
+                  ? `${selectedProject.project_title} - ${selectedProject.project_code}`
+                  : ""
+              }
+              onChange={handleProjectsChange}
               options={
                 projects
                   ? projects
@@ -283,20 +378,59 @@ const FormAddPaymentVoucher: React.FC = () => {
           )}
         </FormRow>
 
-        {/* Grant Code */}
-        <FormRow label="Grant Code *">
-          <Input
-            id="grantCode"
-            required
-            value={formData.grantCode}
-            onChange={(e) => handleFormChange("grantCode", e.target.value)}
-          />
-        </FormRow>
+        {/* Project Title Display (Read-only) */}
+        {selectedProject && (
+          <FormRow label="Selected Project">
+            <Input
+              id="projectDisplay"
+              value={formData.project}
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Project will auto-populate when selected above"
+            />
+          </FormRow>
+        )}
       </Row>
+
+      {/* Account Code */}
+      {selectedProject && (
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Account Code *">
+            <Select
+              clearable={true}
+              id="accountCode"
+              customLabel="Select Account"
+              value={formData.accountCode || ""}
+              onChange={handleAccountCodeChange}
+              options={
+                selectedProject?.account_code
+                  ? selectedProject.account_code.map((account_code) => ({
+                      id: account_code.name,
+                      name: account_code.name,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+              required
+            />
+          </FormRow>
+
+          {/* Project Code Display (Read-only) */}
+          <FormRow label="Project Code">
+            <Input
+              id="projectCodeDisplay"
+              value={formData.projectCode}
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Project code will auto-populate"
+            />
+          </FormRow>
+        </Row>
+      )}
 
       {/* Financial Information */}
       <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <FormRow label="Gross Amount (₦) *">
+        <FormRow label="Gross Amount (₦) *" error={formErrors.grossAmount}>
           <Input
             type="number"
             min="0"
@@ -395,7 +529,10 @@ const FormAddPaymentVoucher: React.FC = () => {
 
       {/* Chart of Accounts */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Chart of Account Categories *">
+        <FormRow
+          label="Chart of Account Categories *"
+          error={formErrors.chartOfAccountCategories}
+        >
           <Select
             id="chartOfAccountCategories"
             customLabel="Select Category"
@@ -411,7 +548,10 @@ const FormAddPaymentVoucher: React.FC = () => {
           />
         </FormRow>
 
-        <FormRow label="Chart of Account *">
+        <FormRow
+          label="Organisational Chart of Account *"
+          error={formErrors.organisationalChartOfAccount}
+        >
           <Select
             id="chartOfAccount"
             customLabel="Select Account"
@@ -433,7 +573,10 @@ const FormAddPaymentVoucher: React.FC = () => {
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Chart of Account Code *">
+        <FormRow
+          label="Chart of Account Code *"
+          error={formErrors.chartOfAccountCode}
+        >
           <Input
             id="chartOfAccountCode"
             required
@@ -450,9 +593,9 @@ const FormAddPaymentVoucher: React.FC = () => {
       <Row>
         <FormRow label="Note" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 w-full"
             maxLength={4000}
-            placeholder=""
+            placeholder="Additional notes (optional)"
             id="note"
             value={formData.note}
             onChange={(e) => handleFormChange("note", e.target.value)}
@@ -482,7 +625,6 @@ const FormAddPaymentVoucher: React.FC = () => {
                       }))
                   : []
               }
-              required
             />
           )}
         </FormRow>
@@ -500,13 +642,23 @@ const FormAddPaymentVoucher: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
-          <Button size="medium" disabled={isSaving} onClick={handleSave}>
-            {isSaving ? <SpinnerMini /> : "Save"}
-          </Button>
-        )}
+        <Button
+          size="medium"
+          disabled={isSaving}
+          onClick={handleSave}
+          type="button"
+        >
+          {isSaving ? <SpinnerMini /> : "Save as Draft"}
+        </Button>
+
         {formData.reviewedBy && (
-          <Button size="medium" disabled={isSending} onClick={handleSend}>
+          <Button
+            size="medium"
+            disabled={isSending}
+            onClick={handleSend}
+            type="button"
+            variant="primary"
+          >
             {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>
         )}

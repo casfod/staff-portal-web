@@ -361,7 +361,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           )}
         </div>
 
-        {user.isDeleted && isEditing && (
+        {/* {user.isDeleted && isEditing && (
           <div className="flex items-center md:col-span-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -369,6 +369,29 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
                 name="isDeleted"
                 checked={!editedUser.isDeleted}
                 onChange={handleInputChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                disabled={isPending}
+              />
+              <span className="text-sm text-gray-700">
+                Reactivate this account
+              </span>
+            </label>
+          </div>
+        )} */}
+
+        {user.isDeleted && isEditing && (
+          <div className="flex items-center md:col-span-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="reactivateAccount"
+                checked={!editedUser.isDeleted} // Checked = active, Unchecked = inactive
+                onChange={(e) => {
+                  setEditedUser((prev) => ({
+                    ...prev,
+                    isDeleted: !e.target.checked, // When checked, isDeleted becomes false
+                  }));
+                }}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 disabled={isPending}
               />

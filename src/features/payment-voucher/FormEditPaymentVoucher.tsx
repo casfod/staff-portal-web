@@ -12,17 +12,18 @@ import {
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useDispatch } from "react-redux";
 import { resetPaymentVoucher } from "../../store/paymentVoucherSlice";
-import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
 import {
   useSavePaymentVoucher,
   useSendPaymentVoucher,
-  // useUpdatePaymentVoucherLegacy,
-} from "./Hooks/usePaymentVoucher"; // Fixed imports
+} from "./Hooks/usePaymentVoucher";
 import { useProjects } from "../project/Hooks/useProjects";
 import { accounts, categories } from "./data";
+import { useNavigate } from "react-router-dom";
+import DatePicker from "../../ui/DatePicker";
+import toast from "react-hot-toast";
 
 interface FormEditVoucherProps {
   paymentVoucher: PaymentVoucherType;
@@ -32,24 +33,28 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
   paymentVoucher,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<PaymentVoucherFormData>({
-    payingStation: paymentVoucher.payingStation,
-    payTo: paymentVoucher.payTo,
-    being: paymentVoucher.being,
-    amountInWords: paymentVoucher.amountInWords,
-    grantCode: paymentVoucher.grantCode,
-    grossAmount: paymentVoucher.grossAmount,
-    vat: paymentVoucher.vat,
-    wht: paymentVoucher.wht,
-    devLevy: paymentVoucher.devLevy,
-    otherDeductions: paymentVoucher.otherDeductions,
-    netAmount: paymentVoucher.netAmount,
-    chartOfAccountCategories: paymentVoucher.chartOfAccountCategories,
-    organisationalChartOfAccount: paymentVoucher.organisationalChartOfAccount,
-    chartOfAccountCode: paymentVoucher.chartOfAccountCode,
-    project: paymentVoucher.project,
-    note: paymentVoucher.note,
+    payingStation: paymentVoucher.payingStation || "",
+    pvDate: paymentVoucher.pvDate || "",
+    payTo: paymentVoucher.payTo || "",
+    being: paymentVoucher.being || "",
+    amountInWords: paymentVoucher.amountInWords || "",
+    accountCode: paymentVoucher.accountCode || "",
+    projectCode: paymentVoucher.projectCode || "",
+    grossAmount: paymentVoucher.grossAmount || 0,
+    vat: paymentVoucher.vat || 0,
+    wht: paymentVoucher.wht || 0,
+    devLevy: paymentVoucher.devLevy || 0,
+    otherDeductions: paymentVoucher.otherDeductions || 0,
+    netAmount: paymentVoucher.netAmount || 0,
+    chartOfAccountCategories: paymentVoucher.chartOfAccountCategories || "",
+    organisationalChartOfAccount:
+      paymentVoucher.organisationalChartOfAccount || "",
+    chartOfAccountCode: paymentVoucher.chartOfAccountCode || "",
+    project: paymentVoucher.project || "",
+    note: paymentVoucher.note || "",
     reviewedBy: Array.isArray(paymentVoucher.reviewedBy)
       ? paymentVoucher.reviewedBy[0]?.id || null
       : paymentVoucher.reviewedBy?.id || null,
@@ -65,22 +70,60 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
   >([]);
   const [vatPercentage, setVatPercentage] = useState(0);
   const [whtPercentage, setWhtPercentage] = useState(0);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const { savePaymentVoucher, isPending: isSaving } = useSavePaymentVoucher();
   const { sendPaymentVoucher, isPending: isSending } = useSendPaymentVoucher();
 
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
-  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
-
-  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
-
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Initialize selected project when component mounts
+  useEffect(() => {
+    if (paymentVoucher.project && paymentVoucher.projectCode) {
+      const existingProject = projects?.find(
+        (project) =>
+          project.project_title === paymentVoucher.project &&
+          project.project_code === paymentVoucher.projectCode
+      );
+      if (existingProject) {
+        setSelectedProject(existingProject);
+      }
+    }
+  }, [paymentVoucher, projects]);
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.payingStation.trim())
+      errors.payingStation = "Paying Station is required";
+    if (!formData.payTo.trim()) errors.payTo = "Pay To is required";
+    if (!formData.being.trim()) errors.being = "Being description is required";
+    if (!formData.amountInWords.trim())
+      errors.amountInWords = "Amount in words is required";
+    if (formData.grossAmount <= 0)
+      errors.grossAmount = "Gross Amount must be greater than 0";
+    if (!formData.chartOfAccountCategories)
+      errors.chartOfAccountCategories = "Chart of Account Category is required";
+    if (!formData.organisationalChartOfAccount)
+      errors.organisationalChartOfAccount =
+        "Organisational Chart of Account is required";
+    if (!formData.chartOfAccountCode)
+      errors.chartOfAccountCode = "Chart of Account Code is required";
+    if (!formData.project.trim()) errors.project = "Project is required";
+    if (!formData.projectCode.trim())
+      errors.projectCode = "Project code is required";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // Calculate amounts based on percentages
   const calculateDeductionsFromPercentages = () => {
@@ -95,9 +138,9 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
 
     setFormData((prev) => ({
       ...prev,
-      vat: vatAmount,
-      wht: whtAmount,
-      netAmount: netAmount,
+      vat: parseFloat(vatAmount.toFixed(2)),
+      wht: parseFloat(whtAmount.toFixed(2)),
+      netAmount: parseFloat(netAmount.toFixed(2)),
     }));
 
     if (totalDeductions > grossAmount) {
@@ -110,8 +153,8 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     if (paymentVoucher.grossAmount > 0) {
       const vatPct = (paymentVoucher.vat / paymentVoucher.grossAmount) * 100;
       const whtPct = (paymentVoucher.wht / paymentVoucher.grossAmount) * 100;
-      setVatPercentage(vatPct);
-      setWhtPercentage(whtPct);
+      setVatPercentage(isNaN(vatPct) ? 0 : vatPct);
+      setWhtPercentage(isNaN(whtPct) ? 0 : whtPct);
     }
   }, [paymentVoucher]);
 
@@ -133,6 +176,15 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       ...prev,
       [field]: value,
     }));
+
+    // Clear error when field is updated
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handlePercentageChange = (type: "vat" | "wht", value: number) => {
@@ -192,7 +244,8 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
     }
   }, [formData.organisationalChartOfAccount]);
 
-  const handelProjectsChange = (value: string) => {
+  // Updated handleProjectsChange function with auto-set project field
+  const handleProjectsChange = (value: string) => {
     if (value) {
       const selectedProject = projects?.find(
         (project) =>
@@ -202,41 +255,77 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
         setSelectedProject(selectedProject);
         setFormData((prev) => ({
           ...prev,
-          project: `${selectedProject.project_title} - ${selectedProject.project_code}`,
-          grantCode: selectedProject.project_code,
+          project: selectedProject.project_title, // Auto-set project title
+          projectCode: selectedProject.project_code, // Auto-set project code
         }));
       }
+    } else {
+      setSelectedProject(null);
+      setFormData((prev) => ({
+        ...prev,
+        project: "",
+        projectCode: "",
+        accountCode: "", // Reset account code when project is cleared
+      }));
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleAccountCodeChange = (value: string) => {
+    handleFormChange("accountCode", value);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      alert("Please fix the form errors before saving.");
+      return;
+    }
 
     const saveData: Partial<PaymentVoucherType> = {
       ...formData,
       reviewedBy: null,
       status: "draft" as const,
-      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
-    savePaymentVoucher(saveData);
+    try {
+      await savePaymentVoucher(saveData);
+      dispatch(resetPaymentVoucher());
+      navigate("/payment-vouchers");
+    } catch (error) {
+      console.error("Failed to save payment voucher:", error);
+    }
   };
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Please fix the form errors before sending.");
+      return;
+    }
+
+    if (!formData.reviewedBy) {
+      alert("Please select a reviewer before sending.");
+      return;
+    }
 
     const sendData: Partial<PaymentVoucherType> = {
       ...formData,
       status: "pending" as const,
-      project: selectedProject ? selectedProject?.project_title : undefined,
     };
 
-    sendPaymentVoucher({ data: sendData, files: selectedFiles });
-    dispatch(resetPaymentVoucher());
+    try {
+      await sendPaymentVoucher({ data: sendData, files: selectedFiles });
+      dispatch(resetPaymentVoucher());
+      navigate("/payment-vouchers");
+    } catch (error) {
+      console.error("Failed to send payment voucher:", error);
+    }
   };
 
   return (
-    <form className="space-y-6 uppercase">
+    <form className="space-y-6 uppercase" onSubmit={(e) => e.preventDefault()}>
       <Row>
         <p
           style={{ letterSpacing: "1px" }}
@@ -247,8 +336,24 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       </Row>
 
       {/* Basic Information */}
+
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Paying Station *">
+        <FormRow label="PV Date*" error={formErrors.pvDate}>
+          <DatePicker
+            selected={formData.pvDate ? new Date(formData.pvDate) : new Date()}
+            onChange={(date) =>
+              handleFormChange(
+                "pvDate",
+                date ? date.toISOString().split("T")[0] : null
+              )
+            }
+            variant="secondary"
+            placeholder="Select date"
+          />
+        </FormRow>
+      </Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Paying Station *" error={formErrors.payingStation}>
           <Input
             id="payingStation"
             required
@@ -257,7 +362,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
           />
         </FormRow>
 
-        <FormRow label="Pay To *">
+        <FormRow label="Pay To *" error={formErrors.payTo}>
           <Input
             id="payTo"
             required
@@ -268,7 +373,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       </Row>
 
       <Row>
-        <FormRow label="Being *">
+        <FormRow label="Being *" error={formErrors.being}>
           <textarea
             className="border-2 h-16 min-h-16 rounded-lg focus:outline-none p-3 w-full"
             maxLength={500}
@@ -283,9 +388,13 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       </Row>
 
       <Row>
-        <FormRow label="Amount In Words *" type="wide">
+        <FormRow
+          label="Amount In Words *"
+          type="wide"
+          error={formErrors.amountInWords}
+        >
           <textarea
-            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3"
+            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
             maxLength={1000}
             placeholder=""
             id="amountInWords"
@@ -297,7 +406,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Projects">
+        <FormRow label="Projects *" error={formErrors.project}>
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
@@ -306,8 +415,12 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
               key={projects.length}
               id="projects"
               customLabel="Select Project"
-              value={formData.project || ""}
-              onChange={(value) => handelProjectsChange(value)}
+              value={
+                selectedProject
+                  ? `${selectedProject.project_title} - ${selectedProject.project_code}`
+                  : ""
+              }
+              onChange={handleProjectsChange}
               options={
                 projects
                   ? projects
@@ -324,20 +437,59 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
           )}
         </FormRow>
 
-        {/* Grant Code */}
-        <FormRow label="Grant Code *">
-          <Input
-            id="grantCode"
-            required
-            value={formData.grantCode}
-            onChange={(e) => handleFormChange("grantCode", e.target.value)}
-          />
-        </FormRow>
+        {/* Project Title Display (Read-only) */}
+        {selectedProject && (
+          <FormRow label="Selected Project">
+            <Input
+              id="projectDisplay"
+              value={formData.project}
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Project will auto-populate when selected above"
+            />
+          </FormRow>
+        )}
       </Row>
+
+      {/* Account Code and Project Code */}
+      {selectedProject && (
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Account Code *">
+            <Select
+              clearable={true}
+              key={projects.length}
+              id="accountCode"
+              customLabel="Select Account"
+              value={formData.accountCode || ""}
+              onChange={handleAccountCodeChange}
+              options={
+                selectedProject
+                  ? selectedProject.account_code.map((account_code) => ({
+                      id: account_code.name,
+                      name: account_code.name,
+                    }))
+                  : []
+              }
+              optionsHeight={220}
+            />
+          </FormRow>
+
+          {/* Project Code Display (Read-only) */}
+          <FormRow label="Project Code">
+            <Input
+              id="projectCodeDisplay"
+              value={formData.projectCode}
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Project code will auto-populate"
+            />
+          </FormRow>
+        </Row>
+      )}
 
       {/* Financial Information */}
       <Row cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <FormRow label="Gross Amount (₦) *">
+        <FormRow label="Gross Amount (₦) *" error={formErrors.grossAmount}>
           <Input
             type="number"
             min="0"
@@ -436,7 +588,10 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
 
       {/* Chart of Accounts */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Chart of Account Categories *">
+        <FormRow
+          label="Chart of Account Categories *"
+          error={formErrors.chartOfAccountCategories}
+        >
           <Select
             id="chartOfAccountCategories"
             customLabel="Select Category"
@@ -452,7 +607,10 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
           />
         </FormRow>
 
-        <FormRow label="Chart of Account *">
+        <FormRow
+          label="Organisational Chart of Account *"
+          error={formErrors.organisationalChartOfAccount}
+        >
           <Select
             id="chartOfAccount"
             customLabel="Select Account"
@@ -474,7 +632,10 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Chart of Account Code *">
+        <FormRow
+          label="Chart of Account Code *"
+          error={formErrors.chartOfAccountCode}
+        >
           <Input
             id="chartOfAccountCode"
             required
@@ -491,7 +652,7 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
       <Row>
         <FormRow label="Note" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 w-full"
             maxLength={4000}
             placeholder=""
             id="note"
@@ -501,114 +662,67 @@ const FormEditPaymentVoucher: React.FC<FormEditVoucherProps> = ({
         </FormRow>
       </Row>
 
-      {/* Reviewer/Approver Selection */}
-      {paymentVoucher.reviewedBy ? (
-        <div>
-          <p className="mb-2">
-            <span className="font-bold mr-1 uppercase">Reviewed By :</span>
-            {`${paymentVoucher?.reviewedBy?.first_name} ${paymentVoucher?.reviewedBy?.last_name}`}
-          </p>
-
-          {paymentVoucher?.comments && (
-            <div className="mb-2">
-              <span className="font-bold mr-1 uppercase">Comments :</span>
-              {paymentVoucher?.comments?.map((comment, index) => (
-                <div
-                  key={index}
-                  className="border-2 px-4 py-2 rounded-lg shadow-lg mb-2"
-                >
-                  <p className="text-base font-extrabold">
-                    {`${comment.user.first_name} ${comment.user.last_name}`}
-                  </p>
-                  <p className="text-sm">{`${comment.text}`}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : paymentVoucher.status === "reviewed" ? (
-        <Row>
-          <FormRow label="Approved By *">
-            {isLoadingAmins ? (
-              <SpinnerMini />
-            ) : (
-              <Select
-                clearable={true}
-                id="approvedBy"
-                customLabel="Select an admin"
-                value={formData.approvedBy || ""}
-                onChange={(value) => handleFormChange("approvedBy", value)}
-                options={
-                  admins
-                    ? admins
-                        .filter((admin) => admin.id)
-                        .map((admin) => ({
-                          id: admin.id as string,
-                          name: `${admin.first_name} ${admin.last_name}`,
-                        }))
-                    : []
-                }
-                required
-              />
-            )}
-          </FormRow>
-        </Row>
-      ) : (
-        <Row>
-          <FormRow label="Reviewed By *">
-            {isLoadingReviewers ? (
-              <SpinnerMini />
-            ) : (
-              <Select
-                clearable={true}
-                id="reviewedBy"
-                customLabel="Select Reviewer"
-                value={formData.reviewedBy || ""}
-                onChange={(value) => handleFormChange("reviewedBy", value)}
-                options={
-                  reviewers
-                    ? reviewers
-                        .filter((reviewer) => reviewer.id)
-                        .map((reviewer) => ({
-                          id: reviewer.id as string,
-                          name: `${reviewer.first_name} ${reviewer.last_name}`,
-                        }))
-                    : []
-                }
-                required
-              />
-            )}
-          </FormRow>
-        </Row>
-      )}
-
-      {paymentVoucher.status !== "rejected" && (
-        <>
-          {/* File Upload */}
-          {formData.reviewedBy && (
-            <FileUpload
-              selectedFiles={selectedFiles}
-              setSelectedFiles={setSelectedFiles}
-              accept=".jpg,.png,.pdf,.xlsx,.docx"
-              multiple={true}
+      {/* Reviewer Selection */}
+      <Row>
+        <FormRow label="Reviewed By *">
+          {isLoadingReviewers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              clearable={true}
+              key={reviewers.length}
+              id="reviewedBy"
+              customLabel="Select Reviewer"
+              value={formData.reviewedBy || ""}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
+              options={
+                reviewers
+                  ? reviewers
+                      .filter((reviewer) => reviewer.id)
+                      .map((reviewer) => ({
+                        id: reviewer.id as string,
+                        name: `${reviewer.first_name} ${reviewer.last_name}`,
+                      }))
+                  : []
+              }
             />
           )}
+        </FormRow>
+      </Row>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center w-full gap-4">
-            {!formData.reviewedBy && (
-              <Button size="medium" disabled={isSaving} onClick={handleSave}>
-                {isSaving ? <SpinnerMini /> : "Save"}
-              </Button>
-            )}
-            {formData.reviewedBy && (
-              <Button size="medium" disabled={isSending} onClick={handleSend}>
-                {isSending ? <SpinnerMini /> : "Save And Send"}
-              </Button>
-            )}
-          </div>
-        </>
+      {/* File Upload */}
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx,.docx"
+          multiple={true}
+        />
       )}
+
+      {/* Action Buttons */}
+      <div className="flex justify-center w-full gap-4">
+        <Button
+          size="medium"
+          disabled={isSaving}
+          onClick={handleSave}
+          type="button"
+        >
+          {isSaving ? <SpinnerMini /> : "Save as Draft"}
+        </Button>
+
+        {formData.reviewedBy && (
+          <Button
+            size="medium"
+            disabled={isSending}
+            onClick={handleSend}
+            type="button"
+            variant="primary"
+          >
+            {isSending ? <SpinnerMini /> : "Save And Send"}
+          </Button>
+        )}
+      </div>
     </form>
   );
 };

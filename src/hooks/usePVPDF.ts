@@ -35,7 +35,16 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     setIsGenerating(true);
 
     try {
-      const filename = `${pvData.pvNumber || "PV"}.pdf`;
+      // FIX: Sanitize filename by replacing slashes with dashes or underscores
+      const sanitizeFilename = (filename: string) => {
+        return filename.replace(/\//g, "-"); // Replace all slashes with dashes
+      };
+
+      const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
+
+      // Alternative: If you want to keep the original format but make it filesystem-safe
+      // const filename = `${pvData.pvNumber.replace(/\//g, '-')}.pdf`;
+
       const pdf = await generatePdfViaCanvas(
         pdfRef.current,
         filename,
@@ -72,7 +81,7 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     });
 
     const pdf = new jsPDF({
-      orientation: orientation, // Use the orientation parameter
+      orientation: orientation,
       unit: "mm",
       format: "a4",
       compress: true,
@@ -84,54 +93,98 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     const contentWidth = pdfWidth - margin * 2;
 
     const imgWidth = contentWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // Check if content fits on single page - FIXED CALCULATION
     const availableContentHeight = pdfHeight - margin * 2;
-    const pageContentHeightPx =
-      (availableContentHeight * canvas.width) / imgWidth;
-    const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
-    // Process each page
-    for (let i = 0; i < totalPages; i++) {
-      if (i > 0) {
-        pdf.addPage();
-      }
+    // DEBUG: Log dimensions to understand the issue
+    console.log("PDF Dimensions:", {
+      pdfWidth,
+      pdfHeight,
+      availableContentHeight,
+      imgHeight,
+      canvasHeight: canvas.height,
+      canvasWidth: canvas.width,
+      needsMultiplePages: imgHeight > availableContentHeight,
+    });
 
-      const startY = i * pageContentHeightPx;
-      const remainingHeight = canvas.height - startY;
-      const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
-      const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
+    // FIX: Use more accurate calculation with tolerance
+    const tolerance = 5; // 5mm tolerance
+    const needsMultiplePages = imgHeight > availableContentHeight + tolerance;
 
-      const pageCanvas = document.createElement("canvas");
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = pageImgHeightPx;
-
-      const ctx = pageCanvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas context not available");
-
-      ctx.drawImage(
-        canvas,
-        0,
-        startY,
-        canvas.width,
-        pageImgHeightPx,
-        0,
-        0,
-        canvas.width,
-        pageImgHeightPx
-      );
-
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
-
+    if (!needsMultiplePages) {
+      // SINGLE PAGE - content fits on one page
+      console.log("Using single page mode");
       pdf.addImage(
-        pageImgData,
+        canvas.toDataURL("image/jpeg", 1.0),
         "JPEG",
         margin,
         margin,
         imgWidth,
-        pageImgHeight,
+        imgHeight,
         undefined,
-        "FAST",
-        0
+        "FAST"
       );
+    } else {
+      // MULTI-PAGE - content requires multiple pages
+      console.log("Using multi-page mode");
+      const pageContentHeightPx =
+        (availableContentHeight * canvas.width) / imgWidth;
+      const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
+
+      console.log("Total pages needed:", totalPages);
+
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        const startY = i * pageContentHeightPx;
+        const remainingHeight = canvas.height - startY;
+        const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
+
+        // Only proceed if we have meaningful content
+        if (pageImgHeightPx < 10) {
+          // Less than 10px is essentially empty
+          console.log("Skipping empty page", i);
+          continue;
+        }
+
+        const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
+
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageImgHeightPx;
+
+        const ctx = pageCanvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context not available");
+
+        ctx.drawImage(
+          canvas,
+          0,
+          startY,
+          canvas.width,
+          pageImgHeightPx,
+          0,
+          0,
+          canvas.width,
+          pageImgHeightPx
+        );
+
+        const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
+
+        pdf.addImage(
+          pageImgData,
+          "JPEG",
+          margin,
+          margin,
+          imgWidth,
+          pageImgHeight,
+          undefined,
+          "FAST"
+        );
+      }
     }
 
     const pdfBlob = pdf.output("blob");
@@ -147,11 +200,18 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     }
 
     try {
-      const filename = `${pvData.pvNumber || "PV"}.pdf`;
+      // FIX: Sanitize filename for download as well
+      const sanitizeFilename = (filename: string) => {
+        return filename.replace(/\//g, "-");
+      };
+
+      const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
+      console.log("Downloading PDF with filename:", filename);
+
       await generatePdf(pdfRef.current, {
-        filename,
+        filename, // Use the sanitized filename
         format: "a4",
-        orientation: orientation, // Use the orientation parameter
+        orientation: orientation,
         scale: 2,
         margin: 10,
         multiPage: true,

@@ -56,9 +56,9 @@ export interface UserType {
     canUpdate?: boolean;
     canDelete?: boolean;
   };
+  position?: string;
 
   isDeleted?: boolean;
-  position?: string;
   password?: string;
   passwordConfirm?: string;
 }
@@ -480,7 +480,7 @@ export interface ImplementationPeriod {
 
 export interface AccountCode {
   name: string;
-  code?: string;
+  // code?: string;
 }
 export interface Sector {
   name: string;
@@ -923,11 +923,12 @@ export interface UseGoodsReceivedType {
 export interface PaymentVoucherType {
   id?: string;
   pvNumber: string;
+  pvDate: string;
   payingStation: string;
   payTo: string;
   being: string;
   amountInWords: string;
-  grantCode: string;
+  accountCode: string;
   grossAmount: number;
   vat: number;
   wht: number;
@@ -938,6 +939,7 @@ export interface PaymentVoucherType {
   organisationalChartOfAccount: string;
   chartOfAccountCode: string;
   project: string;
+  projectCode: string;
   note: string;
   createdBy?: Partial<UserType>; // Made optional for form creation
   reviewedBy?: UserType[] | any; // Changed to string for form handling
@@ -955,8 +957,9 @@ export interface PaymentVoucherFormData {
   payingStation: string;
   payTo: string;
   being: string;
+  pvDate?: string;
   amountInWords: string;
-  grantCode: string;
+  accountCode: string;
   grossAmount: number;
   vat: number;
   wht: number;
@@ -967,6 +970,7 @@ export interface PaymentVoucherFormData {
   organisationalChartOfAccount: string;
   chartOfAccountCode: string;
   project: string;
+  projectCode: string;
   note: string;
   reviewedBy?: string | null;
   approvedBy?: string | null;

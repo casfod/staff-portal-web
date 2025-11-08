@@ -155,9 +155,7 @@ export const updatePassword = async function (data: any) {
 
 export const deleteUser = async function (userId: string) {
   try {
-    const response = await axiosInstance.delete<UserType>(
-      `/users/deleteUser/${userId}`
-    );
+    const response = await axiosInstance.delete<UserType>(`/users/${userId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

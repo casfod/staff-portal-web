@@ -114,14 +114,14 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               </div>
             </div>
             <div>
-              <strong className="text-gray-700 text-xs">Grant Code:</strong>
+              <strong className="text-gray-700 text-xs">Account Code:</strong>
               <div className="border-b border-gray-300 py-0.5 text-xs">
-                {pvData.grantCode}
+                {pvData.accountCode}
               </div>
             </div>
             <div>
               <strong className="text-gray-700 text-xs">
-                Chart of Account:
+                Organisational Chart of Account:
               </strong>
               <div className="border-b border-gray-300 py-0.5 text-xs">
                 {pvData.organisationalChartOfAccount}

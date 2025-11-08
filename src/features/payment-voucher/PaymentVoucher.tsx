@@ -151,8 +151,6 @@ const PaymentVoucher = () => {
         paymentVoucherId: voucherId!,
         files: [pdfFile],
       });
-
-      toast.success("PDF generated and uploaded successfully");
     } catch (error) {
       console.error("PDF upload failed:", error);
       toast.error("Failed to generate or upload PDF");
