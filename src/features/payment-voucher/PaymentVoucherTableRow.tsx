@@ -48,7 +48,8 @@ const PaymentVoucherTableRow = ({
       id: "actions",
       content: (
         <ActionIcons
-          isEditable={isEditable}
+          // isEditable={isEditable}
+          isEditable={true}
           requestId={voucherId}
           visibleItems={visibleItems}
           onToggleView={toggleViewItems}
