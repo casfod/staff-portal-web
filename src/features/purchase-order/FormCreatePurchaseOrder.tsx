@@ -285,7 +285,7 @@ const FormCreatePurchaseOrder: React.FC = () => {
               size="md"
               placeholder="Select date"
               clearable={true}
-              minDate={new Date()}
+              // minDate={new Date()}
             />
           </FormRow>
         </Row>

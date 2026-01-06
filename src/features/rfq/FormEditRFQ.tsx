@@ -273,7 +273,7 @@ const FormEditRFQ: React.FC<FormEditRFQProps> = ({ rfq }) => {
                 placeholder="Select date"
                 // className="custom-class-if-needed"
                 clearable={true}
-                minDate={Date.now()}
+                // minDate={Date.now()}
                 // requiredTrigger={!!formData.dayOfDeparture}
               />
             </FormRow>

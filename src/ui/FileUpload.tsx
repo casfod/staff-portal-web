@@ -16,7 +16,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   accept = ".jpg,.png,.pdf,.doc,.docx,.xlsx",
   multiple = true,
   maxFiles = 10,
-  maxSizeMB = 5,
+  maxSizeMB = 10,
   selectedFiles,
   setSelectedFiles,
 }) => {

@@ -86,9 +86,9 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           <p className="text-md font-semibold text-blue-600 mt-1">
             {grnData.GRDCode}
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          {/* <p className="text-sm text-gray-500 mt-1">
             GRN Date: {formatToDDMMYYYY(grnData.createdAt)}
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -351,7 +351,7 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
               <div>
                 <p className="text-sm text-gray-600 mb-1">Date</p>
                 <div className="h-6 border-b border-gray-400 text-center">
-                  {formatToDDMMYYYY(grnData.createdAt)}
+                  {/* {formatToDDMMYYYY(grnData.createdAt)} */}
                 </div>
               </div>
             </div>
