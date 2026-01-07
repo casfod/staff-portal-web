@@ -3,18 +3,20 @@ import { ConceptNoteType, Project } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
-import { useSaveConceptNote } from "./Hooks/useSaveConceptNotes";
-import { useSendConceptNote } from "./Hooks/useSendConceptNotes";
 import { useProjects } from "../project/Hooks/useProjects";
 import { useAdmins } from "../user/Hooks/useAdmins";
+import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS IMPORT
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import DatePicker from "../../ui/DatePicker";
 import { FileUpload } from "../../ui/FileUpload";
+import {
+  useSaveConceptNote,
+  useSendConceptNote,
+} from "./Hooks/useConceptNotes";
 
-// import { FaPlus, FaTrash } from "react-icons/fa";
 const FormAddConceptNotes = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -30,19 +32,23 @@ const FormAddConceptNotes = () => {
     means_of_verification: "",
     project: null,
     activity_budget: 0,
-    expense_Charged_To: "", // Initialize as empty string
-    account_Code: "", // Initialize as empty string
+    expense_Charged_To: "",
+    account_Code: "",
+    reviewedBy: null, // ADD THIS
     approvedBy: null,
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
-
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Fetch reviewers data
+  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
+  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
@@ -64,30 +70,25 @@ const FormAddConceptNotes = () => {
 
   const handleFormChange = (field: keyof ConceptNoteType, value: string) => {
     if (field === "expense_Charged_To") {
-      // Find the selected project
       const selectedProject = projects.find(
         (project) =>
           `${project.project_title} - ${project.project_code}` === value
       );
 
       formData.project = selectedProject?.id;
-      // Update the selected project state
       setSelectedProject(selectedProject || null);
 
-      // Update the form data with the selected project title and code
       setFormData({
         ...formData,
         expense_Charged_To: value,
-        account_Code: "", // Reset account code when project changes
+        account_Code: "",
       });
     } else if (field === "account_Code") {
-      // Update the selected account code
       setFormData({
         ...formData,
         account_Code: value,
       });
     } else {
-      // Handle other fields
       setFormData({ ...formData, [field]: value });
     }
   };
@@ -103,32 +104,35 @@ const FormAddConceptNotes = () => {
     isError: isErrorSend,
   } = useSendConceptNote();
 
-  // Handle form submission
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
     if (!isFormValid) return;
 
-    if (formData.approvedBy === "") {
-      formData.approvedBy = null;
-    }
+    // Clear both reviewer and approver for draft save
+    formData.reviewedBy = null;
+    formData.approvedBy = null;
 
-    // Make sure project_code is included
-    const data = {
-      ...formData,
-      // project: selectedProject?.project_code || formData.project_code,
-    };
-
-    console.log("Submitting data:", data); // Verify project_code is included
+    const data = { ...formData };
+    console.log("Saving as draft:", data);
     saveConceptNote(data);
   };
 
-  // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+
+    if (!isFormValid) return;
+
+    // Validate that reviewedBy is set for submission
+    if (!formData.reviewedBy) {
+      alert("Please select a reviewer before submitting");
+      return;
+    }
 
     const data = { ...formData };
+    console.log("Submitting for review:", data);
     sendConceptNote({ data, files: selectedFiles });
   };
 
@@ -138,15 +142,15 @@ const FormAddConceptNotes = () => {
 
   return (
     <form className="space-y-6">
+      {/* Project and Account Code Selection - Same as before */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        {/* First Select: Projects */}
         <FormRow label="Expense Charged To *">
           {isLoadingProjects ? (
             <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              key={projects.length} // Force re-render when projects change
+              key={projects.length}
               id="expenseChargedTo"
               customLabel="Select Project"
               value={formData.expense_Charged_To || ""}
@@ -160,7 +164,6 @@ const FormAddConceptNotes = () => {
                       .map((project) => ({
                         id: `${project.project_title} - ${project.project_code}`,
                         name: `${project.project_code}`,
-                        // name: `${project.project_title} - ${project.project_code}`,
                       }))
                   : []
               }
@@ -169,7 +172,6 @@ const FormAddConceptNotes = () => {
           )}
         </FormRow>
 
-        {/* Second Select: Account Code */}
         {selectedProject && (
           <FormRow label="Account Code *">
             {isLoadingProjects ? (
@@ -195,6 +197,8 @@ const FormAddConceptNotes = () => {
           </FormRow>
         )}
       </Row>
+
+      {/* Other form fields remain the same */}
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Activity Title *">
           <Input
@@ -219,6 +223,7 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
+      {/* Activity Period */}
       <Row cols="grid-cols-1 md:grid-cols-4">
         <FormRow label="Activity Period (From) *">
           <DatePicker
@@ -236,7 +241,6 @@ const FormAddConceptNotes = () => {
             }
             variant="secondary"
             placeholder="Select date"
-            // minDate={new Date()}
           />
         </FormRow>
         {formData.activity_period?.from && (
@@ -277,11 +281,11 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
-      {/* Background Context */}
+      {/* Text areas remain the same */}
       <Row>
         <FormRow label="Background Context *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
             maxLength={4000}
             id="background_context"
             required
@@ -296,7 +300,7 @@ const FormAddConceptNotes = () => {
       <Row>
         <FormRow label="Objectives/Purpose *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
             maxLength={4000}
             id="objectives_purpose"
             required
@@ -307,10 +311,11 @@ const FormAddConceptNotes = () => {
           />
         </FormRow>
       </Row>
+
       <Row>
         <FormRow label="Detailed Activity Description *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
             maxLength={4000}
             id="detailed_activity_description"
             required
@@ -322,11 +327,10 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
-      {/* Strategic Plan */}
       <Row>
         <FormRow label="Strategic Plan *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
             maxLength={4000}
             id="strategic_plan"
             required
@@ -335,10 +339,11 @@ const FormAddConceptNotes = () => {
           />
         </FormRow>
       </Row>
+
       <Row>
         <FormRow label="Benefits of Project *" type="wide">
           <textarea
-            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3  "
+            className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
             maxLength={4000}
             id="benefits_of_project"
             required
@@ -364,56 +369,86 @@ const FormAddConceptNotes = () => {
         </FormRow>
       </Row>
 
-      {/* Approver Selection */}
-      {!isLoadingAdmins && (
-        <Row>
-          <FormRow label="Approved By *">
-            {isLoadingAdmins ? (
-              <SpinnerMini /> // Show a spinner while loading admins
-            ) : (
-              <Select
-                clearable={true}
-                id="approvedBy"
-                customLabel="Select an admin"
-                value={formData.approvedBy || ""} // Use empty string if null
-                onChange={(value) => handleFormChange("approvedBy", value)}
-                options={
-                  admins
-                    ? admins
-                        .filter((admin) => admin.id) // Filter out admins with undefined IDs
-                        .map((admin) => ({
-                          id: admin.id as string, // Assert that admin.id is a string
-                          name: `${admin.first_name} ${admin.last_name}`,
-                        }))
-                    : []
-                }
-                required
-              />
-            )}
-          </FormRow>
-          {formData.approvedBy && (
-            <FileUpload
-              selectedFiles={selectedFiles}
-              setSelectedFiles={setSelectedFiles}
-              accept=".jpg,.png,.pdf,.xlsx,.docx"
-              multiple={true}
+      {/* REVIEWER SELECTION (for submission) */}
+      <Row>
+        <FormRow label="Reviewed By *">
+          {isLoadingReviewers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              clearable={true}
+              id="reviewedBy"
+              customLabel="Select Reviewer"
+              value={formData.reviewedBy || ""}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
+              options={
+                reviewers
+                  ? reviewers
+                      .filter((reviewer) => reviewer.id)
+                      .map((reviewer) => ({
+                        id: reviewer.id as string,
+                        name: `${reviewer.first_name} ${reviewer.last_name}`,
+                      }))
+                  : []
+              }
+              required
             />
           )}
+        </FormRow>
+      </Row>
 
-          <div className="flex justify-center w-full gap-4">
-            {!formData.approvedBy && (
-              <Button disabled={isSaving} size="medium" onClick={handleSave}>
-                {isSaving ? <SpinnerMini /> : "Save"}
-              </Button>
-            )}
-            {formData.approvedBy && (
-              <Button size="medium" disabled={isSending} onClick={handleSend}>
-                {isSending ? <SpinnerMini /> : "Save And Send"}
-              </Button>
-            )}
-          </div>
-        </Row>
+      {/* APPROVER SELECTION (optional for submission) */}
+      {/* <Row>
+        <FormRow label="Approved By">
+          {isLoadingAdmins ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              clearable={true}
+              id="approvedBy"
+              customLabel="Select an admin (optional)"
+              value={formData.approvedBy || ""}
+              onChange={(value) => handleFormChange("approvedBy", value)}
+              options={
+                admins
+                  ? admins
+                      .filter((admin) => admin.id)
+                      .map((admin) => ({
+                        id: admin.id as string,
+                        name: `${admin.first_name} ${admin.last_name}`,
+                      }))
+                  : []
+              }
+            />
+          )}
+        </FormRow>
+      </Row> */}
+
+      {/* File upload only when submitting (reviewedBy is set) */}
+      {formData.reviewedBy && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.xlsx,.docx"
+          multiple={true}
+        />
       )}
+
+      <div className="flex justify-center w-full gap-4">
+        {/* Save as Draft button (no reviewer required) */}
+        {!formData.reviewedBy && (
+          <Button disabled={isSaving} size="medium" onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Save as Draft"}
+          </Button>
+        )}
+
+        {/* Submit for Review button (reviewer required) */}
+        {formData.reviewedBy && (
+          <Button size="medium" disabled={isSending} onClick={handleSend}>
+            {isSending ? <SpinnerMini /> : "Submit for Review"}
+          </Button>
+        )}
+      </div>
     </form>
   );
 };

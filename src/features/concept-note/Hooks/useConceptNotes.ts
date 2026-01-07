@@ -5,29 +5,27 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import {
-  getAdvanceRequest,
-  getAdvanceRequestStats,
-  getAllAdvanceRequest,
-} from "../../../services/apiAdvanceRequest";
-import {
-  AdvanceRequestType,
-  UseAdvanceRequest,
-  UseAdvanceRequestType,
-  UseAdvanceStatsType,
+  ConceptNoteType,
+  UseConceptNote,
+  UseConceptNoteStatsType,
+  UseConceptNoteType,
 } from "../../../interfaces";
+import {
+  getAllConceptNotes,
+  getConceptNote,
+  getConceptNotesStats,
+  saveConceptNote as saveAndSendConceptNoteApi,
+  saveAndSendConceptNote as SendConceptNoteApi,
+  updateConceptNote as updateConceptNoteApi,
+  updateStatus as updateStatusApi,
+  deleteConceptNote as deleteConceptNoteAPI,
+} from "../../../services/apiConceptNotes";
+
+import { copyTo as copyToApi } from "../../../services/apiConceptNotes";
 import { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
-
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import {
-  deleteAdvanceRequest as deleteAdvanceRequestAPI,
-  saveAdvanceRequests as saveAdvanceRequestsApi,
-  sendAdvanceRequests as sendAdvanceRequestsApi,
-  updateAdvanceRequest as updateAdvanceRequestApi,
-  updateStatus as updateStatusApi,
-  copyTo as copyToApi,
-} from "../../../services/apiAdvanceRequest";
 
 interface ErrorResponse {
   message: string;
@@ -43,35 +41,35 @@ interface LoginError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
-export function useAdvanceRequest(id: string) {
-  return useQuery<UseAdvanceRequest, Error>({
-    queryKey: ["advance-request", id],
-    queryFn: () => getAdvanceRequest(id),
-    staleTime: 0,
-  });
-}
-
-export function useAdvanceRequestStats(
-  options?: UseQueryOptions<UseAdvanceStatsType, Error> // Add options parameter
+export function useAllConceptNotes(
+  search?: string,
+  sort?: string,
+  page?: number,
+  limit?: number,
+  options?: UseQueryOptions<UseConceptNoteType, Error> // Add options parameter
 ) {
-  return useQuery<UseAdvanceStatsType, Error>({
-    queryKey: ["advance-requests-stats"],
-    queryFn: () => getAdvanceRequestStats(),
+  return useQuery<UseConceptNoteType, Error>({
+    queryKey: ["all-concept-notes", search, sort, page, limit],
+    queryFn: () => getAllConceptNotes({ search, sort, page, limit }),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
 }
 
-export function useAllAdvanceRequests(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<UseAdvanceRequestType, Error> // Add options parameter
+export function useConceptNote(id: string) {
+  return useQuery<UseConceptNote, Error>({
+    queryKey: ["concept-note", id],
+    queryFn: () => getConceptNote(id),
+    staleTime: 0,
+  });
+}
+
+export function useConceptNotesStats(
+  options?: UseQueryOptions<UseConceptNoteStatsType, Error> // Add options parameter
 ) {
-  return useQuery<UseAdvanceRequestType, Error>({
-    queryKey: ["all-advance-requests", search, sort, page, limit],
-    queryFn: () => getAllAdvanceRequest({ search, sort, page, limit }),
+  return useQuery<UseConceptNoteStatsType, Error>({
+    queryKey: ["concept-notes-stats"],
+    queryFn: () => getConceptNotesStats(),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
@@ -94,7 +92,7 @@ export function useCopy(requestId: string) {
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", requestId],
         });
       } else if (data.status !== 200) {
         toast.error("Copy not successful");
@@ -115,7 +113,7 @@ export function useCopy(requestId: string) {
   return { copyto, isPending, isError, errorMessage };
 }
 
-export function useDeleteAdvanceRequest(
+export function useDeleteConceptNote(
   search?: string,
   sort?: string,
   page?: number,
@@ -124,58 +122,57 @@ export function useDeleteAdvanceRequest(
   const queryClient = useQueryClient();
 
   const {
-    mutate: deleteAdvanceRequest,
+    mutate: deleteConceptNote,
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
   } = useMutation<void, FetchError, string>({
     mutationFn: async (userID: string) => {
-      await deleteAdvanceRequestAPI(userID);
+      await deleteConceptNoteAPI(userID);
     },
     onSuccess: () => {
-      toast.success("Advance Request deleted");
+      toast.success("Concept Note deleted");
 
       queryClient.invalidateQueries({
-        queryKey: ["all-advance-requests", search, sort, page, limit],
+        queryKey: ["all-concept-notes", search, sort, page, limit],
       });
     },
     onError: (error) => {
-      toast.error("Error deleting Advance Request");
-
+      toast.error("Error deleting Concept Note");
       const errorMessage =
         error.response?.data.message ||
-        "An error occurred while deleting the Advance Request.";
-      console.error("Delete Advance Request Error:", errorMessage);
+        "An error occurred while deleting the Concept Note.";
+      console.error("Delete Concept Note Error:", errorMessage);
     },
   });
 
   return {
-    deleteAdvanceRequest,
+    deleteConceptNote,
     isDeleting,
     isErrorDeleting,
     errorDeleting,
   };
 }
 
-export function useSaveAdvanceRequest() {
+export function useSaveConceptNote() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const {
-    mutate: saveAdvanceRequest,
+    mutate: saveConceptNote,
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<AdvanceRequestType>) =>
-      saveAdvanceRequestsApi(data),
+    mutationFn: (data: Partial<ConceptNoteType>) =>
+      saveAndSendConceptNoteApi(data),
 
     onSuccess: (data) => {
       if (data.status === 201) {
         // Show success toast
-        toast.success("AdvanceRequest saved successfully");
+        toast.success("Concept Note saved successfully");
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-advance-requests"] });
+        queryClient.invalidateQueries({ queryKey: ["all-concept-notes"] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -188,19 +185,19 @@ export function useSaveAdvanceRequest() {
       toast.error(err.response?.data.message || "An error occurred");
 
       // Log the error for debugging
-      console.error("Advance Request save Error:", err.response?.data.message);
+      console.error("Concept Note save Error:", err.response?.data.message);
     },
   });
 
-  return { saveAdvanceRequest, isPending, isError };
+  return { saveConceptNote, isPending, isError };
 }
 
-export function useSendAdvanceRequest() {
+export function useSendConceptNote() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const {
-    mutate: sendAdvanceRequest,
+    mutate: sendConceptNote,
     isPending,
     isError,
   } = useMutation({
@@ -208,17 +205,17 @@ export function useSendAdvanceRequest() {
       data,
       files,
     }: {
-      data: Partial<AdvanceRequestType>;
+      data: Partial<ConceptNoteType>;
       files: File[];
-    }) => sendAdvanceRequestsApi(data, files),
+    }) => SendConceptNoteApi(data, files),
 
     onSuccess: (data) => {
       if (data.status === 201) {
         // Show success toast
-        toast.success("AdvanceRequest sent successfully");
+        toast.success("Concept Note sent successfully");
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-advance-requests"] });
+        queryClient.invalidateQueries({ queryKey: ["all-concept-notes"] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -231,19 +228,20 @@ export function useSendAdvanceRequest() {
       toast.error(err.response?.data.message || "An error occurred");
 
       // Log the error for debugging
-      console.error("Advance Request send Error:", err.response?.data.message);
+      console.error("Concept Note send Error:", err.response?.data.message);
     },
   });
 
-  return { sendAdvanceRequest, isPending, isError };
+  return { sendConceptNote, isPending, isError };
 }
 
-export function useUpdateAdvanceRequest(requestId: string) {
+export function useUpdateConceptNote(conceptNoteId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const queryClient = useQueryClient();
 
   const {
-    mutate: updateAdvanceRequest,
+    mutate: updateConceptNote,
     isPending,
     isError,
   } = useMutation({
@@ -251,39 +249,40 @@ export function useUpdateAdvanceRequest(requestId: string) {
       data,
       files,
     }: {
-      data: Partial<AdvanceRequestType>;
+      data: Partial<ConceptNoteType>;
       files: File[];
-    }) => updateAdvanceRequestApi(requestId, data, files),
+    }) => updateConceptNoteApi(conceptNoteId, data, files),
 
     onSuccess: (data) => {
       if (data.status === 200) {
-        toast.success("Advance Request updated successfully");
+        toast.success("Concept note updated successfully");
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", conceptNoteId],
         });
       } else if (data.status !== 200) {
-        toast.error("Advance Request update not successful");
+        toast.error("Concept note update not successful");
         setErrorMessage(data.message);
         console.error("Login Error:", data.message); // Log error directly here
       }
     },
 
     onError: (err: LoginError) => {
-      toast.error("Error updating Advance Request");
+      toast.error("Error updating ConceptNote");
       const error = err.response?.data.message || "An error occurred";
 
-      console.error("AdvanceRequest Error:", error);
+      console.error("ConceptNote update Error:", error);
       setErrorMessage(error); // Set the error message to display
     },
   });
 
-  return { updateAdvanceRequest, isPending, isError, errorMessage };
+  return { updateConceptNote, isPending, isError, errorMessage };
 }
 
 export function useUpdateStatus(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const queryClient = useQueryClient();
 
   const {
@@ -300,7 +299,7 @@ export function useUpdateStatus(requestId: string) {
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", requestId],
         });
       } else if (data.status !== 200) {
         toast.error("Status update not successful");

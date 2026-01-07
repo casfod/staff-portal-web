@@ -87,7 +87,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
     <DetailContainer>
       {/* Concept Note Details Section */}
       <div
-        className={`flex flex-col gap-3 w-full   ${
+        className={`flex flex-col gap-3 w-full ${
           !requestId ? "text-sm" : "text-sm md:text-base"
         } mb-3 break-words`}
       >
@@ -104,17 +104,45 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
         ))}
       </div>
 
-      {/* Prepared By Section */}
-      <div className="w-fit mt-4 border-t border-gray-300 pt-4">
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}  `}>
+      {/* Approval Chain Section (NEW) */}
+      <div className="w-fit mt-4 border-t border-gray-300 pt-4 space-y-2">
+        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
           <span className="font-bold mr-1 uppercase">Prepared By:</span>
           {`${request?.preparedBy?.first_name} ${request?.preparedBy?.last_name}`}
         </p>
 
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}  `}>
+        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
           <span className="font-bold mr-1 uppercase">Role:</span>
           {request?.preparedBy?.role}
         </p>
+
+        {/* Reviewer Information (NEW) */}
+        {request.reviewedBy && (
+          <>
+            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
+              <span className="font-bold mr-1 uppercase">Reviewed By:</span>
+              {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+            </p>
+            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
+              <span className="font-bold mr-1 uppercase">Reviewer Role:</span>
+              {request?.reviewedBy?.role}
+            </p>
+          </>
+        )}
+
+        {/* Approver Information (NEW) */}
+        {request.approvedBy && (
+          <>
+            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
+              <span className="font-bold mr-1 uppercase">Approved By:</span>
+              {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
+            </p>
+            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
+              <span className="font-bold mr-1 uppercase">Approver Role:</span>
+              {request?.approvedBy?.role}
+            </p>
+          </>
+        )}
       </div>
 
       {/* File Attachments Section */}

@@ -1,6 +1,9 @@
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useAllConceptNotes } from "./Hooks/useAllConceptNotes";
+import {
+  useAllConceptNotes,
+  useDeleteConceptNote,
+} from "./Hooks/useConceptNotes";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useDebounce } from "use-debounce";
@@ -11,7 +14,7 @@ import { setPage, setSearchTerm } from "../../store/genericQuerySlice";
 import Spinner from "../../ui/Spinner";
 import { ConceptNoteType } from "../../interfaces";
 import { setConceptNote } from "../../store/conceptNoteSlice";
-import { useDeleteConceptNote } from "./Hooks/useDeleteConceptNote";
+
 import { GoXCircle } from "react-icons/go";
 import { BiSearch } from "react-icons/bi";
 import TextHeader from "../../ui/TextHeader";

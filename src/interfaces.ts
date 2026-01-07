@@ -554,10 +554,10 @@ export interface ConceptNoteType {
   means_of_verification: string;
   activity_budget: number;
   comments?: [{ user: Partial<UserType>; text: string }];
-
+  reviewedBy?: any;
   preparedBy?: any;
   approvedBy?: any;
-  status?: "pending" | "approved" | "rejected" | "draft";
+  status?: "pending" | "approved" | "rejected" | "reviewed" | "draft";
   createdAt?: string;
   updatedAt?: string;
 

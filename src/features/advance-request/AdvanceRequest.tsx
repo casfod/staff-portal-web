@@ -5,11 +5,9 @@ import { RootState } from "../../store/store";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
-import { useUpdateStatus } from "./Hooks/useUpdateStatus";
+
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
-
-import { useUpdateAdvanceRequest } from "./Hooks/useUpdateAdvanceRequest";
 
 import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
@@ -21,13 +19,17 @@ import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import { useAdvanceRequest } from "./Hooks/useAdvanceRequest";
+import {
+  useAdvanceRequest,
+  useCopy,
+  useUpdateAdvanceRequest,
+  useUpdateStatus,
+} from "./Hooks/useAdvanceRequest";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
-import { useCopy } from "./Hooks/useCopy";
 
 const Request = () => {
   const currentUser = localStorageUser();

@@ -2,13 +2,13 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useAllAdvanceRequests } from "./Hooks/useAllAdvanceRequests";
+
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 import { Pagination } from "../../ui/Pagination";
 import Spinner from "../../ui/Spinner";
-import { useDeleteAdvanceRequest } from "./Hooks/useDeleteAdvanceRequest";
+
 import { AdvanceRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import { setAdvanceRequest } from "../../store/advanceRequestSlice";
@@ -24,6 +24,10 @@ import AdvanceRequestTableRow from "./AdvanceRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
+import {
+  useAllAdvanceRequests,
+  useDeleteAdvanceRequest,
+} from "./Hooks/useAdvanceRequest";
 
 const AllAdvanceRequests = () => {
   const navigate = useNavigate();

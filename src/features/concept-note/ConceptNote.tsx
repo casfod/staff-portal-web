@@ -1,5 +1,4 @@
 import { List } from "lucide-react";
-
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,24 +6,28 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Button from "../../ui/Button";
-import { useUpdateStatus } from "./Hooks/useUpdateStatus";
 import StatusBadge from "../../ui/StatusBadge";
 import { ConceptNoteDetails } from "./ConceptNoteDetails";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import TextHeader from "../../ui/TextHeader";
 import { FileUpload } from "../../ui/FileUpload";
-import { useUpdateConceptNote } from "./Hooks/useUpdateConceptNote";
-import { ConceptNoteType } from "../../interfaces";
+// import { ConceptNoteType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import { useConceptNote } from "./Hooks/useConceptNote";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
-import { useCopy } from "./Hooks/useCopy";
+import {
+  useConceptNote,
+  useCopy,
+  useUpdateConceptNote,
+  useUpdateStatus,
+} from "./Hooks/useConceptNotes";
+import AdminApprovalSection from "../../ui/AdminApprovalSection"; // ADD THIS
+import { useAdmins } from "../user/Hooks/useAdmins"; // ADD THIS
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -43,30 +46,36 @@ const ConceptNote = () => {
     [remoteData, conceptNote]
   );
 
-  // Redirect logic - PLACE IT HERE
+  // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
-      navigate("/purchase-requests");
+      navigate("/concept-notes"); // Fixed navigation path
     }
   }, [requestData, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [formData] = useState<Partial<ConceptNoteType>>({});
+  const [formData, setFormData] = useState({ approvedBy: null }); // For admin approval
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
-
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     requestId!
   );
-
   const { updateConceptNote, isPending: isUpdating } = useUpdateConceptNote(
     conceptNote?.id!
   );
   const { copyto, isPending: isCopying } = useCopy(requestId!);
+
+  // Fetch admins data for approval section
+  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,12 +87,10 @@ const ConceptNote = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
@@ -98,22 +105,42 @@ const ConceptNote = () => {
       text: "Concept Note",
     },
   });
+
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);
   };
 
-  const isCreator = requestData?.preparedBy!.id === currentUser.id;
+  // User references and permission logic (UPDATED for two-step workflow)
+  const currentUserId = currentUser.id;
+  const userRole = currentUser.role;
   const requestStatus = requestData?.status;
+
+  // Permission flags with explicit null checks
+  const isCreator = requestData?.preparedBy?.id === currentUserId;
+  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
+  const isApprover = requestData?.approvedBy?.id === currentUserId;
+  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
+
+  // Conditional rendering flags (UPDATED for two-step workflow)
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
 
-  const showStatusUpdate =
-    requestData?.status === "pending" &&
-    currentUser.id === requestData?.approvedBy?.id;
+  // Permission to update status (UPDATED for two-step workflow)
+  const canUpdateStatus =
+    !isCreator &&
+    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
+      (isAdmin && requestStatus === "reviewed" && isApprover));
 
-  // const tableHeadData = ["Prepared By", "Status", "Account Code", "Date"];
+  // Show admin approval section (for reviewed concept notes)
+  const showAdminApproval =
+    !requestData?.approvedBy &&
+    requestStatus === "reviewed" &&
+    (isCreator ||
+      (isReviewer && !requestData?.reviewedBy) ||
+      (isApprover && !requestData?.approvedBy));
+
   const tableHeadData = ["Prepared By", "Status", "Date", "Actions"];
 
   const tableRowData = [
@@ -125,7 +152,6 @@ const ConceptNote = () => {
       id: "status",
       content: <StatusBadge status={requestData?.status!} key="status-badge" />,
     },
-
     { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
       id: "action",
@@ -149,7 +175,6 @@ const ConceptNote = () => {
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Concept Note</TextHeader>
-
           <Button onClick={() => navigate("/concept-notes")}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
@@ -168,12 +193,12 @@ const ConceptNote = () => {
           emptyComponent={<div>No data available</div>}
         >
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 ">
+            <thead className="bg-gray-50">
               <tr>
                 {tableHeadData.map((title, index) => (
                   <th
                     key={index}
-                    className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                    className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
                   >
                     {title}
                   </th>
@@ -189,7 +214,7 @@ const ConceptNote = () => {
                 {tableRowData.map((data) => (
                   <td
                     key={data.id}
-                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
+                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
                   >
                     {data.content}
                   </td>
@@ -220,22 +245,37 @@ const ConceptNote = () => {
                       </div>
                     )}
 
-                    {requestData?.status !== "draft" && (
-                      <div className="  mt-4 tracking-wide">
-                        <RequestCommentsAndActions request={requestData} />
+                    {/* Comments and Actions Section */}
+                    {requestData?.reviewedBy &&
+                      requestData?.status !== "draft" && (
+                        <div className="mt-4 tracking-wide">
+                          <RequestCommentsAndActions request={requestData} />
 
-                        {showStatusUpdate && (
-                          <StatusUpdateForm
-                            requestStatus={requestData?.status!}
-                            status={status}
-                            setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
-                            isUpdatingStatus={isUpdatingStatus}
-                            handleStatusChange={onStatusChangeHandler}
-                            directApproval={true}
-                          />
-                        )}
+                          {canUpdateStatus && (
+                            <StatusUpdateForm
+                              requestStatus={requestData?.status!}
+                              status={status}
+                              setStatus={setStatus}
+                              comment={comment}
+                              setComment={setComment}
+                              isUpdatingStatus={isUpdatingStatus}
+                              handleStatusChange={onStatusChangeHandler}
+                            />
+                          )}
+                        </div>
+                      )}
+
+                    {/* Admin Approval Section (for reviewed concept notes) */}
+                    {showAdminApproval && (
+                      <div className="relative z-10 pb-64">
+                        <AdminApprovalSection
+                          formData={formData}
+                          handleFormChange={handleFormChange}
+                          admins={admins}
+                          isLoadingAmins={isLoadingAmins}
+                          isUpdating={isUpdating}
+                          handleSend={handleSend}
+                        />
                       </div>
                     )}
                   </div>
