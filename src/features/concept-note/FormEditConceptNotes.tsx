@@ -4,8 +4,8 @@ import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
 import { useProjects } from "../project/Hooks/useProjects";
-import { useAdmins } from "../user/Hooks/useAdmins";
-import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS
+// import { useAdmins } from "../user/Hooks/useAdmins";
+// import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
@@ -18,12 +18,16 @@ import {
   useSaveConceptNote,
   useSendConceptNote,
 } from "./Hooks/useConceptNotes";
+import { useUsers } from "../user/Hooks/useUsers";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 interface FormEditConceptNotesProps {
   conceptNote: ConceptNoteType;
 }
 
 const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
+  const currentUser = localStorageUser();
+
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [formData, setFormData] = useState<Partial<ConceptNoteType>>({
@@ -56,12 +60,25 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
   );
 
   // Fetch reviewers data
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
-  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  // const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
+  // const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
   // Fetch admins data
-  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
-  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+  // const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+  // const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
+  const {
+    data,
+    isLoading: isLoadingUsers,
+    // isError,
+  } = useUsers({ limit: 1000 });
+  const users = useMemo(
+    () =>
+      data?.data?.users.filter((user) => user.id !== currentUser.id) ?? [
+        currentUser,
+      ],
+    [data]
+  );
 
   const handleFormChange = (field: keyof ConceptNoteType, value: string) => {
     if (field === "expense_Charged_To") {
@@ -396,7 +413,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
         // Show reviewer selection for drafts or rejected notes
         <Row>
           <FormRow label="Reviewed By *">
-            {isLoadingReviewers ? (
+            {isLoadingUsers ? (
               <SpinnerMini />
             ) : (
               <Select
@@ -406,8 +423,8 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
                 value={formData.reviewedBy || ""}
                 onChange={(value) => handleFormChange("reviewedBy", value)}
                 options={
-                  reviewers
-                    ? reviewers
+                  users
+                    ? users
                         .filter((reviewer) => reviewer.id)
                         .map((reviewer) => ({
                           id: reviewer.id as string,
@@ -423,7 +440,8 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
       ) : conceptNote.status === "reviewed" ? (
         // Show approver selection for reviewed notes
         <Row>
-          <FormRow label="Approved By *">
+          <></>
+          {/* <FormRow label="Approved By *">
             {isLoadingAmins ? (
               <SpinnerMini />
             ) : (
@@ -446,7 +464,7 @@ const FormEditConceptNotes = ({ conceptNote }: FormEditConceptNotesProps) => {
                 required
               />
             )}
-          </FormRow>
+          </FormRow> */}
         </Row>
       ) : (
         // Show read-only info for other statuses

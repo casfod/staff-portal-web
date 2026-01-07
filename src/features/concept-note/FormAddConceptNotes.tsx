@@ -5,7 +5,7 @@ import Input from "../../ui/Input";
 import Row from "../../ui/Row";
 import { useProjects } from "../project/Hooks/useProjects";
 // import { useAdmins } from "../user/Hooks/useAdmins";
-import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS IMPORT
+// import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS IMPORT
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
@@ -16,9 +16,12 @@ import {
   useSaveConceptNote,
   useSendConceptNote,
 } from "./Hooks/useConceptNotes";
-// import { useUsers } from "../user/Hooks/useUsers";
+import { useUsers } from "../user/Hooks/useUsers";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 const FormAddConceptNotes = () => {
+  const currentUser = localStorageUser();
+
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [formData, setFormData] = useState<Partial<ConceptNoteType>>({
@@ -48,15 +51,21 @@ const FormAddConceptNotes = () => {
   );
 
   // Fetch reviewers data
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
-  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  // const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
+  // const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
-  // const {
-  //   data,
-  //   isLoading: isLoadingUsers,
-  //   isError,
-  // } = useUsers({ limit: 1000 });
-  // const users = useMemo(() => data?.data?.users ?? [], [data]);
+  const {
+    data,
+    isLoading: isLoadingUsers,
+    // isError,
+  } = useUsers({ limit: 1000 });
+  const users = useMemo(
+    () =>
+      data?.data?.users.filter((user) => user.id !== currentUser.id) ?? [
+        currentUser,
+      ],
+    [data]
+  );
 
   // Fetch admins data
   // const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
@@ -380,18 +389,19 @@ const FormAddConceptNotes = () => {
       {/* REVIEWER SELECTION (for submission) */}
       <Row>
         <FormRow label="Reviewed By *">
-          {isLoadingReviewers ? (
+          {isLoadingUsers ? (
             <SpinnerMini />
           ) : (
             <Select
+              filterable={true}
               clearable={true}
               id="reviewedBy"
               customLabel="Select Reviewer"
               value={formData.reviewedBy || ""}
               onChange={(value) => handleFormChange("reviewedBy", value)}
               options={
-                reviewers
-                  ? reviewers
+                users
+                  ? users
                       .filter((reviewer) => reviewer.id)
                       .map((reviewer) => ({
                         id: reviewer.id as string,
@@ -406,7 +416,7 @@ const FormAddConceptNotes = () => {
       </Row>
       {/* <Row>
         <FormRow label="Reviewed By *">
-          {isLoadingReviewers ? (
+          {isLoadingusers ? (
             <SpinnerMini />
           ) : (
             <Select
