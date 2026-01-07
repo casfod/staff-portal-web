@@ -4,7 +4,7 @@ import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
 import { useProjects } from "../project/Hooks/useProjects";
-import { useAdmins } from "../user/Hooks/useAdmins";
+// import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers"; // ADD THIS IMPORT
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
@@ -16,6 +16,7 @@ import {
   useSaveConceptNote,
   useSendConceptNote,
 } from "./Hooks/useConceptNotes";
+// import { useUsers } from "../user/Hooks/useUsers";
 
 const FormAddConceptNotes = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -50,9 +51,16 @@ const FormAddConceptNotes = () => {
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers(); // ADD THIS
   const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
 
+  // const {
+  //   data,
+  //   isLoading: isLoadingUsers,
+  //   isError,
+  // } = useUsers({ limit: 1000 });
+  // const users = useMemo(() => data?.data?.users ?? [], [data]);
+
   // Fetch admins data
-  const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
-  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+  // const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
+  // const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
 
   const handleNestedChange = (
     parentField: keyof ConceptNoteType,
@@ -396,6 +404,32 @@ const FormAddConceptNotes = () => {
           )}
         </FormRow>
       </Row>
+      {/* <Row>
+        <FormRow label="Reviewed By *">
+          {isLoadingReviewers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              clearable={true}
+              id="reviewedBy"
+              customLabel="Select Reviewer"
+              value={formData.reviewedBy || ""}
+              onChange={(value) => handleFormChange("reviewedBy", value)}
+              options={
+                reviewers
+                  ? reviewers
+                      .filter((reviewer) => reviewer.id)
+                      .map((reviewer) => ({
+                        id: reviewer.id as string,
+                        name: `${reviewer.first_name} ${reviewer.last_name}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
+        </FormRow>
+      </Row> */}
 
       {/* APPROVER SELECTION (optional for submission) */}
       {/* <Row>

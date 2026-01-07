@@ -40,12 +40,12 @@ export function AllUsers() {
     };
   }, [dispatch]);
 
-  const { data, isLoading, isError } = useUsers(
-    debouncedSearchTerm,
+  const { data, isLoading, isError } = useUsers({
+    search: debouncedSearchTerm,
     sort,
     page,
-    limit
-  );
+    limit,
+  });
 
   const { deleteUser } = useDeleteUser();
   // Add null checks for `data` and `data.data`

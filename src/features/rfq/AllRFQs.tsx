@@ -18,7 +18,6 @@ import { localStorageUser } from "../../utils/localStorageUser";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import RFQTableRow from "./RFQTableRow";
-// import SpinnerMini from "../../ui/SpinnerMini";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 export function AllRFQs() {
