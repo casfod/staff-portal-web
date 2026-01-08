@@ -130,7 +130,7 @@ const ConceptNote = () => {
   // Permission to update status (UPDATED for two-step workflow)
   const canUpdateStatus =
     !isCreator &&
-    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
+    ((requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
   // Show admin approval section (for reviewed concept notes)
