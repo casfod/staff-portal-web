@@ -10,29 +10,28 @@ import {
   usePurChaseRequestType,
   UsePurchaseStatsType,
 } from "../../../interfaces";
+import { AxiosError, AxiosResponse } from "axios";
+import { useState } from "react";
+import { copyTo as copyToApi } from "../../../services/apiPurchaseRequest";
 import {
   getAllPurchaseRequest,
   getPurChaseRequest,
   getPurchaseRequestStats,
+  sendPurchaseRequests as sendPurchaseRequestsApi,
+  savePurchaseRequests as savePurchaseRequestsApi,
+  updatePurchaseRequest as updatePurchaseRequestApi,
+  updateStatus as updateStatusApi,
+  addComment as addCommentApi,
+  updateComment as updateCommentApi,
+  deleteComment as deleteCommentApi,
+  deletePurchaseRequest as deletePurchaseRequestAPI,
 } from "../../../services/apiPurchaseRequest";
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
-import { copyTo as copyToApi } from "../../../services/apiPurchaseRequest";
-import { deletePurchaseRequest as deletePurchaseRequestAPI } from "../../../services/apiPurchaseRequest";
-import { savePurchaseRequests as savePurchaseRequestsApi } from "../../../services/apiPurchaseRequest.ts";
-import { sendPurchaseRequests as sendPurchaseRequestsApi } from "../../../services/apiPurchaseRequest.ts";
-import { updatePurchaseRequest as updatePurchaseRequestApi } from "../../../services/apiPurchaseRequest.ts";
-import { updateStatus as updateStatusApi } from "../../../services/apiPurchaseRequest.ts";
 
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 interface ErrorResponse {
   message: string;
-}
-
-interface HookError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
 }
 
 interface HookError extends AxiosError {
@@ -90,49 +89,6 @@ export function useCopy(requestId: string) {
   });
 
   return { copyto, isPending, isError, errorMessage };
-}
-
-export function useDeletePurchaseRequest(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
-  const queryClient = useQueryClient();
-
-  const {
-    mutate: deletePurchaseRequest,
-    isPending: isDeleting,
-    isError: isErrorDeleting,
-    error: errorDeleting,
-  } = useMutation<void, HookError, string>({
-    mutationFn: async (userID: string) => {
-      await deletePurchaseRequestAPI(userID);
-    },
-    onSuccess: () => {
-      toast.success("Purchase Request deleted");
-
-      queryClient.invalidateQueries({
-        queryKey: ["all-purchase-requests", search, sort, page, limit],
-      });
-    },
-
-    onError: (error) => {
-      toast.error("Error deleting Purchase Request");
-
-      const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Purchase Request.";
-      console.error("Delete Purchase Request Error:", errorMessage);
-    },
-  });
-
-  return {
-    deletePurchaseRequest,
-    isDeleting,
-    isErrorDeleting,
-    errorDeleting,
-  };
 }
 
 export function usePurchaseRequest(id: string) {
@@ -320,4 +276,159 @@ export function useUpdateStatus(requestId: string) {
   });
 
   return { updateStatus, isPending, isError, errorMessage };
+}
+
+export function useAddComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: addComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
+
+    onSuccess: (data) => {
+      if (data.status === 201) {
+        toast.success("Comment added successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 201) {
+        toast.error("Failed to add comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error adding comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Add Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { addComment, isPending, isError, errorMessage };
+}
+
+export function useUpdateComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
+      updateCommentApi(requestId, commentId, { text }),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment updated successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to update comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error updating comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Update Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { updateComment, isPending, isError, errorMessage };
+}
+
+export function useDeleteComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deleteComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment deleted successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to delete comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error deleting comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Delete Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { deleteComment, isPending, isError, errorMessage };
+}
+
+export function useDeletePurchaseRequest(
+  search?: string,
+  sort?: string,
+  page?: number,
+  limit?: number
+) {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deletePurchaseRequest,
+    isPending: isDeleting,
+    isError: isErrorDeleting,
+    error: errorDeleting,
+  } = useMutation<void, HookError, string>({
+    mutationFn: async (userID: string) => {
+      await deletePurchaseRequestAPI(userID);
+    },
+    onSuccess: () => {
+      toast.success("Purchase Request deleted");
+
+      queryClient.invalidateQueries({
+        queryKey: ["all-purchase-requests", search, sort, page, limit],
+      });
+    },
+
+    onError: (error) => {
+      toast.error("Error deleting Purchase Request");
+
+      const errorMessage =
+        error.response?.data.message ||
+        "An error occurred while deleting the Purchase Request.";
+      console.error("Delete Purchase Request Error:", errorMessage);
+    },
+  });
+
+  return {
+    deletePurchaseRequest,
+    isDeleting,
+    isErrorDeleting,
+    errorDeleting,
+  };
 }

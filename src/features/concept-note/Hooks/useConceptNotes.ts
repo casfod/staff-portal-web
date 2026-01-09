@@ -18,6 +18,9 @@ import {
   saveAndSendConceptNote as SendConceptNoteApi,
   updateConceptNote as updateConceptNoteApi,
   updateStatus as updateStatusApi,
+  addComment as addCommentApi,
+  updateComment as updateCommentApi,
+  deleteComment as deleteCommentApi,
   deleteConceptNote as deleteConceptNoteAPI,
 } from "../../../services/apiConceptNotes";
 
@@ -108,47 +111,6 @@ export function useCopy(requestId: string) {
   });
 
   return { copyto, isPending, isError, errorMessage };
-}
-
-export function useDeleteConceptNote(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
-  const queryClient = useQueryClient();
-
-  const {
-    mutate: deleteConceptNote,
-    isPending: isDeleting,
-    isError: isErrorDeleting,
-    error: errorDeleting,
-  } = useMutation<void, HookError, string>({
-    mutationFn: async (userID: string) => {
-      await deleteConceptNoteAPI(userID);
-    },
-    onSuccess: () => {
-      toast.success("Concept Note deleted");
-
-      queryClient.invalidateQueries({
-        queryKey: ["all-concept-notes", search, sort, page, limit],
-      });
-    },
-    onError: (error) => {
-      toast.error("Error deleting Concept Note");
-      const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Concept Note.";
-      console.error("Delete Concept Note Error:", errorMessage);
-    },
-  });
-
-  return {
-    deleteConceptNote,
-    isDeleting,
-    isErrorDeleting,
-    errorDeleting,
-  };
 }
 
 export function useSaveConceptNote() {
@@ -315,4 +277,157 @@ export function useUpdateStatus(requestId: string) {
   });
 
   return { updateStatus, isPending, isError, errorMessage };
+}
+
+export function useAddComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: addComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
+
+    onSuccess: (data) => {
+      if (data.status === 201) {
+        toast.success("Comment added successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 201) {
+        toast.error("Failed to add comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error adding comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Add Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { addComment, isPending, isError, errorMessage };
+}
+
+export function useUpdateComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
+      updateCommentApi(requestId, commentId, { text }),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment updated successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to update comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error updating comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Update Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { updateComment, isPending, isError, errorMessage };
+}
+
+export function useDeleteComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deleteComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment deleted successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to delete comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error deleting comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Delete Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { deleteComment, isPending, isError, errorMessage };
+}
+
+export function useDeleteConceptNote(
+  search?: string,
+  sort?: string,
+  page?: number,
+  limit?: number
+) {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deleteConceptNote,
+    isPending: isDeleting,
+    isError: isErrorDeleting,
+    error: errorDeleting,
+  } = useMutation<void, HookError, string>({
+    mutationFn: async (userID: string) => {
+      await deleteConceptNoteAPI(userID);
+    },
+    onSuccess: () => {
+      toast.success("Concept Note deleted");
+
+      queryClient.invalidateQueries({
+        queryKey: ["all-concept-notes", search, sort, page, limit],
+      });
+    },
+    onError: (error) => {
+      toast.error("Error deleting Concept Note");
+      const errorMessage =
+        error.response?.data.message ||
+        "An error occurred while deleting the Concept Note.";
+      console.error("Delete Concept Note Error:", errorMessage);
+    },
+  });
+
+  return {
+    deleteConceptNote,
+    isDeleting,
+    isErrorDeleting,
+    errorDeleting,
+  };
 }
