@@ -23,11 +23,16 @@ import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
 import {
+  useAddComment,
   useCopy,
+  useDeleteComment,
   useExpenseClaim,
+  useUpdateComment,
   useUpdateExpenseClaim,
   useUpdateStatus,
 } from "./Hooks/useExpenseClaims";
+import CommentSection from "../../ui/CommentSection";
+import { Comment as AppComment } from "../../interfaces";
 
 const ExpenseClaim = () => {
   const currentUser = localStorageUser();
@@ -47,7 +52,7 @@ const ExpenseClaim = () => {
     return expenseClaim;
   }, [remote, expenseClaim]);
 
-  // Redirect logic - PLACE IT HERE
+  // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
       navigate("/expense-claims");
@@ -69,6 +74,16 @@ const ExpenseClaim = () => {
   const { updateExpenseClaim, isPending: isUpdating } = useUpdateExpenseClaim(
     requestId!
   );
+
+  // Comment hooks (ADDED)
+  const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    requestId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    requestId!
+  );
+
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const { copyto, isPending: isCopying } = useCopy(requestId!);
@@ -82,12 +97,10 @@ const ExpenseClaim = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
@@ -96,6 +109,19 @@ const ExpenseClaim = () => {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     updateExpenseClaim({ data: formData, files: selectedFiles });
+  };
+
+  // Comment handlers (ADDED)
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
   };
 
   //PDF logic
@@ -122,6 +148,11 @@ const ExpenseClaim = () => {
   const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  // Check if user is in copiedTo array (ADDED)
+  const isCopiedTo = requestData?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
@@ -132,6 +163,15 @@ const ExpenseClaim = () => {
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
+  // Users who can add comments (ADDED)
+  const canAddComments =
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
+    (userRole === "REVIEWER" && requestStatus === "pending");
+
   const showAdminApproval =
     !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
@@ -139,6 +179,8 @@ const ExpenseClaim = () => {
       (isReviewer && !requestData?.reviewedBy) ||
       (isApprover && !requestData?.approvedBy));
 
+  // Cast comments to Comment[] type for TypeScript (ADDED)
+  const comments = (requestData?.comments || []) as AppComment[];
   // Table data
   const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
   const tableRowData = [
@@ -190,7 +232,6 @@ const ExpenseClaim = () => {
           loadingComponent={<Spinner />}
           emptyComponent={<div>No data available</div>}
         >
-          {" "}
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -257,6 +298,20 @@ const ExpenseClaim = () => {
                           />
                         )}
                       </div>
+                    )}
+
+                    {/* Comment Section for all authorized users (ADDED) */}
+                    {requestData?.status !== "draft" && canAddComments && (
+                      <CommentSection
+                        comments={comments}
+                        canComment={canAddComments}
+                        onAddComment={handleAddComment}
+                        onUpdateComment={handleUpdateComment}
+                        onDeleteComment={handleDeleteComment}
+                        isLoading={isAddingComment}
+                        isUpdating={isUpdatingComment}
+                        isDeleting={isDeletingComment}
+                      />
                     )}
 
                     {showAdminApproval && (

@@ -24,11 +24,16 @@ import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
 import {
+  useAddComment,
   useCopy,
+  useDeleteComment,
   useTravelRequest,
+  useUpdateComment,
   useUpdateStatus,
   useUpdateTravelRequest,
 } from "./Hooks/useTravelRequests";
+import CommentSection from "../../ui/CommentSection";
+import { Comment as AppComment } from "../../interfaces";
 
 const TravelRequest = () => {
   const currentUser = localStorageUser();
@@ -47,7 +52,7 @@ const TravelRequest = () => {
     [remoteData, travelRequest]
   );
 
-  // Redirect logic - PLACE IT HERE
+  // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
       navigate("/travel-requests");
@@ -69,6 +74,16 @@ const TravelRequest = () => {
   const { updateTravelRequest, isPending: isUpdating } = useUpdateTravelRequest(
     requestId!
   );
+
+  // Comment hooks (ADDED)
+  const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    requestId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    requestId!
+  );
+
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const { copyto, isPending: isCopying } = useCopy(requestId!);
@@ -82,12 +97,10 @@ const TravelRequest = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
@@ -96,6 +109,19 @@ const TravelRequest = () => {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     updateTravelRequest({ data: formData, files: selectedFiles });
+  };
+
+  // Comment handlers (ADDED)
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
   };
 
   //PDF logic
@@ -122,6 +148,11 @@ const TravelRequest = () => {
   const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  // Check if user is in copiedTo array (ADDED)
+  const isCopiedTo = requestData?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
@@ -132,12 +163,24 @@ const TravelRequest = () => {
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
+  // Users who can add comments (ADDED)
+  const canAddComments =
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
+    (userRole === "REVIEWER" && requestStatus === "pending");
+
   const showAdminApproval =
     !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
     (isCreator ||
       (isReviewer && !requestData?.reviewedBy) ||
       (isApprover && !requestData?.approvedBy));
+
+  // Cast comments to Comment[] type for TypeScript (ADDED)
+  const comments = (requestData?.comments || []) as AppComment[];
 
   // Table data
   const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
@@ -256,6 +299,20 @@ const TravelRequest = () => {
                           />
                         )}
                       </div>
+                    )}
+
+                    {/* Comment Section for all authorized users (ADDED) */}
+                    {requestData?.status !== "draft" && canAddComments && (
+                      <CommentSection
+                        comments={comments}
+                        canComment={canAddComments}
+                        onAddComment={handleAddComment}
+                        onUpdateComment={handleUpdateComment}
+                        onDeleteComment={handleDeleteComment}
+                        isLoading={isAddingComment}
+                        isUpdating={isUpdatingComment}
+                        isDeleting={isDeletingComment}
+                      />
                     )}
 
                     {showAdminApproval && (

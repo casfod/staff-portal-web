@@ -24,11 +24,16 @@ import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import {
+  useAddComment,
   useCopy,
+  useDeleteComment,
   usePurchaseRequest,
+  useUpdateComment,
   useUpdatePurChaseRequest,
   useUpdateStatus,
 } from "./Hooks/PRHook";
+import CommentSection from "../../ui/CommentSection";
+import { Comment as AppComment } from "../../interfaces";
 
 const PurchaseRequest = () => {
   const isUnderMaintenance = false; // Set this based on your maintenance status
@@ -53,7 +58,7 @@ const PurchaseRequest = () => {
     [remoteData, purchaseRequest]
   );
 
-  // Redirect logic - PLACE IT HERE
+  // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
       navigate("/purchase-requests");
@@ -75,6 +80,15 @@ const PurchaseRequest = () => {
   const { updatePurchaseRequest, isPending: isUpdating } =
     useUpdatePurChaseRequest(requestId!);
 
+  // Comment hooks (ADDED)
+  const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    requestId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    requestId!
+  );
+
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
@@ -89,12 +103,10 @@ const PurchaseRequest = () => {
       try {
         await updateStatus(data, {
           onError: (error) => {
-            // This will be caught by the handleStatusChange's try/catch
             throw error;
           },
         });
       } catch (error) {
-        // Re-throw to ensure the promise chain is maintained
         throw error;
       }
     });
@@ -103,6 +115,19 @@ const PurchaseRequest = () => {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     updatePurchaseRequest({ data: formData, files: selectedFiles });
+  };
+
+  // Comment handlers (ADDED)
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
   };
 
   //PDF logic
@@ -133,6 +158,11 @@ const PurchaseRequest = () => {
   const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  // Check if user is in copiedTo array (ADDED)
+  const isCopiedTo = requestData?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
@@ -143,6 +173,15 @@ const PurchaseRequest = () => {
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
+  // Users who can add comments (ADDED)
+  const canAddComments =
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
+    (userRole === "REVIEWER" && requestStatus === "pending");
+
   const showAdminApproval =
     !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
@@ -150,8 +189,10 @@ const PurchaseRequest = () => {
       (isReviewer && !requestData?.reviewedBy) ||
       (isApprover && !requestData?.approvedBy));
 
+  // Cast comments to Comment[] type for TypeScript (ADDED)
+  const comments = (requestData?.comments || []) as AppComment[];
+
   // Table data
-  // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
   const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
   const tableRowData = [
     { id: "requestedBy", content: requestData?.requestedBy },
@@ -278,6 +319,20 @@ const PurchaseRequest = () => {
                               )}
                             </div>
                           )}
+
+                        {/* Comment Section for all authorized users (ADDED) */}
+                        {requestData?.status !== "draft" && canAddComments && (
+                          <CommentSection
+                            comments={comments}
+                            canComment={canAddComments}
+                            onAddComment={handleAddComment}
+                            onUpdateComment={handleUpdateComment}
+                            onDeleteComment={handleDeleteComment}
+                            isLoading={isAddingComment}
+                            isUpdating={isUpdatingComment}
+                            isDeleting={isDeletingComment}
+                          />
+                        )}
 
                         {showAdminApproval && (
                           <div className="relative z-10 pb-64">

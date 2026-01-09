@@ -3,12 +3,12 @@ import { localStorageUser } from "../utils/localStorageUser";
 import { formatToDDMMYYYY } from "../utils/formatToDDMMYYYY";
 import Button from "./Button";
 import SpinnerMini from "./SpinnerMini";
-import { Comment } from "../interfaces";
+import { Comment as AppComment } from "../interfaces"; // Use alias to avoid conflict
 import Swal from "sweetalert2";
 
 interface CommentSectionProps {
   documentId?: string;
-  comments: Comment[] | any[];
+  comments: AppComment[] | any[];
   canComment: boolean;
   onAddComment: (text: string) => Promise<void>;
   onUpdateComment: (commentId: string, text: string) => Promise<void>;
@@ -35,91 +35,36 @@ const CommentSection = ({
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddComment = async () => {
-    if (newComment.trim() === "") {
-      Swal.fire({
-        title: "Comment Required",
-        text: "Please enter a comment before submitting.",
-        icon: "warning",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
+    if (newComment.trim() === "") return;
 
     setIsAdding(true);
     try {
       await onAddComment(newComment);
       setNewComment("");
-
-      // Show success message
-      Swal.fire({
-        title: "Success!",
-        text: "Comment added successfully.",
-        icon: "success",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-        timer: 2000,
-        timerProgressBar: true,
-      });
     } catch (error) {
       console.error("Failed to add comment:", error);
-
-      // Show error message
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to add comment. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-      });
     } finally {
       setIsAdding(false);
     }
   };
 
   const handleStartEdit = (comment: any) => {
-    setEditingCommentId(comment._id || comment.id);
+    const commentId = getCommentId(comment);
+    if (!commentId) return; // Don't start edit if no ID
+
+    setEditingCommentId(commentId);
     setEditingText(comment.text);
   };
 
   const handleUpdateComment = async () => {
-    if (!editingCommentId || editingText.trim() === "") {
-      Swal.fire({
-        title: "Comment Required",
-        text: "Please enter a comment before saving.",
-        icon: "warning",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
+    if (!editingCommentId || editingText.trim() === "") return;
 
     try {
       await onUpdateComment(editingCommentId, editingText);
       setEditingCommentId(null);
       setEditingText("");
-
-      // Show success message
-      Swal.fire({
-        title: "Success!",
-        text: "Comment updated successfully.",
-        icon: "success",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-        timer: 2000,
-        timerProgressBar: true,
-      });
     } catch (error) {
       console.error("Failed to update comment:", error);
-
-      // Show error message
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to update comment. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "OK",
-      });
     }
   };
 
@@ -144,16 +89,16 @@ const CommentSection = ({
       try {
         await onDeleteComment(commentId);
 
-        // Show success message
-        Swal.fire({
-          title: "Deleted!",
-          text: "Comment has been deleted.",
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: "OK",
-          timer: 2000,
-          timerProgressBar: true,
-        });
+        // // Show success message
+        // Swal.fire({
+        //   title: "Deleted!",
+        //   text: "Comment has been deleted.",
+        //   icon: "success",
+        //   confirmButtonColor: "#3085d6",
+        //   confirmButtonText: "OK",
+        //   timer: 2000,
+        //   timerProgressBar: true,
+        // });
       } catch (error) {
         console.error("Failed to delete comment:", error);
 
@@ -185,20 +130,27 @@ const CommentSection = ({
   });
 
   // Helper function to get comment ID
-  const getCommentId = (comment: any) => {
-    return comment._id || comment.id;
+  const getCommentId = (comment: any): string | null => {
+    return comment._id || comment.id || null;
   };
 
-  // Helper function to check if comment is editable (user is owner)
-  const isCommentOwner = (comment: any) => {
+  // Helper function to check if comment is editable (user is owner AND has ID)
+  const canEditComment = (comment: any) => {
     const commentUserId = comment.user?.id || comment.user?._id;
-    return currentUser.id === commentUserId;
+    const isOwner = currentUser.id === commentUserId;
+    const hasId = getCommentId(comment) !== null;
+    return isOwner && hasId;
+  };
+
+  // Helper function to check if comment can be deleted
+  const canDeleteComment = (comment: any) => {
+    return canEditComment(comment); // Same logic as edit - user must own and have ID
   };
 
   // Helper function to get user display name
   const getUserDisplayName = (comment: any) => {
     if (comment.user?.first_name && comment.user?.last_name) {
-      return `${comment.user.first_name} ${comment.user.last_name}`;
+      return `${comment.user.role}: ${comment.user.first_name} ${comment.user.last_name}`;
     }
     return "Unknown User";
   };
@@ -221,105 +173,94 @@ const CommentSection = ({
       {canComment && (
         <div className="mb-6">
           <textarea
-            className="w-full p-3 border rounded-lg mb-2 min-h-[100px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            className="w-full p-3 border rounded-lg mb-2 min-h-[100px] text-sm"
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             disabled={isAdding || isLoading}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.ctrlKey) {
-                handleAddComment();
-              }
-            }}
           />
-          <div className="flex justify-between items-center">
-            <p className="text-xs text-gray-500">Press Ctrl+Enter to submit</p>
-            <div className="flex justify-end">
-              <Button
-                onClick={handleAddComment}
-                disabled={isAdding || isLoading || newComment.trim() === ""}
-                size="small"
-                className="bg-blue-600 hover:bg-blue-700 transition-colors"
-              >
-                {isAdding ? <SpinnerMini /> : "Add Comment"}
-              </Button>
-            </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleAddComment}
+              disabled={isAdding || isLoading || newComment.trim() === ""}
+              size="small"
+            >
+              {isAdding ? <SpinnerMini /> : "Add Comment"}
+            </Button>
           </div>
         </div>
       )}
 
       {/* Comments list */}
       <div className="space-y-4">
-        {visibleComments.map((comment) => {
+        {visibleComments.map((comment, index) => {
           const commentId = getCommentId(comment);
-          const isOwner = isCommentOwner(comment);
+          const canEdit = canEditComment(comment);
+          const canDelete = canDeleteComment(comment);
           const displayName = getUserDisplayName(comment);
           const createdDate = getCreationDate(comment);
           const edited = isEdited(comment);
 
+          // Use ID if available, otherwise use index as fallback for key
+          const key = commentId || `comment-${index}`;
+
           return (
-            <div
-              key={commentId}
-              className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
-            >
+            <div key={key} className="border rounded-lg p-4 bg-gray-50">
               <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-blue-600 font-semibold text-sm">
-                      {displayName.charAt(0).toUpperCase()}
+                <div>
+                  <span className="font-semibold text-sm">{displayName}</span>
+                  <span className="text-xs text-gray-500 ml-2">
+                    {formatToDDMMYYYY(createdDate)}
+                  </span>
+                  {edited && (
+                    <span className="text-xs text-gray-500 ml-2">(edited)</span>
+                  )}
+                  {!commentId && (
+                    <span className="text-xs text-gray-500 ml-2 italic">
+                      (read-only)
                     </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-sm">{displayName}</span>
-                    <div className="flex items-center">
-                      <span className="text-xs text-gray-500">
-                        {formatToDDMMYYYY(createdDate)}
-                      </span>
-                      {edited && (
-                        <span className="text-xs text-gray-500 ml-2">
-                          (edited)
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                {isOwner && (
+                {/* Only show edit/delete if user owns the comment AND comment has ID */}
+                {(canEdit || canDelete) && (
                   <div className="flex space-x-2">
                     {editingCommentId === commentId ? (
                       <>
                         <button
                           onClick={handleUpdateComment}
                           disabled={isUpdating}
-                          className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+                          className="text-xs text-blue-600 hover:text-blue-800"
                         >
                           {isUpdating ? <SpinnerMini /> : "Save"}
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="text-xs px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                          className="text-xs text-gray-600 hover:text-gray-800"
                         >
                           Cancel
                         </button>
                       </>
                     ) : (
                       <>
-                        <button
-                          onClick={() => handleStartEdit(comment)}
-                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
-                          disabled={isDeleting}
-                          title="Edit comment"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteComment(commentId)}
-                          disabled={isDeleting}
-                          className="text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
-                          title="Delete comment"
-                        >
-                          {isDeleting ? <SpinnerMini /> : "Delete"}
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => handleStartEdit(comment)}
+                            className="text-xs text-blue-600 hover:text-blue-800"
+                            disabled={isDeleting}
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {canDelete && commentId && (
+                          <button
+                            onClick={() => handleDeleteComment(commentId)}
+                            disabled={isDeleting}
+                            className="text-xs text-red-600 hover:text-red-800"
+                          >
+                            {isDeleting ? <SpinnerMini /> : "Delete"}
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -327,27 +268,14 @@ const CommentSection = ({
               </div>
 
               {editingCommentId === commentId ? (
-                <div className="mt-3">
-                  <textarea
-                    className="w-full p-3 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    value={editingText}
-                    onChange={(e) => setEditingText(e.target.value)}
-                    rows={3}
-                    autoFocus
-                  />
-                  <div className="flex justify-end mt-2 space-x-2">
-                    <button
-                      onClick={handleCancelEdit}
-                      className="text-xs px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
-                    >
-                      Cancel Editing
-                    </button>
-                  </div>
-                </div>
+                <textarea
+                  className="w-full p-2 border rounded text-sm"
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  rows={3}
+                />
               ) : (
-                <p className="text-gray-700 text-sm mt-2 ml-10">
-                  {comment.text}
-                </p>
+                <p className="text-gray-700 text-sm">{comment.text}</p>
               )}
             </div>
           );
@@ -370,9 +298,6 @@ const CommentSection = ({
               />
             </svg>
             <p className="text-gray-500 mt-2 text-sm">No comments yet</p>
-            <p className="text-gray-400 text-xs mt-1">
-              Be the first to add a comment!
-            </p>
           </div>
         )}
       </div>

@@ -21,13 +21,18 @@ import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
 import {
+  useAddComment,
   useConceptNote,
   useCopy,
+  useDeleteComment,
+  useUpdateComment,
   useUpdateConceptNote,
   useUpdateStatus,
 } from "./Hooks/useConceptNotes";
 import AdminApprovalSection from "../../ui/AdminApprovalSection"; // ADD THIS
 import { useAdmins } from "../user/Hooks/useAdmins"; // ADD THIS
+import CommentSection from "../../ui/CommentSection";
+import { Comment as AppComment } from "../../interfaces";
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -49,13 +54,13 @@ const ConceptNote = () => {
   // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
-      navigate("/concept-notes"); // Fixed navigation path
+      navigate("/concept-notes");
     }
   }, [requestData, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState({ approvedBy: null }); // For admin approval
+  const [formData, setFormData] = useState({ approvedBy: null });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
@@ -67,6 +72,16 @@ const ConceptNote = () => {
   const { updateConceptNote, isPending: isUpdating } = useUpdateConceptNote(
     conceptNote?.id!
   );
+
+  // Comment hooks (ADDED)
+  const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    requestId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    requestId!
+  );
+
   const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   // Fetch admins data for approval section
@@ -82,6 +97,7 @@ const ConceptNote = () => {
     updateConceptNote({ data: formData, files: selectedFiles });
   };
 
+  // Handle status change with confirmation dialog
   const onStatusChangeHandler = () => {
     handleStatusChange(status, comment, async (data) => {
       try {
@@ -94,6 +110,19 @@ const ConceptNote = () => {
         throw error;
       }
     });
+  };
+
+  // Comment handlers (ADDED)
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
   };
 
   //PDF logic
@@ -110,7 +139,7 @@ const ConceptNote = () => {
     downloadPdf(pdfContentRef);
   };
 
-  // User references and permission logic (UPDATED for two-step workflow)
+  // User references and permission logic
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
   const requestStatus = requestData?.status;
@@ -121,17 +150,31 @@ const ConceptNote = () => {
   const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
-  // Conditional rendering flags (UPDATED for two-step workflow)
+  // Check if user is in copiedTo array (ADDED)
+  const isCopiedTo = requestData?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
+
+  // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
 
-  // Permission to update status (UPDATED for two-step workflow)
+  // Permission to update status
   const canUpdateStatus =
     !isCreator &&
     ((requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
+
+  // Users who can add comments (ADDED)
+  const canAddComments =
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
+    (userRole === "REVIEWER" && requestStatus === "pending");
 
   // Show admin approval section (for reviewed concept notes)
   const showAdminApproval =
@@ -140,6 +183,9 @@ const ConceptNote = () => {
     (isCreator ||
       (isReviewer && !requestData?.reviewedBy) ||
       (isApprover && !requestData?.approvedBy));
+
+  // Cast comments to Comment[] type for TypeScript (ADDED)
+  const comments = (requestData?.comments || []) as AppComment[];
 
   const tableHeadData = ["Prepared By", "Status", "Date", "Actions"];
 
@@ -264,6 +310,20 @@ const ConceptNote = () => {
                           )}
                         </div>
                       )}
+
+                    {/* Comment Section for all authorized users (ADDED) */}
+                    {requestData?.status !== "draft" && canAddComments && (
+                      <CommentSection
+                        comments={comments}
+                        canComment={canAddComments}
+                        onAddComment={handleAddComment}
+                        onUpdateComment={handleUpdateComment}
+                        onDeleteComment={handleDeleteComment}
+                        isLoading={isAddingComment}
+                        isUpdating={isUpdatingComment}
+                        isDeleting={isDeletingComment}
+                      />
+                    )}
 
                     {/* Admin Approval Section (for reviewed concept notes) */}
                     {showAdminApproval && (

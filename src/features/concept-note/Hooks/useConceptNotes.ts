@@ -296,7 +296,7 @@ export function useAddComment(requestId: string) {
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", requestId],
         });
       } else if (data.status !== 201) {
         toast.error("Failed to add comment");
@@ -334,7 +334,7 @@ export function useUpdateComment(requestId: string) {
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", requestId],
         });
       } else if (data.status !== 200) {
         toast.error("Failed to update comment");
@@ -371,7 +371,7 @@ export function useDeleteComment(requestId: string) {
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ["concept-note", requestId],
         });
       } else if (data.status !== 200) {
         toast.error("Failed to delete comment");
