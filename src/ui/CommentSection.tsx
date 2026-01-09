@@ -251,7 +251,9 @@ const CommentSection = ({
                   rows={3}
                 />
               ) : (
-                <p className="text-gray-700 text-sm">{comment.text}</p>
+                <p className="text-gray-700 text-sm break-words">
+                  {comment.text}
+                </p>
               )}
             </div>
           );

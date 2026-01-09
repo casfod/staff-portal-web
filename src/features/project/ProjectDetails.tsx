@@ -38,7 +38,7 @@ const SectorsTable = ({ sectors }: { sectors: Project["sectors"] }) => (
             {rowData.map((data) => (
               <td
                 key={data.id}
-                className="px-6 py-4 text-sm   break-words max-w-xs"
+                className="px-6 py-4 text-sm  break-words max-w-xs"
               >
                 {data.content}
               </td>
@@ -157,7 +157,7 @@ export const ProjectDetails = ({ request }: RequestDetailsProps) => {
       </div>
 
       {/* Sectors Section Header */}
-      <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest my-4">
+      <h2 className="text-center text-base md:text-lg font-semibold tracking-widest my-4">
         SECTORS
       </h2>
 
