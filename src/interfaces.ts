@@ -16,6 +16,26 @@ export interface FileType {
 }
 
 ///////////////////////
+//Comment
+///////////////////////
+
+export interface Comment {
+  _id: string;
+  user: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+  text: string;
+  edited: boolean;
+  deleted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+///////////////////////
 //User
 ///////////////////////
 
@@ -122,13 +142,13 @@ export interface PurChaseRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   itemGroups?: PurchaseRequesItemGroupType[];
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   status?: string;
   createdBy?: Partial<UserType>;
   createdAt?: string;
   updatedAt?: string;
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 export interface PurchaseRequesItemGroupType {
@@ -195,13 +215,13 @@ export interface AdvanceRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   itemGroups?: AdvanceRequesItemGroupType[];
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   status?: string;
   createdBy?: Partial<UserType>;
   createdAt?: string;
   updatedAt?: string;
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 export interface AdvanceRequesItemGroupType {
@@ -275,7 +295,7 @@ export interface TravelRequestType {
   dayOfReturn: Date | string | null;
   expenses: TravelRequestItemGroup[];
 
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   status?: string;
   createdBy?: Partial<UserType>;
   createdAt?: string;
@@ -283,7 +303,7 @@ export interface TravelRequestType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 ///////////////////////
@@ -345,7 +365,7 @@ export interface ExpenseClaimType {
   dayOfReturn: Date | string | null;
   expenses: ExpenseClaimItemGroup[];
 
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   status?: string;
   createdBy?: Partial<UserType>;
   createdAt?: string;
@@ -353,7 +373,7 @@ export interface ExpenseClaimType {
   reviewedBy?: any;
   approvedBy?: any;
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 ///////////////////////
@@ -411,14 +431,14 @@ export interface PaymentRequestType {
   approvedBy?: any;
   approvedAt?: string;
 
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   status: string;
 
   // Mongoose timestamps (auto-generated)
   createdAt?: string;
   updatedAt?: string;
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 ///////////////////////
@@ -553,7 +573,7 @@ export interface ConceptNoteType {
   benefits_of_project: string;
   means_of_verification: string;
   activity_budget: number;
-  comments?: [{ user: Partial<UserType>; text: string }];
+  comments?: Comment[];
   reviewedBy?: any;
   preparedBy?: any;
   approvedBy?: any;
@@ -562,7 +582,7 @@ export interface ConceptNoteType {
   updatedAt?: string;
 
   files?: [];
-  copiedTo?: [UserType];
+  copiedTo?: UserType[];
 }
 
 ///////////////////////
@@ -759,7 +779,8 @@ export interface UseRFQStatsType {
 // PURCHASE ORDER
 ///////////////////////////////////
 
-export interface Comment {
+// Keep the old Comment interface for backward compatibility
+export interface OldComment {
   user: {
     id: string;
     email: string;
@@ -812,7 +833,7 @@ export interface PurchaseOrderType {
   };
   status: "pending" | "approved" | "rejected";
   isFromRFQ: boolean;
-  comments: Comment[];
+  comments: Comment[] | OldComment[]; // Support both new and old comment formats
   approvedBy?: Partial<UserType>;
   createdAt: string;
   updatedAt: string;

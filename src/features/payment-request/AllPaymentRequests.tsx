@@ -2,7 +2,10 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useAllPaymentRequests } from "./Hooks/useAllPaymentRequests";
+import {
+  useAllPaymentRequests,
+  useDeletePaymentRequest,
+} from "./Hooks/usePaymentRequests";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
@@ -10,7 +13,6 @@ import { Pagination } from "../../ui/Pagination";
 
 import Spinner from "../../ui/Spinner";
 
-import { useDeletePaymentRequest } from "./Hooks/useDeletePaymentRequest";
 import { PaymentRequestType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import {

@@ -31,11 +31,11 @@ interface ErrorResponse {
   message: string;
 }
 
-interface LoginError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
-interface FetchError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -80,7 +80,7 @@ export function useCopy(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error");
       const error = err.response?.data.message || "An error occurred";
 
@@ -105,7 +105,7 @@ export function useDeletePurchaseRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, FetchError, string>({
+  } = useMutation<void, HookError, string>({
     mutationFn: async (userID: string) => {
       await deletePurchaseRequestAPI(userID);
     },
@@ -183,7 +183,7 @@ export function useSavePurchaseRequest() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -226,7 +226,7 @@ export function useSendPurchaseRequest() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -271,7 +271,7 @@ export function useUpdatePurChaseRequest(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Purchase Request");
       const error = err.response?.data.message || "An error occurred";
 
@@ -310,7 +310,7 @@ export function useUpdateStatus(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Status");
       const error = err.response?.data.message || "An error occurred";
 

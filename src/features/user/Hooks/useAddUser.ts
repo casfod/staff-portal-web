@@ -10,7 +10,7 @@ interface ErrorResponse {
   message: string;
 }
 
-interface LoginError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -41,7 +41,7 @@ export function useAddUser() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 

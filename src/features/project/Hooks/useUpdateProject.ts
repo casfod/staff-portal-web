@@ -12,7 +12,7 @@ interface ErrorResponse {
   message: string;
 }
 
-interface LoginError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -40,7 +40,7 @@ export function useUpdateProject(projectId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Project");
       const error = err.response?.data.message || "An error occurred";
 

@@ -19,8 +19,10 @@ import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { Pagination } from "../../ui/Pagination";
 
 import Spinner from "../../ui/Spinner";
-import { useAllExpenseClaims } from "./Hooks/useAllExpenseClaims";
-import { useDeleteExpenseClaim } from "./Hooks/useDeleteExpenseClaim";
+import {
+  useAllExpenseClaims,
+  useDeleteExpenseClaim,
+} from "./Hooks/useExpenseClaims";
 import ExpenseClaimTableRow from "./ExpenseClaimTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";

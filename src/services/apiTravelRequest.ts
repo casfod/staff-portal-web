@@ -247,6 +247,52 @@ export const updateStatus = async function (
   }
 };
 
+// Comment API functions
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/travel-requests/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/travel-requests/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/travel-requests/${requestId}/comments/${commentId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deleteTravelRequest = async function (TravelRequestID: string) {
   try {
     const response = await axiosInstance.delete<TravelRequestType>(

@@ -118,160 +118,6 @@ export const getConceptNote = async function (requestId: string) {
   }
 };
 
-// export const getConceptCote = async function (conceptNoteId: string) {
-//   try {
-//     const response = await axiosInstance.get<UseConceptNoteType>(
-//       `/concept-notes/${conceptNoteId}`
-//     );
-//     return response.data;
-//   } catch (err) {
-//     return handleError(err);
-//   }
-// };
-
-// export const saveAndSendConceptNote = async function (
-//   data: Partial<ConceptNoteType>,
-//   files: File[]
-// ) {
-//   try {
-//     const formData = new FormData();
-
-//     formData.append("activity_period", JSON.stringify(data.activity_period));
-
-//     // Append standard fields
-//     const simpleFields: (keyof ConceptNoteType)[] = [
-//       "activity_title",
-//       "activity_location",
-//       "background_context",
-//       "objectives_purpose",
-//       "detailed_activity_description",
-//       "strategic_plan",
-//       "benefits_of_project",
-//       "means_of_verification",
-//       "project",
-//       "activity_budget",
-//       "expense_Charged_To",
-//       "account_Code",
-//       "approvedBy",
-//     ];
-
-//     simpleFields.forEach((key) => {
-//       if (data[key] !== undefined && data[key] !== null) {
-//         formData.append(key, String(data[key]));
-//       }
-//     });
-
-//     // Append files
-//     files.forEach((file) => {
-//       formData.append("files", file);
-//     });
-
-//     const response = await axiosInstance.post<UseConceptNoteType>(
-//       `/concept-notes`,
-//       formData,
-//       {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       }
-//     );
-//     return response.data;
-//   } catch (err) {
-//     return handleError(err);
-//   }
-// };
-
-// export const saveConceptNote = async function (data: Partial<ConceptNoteType>) {
-//   try {
-//     const response = await axiosInstance.post<UseConceptNoteType>(
-//       `/concept-notes/save`,
-//       data
-//     );
-//     return response.data;
-//   } catch (err) {
-//     return handleError(err);
-//   }
-// };
-
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<ConceptNoteType>>(
-      `/concept-notes/copy/${requestId}`,
-      data
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-// export const updateConceptNote = async function (
-//   conceptNoteId: string,
-//   data: Partial<ConceptNoteType>,
-//   files: File[]
-// ) {
-//   try {
-//     const formData = new FormData();
-
-//     // Append standard fields
-//     const simpleFields: (keyof ConceptNoteType)[] = ["approvedBy"];
-
-//     simpleFields.forEach((key) => {
-//       if (data[key] !== undefined && data[key] !== null) {
-//         formData.append(key, String(data[key]));
-//       }
-//     });
-
-//     // Append files
-//     files.forEach((file) => {
-//       formData.append("files", file);
-//     });
-
-//     const response = await axiosInstance.put<ConceptNoteType>(
-//       `/concept-notes/${conceptNoteId}`,
-//       formData,
-//       {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       }
-//     );
-//     return response.data;
-//   } catch (err) {
-//     return handleError(err);
-//   }
-// };
-
-export const updateStatus = async function (
-  requestId: string,
-  data: { status: string; comment: string }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<ConceptNoteType>>(
-      `/concept-notes/update-status/${requestId}`,
-      data
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const deleteConceptNote = async function (conceptNoteId: string) {
-  try {
-    const response = await axiosInstance.delete<ConceptNoteType>(
-      `/concept-notes/${conceptNoteId}`
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-
 // Update the saveAndSendConceptNote function to include reviewedBy
 export const saveAndSendConceptNote = async function (
   data: Partial<ConceptNoteType>,
@@ -375,3 +221,94 @@ export const updateConceptNote = async function (
     return handleError(err);
   }
 };
+
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<ConceptNoteType>>(
+      `/concept-notes/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateStatus = async function (
+  requestId: string,
+  data: { status: string; comment: string }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<ConceptNoteType>>(
+      `/concept-notes/update-status/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/concept-notes/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/concept-notes/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/concept-notes/${requestId}/comments/${commentId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteConceptNote = async function (conceptNoteId: string) {
+  try {
+    const response = await axiosInstance.delete<ConceptNoteType>(
+      `/concept-notes/${conceptNoteId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////

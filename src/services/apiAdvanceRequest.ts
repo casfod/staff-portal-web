@@ -97,6 +97,7 @@ export const getAllAdvanceRequest = async function (queryParams: {
     return handleError(err);
   }
 };
+
 export const getAdvanceRequest = async function (requestId: string) {
   try {
     const response = await axiosInstance.get<UseAdvanceRequest>(
@@ -119,6 +120,7 @@ export const getAdvanceRequestStats = async function () {
     return handleError(err);
   }
 };
+
 export const saveAdvanceRequests = async function (
   data: Partial<AdvanceRequestType>
 ) {
@@ -241,6 +243,52 @@ export const copyTo = async function (
     const response = await axiosInstance.patch<Partial<AdvanceRequestType>>(
       `/advance-requests/copy/${requestId}`,
       data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// Comment API functions
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/advance-requests/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/advance-requests/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/advance-requests/${requestId}/comments/${commentId}`
     );
     return response.data;
   } catch (err) {

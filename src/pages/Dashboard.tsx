@@ -6,10 +6,6 @@ import TextHeader from "../ui/TextHeader";
 // Import all your hooks
 import { usePurchaseStats } from "../features/purchase-request/Hooks/PRHook";
 import { useProjectStats } from "../features/project/Hooks/useProjectStats";
-
-import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequestStats";
-
-import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequestStats";
 import type {
   AdvanceRequestStats,
   ConceptNoteStats,
@@ -19,9 +15,11 @@ import type {
   PurchaseRequestStats,
   TravelRequestStats,
 } from "../interfaces";
-import { useExpenseClaimStats } from "../features/expense-claim/Hooks/useExpenseClaimStats";
 import { useConceptNotesStats } from "../features/concept-note/Hooks/useConceptNotes";
 import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequest";
+import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequests";
+import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequests";
+import { useExpenseClaimStats } from "../features/expense-claim/Hooks/useExpenseClaims";
 
 export function Dashboard() {
   // Combine all stats hooks into a single object for better organization

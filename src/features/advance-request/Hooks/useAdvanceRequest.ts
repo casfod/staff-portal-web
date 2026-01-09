@@ -8,6 +8,9 @@ import {
   getAdvanceRequest,
   getAdvanceRequestStats,
   getAllAdvanceRequest,
+  addComment as addCommentApi,
+  updateComment as updateCommentApi,
+  deleteComment as deleteCommentApi,
 } from "../../../services/apiAdvanceRequest";
 import {
   AdvanceRequestType,
@@ -33,13 +36,11 @@ interface ErrorResponse {
   message: string;
 }
 
-type FetchError = AxiosError<ErrorResponse>;
-
 interface ErrorResponse {
   message: string;
 }
 
-interface LoginError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -103,7 +104,7 @@ export function useCopy(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error");
       const error = err.response?.data.message || "An error occurred";
 
@@ -113,6 +114,118 @@ export function useCopy(requestId: string) {
   });
 
   return { copyto, isPending, isError, errorMessage };
+}
+
+export function useAddComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: addComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
+
+    onSuccess: (data) => {
+      if (data.status === 201) {
+        toast.success("Comment added successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 201) {
+        toast.error("Failed to add comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error adding comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Add Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { addComment, isPending, isError, errorMessage };
+}
+
+export function useUpdateComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
+      updateCommentApi(requestId, commentId, { text }),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment updated successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to update comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error updating comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Update Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { updateComment, isPending, isError, errorMessage };
+}
+
+export function useDeleteComment(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deleteComment,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Comment deleted successfully");
+
+        // Invalidate and refetch
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Failed to delete comment");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message);
+      }
+    },
+
+    onError: (err: HookError) => {
+      toast.error("Error deleting comment");
+      const error = err.response?.data.message || "An error occurred";
+      console.error("Delete Comment Error:", error);
+      setErrorMessage(error);
+    },
+  });
+
+  return { deleteComment, isPending, isError, errorMessage };
 }
 
 export function useDeleteAdvanceRequest(
@@ -128,7 +241,7 @@ export function useDeleteAdvanceRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, FetchError, string>({
+  } = useMutation<void, HookError, string>({
     mutationFn: async (userID: string) => {
       await deleteAdvanceRequestAPI(userID);
     },
@@ -183,7 +296,7 @@ export function useSaveAdvanceRequest() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -226,7 +339,7 @@ export function useSendAdvanceRequest() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -270,7 +383,7 @@ export function useUpdateAdvanceRequest(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Advance Request");
       const error = err.response?.data.message || "An error occurred";
 
@@ -309,7 +422,7 @@ export function useUpdateStatus(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Status");
       const error = err.response?.data.message || "An error occurred";
 

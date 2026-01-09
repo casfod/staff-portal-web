@@ -245,6 +245,52 @@ export const updateStatus = async function (
   }
 };
 
+// Comment API functions
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/payment-requests/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/payment-requests/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/payment-requests/${requestId}/comments/${commentId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deletePaymentRequest = async function (paymentRequestID: string) {
   try {
     const response = await axiosInstance.delete<PaymentRequestType>(

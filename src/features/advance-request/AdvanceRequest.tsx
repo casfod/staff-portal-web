@@ -24,12 +24,17 @@ import {
   useCopy,
   useUpdateAdvanceRequest,
   useUpdateStatus,
+  useAddComment,
+  useUpdateComment,
+  useDeleteComment,
 } from "./Hooks/useAdvanceRequest";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
+import CommentSection from "../../ui/CommentSection";
+import { Comment } from "../../interfaces";
 
 const Request = () => {
   const currentUser = localStorageUser();
@@ -52,7 +57,7 @@ const Request = () => {
     [remoteData, advanceRequest]
   );
 
-  // Redirect logic - PLACE IT HERE
+  // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !requestData)) {
       navigate("/advance-requests");
@@ -72,6 +77,15 @@ const Request = () => {
   );
   const { updateAdvanceRequest, isPending: isUpdating } =
     useUpdateAdvanceRequest(requestId!);
+
+  // Comment hooks
+  const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    requestId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    requestId!
+  );
 
   // Fetch admins data
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
@@ -106,6 +120,19 @@ const Request = () => {
     updateAdvanceRequest({ data: formData, files: selectedFiles });
   };
 
+  // Comment handlers
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
+  };
+
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
@@ -133,6 +160,11 @@ const Request = () => {
   const isApprover = requestData?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  // Check if user is in copiedTo array
+  const isCopiedTo = requestData?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
@@ -143,6 +175,15 @@ const Request = () => {
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
+  // Users who can add comments
+  const canAddComments =
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
+    (userRole === "REVIEWER" && requestStatus === "pending");
+
   const showAdminApproval =
     !requestData?.approvedBy &&
     requestStatus === "reviewed" &&
@@ -151,7 +192,6 @@ const Request = () => {
       (isApprover && !requestData?.approvedBy));
 
   // Table data
-  // const tableHeadData = ["Request", "Status", "Department", "Amount", "Date"];
   const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
   const tableRowData = [
     { id: "requestedBy", content: requestData?.requestedBy },
@@ -175,14 +215,15 @@ const Request = () => {
     },
   ];
 
+  // Cast comments to Comment[] type for TypeScript
+  const comments = (requestData?.comments || []) as Comment[];
+
   return (
     <div className="flex flex-col space-y-3 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Advance Request</TextHeader>
-          <Button
-            onClick={() => navigate("/advance-requests")} // Use relative path here
-          >
+          <Button onClick={() => navigate("/advance-requests")}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>
@@ -215,7 +256,7 @@ const Request = () => {
 
             <tbody className="bg-white divide-y divide-gray-200">
               <>
-                {/* Purchase Request Details Row */}
+                {/* Advance Request Details Row */}
                 <tr key={requestData?.id} className="h-[40px] max-h-[40px] ">
                   {tableRowData.map((data) => (
                     <td
@@ -274,6 +315,20 @@ const Request = () => {
                             )}
                           </div>
                         )}
+
+                      {/* Comment Section for all authorized users */}
+                      {requestData?.status !== "draft" && canAddComments && (
+                        <CommentSection
+                          comments={comments}
+                          canComment={canAddComments}
+                          onAddComment={handleAddComment}
+                          onUpdateComment={handleUpdateComment}
+                          onDeleteComment={handleDeleteComment}
+                          isLoading={isAddingComment}
+                          isUpdating={isUpdatingComment}
+                          isDeleting={isDeletingComment}
+                        />
+                      )}
 
                       {/* Admin Approval Section (for STAFF role) */}
                       {showAdminApproval && (

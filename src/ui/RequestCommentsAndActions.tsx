@@ -1,4 +1,5 @@
 import { SlMagnifier } from "react-icons/sl";
+import { useParams } from "react-router-dom";
 
 const RequestCommentsAndActions = ({
   request,
@@ -7,6 +8,8 @@ const RequestCommentsAndActions = ({
   request: any;
   handleAction?: (request: any) => void;
 }) => {
+  const { requestId } = useParams();
+
   if (request.status === "draft") return null;
 
   // Determine if the request was reviewed or went straight to approval
@@ -37,7 +40,7 @@ const RequestCommentsAndActions = ({
       </div>
 
       {/* Show comments if they exist */}
-      {request.comments?.length > 0 && (
+      {request.comments?.length > 0 && !requestId && (
         <div className="flex flex-col gap-2">
           <span className="font-bold uppercase">Comments:</span>
           <div className="w-fit flex flex-col gap-2">

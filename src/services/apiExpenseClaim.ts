@@ -249,6 +249,51 @@ export const updateStatus = async function (
   }
 };
 
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/expense-claims/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/expense-claims/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/expense-claims/${requestId}/comments/${commentId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deleteExpenseClaim = async function (expenseClaimID: string) {
   try {
     const response = await axiosInstance.delete<ExpenseClaimType>(

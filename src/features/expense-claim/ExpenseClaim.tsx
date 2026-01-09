@@ -2,13 +2,9 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { RootState } from "../../store/store";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
-import { useUpdateStatus } from "./Hooks/useUpdateStatus";
-import { useUpdateExpenseClaim } from "./Hooks/useUpdateExpenseClaim";
-
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import ExpenseClaimDetails from "./ExpenseClaimDetails";
@@ -21,13 +17,17 @@ import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import { useExpenseClaim } from "./Hooks/useExpenseClaim";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
-import { useCopy } from "./Hooks/useCopy";
+import {
+  useCopy,
+  useExpenseClaim,
+  useUpdateExpenseClaim,
+  useUpdateStatus,
+} from "./Hooks/useExpenseClaims";
 
 const ExpenseClaim = () => {
   const currentUser = localStorageUser();

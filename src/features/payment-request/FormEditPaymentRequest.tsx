@@ -3,8 +3,6 @@ import { PaymentRequestType, Project } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
-import { useSavePaymentRequest } from "./Hooks/useSavePaymentRequest";
-import { useSendPaymentRequest } from "./Hooks/useSendPaymentRequest";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
 
@@ -16,6 +14,10 @@ import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
 import { FileUpload } from "../../ui/FileUpload";
+import {
+  useSavePaymentRequest,
+  useSendPaymentRequest,
+} from "./Hooks/usePaymentRequests";
 // import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface FormEditPaymentRequestProps {

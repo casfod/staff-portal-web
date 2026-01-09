@@ -19,8 +19,10 @@ import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { Pagination } from "../../ui/Pagination";
 
 import Spinner from "../../ui/Spinner";
-import { useAllTravelRequests } from "./Hooks/useAllTravelRequests";
-import { useDeleteTravelRequest } from "./Hooks/useDeleteTravelRequest";
+import {
+  useAllTravelRequests,
+  useDeleteTravelRequest,
+} from "./Hooks/useTravelRequests";
 import TravelRequestTableRow from "./TravelRequestTableRow";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";

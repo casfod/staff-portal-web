@@ -30,14 +30,11 @@ import { useNavigate } from "react-router-dom";
 interface ErrorResponse {
   message: string;
 }
-
-type FetchError = AxiosError<ErrorResponse>;
-
 interface ErrorResponse {
   message: string;
 }
 
-interface LoginError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -101,7 +98,7 @@ export function useCopy(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error");
       const error = err.response?.data.message || "An error occurred";
 
@@ -126,7 +123,7 @@ export function useDeleteConceptNote(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, FetchError, string>({
+  } = useMutation<void, HookError, string>({
     mutationFn: async (userID: string) => {
       await deleteConceptNoteAPI(userID);
     },
@@ -180,7 +177,7 @@ export function useSaveConceptNote() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -223,7 +220,7 @@ export function useSendConceptNote() {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       // Show error toast
       toast.error(err.response?.data.message || "An error occurred");
 
@@ -268,7 +265,7 @@ export function useUpdateConceptNote(conceptNoteId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating ConceptNote");
       const error = err.response?.data.message || "An error occurred";
 
@@ -308,7 +305,7 @@ export function useUpdateStatus(requestId: string) {
       }
     },
 
-    onError: (err: LoginError) => {
+    onError: (err: HookError) => {
       toast.error("Error updating Status");
       const error = err.response?.data.message || "An error occurred";
 

@@ -7,7 +7,7 @@ interface ErrorResponse {
   message: string;
 }
 
-interface FetchError extends AxiosError {
+interface HookError extends AxiosError {
   response?: AxiosResponse<ErrorResponse>;
 }
 
@@ -19,7 +19,7 @@ export function useDeleteUser() {
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, FetchError, string>({
+  } = useMutation<void, HookError, string>({
     mutationFn: async (userID: string) => {
       await deleteUserApi(userID);
     },

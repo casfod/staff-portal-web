@@ -6,9 +6,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { RootState } from "../../store/store";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
-import { useUpdateStatus } from "./Hooks/useUpdateStatus";
-import { useUpdateTravelRequest } from "./Hooks/useUpdateTravelRequest";
-
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import TravelRequestDetails from "./TravelRequestDetails";
@@ -21,13 +18,17 @@ import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import { useTravelRequest } from "./Hooks/useAdvanceRequest";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
-import { useCopy } from "./Hooks/useCopy";
+import {
+  useCopy,
+  useTravelRequest,
+  useUpdateStatus,
+  useUpdateTravelRequest,
+} from "./Hooks/useTravelRequests";
 
 const TravelRequest = () => {
   const currentUser = localStorageUser();

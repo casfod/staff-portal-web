@@ -247,6 +247,51 @@ export const updateStatus = async function (
   }
 };
 
+export const addComment = async function (
+  requestId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/purchase-requests/${requestId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateComment = async function (
+  requestId: string,
+  commentId: string,
+  data: { text: string }
+) {
+  try {
+    const response = await axiosInstance.put(
+      `/purchase-requests/${requestId}/comments/${commentId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deleteComment = async function (
+  requestId: string,
+  commentId: string
+) {
+  try {
+    const response = await axiosInstance.delete(
+      `/purchase-requests/${requestId}/comments/${commentId}`
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const deletePurchaseRequest = async function (
   purchaseRequestID: string
 ) {
