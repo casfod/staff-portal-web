@@ -83,7 +83,7 @@ const ActionIcons = ({
     data: usersData,
     isLoading: usersLoading,
     isError: usersError,
-  } = useUsers(debouncedSearchTerm, "", 1, 9999);
+  } = useUsers({ search: debouncedSearchTerm, limit: 9999 });
 
   // Vendors query (for vendor sharing)
   const {
