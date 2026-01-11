@@ -121,6 +121,11 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
   return (
     <DetailContainer>
       {/* Request Details Section */}
+      {request?.arNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.arNumber}
+        </h1>
+      )}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"

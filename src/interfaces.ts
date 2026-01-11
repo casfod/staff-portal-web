@@ -125,6 +125,7 @@ export interface usePurChaseRequestType {
 
 export interface PurChaseRequestType {
   id?: string;
+  pcrNumber?: string;
   department: string;
   suggestedSupplier: string;
   requestedBy?: string;
@@ -194,6 +195,7 @@ export interface UseAdvanceRequestType {
 
 export interface AdvanceRequestType {
   id?: string;
+  arNumber?: string;
   department: string;
   suggestedSupplier: string;
   requestedBy?: string;
@@ -279,6 +281,7 @@ export interface TravelRequestItemGroup {
 
 export interface TravelRequestType {
   id?: string;
+  trNumber?: string;
   staffName?: string;
   travelRequest: {
     from: string;
@@ -350,6 +353,7 @@ export interface ExpenseClaimItemGroup {
 
 export interface ExpenseClaimType {
   id?: string;
+  ecNumber?: string;
   staffName?: string;
   expenseClaim: {
     from: any;
@@ -411,6 +415,7 @@ export interface usePaymentRequestType {
 
 export interface PaymentRequestType {
   id?: string;
+  pmrNumber?: string;
   requestBy: string;
   amountInFigure: number;
   amountInWords: string;
@@ -548,6 +553,7 @@ export interface UseConceptNoteType {
 
 export interface ConceptNoteType {
   id?: string;
+  cnNumber?: string;
   staff_name?: string;
   staff_role?: string;
   // project_code: string;

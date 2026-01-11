@@ -40,6 +40,12 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
 
   return (
     <DetailContainer>
+      {request?.pmrNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.pmrNumber}
+        </h1>
+      )}
+
       {/* Request Details Section */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${

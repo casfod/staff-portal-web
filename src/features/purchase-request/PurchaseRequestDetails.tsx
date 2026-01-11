@@ -114,6 +114,13 @@ export const PurchaseRequestDetails = ({ request }: RequestDetailsProps) => {
   return (
     <DetailContainer>
       {/* Purchase Request Details Section */}
+
+      {request?.pcrNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.pcrNumber}
+        </h1>
+      )}
+
       <div
         className={`flex flex-col gap-2 md:gap-3 w-full   ${
           !requestId ? "text-sm" : "text-sm md:text-base"

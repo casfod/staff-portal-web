@@ -131,6 +131,11 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
   return (
     <DetailContainer>
       {/* Expense Claim Details Section */}
+      {request?.ecNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.ecNumber}
+        </h1>
+      )}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
@@ -158,19 +163,15 @@ const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
           ))}
         </div>
       </div>
-
       {/* Expenses Section Header */}
       <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest my-4 break-words">
         EXPENSES
       </h2>
-
       <ExpenseTable expenses={request.expenses} />
-
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-
       {/* Copied To */}
       {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
     </DetailContainer>

@@ -129,6 +129,12 @@ const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
   return (
     <DetailContainer>
       {/* Travel Request Details Section */}
+      {request?.trNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.trNumber}
+        </h1>
+      )}
+
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
           !requestId ? "text-sm" : "text-sm md:text-base"

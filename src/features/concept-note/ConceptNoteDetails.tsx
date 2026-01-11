@@ -86,6 +86,12 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
   return (
     <DetailContainer>
       {/* Concept Note Details Section */}
+      {request?.cnNumber && (
+        <h1 className="text-center text-lg font-extrabold p-6">
+          {request?.cnNumber}
+        </h1>
+      )}
+
       <div
         className={`flex flex-col gap-3 w-full ${
           !requestId ? "text-sm" : "text-sm md:text-base"
