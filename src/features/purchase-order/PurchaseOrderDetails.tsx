@@ -45,6 +45,8 @@ export const PurchaseOrderDetails = ({
 }: PurchaseOrderDetailsProps) => {
   const { purchaseOrderId } = useParams();
 
+  console.log(purchaseOrder);
+
   // Updated vendor name logic to handle both copiedTo and selectedVendor
   const vendorName = purchaseOrder.selectedVendor
     ? purchaseOrder.selectedVendor.businessName
@@ -73,10 +75,11 @@ export const PurchaseOrderDetails = ({
         {
           id: "status",
           label: "Status",
-          content: purchaseOrder.status.toUpperCase(),
+          content: purchaseOrder.status
+            ? purchaseOrder.status.toUpperCase()
+            : "N/A",
           icon: <Tag className="w-4 h-4" />,
         },
-
         {
           id: "purchaseOrderCode",
           label: "PO Code",
@@ -87,13 +90,13 @@ export const PurchaseOrderDetails = ({
           label: "RFQ Reference Code",
           content: RFQReferenceCode,
         },
-
         {
           id: "casfodAddressId",
           label: "Casfod Address",
-          content: purchaseOrder.casfodAddressId.toUpperCase(),
+          content: purchaseOrder.casfodAddressId
+            ? purchaseOrder.casfodAddressId.toUpperCase()
+            : "N/A",
         },
-
         {
           id: "VAT",
           label: "WHT (%)",
@@ -101,23 +104,23 @@ export const PurchaseOrderDetails = ({
             purchaseOrder.VAT ? purchaseOrder.VAT.toLocaleString() : 0
           }`,
         },
-
         {
           id: "grossTotal",
           label: "Gross Total",
           content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
-          // icon: <DollarSign className="w-4 h-4" />,
         },
         {
           id: "WHT",
           label: "WHT AMOUNT",
           content: `₦${
             purchaseOrder.VAT
-              ? (purchaseOrder.totalAmount / 100) * purchaseOrder.VAT
+              ? (
+                  (purchaseOrder.totalAmount / 100) *
+                  purchaseOrder.VAT
+                ).toLocaleString()
               : 0
           }`,
         },
-
         {
           id: "netTotal",
           label: "Net Total",
@@ -129,7 +132,6 @@ export const PurchaseOrderDetails = ({
                 ).toLocaleString()
               : purchaseOrder.totalAmount.toLocaleString()
           }`,
-          // icon: <DollarSign className="w-4 h-4" />,
         },
       ],
     },
