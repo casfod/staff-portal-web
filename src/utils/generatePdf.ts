@@ -2,6 +2,37 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+// export interface PdfOptions {
+//   filename: string;
+//   format?: "a3" | "a4" | "a5" | "letter" | "legal";
+//   orientation?: "portrait" | "landscape";
+//   margin?: number;
+//   scale?: number;
+//   quality?: number;
+//   backgroundColor?: string;
+//   titleOptions?: {
+//     text: string;
+//     fontSize?: number;
+//     fontStyle?: "normal" | "bold" | "italic";
+//     color?: string;
+//     marginBottom?: number;
+//   };
+//   // ADD FOOTER OPTIONS
+//   footerOptions?: {
+//     left?: string;
+//     right?: string | ((currentPage: number, totalPages: number) => string);
+//     center?: string;
+//     fontSize?: number;
+//     color?: string;
+//     lineColor?: string;
+//     marginTop?: number;
+//   };
+//   letterRendering?: boolean;
+//   enableLinks?: boolean;
+//   multiPage?: boolean;
+//   save?: boolean;
+// }
+
 export type PdfOptions = {
   title?: string;
   filename?: string;
@@ -25,9 +56,17 @@ export type PdfOptions = {
     color?: string;
     marginBottom?: number;
   };
+  footerOptions?: {
+    left?: string;
+    right?: string | ((currentPage: number, totalPages: number) => string);
+    center?: string;
+    fontSize?: number;
+    color?: string;
+    lineColor?: string;
+    marginTop?: number;
+  };
   save?: boolean;
 };
-
 const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
@@ -241,6 +280,44 @@ export const generatePdf = async (
           undefined,
           compression
         );
+
+        // In the multi-page generation logic, after adding image to each page:
+        if (options.footerOptions) {
+          const footer = options.footerOptions;
+          pdf.setFontSize(footer.fontSize || 9);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(footer.color || "#666666");
+
+          // Left text
+          if (footer.left) {
+            pdf.text(footer.left, margin, pdfHeight - 5);
+          }
+
+          // Right text
+          if (footer.right) {
+            let rightText = "";
+            if (typeof footer.right === "function") {
+              rightText = footer.right(i + 1, totalPages);
+            } else {
+              rightText = footer.right;
+            }
+            const textWidth = pdf.getTextWidth(rightText);
+            pdf.text(rightText, pdfWidth - margin - textWidth, pdfHeight - 5);
+          }
+
+          // Center text
+          if (footer.center) {
+            const centerText = footer.center;
+            const textWidth = pdf.getTextWidth(centerText);
+            pdf.text(centerText, (pdfWidth - textWidth) / 2, pdfHeight - 5);
+          }
+
+          // Optional line
+          if (footer.lineColor) {
+            pdf.setDrawColor(footer.lineColor);
+            pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
+          }
+        }
       }
     } else {
       // SINGLE-PAGE LOGIC (UPDATED WITH TITLE SUPPORT)

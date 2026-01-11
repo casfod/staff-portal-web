@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { generatePdf } from "../utils/generatePdf";
 import { PurchaseOrderType } from "../interfaces";
+import { addPdfFooter } from "../utils/pdfFooterUtils";
 
 interface UsePOPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -52,8 +53,6 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
   ): Promise<File | null> => {
     const { jsPDF } = await import("jspdf");
     const html2canvas = (await import("html2canvas")).default;
-
-    console.log(poData);
 
     const canvas = await html2canvas(element, {
       scale: 2,
@@ -124,6 +123,9 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
         "FAST",
         0
       );
+
+      // ADD FOOTER WITH PO CODE AND PAGE NUMBER
+      addPdfFooter(pdf, poData.POCode, "PO Code", i + 1, totalPages, margin);
     }
 
     const pdfBlob = pdf.output("blob");
@@ -153,6 +155,14 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
           fontStyle: "bold",
           color: "#000000",
           marginBottom: 10,
+        },
+        footerOptions: {
+          left: `PO Code: ${poData.POCode || "N/A"}`,
+          right: (currentPage: number, totalPages: number) =>
+            `Page ${currentPage} of ${totalPages}`,
+          fontSize: 9,
+          color: "#666666",
+          lineColor: "#E0E0E0",
         },
         save: true,
       });

@@ -1,8 +1,9 @@
-// hooks/useRFQPDF.ts - FIXED VERSION
+// hooks/useRFQPDF.ts - FIXED VERSION with footer
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { generatePdf } from "../utils/generatePdf";
 import { RFQType } from "../interfaces";
+import { addPdfFooter } from "../utils/pdfFooterUtils";
 
 interface UseRFQPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -45,7 +46,7 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
     }
   };
 
-  // Fixed multi-page PDF generation with correct addImage usage
+  // Fixed multi-page PDF generation with footer
   const generatePdfViaCanvas = async (
     element: HTMLElement,
     filename: string,
@@ -63,8 +64,6 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
       logging: false,
     });
 
-    // const imgData = canvas.toDataURL("image/jpeg", 1.0);
-
     // Create PDF with multi-page support
     const pdf = new jsPDF({
       orientation: "portrait",
@@ -78,51 +77,16 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
     const margin = 10;
     const contentWidth = pdfWidth - margin * 2;
 
-    // Calculate image dimensions
     const imgWidth = contentWidth;
-    // const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // MULTI-PAGE LOGIC
     const availableContentHeight = pdfHeight - margin * 2;
     const pageContentHeightPx =
       (availableContentHeight * canvas.width) / imgWidth;
     const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
-    // Add title to first page
-    const titleHeight = 0;
-    if (rfqData.RFQCode) {
-      pdf.setFontSize(16);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor("#000000");
-
-      // const titleText = `Request for Quotation - ${rfqData.RFQCode}`;
-      // const titleText = ``;
-      // const titleWidth = pdf.getTextWidth(titleText);
-      // const titleX = margin + (contentWidth - titleWidth) / 2;
-      // const titleY = margin + 8;
-
-      // pdf.text(titleText, titleX, titleY);
-    }
-
     // Process each page
     for (let i = 0; i < totalPages; i++) {
       if (i > 0) {
         pdf.addPage();
-
-        // Add title to subsequent pages
-        if (rfqData.RFQCode) {
-          pdf.setFontSize(16);
-          pdf.setFont("helvetica", "bold");
-          pdf.setTextColor("#000000");
-
-          // const titleText = ``;
-          // const titleText = `Request for Quotation - ${rfqData.RFQCode}`;
-          // const titleWidth = pdf.getTextWidth(titleText);
-          // const titleX = margin + (contentWidth - titleWidth) / 2;
-          // const titleY = margin + 8;
-
-          // pdf.text(titleText, titleX, titleY);
-        }
       }
 
       const startY = i * pageContentHeightPx;
@@ -138,7 +102,6 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
       const ctx = pageCanvas.getContext("2d");
       if (!ctx) throw new Error("Canvas context not available");
 
-      // Draw the portion of the original canvas
       ctx.drawImage(
         canvas,
         0,
@@ -153,21 +116,22 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
 
       const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
 
-      // CORRECT addImage usage - maximum 9 arguments
       pdf.addImage(
-        pageImgData, // imageData
-        "JPEG", // format
-        margin, // x
-        margin + titleHeight, // y
-        imgWidth, // width
-        pageImgHeight, // height
-        undefined, // alias (optional)
-        "FAST", // compression
-        0 // rotation (optional)
+        pageImgData,
+        "JPEG",
+        margin,
+        margin,
+        imgWidth,
+        pageImgHeight,
+        undefined,
+        "FAST",
+        0
       );
+
+      // ADD FOOTER WITH RFQ CODE AND PAGE NUMBER
+      addPdfFooter(pdf, rfqData.RFQCode, "RFQ Code", i + 1, totalPages, margin);
     }
 
-    // Get PDF as blob and convert to File
     const pdfBlob = pdf.output("blob");
     return new File([pdfBlob], filename, { type: "application/pdf" });
   };
@@ -191,11 +155,18 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
         quality: 1,
         backgroundColor: "#FFFFFF",
         titleOptions: {
-          // text: `Request for Quotation - ${rfqData.RFQCode || ""}`,
           fontSize: 16,
           fontStyle: "bold",
           color: "#000000",
           marginBottom: 10,
+        },
+        footerOptions: {
+          left: `RFQ Code: ${rfqData.RFQCode || "N/A"}`,
+          right: (currentPage: number, totalPages: number) =>
+            `Page ${currentPage} of ${totalPages}`,
+          fontSize: 9,
+          color: "#666666",
+          lineColor: "#E0E0E0",
         },
         save: true,
       });

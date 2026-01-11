@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { generatePdf } from "../utils/generatePdf";
 import { PaymentVoucherType } from "../interfaces";
+import { addPdfFooter } from "../utils/pdfFooterUtils";
 
 interface UsePVPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -35,15 +36,11 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     setIsGenerating(true);
 
     try {
-      // FIX: Sanitize filename by replacing slashes with dashes or underscores
       const sanitizeFilename = (filename: string) => {
-        return filename.replace(/\//g, "-"); // Replace all slashes with dashes
+        return filename.replace(/\//g, "-");
       };
 
       const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
-
-      // Alternative: If you want to keep the original format but make it filesystem-safe
-      // const filename = `${pvData.pvNumber.replace(/\//g, '-')}.pdf`;
 
       const pdf = await generatePdfViaCanvas(
         pdfRef.current,
@@ -67,8 +64,6 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     pvData: PaymentVoucherType,
     orientation: "portrait" | "landscape" = "landscape"
   ): Promise<File | null> => {
-    console.log(pvData);
-
     const { jsPDF } = await import("jspdf");
     const html2canvas = (await import("html2canvas")).default;
 
@@ -95,27 +90,12 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     const imgWidth = contentWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    // Check if content fits on single page - FIXED CALCULATION
     const availableContentHeight = pdfHeight - margin * 2;
-
-    // DEBUG: Log dimensions to understand the issue
-    console.log("PDF Dimensions:", {
-      pdfWidth,
-      pdfHeight,
-      availableContentHeight,
-      imgHeight,
-      canvasHeight: canvas.height,
-      canvasWidth: canvas.width,
-      needsMultiplePages: imgHeight > availableContentHeight,
-    });
-
-    // FIX: Use more accurate calculation with tolerance
-    const tolerance = 5; // 5mm tolerance
+    const tolerance = 5;
     const needsMultiplePages = imgHeight > availableContentHeight + tolerance;
 
     if (!needsMultiplePages) {
-      // SINGLE PAGE - content fits on one page
-      console.log("Using single page mode");
+      // SINGLE PAGE
       pdf.addImage(
         canvas.toDataURL("image/jpeg", 1.0),
         "JPEG",
@@ -126,14 +106,14 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
         undefined,
         "FAST"
       );
+
+      // ADD FOOTER FOR SINGLE PAGE
+      addPdfFooter(pdf, pvData.pvNumber, "PV Number", 1, 1, margin);
     } else {
-      // MULTI-PAGE - content requires multiple pages
-      console.log("Using multi-page mode");
+      // MULTI-PAGE
       const pageContentHeightPx =
         (availableContentHeight * canvas.width) / imgWidth;
       const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
-
-      console.log("Total pages needed:", totalPages);
 
       for (let i = 0; i < totalPages; i++) {
         if (i > 0) {
@@ -144,10 +124,7 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
         const remainingHeight = canvas.height - startY;
         const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
 
-        // Only proceed if we have meaningful content
         if (pageImgHeightPx < 10) {
-          // Less than 10px is essentially empty
-          console.log("Skipping empty page", i);
           continue;
         }
 
@@ -184,6 +161,16 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
           undefined,
           "FAST"
         );
+
+        // ADD FOOTER WITH PV NUMBER AND PAGE NUMBER
+        addPdfFooter(
+          pdf,
+          pvData.pvNumber,
+          "PV Number",
+          i + 1,
+          totalPages,
+          margin
+        );
       }
     }
 
@@ -200,16 +187,14 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     }
 
     try {
-      // FIX: Sanitize filename for download as well
       const sanitizeFilename = (filename: string) => {
         return filename.replace(/\//g, "-");
       };
 
       const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
-      console.log("Downloading PDF with filename:", filename);
 
       await generatePdf(pdfRef.current, {
-        filename, // Use the sanitized filename
+        filename,
         format: "a4",
         orientation: orientation,
         scale: 2,
@@ -223,6 +208,14 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
           fontStyle: "bold",
           color: "#000000",
           marginBottom: 10,
+        },
+        footerOptions: {
+          left: `PV Number: ${pvData.pvNumber || "N/A"}`,
+          right: (currentPage: number, totalPages: number) =>
+            `Page ${currentPage} of ${totalPages}`,
+          fontSize: 9,
+          color: "#666666",
+          lineColor: "#E0E0E0",
         },
         save: true,
       });
