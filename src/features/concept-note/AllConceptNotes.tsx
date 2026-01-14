@@ -22,7 +22,19 @@ import Button from "../../ui/Button";
 import ConceptNoteTableRow from "./ConceptNoteTableRow";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
 
-const tableHeadData = ["Prepared By", "Status", "Date", "Actions"];
+// Update tableHeadData to match Purchase Request structure
+const tableHeadData = [
+  { label: "Prepared By", showOnMobile: true, minWidth: "120px" },
+  { label: "Status", showOnMobile: true, minWidth: "100px" },
+  {
+    label: "Date",
+    showOnMobile: false,
+    showOnTablet: true,
+    minWidth: "100px",
+  },
+  { label: "Actions", showOnMobile: true, minWidth: "100px" },
+];
+
 const AllConceptNotes = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -122,14 +134,27 @@ const AllConceptNotes = () => {
       {/* Concept Notes Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200 ">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 hidden sm:table-header-group">
             <tr>
-              {tableHeadData.map((title, index) => (
+              {tableHeadData.map((header, index) => (
                 <th
                   key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  className={`
+                    px-3 py-2.5 md:px-4 md:py-3 
+                    text-left font-medium uppercase 
+                    tracking-wider
+                    ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                    ${
+                      header.showOnTablet
+                        ? "hidden sm:table-cell md:table-cell"
+                        : ""
+                    }
+                    text-xs md:text-sm
+                    whitespace-nowrap
+                  `}
+                  style={{ minWidth: header.minWidth }}
                 >
-                  {title}
+                  {header.label}
                 </th>
               ))}
             </tr>
@@ -154,6 +179,7 @@ const AllConceptNotes = () => {
                   handleEdit={handleEdit}
                   handleDelete={handleDelete}
                   handleAction={handleAction}
+                  tableHeadData={tableHeadData}
                 />
               ))
             )}

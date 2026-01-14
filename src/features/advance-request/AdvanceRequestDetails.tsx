@@ -1,160 +1,18 @@
-import { moneyFormat } from "../../utils/moneyFormat";
-import { AdvanceRequestType } from "../../interfaces";
+import { AdvanceRequestType, ItemGroupType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
+import MobileItemsTable from "../../ui/MobileItemsTable";
+import ItemsTable from "../../ui/ItemsTable";
+import RequestItemsTable from "../../ui/RequestItemsTable";
 
 interface RequestDetailsProps {
   request: AdvanceRequestType;
 }
 
-const tableHeadData = [
-  "Description",
-  "Quantity",
-  "Frequency",
-  "Unit",
-  "Unit Cost",
-  "Total",
-];
-
-const ItemsTable = ({
-  itemGroups,
-}: {
-  itemGroups: AdvanceRequestType["itemGroups"];
-}) => (
-  <div className="overflow-x-auto rounded-lg border border-gray-200 mb-4">
-    <div className="min-w-full inline-block align-middle">
-      <div className="overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr className="table-row">
-              {tableHeadData.map((data, index) => (
-                <th
-                  key={index}
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"
-                >
-                  {data}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {itemGroups!.map((item) => {
-              const rowData = [
-                { id: "description", content: item.description },
-                { id: "quantity", content: item.quantity },
-                { id: "frequency", content: item.frequency },
-                { id: "unit", content: item.unit },
-                { id: "unitCost", content: moneyFormat(item.unitCost, "NGN") },
-                { id: "total", content: moneyFormat(item.total, "NGN") },
-              ];
-
-              return (
-                <tr
-                  key={item.id!}
-                  className="table-row hover:bg-gray-50 transition-colors"
-                >
-                  {rowData.map((data) => (
-                    <td
-                      key={data.id}
-                      className="px-4 py-4 whitespace-normal break-words"
-                    >
-                      <div className="text-sm text-gray-900">
-                        {data.content}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-);
-
 // Improved Mobile-friendly alternative table view
-const MobileItemsTable = ({
-  itemGroups,
-}: {
-  itemGroups: AdvanceRequestType["itemGroups"];
-}) => (
-  <div className="md:hidden space-y-4 mb-4">
-    {itemGroups!.map((item, index) => (
-      <div
-        key={item.id!}
-        className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
-      >
-        <div className="space-y-3">
-          {/* Header with index */}
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="font-bold text-gray-700">Item {index + 1}</span>
-            <span className="font-bold">{moneyFormat(item.total, "NGN")}</span>
-          </div>
-
-          {/* Details grid */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <div className="space-y-1">
-              <div>
-                <span className="font-medium text-gray-600 text-sm">Qty:</span>
-                <span className="ml-2">{item.quantity}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600 text-sm">
-                  Frequency:
-                </span>
-                <span className="ml-2">{item.frequency}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <div>
-            <span className="font-medium text-gray-600 text-sm">Unit:</span>
-            <span className="ml-2">{item.unit}</span>
-          </div>
-        </div>
-
-        <div>
-          <span className="font-medium text-gray-600 text-sm">Unit Cost:</span>
-          <span className="ml-2">{moneyFormat(item.unitCost, "NGN")}</span>
-        </div>
-
-        <div className="text-center p-2">
-          <p className="font-bold">TOTAL</p>
-          <div className="font-bold ">{moneyFormat(item.total, "NGN")}</div>
-        </div>
-
-        {/* Description - Full width */}
-        <div className="border-t pt-2">
-          <span className="font-semibold text-gray-700 block mb-1">
-            Description:
-          </span>
-          <p className="text-gray-900">{item.description}</p>
-        </div>
-      </div>
-    ))}
-
-    {/* Total Summary */}
-    {itemGroups!.length > 0 && (
-      <div className="rounded-lg border border-blue-200 p-4 mt-4">
-        <div className="flex justify-between flex-wrap items-center">
-          <span className="font-bold text-gray-800">Total Amount:</span>
-          <span className="font-bold text-sm">
-            {moneyFormat(
-              itemGroups!.reduce((sum, item) => sum + item.total, 0),
-              "NGN"
-            )}
-          </span>
-        </div>
-      </div>
-    )}
-  </div>
-);
 
 export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
@@ -256,12 +114,10 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
       </h2>
 
       {/* Show mobile table on small screens, desktop table on larger screens */}
-      <div className="hidden md:block">
-        <ItemsTable itemGroups={request.itemGroups} />
-      </div>
-      <div className="md:hidden">
-        <MobileItemsTable itemGroups={request.itemGroups} />
-      </div>
+      <RequestItemsTable
+        items={request.itemGroups as ItemGroupType[]}
+        type="advance"
+      />
 
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (

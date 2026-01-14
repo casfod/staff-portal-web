@@ -1,5 +1,3 @@
-// import { SlMagnifier } from "react-icons/sl";
-// import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import { PaymentRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
@@ -13,72 +11,103 @@ interface RequestDetailsProps {
   handleAction?: (request: PaymentRequestType) => void;
 }
 
-const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
+export const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
 
-  const data1 = [
-    { label: "Account Code", value: request.grantCode },
-    { label: "Amount In Words", value: request.amountInWords },
-
-    { label: "Purpose Of Expense", value: request.purposeOfExpense },
+  const rowData = [
     {
-      label: "Date Of Expense",
-      value: formatToDDMMYYYY(request?.dateOfExpense!),
+      id: "grantCode",
+      label: "Account Code :",
+      content: request.grantCode,
     },
-    { label: "Special Instruction", value: request.specialInstruction },
     {
-      label: "Request",
-      value: `${request.requestedBy?.first_name?.toUpperCase()} ${request.requestedBy?.last_name?.toUpperCase()}`,
+      id: "accountName",
+      label: "Account Name :",
+      content: request.accountName,
     },
-  ];
-
-  const data2 = [
-    { label: "Account Name", value: request.accountName },
-    { label: "Account Number", value: request.accountNumber },
-    { label: "Bank Name", value: request.bankName },
+    {
+      id: "accountNumber",
+      label: "Account Number :",
+      content: request.accountNumber,
+    },
+    {
+      id: "bankName",
+      label: "Bank Name :",
+      content: request.bankName,
+    },
+    {
+      id: "amountInWords",
+      label: "Amount In Words :",
+      content: request.amountInWords,
+    },
+    {
+      id: "purposeOfExpense",
+      label: "Purpose Of Expense :",
+      content: request.purposeOfExpense,
+    },
+    {
+      id: "dateOfExpense",
+      label: "Date Of Expense :",
+      content: formatToDDMMYYYY(request?.dateOfExpense!),
+    },
+    {
+      id: "specialInstruction",
+      label: "Special Instruction :",
+      content: request.specialInstruction,
+    },
+    // {
+    //   id: "requestedBy",
+    //   label: "Requested By :",
+    //   content: `${request.requestBy?.toUpperCase()} ${request.requestedBy?.last_name?.toUpperCase()}`,
+    // },
+    {
+      id: "amountInFigure",
+      label: "Amount :",
+      content: moneyFormat(Number(request.amountInFigure), "NGN"),
+    },
   ];
 
   return (
     <DetailContainer>
+      {/* Payment Request Details Header */}
       {request?.pmrNumber && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-4 md:p-6">
           {request?.pmrNumber}
         </h1>
       )}
 
-      {/* Request Details Section */}
+      {/* Details Grid - Matching PurchaseRequestDetails structure */}
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
-        }   mb-3 ${
-          request?.files!.length > 0 && "border-b border-gray-300"
-        } pb-6`}
+        } mb-6 border-b border-gray-300 pb-6`}
       >
-        {/* Left Column */}
-        <div className="flex flex-col gap-2 md:gap-3 w-full">
-          {data1.map(({ label, value }) => (
-            <div key={label} className="whitespace-pre-line">
-              <h2 className="text-sm font-bold uppercase mb-1">{label}:</h2>
-              <p>{value}</p>
+        <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+          {rowData.slice(0, Math.ceil(rowData.length / 2)).map((data) => (
+            <div
+              key={data.id}
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+            >
+              <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
+                {data.label}
+              </span>
+              <span className="break-words">{data.content}</span>
             </div>
           ))}
         </div>
 
-        {/* Right Column - Recipients Information */}
-        <div className="w-fit h-fit border border-gray-300 space-y-3 shadow-md p-5 rounded-lg">
-          <h2 className="font-bold">RECIPIENTS INFORMATION</h2>
-
-          {data2.map(({ label, value }) => (
-            <div key={label} className="whitespace-pre-line">
-              <h2 className="text-sm font-bold uppercase mb-1">{label}:</h2>
-              <p>{value}</p>
+        <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+          {rowData.slice(Math.ceil(rowData.length / 2)).map((data) => (
+            <div
+              key={data.id}
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+            >
+              <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
+                {data.label}
+              </span>
+              <span className="break-words">{data.content}</span>
             </div>
           ))}
-
-          <div className="whitespace-pre-line">
-            <h2 className="text-sm font-bold uppercase mb-1">Budget:</h2>
-            <p>{moneyFormat(Number(request.amountInFigure), "NGN")}</p>
-          </div>
         </div>
       </div>
 
@@ -92,4 +121,5 @@ const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
     </DetailContainer>
   );
 };
+
 export default PaymentRequestDetails;

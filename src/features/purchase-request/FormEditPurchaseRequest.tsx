@@ -349,7 +349,7 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
       </Row>
 
       {/* Dynamic itemGroup */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[580px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
         {itemGroup.map((group, index) => (
           <div
             key={index}
@@ -358,19 +358,18 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           >
             <h4 className="  text-lg font-semibold">ITEM {index + 1}</h4>
 
-            <FormRow label="Description *" type="wide">
+            <FormRow label="Item Name *" type="wide">
               <input
                 className="w-full   text-[16px] border-2 border-gray-300 bg-white rounded-lg px-2 py-1 focus:outline-none"
                 placeholder=""
                 disabled={disabledStates[index]}
-                value={group.description}
+                value={group.itemName}
                 required
                 onChange={(e) =>
-                  handleItemChange(index, "description", e.target.value)
+                  handleItemChange(index, "itemName", e.target.value)
                 }
               />
             </FormRow>
-
             <Row cols="grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
               <FormRow label="Frequency *">
                 <Input
@@ -429,6 +428,21 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
                   value={group.total}
                   onChange={(e) =>
                     handleItemChange(index, "total", e.target.value)
+                  }
+                />
+              </FormRow>
+            </Row>
+
+            <Row>
+              <FormRow label="Description*" type="wide">
+                <textarea
+                  className="border-2 h-22 min-h-28 rounded-lg focus:outline-none p-3  "
+                  maxLength={4000}
+                  id="description"
+                  required
+                  value={group.description}
+                  onChange={(e) =>
+                    handleItemChange(index, "description", e.target.value)
                   }
                 />
               </FormRow>

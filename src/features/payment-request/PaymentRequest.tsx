@@ -11,13 +11,8 @@ import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 import PaymentRequestDetails from "./PaymentRequestDetails";
 import StatusBadge from "../../ui/StatusBadge";
-import AdminApprovalSection from "../../ui/AdminApprovalSection";
-import StatusUpdateForm from "../../ui/StatusUpdateForm";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
-import { FileUpload } from "../../ui/FileUpload";
-import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
@@ -34,8 +29,11 @@ import {
   useUpdatePaymentRequest,
   useUpdateStatus,
 } from "./Hooks/usePaymentRequests";
-import CommentSection from "../../ui/CommentSection";
 import { Comment as AppComment } from "../../interfaces";
+import TableRowMain from "../../ui/TableRowMain";
+import TableData from "../../ui/TableData";
+import RequestCard from "../../ui/RequestCard";
+import RequestDetailLayout from "../../ui/RequestDetailLayout";
 
 const PaymentRequest = () => {
   const currentUser = localStorageUser();
@@ -53,17 +51,17 @@ const PaymentRequest = () => {
     (state: RootState) => state.paymentRequest.paymentRequest
   );
 
-  const requestData = useMemo(
+  const request = useMemo(
     () => remoteData?.data || paymentRequest,
     [remoteData, paymentRequest]
   );
 
   // Redirect logic
   useEffect(() => {
-    if (!requestId || (!isLoading && !requestData)) {
+    if (!requestId || (!isLoading && !request)) {
       navigate("/payment-requests");
     }
-  }, [requestData, requestId, navigate, isLoading]);
+  }, [request, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -72,13 +70,14 @@ const PaymentRequest = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Custom hooks
+  const { handleStatusChange } = useStatusUpdate();
   const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
     requestId!
   );
   const { updatePaymentRequest, isPending: isUpdating } =
     useUpdatePaymentRequest(requestId!);
 
-  // Comment hooks (ADDED)
+  // Comment hooks
   const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
   const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
     requestId!
@@ -88,8 +87,6 @@ const PaymentRequest = () => {
   );
 
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
-  const { handleStatusChange } = useStatusUpdate();
-
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const { copyto, isPending: isCopying } = useCopy(requestId!);
 
@@ -116,7 +113,7 @@ const PaymentRequest = () => {
     updatePaymentRequest({ data: formData, files: selectedFiles });
   };
 
-  // Comment handlers (ADDED)
+  // Comment handlers
   const handleAddComment = async (text: string) => {
     await addComment({ text });
   };
@@ -132,7 +129,7 @@ const PaymentRequest = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `PaymentRequest-${paymentRequest?.id}`,
+    filename: `PaymentRequest-${request?.id}`,
     multiPage: true,
     titleOptions: {
       text: "Payment Request",
@@ -146,17 +143,17 @@ const PaymentRequest = () => {
   // User references
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = requestData?.status;
-  const requestedByName = `${requestData?.requestedBy?.first_name} ${requestData?.requestedBy?.last_name}`;
+  const requestStatus = request?.status;
+  const requestedByName = `${request?.requestedBy?.first_name} ${request?.requestedBy?.last_name}`;
 
-  // Permission flags with explicit null checks
-  const isCreator = requestData?.requestedBy?.id === currentUserId;
-  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
-  const isApprover = requestData?.approvedBy?.id === currentUserId;
+  // Permission flags
+  const isCreator = request?.requestedBy?.id === currentUserId;
+  const isReviewer = request?.reviewedBy?.id === currentUserId;
+  const isApprover = request?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
-  // Check if user is in copiedTo array (ADDED)
-  const isCopiedTo = requestData?.copiedTo?.some(
+  // Check if user is in copiedTo array
+  const isCopiedTo = request?.copiedTo?.some(
     (user: any) => user.id === currentUserId
   );
 
@@ -170,7 +167,7 @@ const PaymentRequest = () => {
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
-  // Users who can add comments (ADDED)
+  // Users who can add comments
   const canAddComments =
     isCreator ||
     isReviewer ||
@@ -180,47 +177,79 @@ const PaymentRequest = () => {
     (userRole === "REVIEWER" && requestStatus === "pending");
 
   const showAdminApproval =
-    !requestData?.approvedBy &&
+    !request?.approvedBy &&
     requestStatus === "reviewed" &&
     (isCreator ||
-      (isReviewer && !requestData?.reviewedBy) ||
-      (isApprover && !requestData?.approvedBy));
+      (isReviewer && !request?.reviewedBy) ||
+      (isApprover && !request?.approvedBy));
 
-  // Cast comments to Comment[] type for TypeScript (ADDED)
-  const comments = (requestData?.comments || []) as AppComment[];
+  // Cast comments to Comment[] type for TypeScript
+  const comments = (request?.comments || []) as AppComment[];
 
-  // Table data
-  const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
+  const requestCreatedAt = request?.createdAt ?? "";
+  const fullDate = formatToDDMMYYYY(requestCreatedAt);
+
+  // Table data configuration - matching Purchase Request structure
+  const tableHeadData = [
+    { label: "Request", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+    { label: "Budget", showOnMobile: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
+    { label: "Actions", showOnMobile: true, minWidth: "100px" },
+  ];
+
   const tableRowData = [
-    { id: "requestedBy", content: requestedByName },
+    {
+      id: "requestedBy",
+      content: requestedByName,
+      showOnMobile: true,
+      showOnTablet: true,
+    },
     {
       id: "status",
-      content: <StatusBadge status={requestStatus!} key="status-badge" />,
+      content: <StatusBadge status={requestStatus!} />,
+      showOnMobile: true,
+      showOnTablet: true,
     },
     {
-      id: "amountInFigure",
-      content: moneyFormat(requestData?.amountInFigure!, "NGN"),
+      id: "amount",
+      content: moneyFormat(request?.amountInFigure!, "NGN"),
+      showOnMobile: true,
+      showOnTablet: true,
     },
-    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
     {
-      id: "action",
+      id: "date",
+      content: fullDate,
+      showOnMobile: false,
+      showOnTablet: true,
+    },
+    {
+      id: "actions",
       content: (
         <ActionIcons
           copyTo={copyto}
           isCopying={isCopying}
           canShareRequest={canShareRequest}
-          requestId={requestData?.id}
+          requestId={request?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
+          hideInspect={true}
         />
       ),
+      showOnMobile: true,
+      showOnTablet: true,
     },
   ];
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
+    <div className="flex flex-col space-y-3 pb-20">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Payment Request</TextHeader>
@@ -231,115 +260,149 @@ const PaymentRequest = () => {
         </div>
       </div>
 
-      {/* Main Table Section */}
-      <div ref={pdfContentRef}>
+      {/* Main Content Section */}
+      <div id="pdfContentRef" ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
-          data={requestData}
+          data={request}
           errorComponent={<NetworkErrorUI />}
           loadingComponent={<Spinner />}
           emptyComponent={<div>No data available</div>}
         >
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {tableHeadData.map((title, index) => (
-                  <th
-                    key={index}
-                    className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+          <div className="overflow-x-auto">
+            <div className="md:min-w-full">
+              <table className="w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 hidden sm:table-header-group">
+                  <tr>
+                    {tableHeadData.map((header, index) => (
+                      <th
+                        key={index}
+                        className={`
+                          px-3 py-2.5 md:px-4 md:py-3 
+                          text-left font-medium uppercase 
+                          tracking-wider
+                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                          ${
+                            header.showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          text-xs md:text-sm
+                          whitespace-nowrap
+                        `}
+                        style={{ minWidth: header.minWidth }}
+                      >
+                        {header.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Desktop/Tablet Row */}
+                  <TableRowMain
+                    key={request?.id}
+                    requestId={request?.id || ""}
+                    toggleViewItems={() => {}}
+                    className="hidden sm:table-row"
                   >
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr key={requestData?.id} className="h-[40px] max-h-[40px]">
-                {tableRowData.map((data) => (
-                  <td
-                    key={data.id}
-                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                  >
-                    {data.content}
-                  </td>
-                ))}
-              </tr>
-
-              <tr>
-                <td colSpan={5}>
-                  <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                    <PaymentRequestDetails request={requestData!} />
-
-                    {canUploadFiles && (
-                      <div className="flex flex-col gap-3 mt-3">
-                        <FileUpload
-                          selectedFiles={selectedFiles}
-                          setSelectedFiles={setSelectedFiles}
-                          accept=".jpg,.png,.pdf,.xlsx,.docx"
-                          multiple={true}
-                        />
-
-                        {selectedFiles.length > 0 && (
-                          <div className="self-center">
-                            <Button disabled={isUpdating} onClick={handleSend}>
-                              {isUpdating ? <SpinnerMini /> : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                    {tableRowData.map(
+                      ({ id, content, showOnMobile, showOnTablet }) => (
+                        <TableData
+                          key={`${request?.id}-${id}`}
+                          className={`
+                          ${!showOnMobile ? "hidden md:table-cell" : ""}
+                          ${
+                            showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          px-3 py-2.5 md:px-4 md:py-3
+                        `}
+                        >
+                          {content}
+                        </TableData>
+                      )
                     )}
+                  </TableRowMain>
 
-                    {requestData?.reviewedBy && requestStatus !== "draft" && (
-                      <div className="  mt-4 tracking-wide">
-                        <RequestCommentsAndActions request={requestData} />
-
-                        {canUpdateStatus && (
-                          <StatusUpdateForm
-                            requestStatus={requestStatus}
-                            status={status}
-                            setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
-                            isUpdatingStatus={isUpdatingStatus}
-                            handleStatusChange={onStatusChangeHandler}
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Comment Section for all authorized users (ADDED) */}
-                    {requestData?.status !== "draft" && canAddComments && (
-                      <CommentSection
-                        comments={comments}
-                        canComment={canAddComments}
-                        onAddComment={handleAddComment}
-                        onUpdateComment={handleUpdateComment}
-                        onDeleteComment={handleDeleteComment}
-                        isLoading={isAddingComment}
-                        isUpdating={isUpdatingComment}
-                        isDeleting={isDeletingComment}
+                  {/* Mobile Card View */}
+                  <tr key={`${request?.id}-mobile`} className="sm:hidden">
+                    <td
+                      colSpan={tableHeadData.length}
+                      className="p-4 border-b border-gray-200"
+                    >
+                      <RequestCard
+                        request={request!}
+                        totalAmount={request?.amountInFigure || 0}
+                        requestId={request?.id || ""}
+                        identifier={request?.pmrNumber}
+                        dateValue={requestCreatedAt}
+                        actionIconsProps={{
+                          copyTo: copyto,
+                          isCopying,
+                          canShareRequest,
+                          isGeneratingPDF: isGenerating,
+                          onDownloadPDF: handleDownloadPDF,
+                          showTagDropdown,
+                          setShowTagDropdown,
+                          hideInspect: true,
+                        }}
+                        context="detail"
+                        showActions={true}
+                        showStatus={true}
+                        showIdentifier={true}
+                        showDate={true}
+                        className="sm:hidden"
                       />
-                    )}
+                    </td>
+                  </tr>
 
-                    {showAdminApproval && (
-                      <div className="relative z-10 pb-64">
-                        <AdminApprovalSection
-                          formData={formData}
-                          handleFormChange={handleFormChange}
-                          admins={admins}
-                          isLoadingAmins={isLoadingAmins}
-                          isUpdating={isUpdating}
-                          handleSend={handleSend}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  {/* Details Section */}
+                  <tr>
+                    <td colSpan={tableHeadData.length}>
+                      <RequestDetailLayout
+                        request={request}
+                        requestStatus={request?.status || ""}
+                        // File upload props
+                        canUploadFiles={canUploadFiles}
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        isUploading={isUpdating}
+                        handleUpload={handleSend}
+                        // Status update props
+                        canUpdateStatus={canUpdateStatus}
+                        status={status}
+                        setStatus={setStatus}
+                        comment={comment}
+                        setComment={setComment}
+                        isUpdatingStatus={isUpdatingStatus}
+                        handleStatusChange={onStatusChangeHandler}
+                        // Comment props
+                        comments={comments}
+                        canAddComments={canAddComments}
+                        handleAddComment={handleAddComment}
+                        handleUpdateComment={handleUpdateComment}
+                        handleDeleteComment={handleDeleteComment}
+                        isAddingComment={isAddingComment}
+                        isUpdatingComment={isUpdatingComment}
+                        isDeletingComment={isDeletingComment}
+                        // Admin approval props
+                        showAdminApproval={showAdminApproval}
+                        formData={formData}
+                        handleFormChange={handleFormChange}
+                        admins={admins}
+                        isLoadingAmins={isLoadingAmins}
+                      >
+                        <PaymentRequestDetails request={request!} />
+                      </RequestDetailLayout>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </DataStateContainer>
       </div>
     </div>

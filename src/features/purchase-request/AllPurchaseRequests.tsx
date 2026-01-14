@@ -99,15 +99,19 @@ const AllPurchaseRequests = () => {
   if (isError) {
     return <NetworkErrorUI />;
   }
-
   const tableHeadData = [
-    "Request",
-    "Status",
-    // "Department",
-    "Amount",
-    "Date",
-    "Actions",
+    { label: "Request", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+    { label: "Amount", showOnMobile: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
+    { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
+
   return (
     <div className="flex flex-col space-y-3 pb-80">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
@@ -154,14 +158,23 @@ const AllPurchaseRequests = () => {
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200 ">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 hidden sm:table-header-group">
             <tr>
-              {tableHeadData.map((title, index) => (
+              {tableHeadData.map((header, index) => (
                 <th
                   key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
+                  className={`
+          px-3 py-2.5 md:px-4 md:py-3 
+          text-left font-medium uppercase 
+          tracking-wider
+          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+          ${header.showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+          text-xs md:text-sm
+          whitespace-nowrap
+        `}
+                  style={{ minWidth: header.minWidth }}
                 >
-                  {title}
+                  {header.label}
                 </th>
               ))}
             </tr>
@@ -186,6 +199,7 @@ const AllPurchaseRequests = () => {
                   handleEdit={handleEdit}
                   handleDelete={handleDelete}
                   handleAction={handleAction}
+                  tableHeadData={tableHeadData}
                 />
               ))
             )}

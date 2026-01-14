@@ -155,6 +155,7 @@ export interface PurChaseRequestType {
 export interface PurchaseRequesItemGroupType {
   id?: string;
   description: string;
+  itemName?: string;
   frequency: number;
   quantity: number;
   unit: string;
@@ -228,6 +229,7 @@ export interface AdvanceRequestType {
 
 export interface AdvanceRequesItemGroupType {
   id?: string;
+  itemName?: string;
   description: string;
   frequency: number;
   quantity: number;
@@ -691,14 +693,14 @@ export interface UpdateVendorType {
 //RFQ //
 ///////////////////////
 
-export interface ItemGroupType {
-  description: string;
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
+// export interface ItemGroupType {
+//   description: string;
+//   frequency: number;
+//   quantity: number;
+//   unit: string;
+//   unitCost: number;
+//   total: number;
+// }
 
 export interface RFQItemGroupType {
   description: string;
@@ -1030,3 +1032,22 @@ export interface UsePaymentVoucher {
   message: string;
   data: PaymentVoucherType;
 }
+
+////////////////////
+// UnifiedItemType;
+////////////////////
+
+export interface UnifiedItemType {
+  // Common fields
+  id?: string;
+  description?: string; // For Purchase/Advance
+  itemName?: string;
+  expense?: string; // For Travel/Expense
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
+}
+
+export type ItemGroupType = UnifiedItemType;

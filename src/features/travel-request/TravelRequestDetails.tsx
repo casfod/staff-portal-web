@@ -1,92 +1,64 @@
+import { ItemGroupType, TravelRequestType } from "../../interfaces";
 import { useParams } from "react-router-dom";
-import { TravelRequestType } from "../../interfaces";
-import DetailContainer from "../../ui/DetailContainer";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
+import DetailContainer from "../../ui/DetailContainer";
+import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import CopiedTo from "../../ui/CopiedTo";
+// import MobileItemsTable from "../../ui/MobileItemsTable";
+// import ItemsTable from "../../ui/ItemsTable";
+import RequestItemsTable from "../../ui/RequestItemsTable";
 
 interface RequestDetailsProps {
   request: TravelRequestType;
 }
 
-const ItemsTableData = [
-  "Expense",
-  "Quantity",
-  "Frequency",
-  "Unit",
-  "Unit Cost",
-  "Total",
-];
-
-const ExpenseTable = ({
-  expenses,
-}: {
-  expenses: TravelRequestType["expenses"];
-}) => (
-  <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4 overflow-x-scroll">
-    <thead>
-      <tr>
-        {ItemsTableData.map((data, index) => (
-          <th
-            key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium   uppercase tracking-wider"
-          >
-            {data}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody className="bg-white divide-y divide-gray-200">
-      {expenses!.map((item) => {
-        const rowData = [
-          { id: "expense", content: item.expense },
-          { id: "quantity", content: item.quantity },
-          { id: "frequency", content: item.frequency },
-          { id: "Unit", content: item.unit },
-          { id: "unitCost", content: moneyFormat(item.unitCost, "NGN") },
-          { id: "total", content: moneyFormat(item.total, "NGN") },
-        ];
-
-        return (
-          <tr key={item.id!}>
-            {rowData.map((data) => (
-              <td
-                key={data.id}
-                className="px-6 py-4 text-sm   break-words max-w-xs"
-              >
-                {data.content}
-              </td>
-            ))}
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-);
-
-const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
+export const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
 
+  // Calculate total amount
   const totalAmount =
     request.expenses?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   // Helper function to format content safely
   const formatContent = (content: any): React.ReactNode => {
     if (content instanceof Date) {
-      return formatToDDMMYYYY(content); // or any other date formatting you prefer
+      return formatToDDMMYYYY(content);
     }
     if (content === null || content === undefined) {
-      return "-"; // or any other placeholder you prefer
+      return "-";
     }
     return content;
   };
 
+  // Row data similar to PurchaseRequestDetails
   const rowData = [
     {
       id: "staffName",
       label: "Staff Name :",
       content: request.staffName,
+    },
+    {
+      id: "accountCode",
+      label: "Account Code :",
+      content: request.accountCode,
+    },
+    // {
+    //   id: "department",
+    //   label: "Department :",
+    //   content: request.department,
+    // },
+    {
+      id: "travelReason",
+      label: "Travel Reason :",
+      content: request.travelReason,
+    },
+    {
+      id: "travelRequest",
+      label: "Travel Route :",
+      content: `${request.travelRequest?.from || ""} - ${
+        request.travelRequest?.to || ""
+      }`,
     },
     {
       id: "dayOfDeparture",
@@ -99,84 +71,90 @@ const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
       content: formatToDDMMYYYY(request.dayOfReturn!),
     },
     {
+      id: "expenseChargedTo",
+      label: "Expense Charged To :",
+      content: request.expenseChargedTo,
+    },
+    {
       id: "amountInWords",
       label: "Amount In Words :",
       content: request.amountInWords,
     },
-  ];
-
-  const rowData2 = [
-    {
-      id: "accountCode",
-      label: "Account Code :",
-      content: request.accountCode,
-    },
-    {
-      id: "Travel Reason",
-      label: "Travel Reason:",
-      content: request.travelReason,
-    },
-    {
-      id: "expenseChargedTo",
-      label: "Charged To :",
-      content: `${request.travelRequest.from} - ${request.travelRequest.to}`,
-    },
     {
       id: "totalAmount",
-      label: "Total Amount:",
+      label: "Total Amount :",
       content: moneyFormat(totalAmount, "NGN"),
     },
   ];
 
+  // Prepare expenses for ItemsTable
+  // const formattedExpenses =
+  //   request.expenses?.map((expense) => ({
+  //     id: expense.id!,
+  //     description: expense.expense,
+  //     quantity: expense.quantity,
+  //     unit: expense.unit,
+  //     unitPrice: expense.unitCost,
+  //     total: expense.total,
+  //     // Add any additional fields needed for your ItemsTable
+  //     frequency: expense.frequency,
+  //   })) || [];
+
   return (
     <DetailContainer>
-      {/* Travel Request Details Section */}
+      {/* Travel Request Details Header */}
       {request?.trNumber && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-4 md:p-6">
           {request?.trNumber}
         </h1>
       )}
-
+      {/* Details Grid - Matching PurchaseRequestDetails structure */}
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 ${
           !requestId ? "text-sm" : "text-sm md:text-base"
-        }   mb-3 border-b border-gray-300 pb-6 break-words`}
+        } mb-6 border-b border-gray-300 pb-6`}
       >
-        <div className="flex flex-col gap-2 md:gap-3 w-full">
-          {rowData.map((data) => (
-            <p key={data.id}>
-              <span className="text-sm font-bold mr-1 uppercase">
+        <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+          {rowData.slice(0, Math.ceil(rowData.length / 2)).map((data) => (
+            <div
+              key={data.id}
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+            >
+              <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
               </span>
-              {formatContent(data.content)}
-            </p>
+              <span className="break-words">{formatContent(data.content)}</span>
+            </div>
           ))}
         </div>
 
-        <div className="flex flex-col gap-2 md:gap-3 w-full">
-          {rowData2.map((data) => (
-            <p key={data.id}>
-              <span className="text-sm font-bold mr-1 uppercase">
+        <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+          {rowData.slice(Math.ceil(rowData.length / 2)).map((data) => (
+            <div
+              key={data.id}
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+            >
+              <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
               </span>
-              {formatContent(data.content)}
-            </p>
+              <span className="break-words">{formatContent(data.content)}</span>
+            </div>
           ))}
         </div>
       </div>
-
-      {/* Expenses Section Header */}
-      <h2 className="text-center text-base md:text-lg   font-semibold tracking-widest my-4 break-words">
+      <h2 className="text-center text-base md:text-lg font-semibold tracking-widest mb-4">
         EXPENSES
       </h2>
-
-      <ExpenseTable expenses={request.expenses} />
-
+      {/* Show mobile table on small screens, desktop table on larger screens */}
+      // For Travel Request
+      <RequestItemsTable
+        items={request.expenses as ItemGroupType[]}
+        type="travel"
+      />
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />
       )}
-
       {/* Copied To */}
       {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
     </DetailContainer>

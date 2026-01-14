@@ -97,7 +97,19 @@ const AllPaymentRequests = () => {
     return <NetworkErrorUI />;
   }
 
-  const tableHeadData = ["Request", "Status", "Budget", "Date", "Actions"];
+  // Update tableHeadData to match Purchase Request structure
+  const tableHeadData = [
+    { label: "Request", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+    { label: "Budget", showOnMobile: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
+    { label: "Actions", showOnMobile: true, minWidth: "100px" },
+  ];
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -139,15 +151,28 @@ const AllPaymentRequests = () => {
 
       {/*  Payment Requests Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-200 ">
+          <thead className="bg-gray-50 hidden sm:table-header-group">
             <tr>
-              {tableHeadData.map((title, index) => (
+              {tableHeadData.map((header, index) => (
                 <th
                   key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
+                  className={`
+                    px-3 py-2.5 md:px-4 md:py-3 
+                    text-left font-medium uppercase 
+                    tracking-wider
+                    ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                    ${
+                      header.showOnTablet
+                        ? "hidden sm:table-cell md:table-cell"
+                        : ""
+                    }
+                    text-xs md:text-sm
+                    whitespace-nowrap
+                  `}
+                  style={{ minWidth: header.minWidth }}
                 >
-                  {title}
+                  {header.label}
                 </th>
               ))}
             </tr>
@@ -172,6 +197,7 @@ const AllPaymentRequests = () => {
                   handleEdit={handleEdit}
                   handleDelete={handleDelete}
                   handleAction={handleAction}
+                  tableHeadData={tableHeadData}
                 />
               ))
             )}

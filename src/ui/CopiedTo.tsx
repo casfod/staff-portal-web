@@ -17,12 +17,12 @@ const CopiedTo = ({ to }: { to: UserType[] }) => {
               key={user.id}
               className="p-3 border rounded-md hover:bg-gray-50 transition-colors"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col md:flex-row items-center gap-3 shadow-md md:shadow-none p-2 md:p-0 rounded-md">
                 <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-xs font-medium text-blue-600">
                   {user.first_name.charAt(0)}
                   {user.last_name.charAt(0)}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 text-center md:text-start min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">
                     {`${user.first_name} ${user.last_name}`}
                   </p>

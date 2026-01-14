@@ -9,13 +9,14 @@ interface RequestCardProps {
   request: {
     id?: string;
     status?: string;
-    requestedBy?: string;
+    requestedBy?: any; // This could be string or object
+    requestBy?: string; // Add this for PaymentRequestType
     staffName?: string;
     arNumber?: string;
     pcrNumber?: string;
     trNumber?: string;
     cnNumber?: string;
-    payNumber?: string;
+    pmrNumber?: string;
     ecNumber?: string;
     [key: string]: any;
   };
@@ -67,10 +68,41 @@ const RequestCard = ({
       request.pcrNumber ||
       request.trNumber ||
       request.cnNumber ||
-      request.payNumber ||
+      request.pmrNumber ||
       request.ecNumber ||
       `ID: ${requestId?.substring(0, 8)}`
     );
+  };
+
+  // Helper function to get the display name from request
+  const getDisplayName = () => {
+    // Check for requestBy first (used in PaymentRequestType)
+    if (request.requestBy) {
+      return request.requestBy;
+    }
+
+    // Check for staffName (used in TravelRequestType, ExpenseClaimType)
+    if (request.staffName) {
+      return request.staffName;
+    }
+
+    // Check for requestedBy - could be string or object
+    if (request.requestedBy) {
+      // If it's a string, use it directly
+      if (typeof request.requestedBy === "string") {
+        return request.requestedBy;
+      }
+      // If it's an object with first_name and last_name
+      if (request.requestedBy.first_name && request.requestedBy.last_name) {
+        return `${request.requestedBy.first_name} ${request.requestedBy.last_name}`;
+      }
+      // If it's an object with name property
+      if (request.requestedBy.name) {
+        return request.requestedBy.name;
+      }
+    }
+
+    return "N/A";
   };
 
   const formattedDate = dateValue ? formatToDDMMYYYY(dateValue) : "";
@@ -90,7 +122,7 @@ const RequestCard = ({
           )}
 
           <h3 className="text-center font-semibold text-gray-900 truncate">
-            {request?.requestedBy || request?.staffName || "N/A"}
+            {getDisplayName()}
           </h3>
         </div>
 
@@ -134,7 +166,7 @@ const RequestCard = ({
           )}
           <div>
             <h3 className="font-semibold text-gray-900 text-lg">
-              {request?.requestedBy || request?.staffName || "N/A"}
+              {getDisplayName()}
             </h3>
             {showIdentifier && (
               <div className="text-sm text-gray-600">{getIdentifier()}</div>
