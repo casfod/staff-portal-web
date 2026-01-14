@@ -102,6 +102,21 @@ const RequestCard = ({
       }
     }
 
+    if (request.preparedBy) {
+      // If it's a string, use it directly
+      if (typeof request.preparedBy === "string") {
+        return request.preparedBy;
+      }
+      // If it's an object with first_name and last_name
+      if (request.preparedBy.first_name && request.preparedBy.last_name) {
+        return `${request.preparedBy.first_name} ${request.preparedBy.last_name}`;
+      }
+      // If it's an object with name property
+      if (request.preparedBy.name) {
+        return request.preparedBy.name;
+      }
+    }
+
     return "N/A";
   };
 
