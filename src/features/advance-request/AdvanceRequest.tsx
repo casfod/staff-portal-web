@@ -52,17 +52,17 @@ const Request = () => {
     (state: RootState) => state.advanceRequest.advanceRequest
   );
 
-  const requestData = useMemo(
+  const request = useMemo(
     () => remoteData?.data || advanceRequest,
     [remoteData, advanceRequest]
   );
 
   // Redirect logic
   useEffect(() => {
-    if (!requestId || (!isLoading && !requestData)) {
+    if (!requestId || (!isLoading && !request)) {
       navigate("/advance-requests");
     }
-  }, [requestData, requestId, navigate, isLoading]);
+  }, [request, requestId, navigate, isLoading]);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -147,21 +147,21 @@ const Request = () => {
   };
 
   const totalAmount =
-    requestData?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+    request?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   // User references
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = requestData?.status;
+  const requestStatus = request?.status;
 
   // Permission flags with explicit null checks
-  const isCreator = requestData?.createdBy?.id === currentUserId;
-  const isReviewer = requestData?.reviewedBy?.id === currentUserId;
-  const isApprover = requestData?.approvedBy?.id === currentUserId;
+  const isCreator = request?.createdBy?.id === currentUserId;
+  const isReviewer = request?.reviewedBy?.id === currentUserId;
+  const isApprover = request?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
   // Check if user is in copiedTo array
-  const isCopiedTo = requestData?.copiedTo?.some(
+  const isCopiedTo = request?.copiedTo?.some(
     (user: any) => user.id === currentUserId
   );
 
@@ -185,19 +185,34 @@ const Request = () => {
     (userRole === "REVIEWER" && requestStatus === "pending");
 
   const showAdminApproval =
-    !requestData?.approvedBy &&
+    !request?.approvedBy &&
     requestStatus === "reviewed" &&
     (isCreator ||
-      (isReviewer && !requestData?.reviewedBy) ||
-      (isApprover && !requestData?.approvedBy));
+      (isReviewer && !request?.reviewedBy) ||
+      (isApprover && !request?.approvedBy));
+  const requestCreatedAt = request?.createdAt ?? "";
+
+  const fullDate = formatToDDMMYYYY(requestCreatedAt);
 
   // Table data
-  const tableHeadData = ["Request", "Status", "Amount", "Date", "Actions"];
+  // Responsive table header configuration
+  const tableHeadData = [
+    { label: "Request", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+    { label: "Amount", showOnMobile: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
+    { label: "Actions", showOnMobile: true, minWidth: "100px" },
+  ];
   const tableRowData = [
-    { id: "requestedBy", content: requestData?.requestedBy },
-    { id: "status", content: <StatusBadge status={requestData?.status!} /> },
+    { id: "requestedBy", content: request?.requestedBy },
+    { id: "status", content: <StatusBadge status={request?.status!} /> },
     { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
-    { id: "createdAt", content: formatToDDMMYYYY(requestData?.createdAt!) },
+    { id: "createdAt", content: formatToDDMMYYYY(request?.createdAt!) },
     {
       id: "action",
       content: (
@@ -205,7 +220,7 @@ const Request = () => {
           copyTo={copyto}
           isCopying={isCopying}
           canShareRequest={canShareRequest}
-          requestId={requestData?.id}
+          requestId={request?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
@@ -216,7 +231,7 @@ const Request = () => {
   ];
 
   // Cast comments to Comment[] type for TypeScript
-  const comments = (requestData?.comments || []) as Comment[];
+  const comments = (request?.comments || []) as Comment[];
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
@@ -231,124 +246,196 @@ const Request = () => {
       </div>
 
       {/* Main Table Section */}
+
       <div id="pdfContentRef" ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
-          data={requestData}
+          data={request}
           errorComponent={<NetworkErrorUI />}
           loadingComponent={<Spinner />}
           emptyComponent={<div>No data available</div>}
         >
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {tableHeadData.map((title, index) => (
-                  <th
-                    key={index}
-                    className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                  >
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+          <div className="overflow-x-auto">
+            <div className="md:min-w-full">
+              <table className="w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 hidden sm:table-header-group">
+                  <tr>
+                    {tableHeadData.map((header, index) => (
+                      <th
+                        key={index}
+                        className={`
+                          px-3 py-2.5 md:px-4 md:py-3 
+                          text-left font-medium uppercase 
+                          tracking-wider
+                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                          ${
+                            header.showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          text-xs md:text-sm
+                          whitespace-nowrap
+                        `}
+                        style={{ minWidth: header.minWidth }}
+                      >
+                        {header.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
-            <tbody className="bg-white divide-y divide-gray-200">
-              <>
-                {/* Advance Request Details Row */}
-                <tr key={requestData?.id} className="h-[40px] max-h-[40px] ">
-                  {tableRowData.map((data) => (
-                    <td
-                      key={data.id}
-                      className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-sm 2xl:text-text-base tracking-wider"
-                    >
-                      {data.content}
-                    </td>
-                  ))}
-                </tr>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <>
+                    {/* Advance Request Details Row */}
+                    <tr key={request?.id} className="hidden sm:table-row">
+                      {tableRowData.map((data, index) => (
+                        <td
+                          key={`${data.id}-${index}`}
+                          className="px-3 py-2.5 md:px-6 md:py-3 text-left text-sm 2xl:text-base tracking-wider"
+                        >
+                          {data.content}
+                        </td>
+                      ))}
+                    </tr>
 
-                {/* Items Table Section */}
-                <tr>
-                  <td colSpan={5}>
-                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                      <AdvanceRequestDetails request={requestData!} />
+                    {/* Mobile Card View */}
+                    <tr key={`${requestId}-mobile`} className="sm:hidden">
+                      <td
+                        colSpan={tableHeadData.length}
+                        className="p-4 border-b border-gray-200"
+                      >
+                        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm space-y-3">
+                          {/* Top Row - Main Info */}
 
-                      {canUploadFiles && (
-                        <div className="flex flex-col gap-3 mt-3">
-                          <FileUpload
-                            selectedFiles={selectedFiles}
-                            setSelectedFiles={setSelectedFiles}
-                            accept=".jpg,.png,.pdf,.xlsx,.docx"
-                            multiple={true}
-                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="mt-1">
+                              <StatusBadge
+                                status={request?.status!}
+                                size="sm"
+                              />
+                            </div>
 
-                          {selectedFiles.length > 0 && (
-                            <div className="self-center">
-                              <Button
-                                disabled={isUpdating}
-                                onClick={handleSend}
-                              >
-                                {isUpdating ? <SpinnerMini /> : "Upload"}
-                              </Button>
+                            <h3 className="text-center font-semibold text-gray-900 truncate">
+                              {request?.requestedBy}
+                            </h3>
+                          </div>
+
+                          <div className="text-center">
+                            <div className="text-xs font-bold">
+                              {moneyFormat(totalAmount, "NGN")}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {fullDate}
+                            </div>
+                          </div>
+
+                          {/* Bottom Row - Actions */}
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                            <span className="text-sm text-gray-600">
+                              {request?.arNumber ||
+                                `ID: ${requestId?.substring(0, 8)}`}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <ActionIcons
+                                copyTo={copyto}
+                                isCopying={isCopying}
+                                canShareRequest={canShareRequest}
+                                requestId={request?.id}
+                                isGeneratingPDF={isGenerating}
+                                onDownloadPDF={handleDownloadPDF}
+                                showTagDropdown={showTagDropdown}
+                                setShowTagDropdown={setShowTagDropdown}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Items Table Section */}
+                    <tr>
+                      <td colSpan={5}>
+                        <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                          <AdvanceRequestDetails request={request!} />
+
+                          {canUploadFiles && (
+                            <div className="flex flex-col gap-3 mt-3">
+                              <FileUpload
+                                selectedFiles={selectedFiles}
+                                setSelectedFiles={setSelectedFiles}
+                                accept=".jpg,.png,.pdf,.xlsx,.docx"
+                                multiple={true}
+                              />
+
+                              {selectedFiles.length > 0 && (
+                                <div className="self-center">
+                                  <Button
+                                    disabled={isUpdating}
+                                    onClick={handleSend}
+                                  >
+                                    {isUpdating ? <SpinnerMini /> : "Upload"}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Comments and Actions Section */}
+                          {request?.reviewedBy &&
+                            request?.status !== "draft" && (
+                              <div className="  mt-4 tracking-wide">
+                                <RequestCommentsAndActions request={request} />
+
+                                {canUpdateStatus && (
+                                  <StatusUpdateForm
+                                    requestStatus={request?.status!}
+                                    status={status}
+                                    setStatus={setStatus}
+                                    comment={comment}
+                                    setComment={setComment}
+                                    isUpdatingStatus={isUpdatingStatus}
+                                    handleStatusChange={onStatusChangeHandler}
+                                  />
+                                )}
+                              </div>
+                            )}
+
+                          {/* Comment Section for all authorized users */}
+                          {request?.status !== "draft" && canAddComments && (
+                            <CommentSection
+                              comments={comments}
+                              canComment={canAddComments}
+                              onAddComment={handleAddComment}
+                              onUpdateComment={handleUpdateComment}
+                              onDeleteComment={handleDeleteComment}
+                              isLoading={isAddingComment}
+                              isUpdating={isUpdatingComment}
+                              isDeleting={isDeletingComment}
+                            />
+                          )}
+
+                          {/* Admin Approval Section (for STAFF role) */}
+                          {showAdminApproval && (
+                            <div className="relative z-10 pb-64">
+                              <AdminApprovalSection
+                                formData={formData}
+                                handleFormChange={handleFormChange}
+                                admins={admins}
+                                isLoadingAmins={isLoadingAmins}
+                                isUpdating={isUpdating}
+                                handleSend={handleSend}
+                              />
                             </div>
                           )}
                         </div>
-                      )}
-
-                      {/* Comments and Actions Section */}
-                      {requestData?.reviewedBy &&
-                        requestData?.status !== "draft" && (
-                          <div className="  mt-4 tracking-wide">
-                            <RequestCommentsAndActions request={requestData} />
-
-                            {canUpdateStatus && (
-                              <StatusUpdateForm
-                                requestStatus={requestData?.status!}
-                                status={status}
-                                setStatus={setStatus}
-                                comment={comment}
-                                setComment={setComment}
-                                isUpdatingStatus={isUpdatingStatus}
-                                handleStatusChange={onStatusChangeHandler}
-                              />
-                            )}
-                          </div>
-                        )}
-
-                      {/* Comment Section for all authorized users */}
-                      {requestData?.status !== "draft" && canAddComments && (
-                        <CommentSection
-                          comments={comments}
-                          canComment={canAddComments}
-                          onAddComment={handleAddComment}
-                          onUpdateComment={handleUpdateComment}
-                          onDeleteComment={handleDeleteComment}
-                          isLoading={isAddingComment}
-                          isUpdating={isUpdatingComment}
-                          isDeleting={isDeletingComment}
-                        />
-                      )}
-
-                      {/* Admin Approval Section (for STAFF role) */}
-                      {showAdminApproval && (
-                        <div className="relative z-10 pb-64">
-                          <AdminApprovalSection
-                            formData={formData}
-                            handleFormChange={handleFormChange}
-                            admins={admins}
-                            isLoadingAmins={isLoadingAmins}
-                            isUpdating={isUpdating}
-                            handleSend={handleSend}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              </>
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  </>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </DataStateContainer>
       </div>
     </div>

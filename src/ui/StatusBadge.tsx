@@ -1,4 +1,10 @@
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({
+  status,
+  size = "base",
+}: {
+  status: string;
+  size?: "sm" | "base" | "lg";
+}) => {
   const statusStyles = {
     draft: "border border-gray-400",
     pending: "bg-amber-500 text-white",
@@ -7,13 +13,24 @@ const StatusBadge = ({ status }: { status: string }) => {
     reviewed: "bg-[#0B6DA2] text-white",
   };
 
+  const sizeStyles = {
+    sm: "px-1.5 py-0.5 text-xs font-medium rounded-lg",
+    base: "px-2 py-0.5 text-sm font-semibold rounded-lg",
+    lg: "px-3 py-1.5 text-base font-semibold rounded-lg",
+  };
+
+  const statusText =
+    status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+
   return (
     <div
-      className={`w-fit h-fit px-2 py-0.5 whitespace-nowrap rounded-lg uppercase mb-1 ${
+      className={`inline-flex items-center justify-center ${sizeStyles[size]} ${
         statusStyles[status as keyof typeof statusStyles]
       }`}
     >
-      <p>{status}</p>
+      <span className={`${size === "sm" ? "text-[10px]" : ""}`}>
+        {statusText}
+      </span>
     </div>
   );
 };

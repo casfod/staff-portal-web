@@ -107,27 +107,34 @@ const AllAdvanceRequests = () => {
     return <NetworkErrorUI />;
   }
 
+  // Responsive table header configuration
   const tableHeadData = [
-    "Request",
-    "Status",
-    // "Department",
-    "Amount",
-    "Date",
-    "Actions",
+    { label: "Request", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+    { label: "Amount", showOnMobile: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    }, // Hidden on mobile, shown on tablet+
+    { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
+    <div className="flex flex-col space-y-3 pb-20">
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         {/* Header with title and button */}
         <div className="flex justify-between items-center">
           <TextHeader>Advance Requests</TextHeader>
 
           <Button
-            onClick={() => navigate("/advance-requests/create-advance-request")} // Use relative path here
+            onClick={() => navigate("/advance-requests/create-advance-request")}
+            className="text-sm md:text-base"
           >
             <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            Add
+            <span className="hidden sm:inline">Add</span>
+            <span className="sm:hidden">New</span>
           </Button>
         </div>
 
@@ -141,8 +148,8 @@ const AllAdvanceRequests = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2   placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search"
+              className="w-full h-full px-2 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7 text-sm md:text-base"
+              placeholder="Search requests..."
             />
             <span
               className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
@@ -155,51 +162,82 @@ const AllAdvanceRequests = () => {
       </div>
 
       {/* ///////////////////////////// */}
-      {/*Advance REQUEST TABLE*/}
+      {/* ADVANCE REQUEST TABLE */}
       {/* ///////////////////////////// */}
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll overflow-y-scroll">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left  font-medium   uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading ? (
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-auto">
+        <div className=" md:min-w-full">
+          <table className="w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 hidden sm:table-header-group">
               <tr>
-                <td colSpan={6} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
+                {tableHeadData.map((header, index) => (
+                  <th
+                    key={index}
+                    className={`
+                      px-3 py-2.5 md:px-4 md:py-3 
+                      text-left font-medium uppercase 
+                      tracking-wider
+                      ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                      ${
+                        header.showOnTablet
+                          ? "hidden sm:table-cell md:table-cell"
+                          : ""
+                      }
+                      text-xs md:text-sm
+                      whitespace-nowrap
+                    `}
+                    style={{ minWidth: header.minWidth }}
+                  >
+                    {header.label}
+                  </th>
+                ))}
               </tr>
-            ) : (
-              advanceRequests.map((request) => (
-                <AdvanceRequestTableRow
-                  key={request.id}
-                  request={request}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={tableHeadData.length} className="py-8">
+                    <div className="flex justify-center items-center">
+                      <Spinner />
+                    </div>
+                  </td>
+                </tr>
+              ) : advanceRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={tableHeadData.length} className="py-8">
+                    <div className="flex flex-col justify-center items-center text-gray-500">
+                      <div className="text-lg font-semibold mb-2">
+                        No requests found
+                      </div>
+                      <div className="text-sm">
+                        {searchTerm
+                          ? "Try a different search term"
+                          : "Create your first advance request"}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                advanceRequests.map((request) => (
+                  <AdvanceRequestTableRow
+                    key={request.id}
+                    request={request}
+                    visibleItems={visibleItems}
+                    toggleViewItems={toggleViewItems}
+                    handleEdit={handleEdit}
+                    handleDelete={handleDelete}
+                    handleAction={handleAction}
+                    tableHeadData={tableHeadData} // Pass headers for responsive rendering
+                  />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination - Only show if needed */}
       {(advanceRequests.length >= limit || totalPages > 1) && (
         <Pagination
           currentPage={page}

@@ -15,6 +15,7 @@ const ItemsTableData = [
   "Description",
   "Quantity",
   "Frequency",
+  "Unit",
   "Unit Cost",
   "Total",
 ];
@@ -43,6 +44,7 @@ const ItemsTable = ({
           { id: "description", content: item.description },
           { id: "quantity", content: item.quantity },
           { id: "frequency", content: item.frequency },
+          { id: "Unit", content: item.unit },
           { id: "unitCost", content: moneyFormat(item.unitCost, "NGN") },
           { id: "total", content: moneyFormat(item.total, "NGN") },
         ];
