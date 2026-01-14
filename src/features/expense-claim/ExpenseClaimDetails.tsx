@@ -6,6 +6,7 @@ import DetailContainer from "../../ui/DetailContainer";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import CopiedTo from "../../ui/CopiedTo";
 import RequestItemsTable from "../../ui/RequestItemsTable";
+import SystemInfo from "../../ui/SystemInfo";
 
 interface RequestDetailsProps {
   request: ExpenseClaimType;
@@ -150,6 +151,9 @@ export const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
         items={request.expenses as ItemGroupType[]}
         type="expense"
       />
+
+      <SystemInfo request={request} />
+
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />

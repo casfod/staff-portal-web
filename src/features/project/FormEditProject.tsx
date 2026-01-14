@@ -206,7 +206,7 @@ const FormEditProject: React.FC<FormEditProjectProps> = ({ project }) => {
 
       {/* Account Code */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[600px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.account_code.map((account, index) => (
             <div
               key={index}
@@ -252,7 +252,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
 
       {/* Sectors */}
       <div className="flex flex-col gap-2 scale-[85%]">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[450px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 justify-center gap-4 max-h-[600px] border-2 overflow-y-auto px-3 md:px-6 py-4 mdpy-8 rounded-lg">
           {formData.sectors.map((sector, index) => (
             <div
               key={index}

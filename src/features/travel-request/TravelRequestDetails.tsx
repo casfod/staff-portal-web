@@ -8,6 +8,7 @@ import CopiedTo from "../../ui/CopiedTo";
 // import MobileItemsTable from "../../ui/MobileItemsTable";
 // import ItemsTable from "../../ui/ItemsTable";
 import RequestItemsTable from "../../ui/RequestItemsTable";
+import SystemInfo from "../../ui/SystemInfo";
 
 interface RequestDetailsProps {
   request: TravelRequestType;
@@ -146,11 +147,13 @@ export const TravelRequestDetails = ({ request }: RequestDetailsProps) => {
         EXPENSES
       </h2>
       {/* Show mobile table on small screens, desktop table on larger screens */}
-      // For Travel Request
       <RequestItemsTable
         items={request.expenses as ItemGroupType[]}
         type="travel"
       />
+
+      <SystemInfo request={request} />
+
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (
         <FileAttachmentContainer files={request.files} />

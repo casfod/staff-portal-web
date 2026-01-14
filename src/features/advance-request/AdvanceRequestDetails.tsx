@@ -4,10 +4,9 @@ import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
-import MobileItemsTable from "../../ui/MobileItemsTable";
-import ItemsTable from "../../ui/ItemsTable";
-import RequestItemsTable from "../../ui/RequestItemsTable";
 
+import RequestItemsTable from "../../ui/RequestItemsTable";
+import SystemInfo from "../../ui/SystemInfo";
 interface RequestDetailsProps {
   request: AdvanceRequestType;
 }
@@ -118,6 +117,8 @@ export const AdvanceRequestDetails = ({ request }: RequestDetailsProps) => {
         items={request.itemGroups as ItemGroupType[]}
         type="advance"
       />
+
+      <SystemInfo request={request} />
 
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (

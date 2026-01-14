@@ -111,7 +111,7 @@ const RequestCard = ({
   if (context === "list") {
     return (
       <div
-        className={`bg-white rounded-lg border border-gray-200 p-4 shadow-sm space-y-3 ${className}`}
+        className={`bg-gray-50/50 rounded-lg border border-gray-200 p-4 shadow-md space-y-3 ${className}`}
       >
         {/* Top Row - Main Info */}
         <div className="flex flex-col items-center gap-1">

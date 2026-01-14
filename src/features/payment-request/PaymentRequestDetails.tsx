@@ -5,6 +5,7 @@ import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
+import SystemInfo from "../../ui/SystemInfo";
 
 interface RequestDetailsProps {
   request: PaymentRequestType;
@@ -110,6 +111,8 @@ export const PaymentRequestDetails = ({ request }: RequestDetailsProps) => {
           ))}
         </div>
       </div>
+
+      <SystemInfo request={request} />
 
       {/* File Attachments Section */}
       {request.files && request.files.length > 0 && (

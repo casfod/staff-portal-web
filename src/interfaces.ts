@@ -274,6 +274,7 @@ export interface useTravelRequestType {
 export interface TravelRequestItemGroup {
   id?: string;
   expense: string;
+  description?: string; // For Purchase/Advance
   frequency: number;
   quantity: number;
   unit: string;
@@ -346,6 +347,7 @@ export interface useExpenseClaimType {
 export interface ExpenseClaimItemGroup {
   id?: string;
   expense: string;
+  description?: string; // For Purchase/Advance
   frequency: number;
   quantity: number;
   unit: string;
