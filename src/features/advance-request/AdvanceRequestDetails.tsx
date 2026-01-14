@@ -142,9 +142,9 @@ const MobileItemsTable = ({
     {/* Total Summary */}
     {itemGroups!.length > 0 && (
       <div className="rounded-lg border border-blue-200 p-4 mt-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between flex-wrap items-center">
           <span className="font-bold text-gray-800">Total Amount:</span>
-          <span className="font-bold text-xl">
+          <span className="font-bold text-sm">
             {moneyFormat(
               itemGroups!.reduce((sum, item) => sum + item.total, 0),
               "NGN"

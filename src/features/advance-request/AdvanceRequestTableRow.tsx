@@ -8,6 +8,7 @@ import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
 import TableRowMain from "../../ui/TableRowMain";
 import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
+import RequestCard from "../../ui/RequestCard";
 
 type TableHeaderConfig = {
   label: string;
@@ -138,52 +139,31 @@ const AdvanceRequestTableRow = ({
           </TableData>
         ))}
       </TableRowMain>
-
       {/* Mobile View - Card Layout */}
       <tr key={`${requestId}-mobile`} className="sm:hidden">
         <td colSpan={headers.length} className="p-4 border-b border-gray-200">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm space-y-3">
-            {/* Top Row - Main Info */}
-
-            <div className="flex flex-col items-center gap-1">
-              <div className="mt-1">
-                <StatusBadge status={request.status!} size="sm" />
-              </div>
-
-              <h3 className="text-center font-semibold text-gray-900 truncate">
-                {request.requestedBy}
-              </h3>
-            </div>
-
-            <div className="text-center">
-              <div className="text-xs font-bold">
-                {moneyFormat(totalAmount, "NGN")}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">{fullDate}</div>
-            </div>
-
-            {/* Bottom Row - Actions */}
-            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-              <span className="text-sm text-gray-600">
-                {request.arNumber || `ID: ${requestId.substring(0, 8)}`}
-              </span>
-              <div className="flex items-center space-x-2">
-                <ActionIcons
-                  isEditable={isEditable}
-                  requestId={requestId}
-                  visibleItems={visibleItems}
-                  onToggleView={toggleViewItems}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  request={request}
-                  // variant="mobile"
-                />
-              </div>
-            </div>
-          </div>
+          <RequestCard
+            request={request}
+            totalAmount={totalAmount}
+            requestId={requestId}
+            identifier={request.arNumber}
+            dateValue={requestCreatedAt}
+            actionIconsProps={{
+              isEditable,
+              requestId,
+              visibleItems,
+              onToggleView: toggleViewItems,
+              onEdit: handleEdit,
+              onDelete: handleDelete,
+              request,
+              variant: "list",
+              hideInspect: false,
+            }}
+            context="list"
+            className="sm:hidden"
+          />
         </td>
       </tr>
-
       {/* Expanded Details (Visible on both mobile and desktop) */}
       {isVisible && (
         <tr key={`${requestId}-details`} className="rounded-lg">

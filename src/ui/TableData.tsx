@@ -5,7 +5,7 @@ const TableData = ({
   children,
 }: {
   children: React.ReactNode;
-  className: string;
+  className?: string;
 }) => {
   return (
     <td

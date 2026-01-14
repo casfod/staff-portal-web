@@ -10,14 +10,9 @@ import { localStorageUser } from "../../utils/localStorageUser";
 import { useAdmins } from "../user/Hooks/useAdmins";
 
 import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import AdminApprovalSection from "../../ui/AdminApprovalSection";
-import StatusUpdateForm from "../../ui/StatusUpdateForm";
 import StatusBadge from "../../ui/StatusBadge";
 import Button from "../../ui/Button";
 import TextHeader from "../../ui/TextHeader";
-import { FileUpload } from "../../ui/FileUpload";
-import SpinnerMini from "../../ui/SpinnerMini";
 import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import {
   useAdvanceRequest,
@@ -33,8 +28,11 @@ import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
 import ActionIcons from "../../ui/ActionIcons";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
-import CommentSection from "../../ui/CommentSection";
 import { Comment } from "../../interfaces";
+import TableData from "../../ui/TableData";
+import TableRowMain from "../../ui/TableRowMain";
+import RequestCard from "../../ui/RequestCard";
+import RequestDetailLayout from "../../ui/RequestDetailLayout";
 
 const Request = () => {
   const currentUser = localStorageUser();
@@ -192,7 +190,7 @@ const Request = () => {
       (isApprover && !request?.approvedBy));
   const requestCreatedAt = request?.createdAt ?? "";
 
-  const fullDate = formatToDDMMYYYY(requestCreatedAt);
+  // const fullDate = formatToDDMMYYYY(requestCreatedAt);
 
   // Table data
   // Responsive table header configuration
@@ -208,11 +206,32 @@ const Request = () => {
     },
     { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
+  // Replace the tableRowData in AdvanceRequest.tsx with:
   const tableRowData = [
-    { id: "requestedBy", content: request?.requestedBy },
-    { id: "status", content: <StatusBadge status={request?.status!} /> },
-    { id: "totalAmount", content: moneyFormat(totalAmount, "NGN") },
-    { id: "createdAt", content: formatToDDMMYYYY(request?.createdAt!) },
+    {
+      id: "requestedBy",
+      content: request?.requestedBy,
+      showOnMobile: true,
+      showOnTablet: true,
+    },
+    {
+      id: "status",
+      content: <StatusBadge status={request?.status!} />,
+      showOnMobile: true,
+      showOnTablet: true,
+    },
+    {
+      id: "amount",
+      content: moneyFormat(totalAmount, "NGN"),
+      showOnMobile: true,
+      showOnTablet: true,
+    },
+    {
+      id: "date",
+      content: formatToDDMMYYYY(request?.createdAt!),
+      showOnMobile: false,
+      showOnTablet: true,
+    },
     {
       id: "action",
       content: (
@@ -225,8 +244,11 @@ const Request = () => {
           onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
+          hideInspect={true} // Hide inspect on detail page
         />
       ),
+      showOnMobile: true,
+      showOnTablet: true,
     },
   ];
 
@@ -247,7 +269,7 @@ const Request = () => {
 
       {/* Main Table Section */}
 
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      <div ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -265,18 +287,18 @@ const Request = () => {
                       <th
                         key={index}
                         className={`
-                          px-3 py-2.5 md:px-4 md:py-3 
-                          text-left font-medium uppercase 
-                          tracking-wider
-                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            header.showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          text-xs md:text-sm
-                          whitespace-nowrap
-                        `}
+                    px-3 py-2.5 md:px-4 md:py-3 
+                    text-left font-medium uppercase 
+                    tracking-wider
+                    ${!header.showOnMobile ? "hidden md:table-cell" : ""}
+                    ${
+                      header.showOnTablet
+                        ? "hidden sm:table-cell md:table-cell"
+                        : ""
+                    }
+                    text-xs md:text-sm
+                    whitespace-nowrap
+                  `}
                         style={{ minWidth: header.minWidth }}
                       >
                         {header.label}
@@ -286,152 +308,101 @@ const Request = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <>
-                    {/* Advance Request Details Row */}
-                    <tr key={request?.id} className="hidden sm:table-row">
-                      {tableRowData.map((data, index) => (
-                        <td
-                          key={`${data.id}-${index}`}
-                          className="px-3 py-2.5 md:px-6 md:py-3 text-left text-sm 2xl:text-base tracking-wider"
+                  {/* Desktop/Tablet Row */}
+                  <TableRowMain
+                    key={request?.id}
+                    requestId={request?.id || ""}
+                    toggleViewItems={() => {}} // Empty function since no toggle needed
+                    className="hidden sm:table-row"
+                  >
+                    {tableRowData.map(
+                      ({ id, content, showOnMobile, showOnTablet }) => (
+                        <TableData
+                          key={`${request?.id}-${id}`}
+                          className={`
+                    ${!showOnMobile ? "hidden md:table-cell" : ""}
+                    ${showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                    px-3 py-2.5 md:px-4 md:py-3
+                  `}
                         >
-                          {data.content}
-                        </td>
-                      ))}
-                    </tr>
+                          {content}
+                        </TableData>
+                      )
+                    )}
+                  </TableRowMain>
 
-                    {/* Mobile Card View */}
-                    <tr key={`${requestId}-mobile`} className="sm:hidden">
-                      <td
-                        colSpan={tableHeadData.length}
-                        className="p-4 border-b border-gray-200"
+                  {/* Mobile Card View */}
+                  <tr key={`${request?.id}-mobile`} className="sm:hidden">
+                    <td
+                      colSpan={tableHeadData.length}
+                      className="p-4 border-b border-gray-200"
+                    >
+                      <RequestCard
+                        request={request!}
+                        totalAmount={totalAmount}
+                        requestId={request?.id || ""}
+                        identifier={request?.arNumber}
+                        dateValue={requestCreatedAt}
+                        actionIconsProps={{
+                          copyTo: copyto,
+                          isCopying,
+                          canShareRequest,
+                          isGeneratingPDF: isGenerating,
+                          onDownloadPDF: handleDownloadPDF,
+                          showTagDropdown,
+                          setShowTagDropdown,
+                          hideInspect: true, // Hide inspect button on detail page
+                        }}
+                        context="detail"
+                        showActions={true}
+                        showStatus={true}
+                        showIdentifier={true}
+                        showDate={true}
+                        className="sm:hidden"
+                      />
+                    </td>
+                  </tr>
+
+                  {/* Details Section */}
+                  <tr>
+                    <td colSpan={tableHeadData.length}>
+                      <RequestDetailLayout
+                        request={request}
+                        requestStatus={request?.status || ""}
+                        // File upload props
+                        canUploadFiles={canUploadFiles}
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        isUploading={isUpdating}
+                        handleUpload={handleSend}
+                        // Status update props
+                        canUpdateStatus={canUpdateStatus}
+                        status={status}
+                        setStatus={setStatus}
+                        comment={comment}
+                        setComment={setComment}
+                        isUpdatingStatus={isUpdatingStatus}
+                        handleStatusChange={onStatusChangeHandler}
+                        // Comment props
+                        comments={comments}
+                        canAddComments={canAddComments}
+                        handleAddComment={handleAddComment}
+                        handleUpdateComment={handleUpdateComment}
+                        handleDeleteComment={handleDeleteComment}
+                        isAddingComment={isAddingComment}
+                        isUpdatingComment={isUpdatingComment}
+                        isDeletingComment={isDeletingComment}
+                        // Admin approval props
+                        showAdminApproval={showAdminApproval}
+                        formData={formData}
+                        handleFormChange={handleFormChange}
+                        admins={admins}
+                        isLoadingAmins={isLoadingAmins}
                       >
-                        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm space-y-3">
-                          {/* Top Row - Main Info */}
-
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="mt-1">
-                              <StatusBadge
-                                status={request?.status!}
-                                size="sm"
-                              />
-                            </div>
-
-                            <h3 className="text-center font-semibold text-gray-900 truncate">
-                              {request?.requestedBy}
-                            </h3>
-                          </div>
-
-                          <div className="text-center">
-                            <div className="text-xs font-bold">
-                              {moneyFormat(totalAmount, "NGN")}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {fullDate}
-                            </div>
-                          </div>
-
-                          {/* Bottom Row - Actions */}
-                          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                            <span className="text-sm text-gray-600">
-                              {request?.arNumber ||
-                                `ID: ${requestId?.substring(0, 8)}`}
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              <ActionIcons
-                                copyTo={copyto}
-                                isCopying={isCopying}
-                                canShareRequest={canShareRequest}
-                                requestId={request?.id}
-                                isGeneratingPDF={isGenerating}
-                                onDownloadPDF={handleDownloadPDF}
-                                showTagDropdown={showTagDropdown}
-                                setShowTagDropdown={setShowTagDropdown}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Items Table Section */}
-                    <tr>
-                      <td colSpan={5}>
-                        <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
-                          <AdvanceRequestDetails request={request!} />
-
-                          {canUploadFiles && (
-                            <div className="flex flex-col gap-3 mt-3">
-                              <FileUpload
-                                selectedFiles={selectedFiles}
-                                setSelectedFiles={setSelectedFiles}
-                                accept=".jpg,.png,.pdf,.xlsx,.docx"
-                                multiple={true}
-                              />
-
-                              {selectedFiles.length > 0 && (
-                                <div className="self-center">
-                                  <Button
-                                    disabled={isUpdating}
-                                    onClick={handleSend}
-                                  >
-                                    {isUpdating ? <SpinnerMini /> : "Upload"}
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Comments and Actions Section */}
-                          {request?.reviewedBy &&
-                            request?.status !== "draft" && (
-                              <div className="  mt-4 tracking-wide">
-                                <RequestCommentsAndActions request={request} />
-
-                                {canUpdateStatus && (
-                                  <StatusUpdateForm
-                                    requestStatus={request?.status!}
-                                    status={status}
-                                    setStatus={setStatus}
-                                    comment={comment}
-                                    setComment={setComment}
-                                    isUpdatingStatus={isUpdatingStatus}
-                                    handleStatusChange={onStatusChangeHandler}
-                                  />
-                                )}
-                              </div>
-                            )}
-
-                          {/* Comment Section for all authorized users */}
-                          {request?.status !== "draft" && canAddComments && (
-                            <CommentSection
-                              comments={comments}
-                              canComment={canAddComments}
-                              onAddComment={handleAddComment}
-                              onUpdateComment={handleUpdateComment}
-                              onDeleteComment={handleDeleteComment}
-                              isLoading={isAddingComment}
-                              isUpdating={isUpdatingComment}
-                              isDeleting={isDeletingComment}
-                            />
-                          )}
-
-                          {/* Admin Approval Section (for STAFF role) */}
-                          {showAdminApproval && (
-                            <div className="relative z-10 pb-64">
-                              <AdminApprovalSection
-                                formData={formData}
-                                handleFormChange={handleFormChange}
-                                admins={admins}
-                                isLoadingAmins={isLoadingAmins}
-                                isUpdating={isUpdating}
-                                handleSend={handleSend}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  </>
+                        <AdvanceRequestDetails request={request!} />
+                      </RequestDetailLayout>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

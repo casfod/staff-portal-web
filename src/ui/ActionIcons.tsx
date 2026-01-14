@@ -1,4 +1,4 @@
-// ActionIcons.tsx - Updated with explicit RFQ status handling
+// ActionIcons.tsx - Updated with variant prop
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Download, Edit, Trash2, Users } from "lucide-react";
 import LoadingDots from "./LoadingDots";
@@ -40,6 +40,11 @@ interface ActionIconsProps {
   TagIcon?: React.ReactNode;
   rfqStatus?: RFQStatus; // More specific type for RFQ status
   mode?: "users" | "vendors" | "purchase-order";
+
+  // NEW: Variant prop to differentiate between list and detail views
+  variant?: "list" | "detail";
+  // NEW: Hide inspect button in detail views
+  hideInspect?: boolean;
 }
 
 const ActionIcons = ({
@@ -74,6 +79,10 @@ const ActionIcons = ({
   previewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   rfqStatus,
   mode = "users",
+
+  // NEW: Variant props
+  variant = "list",
+  hideInspect = false,
 }: ActionIconsProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
@@ -161,9 +170,73 @@ const ActionIcons = ({
   const isRFQDisabled = getRFQDisabledState();
   const shareButtonTooltip = getShareButtonTooltip();
 
+  // NEW: Determine if we should show the inspect button
+  const shouldShowInspectButton =
+    variant === "list" && !hideInspect && onToggleView;
+
+  // NEW: Simplified detail view variant
+  if (variant === "detail") {
+    return (
+      <div className="flex space-x-4">
+        {/* PDF Download Button */}
+        {onDownloadPDF && (
+          <button
+            className="hover:cursor-pointer text-green-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDownloadPDF();
+            }}
+            title="Download PDF"
+          >
+            {downloadIcon}
+          </button>
+        )}
+
+        {/* Share Button for detail view */}
+        {shouldShowShareButton && (
+          <div className="relative">
+            <button
+              className={`hover:cursor-pointer ${
+                mode === "vendors" && isRFQDisabled
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              }`}
+              onClick={isRFQDisabled ? undefined : handleTagClick}
+              title={shareButtonTooltip}
+              disabled={isRFQDisabled}
+            >
+              {isCopying ? <LoadingDots /> : TagIcon}
+            </button>
+
+            {showTagDropdown &&
+              !isRFQDisabled &&
+              (mode === "vendors" ? (
+                <TagVendorsDropdown
+                  vendors={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectVendors={handleSelectVendors}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ) : (
+                <TagUsersDropdown
+                  users={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectUsers={handleSelectUsers}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default list view variant
   return (
     <div className="flex space-x-4">
-      {onToggleView && (
+      {shouldShowInspectButton && (
         <span
           className="hover:cursor-pointer"
           onClick={() => onToggleView(requestId)}
