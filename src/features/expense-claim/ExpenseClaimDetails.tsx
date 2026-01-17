@@ -117,7 +117,7 @@ export const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
           {rowData.slice(0, Math.ceil(rowData.length / 2)).map((data) => (
             <div
               key={data.id}
-              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex flex-col md:flex-row gap-1 pb-2 md:pb-0"
             >
               <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
@@ -131,7 +131,7 @@ export const ExpenseClaimDetails = ({ request }: RequestDetailsProps) => {
           {rowData.slice(Math.ceil(rowData.length / 2)).map((data) => (
             <div
               key={data.id}
-              className="w-full md:w-fit border-b-2 md:border-b-0 flex md:items-center flex-col md:flex-row gap-1 pb-2 md:pb-0"
+              className="w-full md:w-fit border-b-2 md:border-b-0 flex flex-col md:flex-row gap-1 pb-2 md:pb-0"
             >
               <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
