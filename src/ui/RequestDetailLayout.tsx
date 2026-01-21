@@ -1,4 +1,3 @@
-// src/ui/RequestDetailLayout.tsx - Fixed version
 import { ReactNode } from "react";
 import Button from "./Button";
 import SpinnerMini from "./SpinnerMini";
@@ -6,18 +5,28 @@ import RequestCommentsAndActions from "./RequestCommentsAndActions";
 import StatusUpdateForm from "./StatusUpdateForm";
 import AdminApprovalSection from "./AdminApprovalSection";
 import CommentSection from "./CommentSection";
-import { Comment } from "../interfaces";
+import { Comment, PurChaseRequestType } from "../interfaces";
 import { FileUpload } from "./FileUpload";
 
 interface RequestDetailLayoutProps {
   request: any;
   children: ReactNode;
 
+  // Two-step approval props
+  isFinanceReviewer?: boolean;
+  isProcurementReviewer?: boolean;
+  isApprover?: boolean;
+  financeReviewStatus?: "pending" | "approved" | "rejected";
+  procurementReviewStatus?: "pending" | "approved" | "rejected";
+  canReviewFinance?: boolean;
+  canReviewProcurement?: boolean;
+  canApprove?: boolean;
+
   // File upload props
   canUploadFiles?: boolean;
   selectedFiles?: File[];
   setSelectedFiles?: (files: File[]) => void;
-  isUploading?: boolean; // This was isUploading, not isUpdating
+  isUploading?: boolean;
   handleUpload?: (e: React.FormEvent) => void;
 
   // Status update props
@@ -36,12 +45,12 @@ interface RequestDetailLayoutProps {
   handleUpdateComment?: (commentId: string, text: string) => Promise<void>;
   handleDeleteComment?: (commentId: string) => Promise<void>;
   isAddingComment?: boolean;
-  isUpdatingComment?: boolean; // Changed from isUpdating to isUpdatingComment
+  isUpdatingComment?: boolean;
   isDeletingComment?: boolean;
 
   // Admin approval props
   showAdminApproval?: boolean;
-  formData?: any;
+  formData?: Partial<PurChaseRequestType>;
   handleFormChange?: (field: string, value: string) => void;
   admins?: any[];
   isLoadingAmins?: boolean;
@@ -54,6 +63,16 @@ interface RequestDetailLayoutProps {
 const RequestDetailLayout = ({
   request,
   children,
+
+  // Two-step approval props
+  isFinanceReviewer = false,
+  isProcurementReviewer = false,
+  isApprover = false,
+  financeReviewStatus,
+  procurementReviewStatus,
+  canReviewFinance = false,
+  canReviewProcurement = false,
+  canApprove = false,
 
   // File upload
   canUploadFiles = false,
@@ -78,7 +97,7 @@ const RequestDetailLayout = ({
   handleUpdateComment,
   handleDeleteComment,
   isAddingComment = false,
-  isUpdatingComment = false, // Fixed prop name
+  isUpdatingComment = false,
   isDeletingComment = false,
 
   // Admin approval
@@ -114,10 +133,87 @@ const RequestDetailLayout = ({
     return Promise.resolve();
   };
 
+  // Determine which status options to show
+  const getStatusOptions = () => {
+    const options = [];
+
+    // Add appropriate options based on user role and current status
+    if (canReviewFinance) {
+      options.push(
+        { value: "approved", label: "Approve Finance Review" },
+        { value: "rejected", label: "Reject Finance Review" }
+      );
+    } else if (canReviewProcurement) {
+      options.push(
+        { value: "approved", label: "Approve Procurement Review" },
+        { value: "rejected", label: "Reject Procurement Review" }
+      );
+    } else if (canApprove) {
+      options.push(
+        { value: "approved", label: "Approve Request" },
+        { value: "rejected", label: "Reject Request" }
+      );
+    } else {
+      // Fallback for backward compatibility
+      if (requestStatus === "pending") {
+        options.push({ value: "reviewed", label: "Approve Review" });
+      }
+      if (requestStatus === "reviewed") {
+        options.push({ value: "approved", label: "Approve Request" });
+      }
+      options.push({ value: "rejected", label: "Reject" });
+    }
+
+    return options;
+  };
+
+  const statusOptions = getStatusOptions();
+
   return (
     <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
       {/* Main Content */}
       {children}
+
+      {/* Two-step approval status display */}
+      {(financeReviewStatus || procurementReviewStatus) && (
+        <div className="mt-4 p-4 bg-gray-50 rounded-md">
+          <h3 className="font-bold text-lg mb-2">Review Status</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {financeReviewStatus && (
+              <div className="flex items-center justify-between p-3 bg-white rounded border">
+                <span className="font-medium">Finance Review:</span>
+                <span
+                  className={`px-3 py-1 rounded text-sm font-semibold ${
+                    financeReviewStatus === "approved"
+                      ? "bg-green-100 text-green-800"
+                      : financeReviewStatus === "rejected"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {financeReviewStatus.toUpperCase()}
+                </span>
+              </div>
+            )}
+            {procurementReviewStatus && (
+              <div className="flex items-center justify-between p-3 bg-white rounded border">
+                <span className="font-medium">Procurement Review:</span>
+                <span
+                  className={`px-3 py-1 rounded text-sm font-semibold ${
+                    procurementReviewStatus === "approved"
+                      ? "bg-green-100 text-green-800"
+                      : procurementReviewStatus === "rejected"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {procurementReviewStatus.toUpperCase()}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* File Upload Section */}
       {canUploadFiles && (
@@ -149,18 +245,25 @@ const RequestDetailLayout = ({
             request={request}
             handleAction={handleAction}
           />
+        </div>
+      )}
 
-          {canUpdateStatus && (
-            <StatusUpdateForm
-              requestStatus={requestStatus}
-              status={status}
-              setStatus={setStatus || (() => {})}
-              comment={comment}
-              setComment={setComment || (() => {})}
-              isUpdatingStatus={isUpdatingStatus}
-              handleStatusChange={handleStatusChange || (() => {})}
-            />
-          )}
+      {/* Status Update Form */}
+      {canUpdateStatus && (
+        <div className="mt-4">
+          <StatusUpdateForm
+            requestStatus={requestStatus}
+            status={status}
+            setStatus={setStatus || (() => {})}
+            comment={comment}
+            setComment={setComment || (() => {})}
+            isUpdatingStatus={isUpdatingStatus}
+            handleStatusChange={handleStatusChange || (() => {})}
+            statusOptions={statusOptions}
+            isFinanceReviewer={isFinanceReviewer}
+            isProcurementReviewer={isProcurementReviewer}
+            isApprover={isApprover}
+          />
         </div>
       )}
 
@@ -173,7 +276,7 @@ const RequestDetailLayout = ({
           onUpdateComment={asyncHandleUpdateComment}
           onDeleteComment={asyncHandleDeleteComment}
           isLoading={isAddingComment}
-          isUpdating={isUpdatingComment} // Fixed prop
+          isUpdating={isUpdatingComment}
           isDeleting={isDeletingComment}
         />
       )}
@@ -186,7 +289,7 @@ const RequestDetailLayout = ({
             handleFormChange={handleFormChange || (() => {})}
             admins={admins}
             isLoadingAmins={isLoadingAmins}
-            isUpdating={isUploading} // Use isUploading here
+            isUpdating={isUploading}
             handleSend={handleUpload || (() => {})}
           />
         </div>

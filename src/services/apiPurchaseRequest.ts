@@ -120,6 +120,7 @@ export const getPurchaseRequestStats = async function () {
     return handleError(err);
   }
 };
+
 export const savePurchaseRequests = async function (
   data: Partial<PurChaseRequestType>
 ) {
@@ -155,7 +156,8 @@ export const sendPurchaseRequests = async function (
       "finalDeliveryPoint",
       "city",
       "activityDescription",
-      "reviewedBy",
+      "financeReviewBy",
+      "procurementReviewBy",
     ];
 
     simpleFields.forEach((key) => {
@@ -206,7 +208,11 @@ export const updatePurchaseRequest = async function (
     const formData = new FormData();
 
     // Append standard fields
-    const simpleFields: (keyof PurChaseRequestType)[] = ["approvedBy"];
+    const simpleFields: (keyof PurChaseRequestType)[] = [
+      "approvedBy",
+      "financeReviewStatus",
+      "procurementReviewStatus",
+    ];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
@@ -234,7 +240,12 @@ export const updatePurchaseRequest = async function (
 
 export const updateStatus = async function (
   requestId: string,
-  data: { status: string; comment: string }
+  data: {
+    status: string;
+    comment: string;
+    financeReviewStatus?: "pending" | "approved" | "rejected";
+    procurementReviewStatus?: "pending" | "approved" | "rejected";
+  }
 ) {
   try {
     const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(

@@ -14,7 +14,6 @@ import Select from "../../ui/Select";
 import { useDispatch } from "react-redux";
 
 import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
-import { useAdmins } from "../user/Hooks/useAdmins";
 import { useReviewers } from "../user/Hooks/useReviewers";
 import { useProjects } from "../project/Hooks/useProjects";
 import DatePicker from "../../ui/DatePicker";
@@ -41,7 +40,10 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
     activityDescription: purchaseRequest.activityDescription,
     expenseChargedTo: purchaseRequest.expenseChargedTo,
     accountCode: purchaseRequest.accountCode,
-    reviewedBy: purchaseRequest?.reviewedBy?.id,
+    financeReviewBy: purchaseRequest?.financeReviewBy?.id,
+    procurementReviewBy: purchaseRequest?.procurementReviewBy?.id,
+    financeReviewStatus: purchaseRequest?.financeReviewStatus,
+    procurementReviewStatus: purchaseRequest?.procurementReviewStatus,
     approvedBy: purchaseRequest?.approvedBy?.id,
   });
 
@@ -150,15 +152,28 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
-  const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
+
   const { data: projectData, isLoading: isLoadingProjects } = useProjects();
 
-  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Filter procurement reviewers - exclude the selected finance reviewer
+  const procurementReviewerOptions = useMemo(() => {
+    if (!reviewers) return [];
+
+    return reviewers
+      .filter((reviewer) => reviewer.id)
+      .filter((reviewer) => reviewer.id !== formData.financeReviewBy) // Exclude finance reviewer
+      .map((reviewer) => ({
+        id: reviewer.id as string,
+        name: `${reviewer.first_name} ${reviewer.last_name}`,
+      }));
+  }, [reviewers, formData.financeReviewBy]);
 
   const handleFormChange = (
     field: keyof PurChaseRequestType,
@@ -186,6 +201,17 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
         ...formData,
         accountCode: value,
       });
+    } else if (field === "financeReviewBy") {
+      // If finance reviewer changes, clear procurement reviewer if it was the same person
+      setFormData({
+        ...formData,
+        financeReviewBy: value,
+        // Clear procurement reviewer if it matches the new finance reviewer
+        procurementReviewBy:
+          value === formData.procurementReviewBy
+            ? null
+            : formData.procurementReviewBy,
+      });
     } else {
       // Handle other fields
       setFormData({ ...formData, [field]: value });
@@ -196,12 +222,14 @@ const FormEditPurchaseRequest: React.FC<FormEditRequestProps> = ({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
-    formData.reviewedBy = null;
+    formData.financeReviewBy = null;
+    formData.procurementReviewBy = null;
 
     const data = { ...formData, itemGroups: [...itemGroup] };
     savePurchaseRequest(data);
     // dispatch(resetPurchaseRequest());
   };
+
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -538,85 +566,109 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
         )}
       </Row>
 
-      {purchaseRequest.reviewedBy ? (
-        <div className=" ">
-          <p className="mb-2">
-            <span className="font-bold mr-1  uppercase">Reviewed By :</span>
-            {`${purchaseRequest?.reviewedBy?.first_name} ${purchaseRequest?.reviewedBy?.last_name}`}
+      {/* Show current reviewer information */}
+      {purchaseRequest.financeReviewBy && (
+        <div className="mb-2">
+          <p className="mb-1">
+            <span className="font-bold mr-1 uppercase">Finance Reviewer:</span>
+            {`${purchaseRequest?.financeReviewBy?.first_name} ${purchaseRequest?.financeReviewBy?.last_name}`}
           </p>
-
-          {purchaseRequest?.comments && (
-            <div className="mb-2">
-              <span className="font-bold mr-1  uppercase">Comments :</span>
-
-              {purchaseRequest?.comments?.map((comment) => (
-                <div className="border-2 px-4 py-2 rounded-lg shadow-lg">
-                  <p className="text-base font-extrabold">
-                    {`${comment.user.first_name} ${comment.user.last_name}`}
-                  </p>
-                  <p className="text-sm">{`${comment.text}`}</p>
-                </div>
-              ))}
-            </div>
+          {purchaseRequest.financeReviewStatus && (
+            <p className="mb-1">
+              <span className="font-bold mr-1 uppercase">Finance Status:</span>
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  purchaseRequest.financeReviewStatus === "approved"
+                    ? "bg-green-100 text-green-800"
+                    : purchaseRequest.financeReviewStatus === "rejected"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {purchaseRequest.financeReviewStatus.toUpperCase()}
+              </span>
+            </p>
           )}
         </div>
-      ) : purchaseRequest.status === "reviewed" ? (
-        <Row>
-          <FormRow label="Approved By *">
-            {isLoadingAmins ? (
-              <SpinnerMini /> // Show a spinner while loading Reviewers
-            ) : (
-              <Select
-                clearable={true}
-                id="approvedBy"
-                customLabel="Select an admin"
-                value={formData.approvedBy || ""} // Use empty string if null
-                onChange={(value) => handleFormChange("reviewedBy", value)}
-                options={
-                  admins
-                    ? admins
-                        .filter((admin) => admin.id) // Filter out Reviewers with undefined IDs
-                        .map((admin) => ({
-                          id: admin.id as string, // Assert that admin.id is a string
-                          name: `${admin.first_name} ${admin.last_name}`,
-                        }))
-                    : []
-                }
-                required
-              />
-            )}
-          </FormRow>
-        </Row>
-      ) : (
-        <Row>
-          <FormRow label="Reviewed By *">
-            {isLoadingReviewers ? (
-              <SpinnerMini /> // Show a spinner while loading Reviewers
-            ) : (
-              <Select
-                clearable={true}
-                id="reviewedBy"
-                customLabel="Select Reviewer"
-                value={formData.reviewedBy || ""} // Use empty string if null
-                onChange={(value) => handleFormChange("reviewedBy", value)}
-                options={
-                  reviewers
-                    ? reviewers
-                        .filter((reviewer) => reviewer.id) // Filter out reviewers with undefined IDs
-                        .map((reviewer) => ({
-                          id: reviewer.id as string, // Assert that reviewer.id is a string
-                          name: `${reviewer.first_name} ${reviewer.last_name}`,
-                        }))
-                    : []
-                }
-                required
-              />
-            )}
-          </FormRow>
-        </Row>
       )}
 
-      {purchaseRequest.status !== "rejected" && formData.reviewedBy && (
+      {purchaseRequest.procurementReviewBy && (
+        <div className="mb-2">
+          <p className="mb-1">
+            <span className="font-bold mr-1 uppercase">
+              Procurement Reviewer:
+            </span>
+            {`${purchaseRequest?.procurementReviewBy?.first_name} ${purchaseRequest?.procurementReviewBy?.last_name}`}
+          </p>
+          {purchaseRequest.procurementReviewStatus && (
+            <p className="mb-1">
+              <span className="font-bold mr-1 uppercase">
+                Procurement Status:
+              </span>
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  purchaseRequest.procurementReviewStatus === "approved"
+                    ? "bg-green-100 text-green-800"
+                    : purchaseRequest.procurementReviewStatus === "rejected"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {purchaseRequest.procurementReviewStatus.toUpperCase()}
+              </span>
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Two-step approval reviewers */}
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Finance Reviewer *">
+          {isLoadingReviewers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              clearable={true}
+              id="financeReviewBy"
+              customLabel="Select Finance Reviewer"
+              value={formData.financeReviewBy || ""}
+              onChange={(value) => handleFormChange("financeReviewBy", value)}
+              options={
+                reviewers
+                  ? reviewers
+                      .filter((reviewer) => reviewer.id)
+                      .map((reviewer) => ({
+                        id: reviewer.id as string,
+                        name: `${reviewer.first_name} ${reviewer.last_name}`,
+                      }))
+                  : []
+              }
+              required
+            />
+          )}
+        </FormRow>
+        {formData.financeReviewBy && (
+          <FormRow label="Procurement Reviewer *">
+            {isLoadingReviewers ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="procurementReviewBy"
+                customLabel="Select Procurement Reviewer"
+                value={formData.procurementReviewBy || ""}
+                onChange={(value) =>
+                  handleFormChange("procurementReviewBy", value)
+                }
+                options={procurementReviewerOptions}
+                required
+              />
+            )}
+          </FormRow>
+        )}
+      </Row>
+
+      {formData.financeReviewBy && formData.procurementReviewBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -626,15 +678,13 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {(!formData.reviewedBy ||
-          (purchaseRequest.status === "rejected" && formData.reviewedBy)) && (
-          <Button size="medium" disabled={isSaving} onClick={handleSave}>
-            {isSaving ? <SpinnerMini /> : "Update And Save"}
-          </Button>
-        )}
-        {formData.reviewedBy && (
+        {formData.financeReviewBy && formData.procurementReviewBy ? (
           <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Update And Send"}
+          </Button>
+        ) : (
+          <Button size="medium" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Update And Save"}
           </Button>
         )}
       </div>

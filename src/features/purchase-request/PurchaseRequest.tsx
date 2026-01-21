@@ -29,7 +29,7 @@ import {
   useUpdatePurChaseRequest,
   useUpdateStatus,
 } from "./Hooks/PRHook";
-import { Comment as AppComment } from "../../interfaces";
+import { Comment as AppComment, PurChaseRequestType } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
@@ -66,7 +66,9 @@ const PurchaseRequest = () => {
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState({ approvedBy: null });
+  const [formData, setFormData] = useState<Partial<PurChaseRequestType>>({
+    approvedBy: null,
+  });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
@@ -92,14 +94,52 @@ const PurchaseRequest = () => {
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
   const { copyto, isPending: isCopying } = useCopy(requestId!);
 
-  const handleFormChange = (field: string, value: string) => {
+  const handleFormChange = (
+    field: keyof PurChaseRequestType,
+    value: string
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // In PurchaseRequest.tsx, update the onStatusChangeHandler function:
 
   const onStatusChangeHandler = () => {
     handleStatusChange(status, comment, async (data) => {
       try {
-        await updateStatus(data, {
+        // Create update data with review statuses if applicable
+        const updateData: any = { ...data };
+
+        // REMOVE THIS: Don't set main status for finance/procurement reviews
+        // delete updateData.status;
+
+        // Add review statuses based on user role
+        const currentUserId = currentUser.id;
+        const isFinanceReviewer =
+          request?.financeReviewBy?.id === currentUserId;
+        const isProcurementReviewer =
+          request?.procurementReviewBy?.id === currentUserId;
+
+        if (isFinanceReviewer) {
+          updateData.financeReviewStatus =
+            status === "approved" ? "approved" : "rejected";
+          // Don't set main status for finance reviewer
+          delete updateData.status;
+        }
+
+        if (isProcurementReviewer) {
+          updateData.procurementReviewStatus =
+            status === "approved" ? "approved" : "rejected";
+          // Don't set main status for procurement reviewer
+          delete updateData.status;
+        }
+
+        // Only approver should set main status
+        const isApprover = request?.approvedBy?.id === currentUserId;
+        if (isApprover) {
+          updateData.status = status; // "approved" or "rejected"
+        }
+
+        await updateStatus(updateData, {
           onError: (error) => {
             throw error;
           },
@@ -143,16 +183,21 @@ const PurchaseRequest = () => {
   };
 
   const totalAmount =
-    request?.itemGroups?.reduce((sum, item) => sum + item.total, 0) || 0;
+    request?.itemGroups?.reduce(
+      (sum: number, item: any) => sum + (item.total || 0),
+      0
+    ) || 0;
 
   // User references
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
-  const requestStatus = request?.status;
+  const requestStatus = request?.status || "draft";
 
   // Permission flags
   const isCreator = request?.createdBy?.id === currentUserId;
-  const isReviewer = request?.reviewedBy?.id === currentUserId;
+  const isFinanceReviewer = request?.financeReviewBy?.id === currentUserId;
+  const isProcurementReviewer =
+    request?.procurementReviewBy?.id === currentUserId;
   const isApprover = request?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
@@ -161,31 +206,52 @@ const PurchaseRequest = () => {
     (user: any) => user.id === currentUserId
   );
 
+  // Determine which status buttons to show
+  const canReviewFinance =
+    isFinanceReviewer &&
+    request?.status === "pending" &&
+    request?.financeReviewStatus === "pending";
+
+  const canReviewProcurement =
+    isProcurementReviewer &&
+    request?.status === "pending" &&
+    request?.procurementReviewStatus === "pending";
+
+  const canApprove = isApprover && request?.status === "reviewed";
+
+  // Determine which update status to show
+  const canUpdateStatus =
+    canReviewFinance || canReviewProcurement || canApprove;
+
+  console.log("Procurement Reviewer Check:", {
+    isProcurementReviewer,
+    canReviewProcurement,
+    canUpdateStatus,
+    requestStatus: request?.status,
+    procurementReviewStatus: request?.procurementReviewStatus,
+  });
+
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
-  const canUpdateStatus =
-    !isCreator &&
-    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
-      (isAdmin && requestStatus === "reviewed" && isApprover));
 
   // Users who can add comments
   const canAddComments =
     isCreator ||
-    isReviewer ||
+    isFinanceReviewer ||
+    isProcurementReviewer ||
     isApprover ||
     isCopiedTo ||
-    isAdmin ||
-    (userRole === "REVIEWER" && requestStatus === "pending");
+    isAdmin;
 
   const showAdminApproval =
     !request?.approvedBy &&
     requestStatus === "reviewed" &&
-    (isCreator ||
-      (isReviewer && !request?.reviewedBy) ||
-      (isApprover && !request?.approvedBy));
+    request?.financeReviewStatus === "approved" &&
+    request?.procurementReviewStatus === "approved" &&
+    (isCreator || isApprover);
 
   const requestCreatedAt = request?.createdAt ?? "";
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
@@ -378,7 +444,18 @@ const PurchaseRequest = () => {
                     <td colSpan={tableHeadData.length}>
                       <RequestDetailLayout
                         request={request}
-                        requestStatus={request?.status || ""}
+                        requestStatus={requestStatus}
+                        // Two-step approval props
+                        isFinanceReviewer={isFinanceReviewer}
+                        isProcurementReviewer={isProcurementReviewer}
+                        isApprover={isApprover}
+                        financeReviewStatus={request?.financeReviewStatus}
+                        procurementReviewStatus={
+                          request?.procurementReviewStatus
+                        }
+                        canReviewFinance={canReviewFinance}
+                        canReviewProcurement={canReviewProcurement}
+                        canApprove={canApprove}
                         // File upload props
                         canUploadFiles={canUploadFiles}
                         selectedFiles={selectedFiles}
@@ -405,7 +482,12 @@ const PurchaseRequest = () => {
                         // Admin approval props
                         showAdminApproval={showAdminApproval}
                         formData={formData}
-                        handleFormChange={handleFormChange}
+                        handleFormChange={(field: string, value: string) =>
+                          handleFormChange(
+                            field as keyof PurChaseRequestType,
+                            value
+                          )
+                        }
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >

@@ -32,7 +32,8 @@ const FormAddPurchaseRequest: React.FC = () => {
     activityDescription: "",
     expenseChargedTo: "",
     accountCode: "",
-    reviewedBy: null,
+    financeReviewBy: null,
+    procurementReviewBy: null,
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -46,14 +47,27 @@ const FormAddPurchaseRequest: React.FC = () => {
   const { sendPurchaseRequest, isPending: isSending } =
     useSendPurchaseRequest();
 
-  const { data, isLoading } = useReviewers();
-  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
+  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
 
-  const reviewers = useMemo(() => data?.data ?? [], [data]);
+  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  const { data: projectData, isLoading: isLoadingProjects } = useProjects();
   const projects = useMemo(
     () => projectData?.data?.projects ?? [],
     [projectData]
   );
+
+  // Filter procurement reviewers - exclude the selected finance reviewer
+  const procurementReviewerOptions = useMemo(() => {
+    if (!reviewers) return [];
+
+    return reviewers
+      .filter((reviewer) => reviewer.id)
+      .filter((reviewer) => reviewer.id !== formData.financeReviewBy) // Exclude finance reviewer
+      .map((reviewer) => ({
+        id: reviewer.id as string,
+        name: `${reviewer.first_name} ${reviewer.last_name}`,
+      }));
+  }, [reviewers, formData.financeReviewBy]);
 
   // Update item group fields
   const handleItemChange = (
@@ -113,6 +127,17 @@ const FormAddPurchaseRequest: React.FC = () => {
       setFormData({
         ...formData,
         accountCode: value,
+      });
+    } else if (field === "financeReviewBy") {
+      // If finance reviewer changes, clear procurement reviewer if it was the same person
+      setFormData({
+        ...formData,
+        financeReviewBy: value,
+        // Clear procurement reviewer if it matches the new finance reviewer
+        procurementReviewBy:
+          value === formData.procurementReviewBy
+            ? null
+            : formData.procurementReviewBy,
       });
     } else {
       // Handle other fields
@@ -176,13 +201,15 @@ const FormAddPurchaseRequest: React.FC = () => {
   const handleSave = (e: React.FormEvent) => {
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
-    formData.reviewedBy = null;
+    formData.financeReviewBy = null;
+    formData.procurementReviewBy = null;
 
     if (!isFormValid) return; // Stop if form is invalid
     e.preventDefault();
     const data = { ...formData, itemGroups: [...itemGroup] };
     savePurchaseRequest(data);
   };
+
   // Handle form submission
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -443,6 +470,7 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           Added
         </span>
       </div>
+
       <Row cols="grid-cols-1 md:grid-cols-2">
         {/* First Select: Projects */}
         <FormRow label="Expense Charged To *">
@@ -498,23 +526,25 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
           </FormRow>
         )}
       </Row>
-      <Row>
-        <FormRow label="Reviewed By *">
-          {isLoading ? (
-            <SpinnerMini /> // Show a spinner while loading reviewers
+
+      {/* Two-step approval reviewers */}
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Finance Reviewer *">
+          {isLoadingReviewers ? (
+            <SpinnerMini />
           ) : (
             <Select
               clearable={true}
-              id="reviewedBy"
-              customLabel="Select Reviewer"
-              value={formData.reviewedBy || ""} // Use empty string if null
-              onChange={(value) => handleFormChange("reviewedBy", value)}
+              id="financeReviewBy"
+              customLabel="Select Finance Reviewer"
+              value={formData.financeReviewBy || ""}
+              onChange={(value) => handleFormChange("financeReviewBy", value)}
               options={
                 reviewers
                   ? reviewers
-                      .filter((reviewer) => reviewer.id) // Filter out reviewers with undefined IDs
+                      .filter((reviewer) => reviewer.id)
                       .map((reviewer) => ({
-                        id: reviewer.id as string, // Assert that reviewer.id is a string
+                        id: reviewer.id as string,
                         name: `${reviewer.first_name} ${reviewer.last_name}`,
                       }))
                   : []
@@ -523,9 +553,29 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
             />
           )}
         </FormRow>
+
+        {formData.financeReviewBy && (
+          <FormRow label="Procurement Reviewer *">
+            {isLoadingReviewers ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="procurementReviewBy"
+                customLabel="Select Procurement Reviewer"
+                value={formData.procurementReviewBy || ""}
+                onChange={(value) =>
+                  handleFormChange("procurementReviewBy", value)
+                }
+                options={procurementReviewerOptions}
+                required
+              />
+            )}
+          </FormRow>
+        )}
       </Row>
 
-      {formData.reviewedBy && (
+      {formData.financeReviewBy && formData.procurementReviewBy && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -535,12 +585,12 @@ p-3 md:p-6 mb-3 rounded-lg shadow-md"
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {!formData.reviewedBy && (
+        {(!formData.financeReviewBy || !formData.procurementReviewBy) && (
           <Button size="medium" disabled={isSaving} onClick={handleSave}>
             {isSaving ? <SpinnerMini /> : "Save"}
           </Button>
         )}
-        {formData.reviewedBy && (
+        {formData.financeReviewBy && formData.procurementReviewBy && (
           <Button size="medium" disabled={isSending} onClick={handleSend}>
             {isSending ? <SpinnerMini /> : "Save And Send"}
           </Button>

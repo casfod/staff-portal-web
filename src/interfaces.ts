@@ -140,8 +140,17 @@ export interface PurChaseRequestType {
   expenseChargedTo: string;
   accountCode: string;
   project?: Partial<Project> | string | null;
+
+  // Two-step approval fields
+  financeReviewBy?: any;
+  financeReviewStatus?: "pending" | "approved" | "rejected";
+  procurementReviewBy?: any;
+  procurementReviewStatus?: "pending" | "approved" | "rejected";
+
+  // Backward compatibility
   reviewedBy?: any;
   approvedBy?: any;
+
   itemGroups?: PurchaseRequesItemGroupType[];
   comments?: Comment[];
   status?: string;

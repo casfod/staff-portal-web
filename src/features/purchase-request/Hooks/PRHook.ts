@@ -194,6 +194,53 @@ export function useSendPurchaseRequest() {
   return { sendPurchaseRequest, isPending, isError };
 }
 
+// export function useUpdatePurChaseRequest(requestId: string) {
+//   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+//   const queryClient = useQueryClient();
+
+//   const {
+//     mutate: updatePurchaseRequest,
+//     isPending,
+//     isError,
+//   } = useMutation({
+//     mutationFn: ({
+//       data,
+//       files,
+//     }: {
+//       data: Partial<PurChaseRequestType>;
+//       files: File[];
+//     }) => updatePurchaseRequestApi(requestId, data, files),
+
+//     onSuccess: (data) => {
+//       if (data.status === 200) {
+//         toast.success("Purchase Request updated successfully");
+
+//         //Invalidate
+//         queryClient.invalidateQueries({
+//           queryKey: ["purchase-request", requestId],
+//         });
+//       } else if (data.status !== 200) {
+//         toast.error("Purchase Request update not successful");
+//         setErrorMessage(data.message);
+//         console.error("Login Error:", data.message); // Log error directly here
+//       }
+//     },
+
+//     onError: (err: HookError) => {
+//       toast.error("Error updating Purchase Request");
+//       const error = err.response?.data.message || "An error occurred";
+
+//       console.error("PurchaseRequest Error:", error);
+//       setErrorMessage(error); // Set the error message to display
+//     },
+//   });
+
+//   return { updatePurchaseRequest, isPending, isError, errorMessage };
+// }
+
+// In your PRHook.ts file, update the useUpdatePurChaseRequest mutation
+
 export function useUpdatePurChaseRequest(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -223,7 +270,7 @@ export function useUpdatePurChaseRequest(requestId: string) {
       } else if (data.status !== 200) {
         toast.error("Purchase Request update not successful");
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error("Update Error:", data.message);
       }
     },
 
@@ -232,7 +279,7 @@ export function useUpdatePurChaseRequest(requestId: string) {
       const error = err.response?.data.message || "An error occurred";
 
       console.error("PurchaseRequest Error:", error);
-      setErrorMessage(error); // Set the error message to display
+      setErrorMessage(error);
     },
   });
 
@@ -248,8 +295,12 @@ export function useUpdateStatus(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
-      updateStatusApi(requestId, data),
+    mutationFn: (data: {
+      status: string;
+      comment: string;
+      financeReviewStatus?: "pending" | "approved" | "rejected";
+      procurementReviewStatus?: "pending" | "approved" | "rejected";
+    }) => updateStatusApi(requestId, data),
 
     onSuccess: (data) => {
       if (data.status === 200) {
