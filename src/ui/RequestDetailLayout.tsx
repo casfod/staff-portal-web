@@ -1,12 +1,12 @@
 import { ReactNode } from "react";
-import Button from "./Button";
-import SpinnerMini from "./SpinnerMini";
-import RequestCommentsAndActions from "./RequestCommentsAndActions";
-import StatusUpdateForm from "./StatusUpdateForm";
-import AdminApprovalSection from "./AdminApprovalSection";
-import CommentSection from "./CommentSection";
 import { Comment, PurChaseRequestType } from "../interfaces";
+import AdminApprovalSection from "./AdminApprovalSection";
+import Button from "./Button";
+import CommentSection from "./CommentSection";
 import { FileUpload } from "./FileUpload";
+import RequestCommentsAndActions from "./RequestCommentsAndActions";
+import SpinnerMini from "./SpinnerMini";
+import StatusUpdateForm from "./StatusUpdateForm";
 
 interface RequestDetailLayoutProps {
   request: any;
@@ -134,11 +134,52 @@ const RequestDetailLayout = ({
   };
 
   // Determine which status options to show
+  // const getStatusOptions = () => {
+  //   const options = [];
+
+  //   // Add appropriate options based on user role and current status
+  //   if (canReviewFinance) {
+  //     options.push(
+  //       { value: "approved", label: "Approve Finance Review" },
+  //       { value: "rejected", label: "Reject Finance Review" }
+  //     );
+  //   } else if (canReviewProcurement) {
+  //     options.push(
+  //       { value: "approved", label: "Approve Procurement Review" },
+  //       { value: "rejected", label: "Reject Procurement Review" }
+  //     );
+  //   } else if (canApprove) {
+  //     options.push(
+  //       { value: "approved", label: "Approve Request" },
+  //       { value: "rejected", label: "Reject Request" }
+  //     );
+  //   } else {
+  //     // Fallback for backward compatibility
+  //     if (requestStatus === "pending") {
+  //       options.push({ value: "reviewed", label: "Approve Review" });
+  //     }
+  //     if (requestStatus === "reviewed") {
+  //       options.push({ value: "approved", label: "Approve Request" });
+  //     }
+  //     options.push({ value: "rejected", label: "Reject" });
+  //   }
+
+  //   return options;
+  // };
+
   const getStatusOptions = () => {
     const options = [];
-
-    // Add appropriate options based on user role and current status
-    if (canReviewFinance) {
+  
+    // Check if this is a purchase order (has POCode field)
+    const isPurchaseOrder = request?.POCode !== undefined;
+  
+    if (isPurchaseOrder) {
+      // Purchase orders have direct approval
+      options.push(
+        { value: "approved", label: "Approve Purchase Order" },
+        { value: "rejected", label: "Reject Purchase Order" }
+      );
+    } else if (canReviewFinance) {
       options.push(
         { value: "approved", label: "Approve Finance Review" },
         { value: "rejected", label: "Reject Finance Review" }
@@ -163,10 +204,9 @@ const RequestDetailLayout = ({
       }
       options.push({ value: "rejected", label: "Reject" });
     }
-
+  
     return options;
   };
-
   const statusOptions = getStatusOptions();
 
   return (
