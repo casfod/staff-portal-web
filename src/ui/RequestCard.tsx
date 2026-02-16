@@ -20,7 +20,7 @@ interface RequestCardProps {
     ecNumber?: string;
     [key: string]: any;
   };
-  totalAmount: number;
+  totalAmount?: number;
   requestId: string;
   dateValue?: string | Date;
   actionIconsProps: {
@@ -143,7 +143,7 @@ const RequestCard = ({
 
         <div className="text-center">
           <div className="text-xs font-bold">
-            {moneyFormat(totalAmount, "NGN")}
+            {moneyFormat(totalAmount ?? 0, "NGN")}
           </div>
           {showDate && formattedDate && (
             <div className="text-xs text-gray-500 mt-1">{formattedDate}</div>
@@ -189,7 +189,7 @@ const RequestCard = ({
           </div>
 
           <div className="font-bold text-gray-900">
-            {moneyFormat(totalAmount, "NGN")}
+            {moneyFormat(totalAmount ?? 0, "NGN")}
           </div>
         </div>
 

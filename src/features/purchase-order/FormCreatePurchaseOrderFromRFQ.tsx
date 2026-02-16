@@ -15,7 +15,7 @@ import { useRFQ } from "../rfq/Hooks/useRFQ";
 import Select from "../../ui/Select";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { useVendors } from "../Vendor/Hooks/useVendor";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 import DatePicker from "../../ui/DatePicker";
 import { casfodAddress } from "../rfq/FormAddRFQ";
 import toast from "react-hot-toast";

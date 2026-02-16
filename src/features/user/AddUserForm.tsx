@@ -1,9 +1,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { UserType } from "../../interfaces";
-import { useAddUser } from "./Hooks/useAddUser";
+
 import SpinnerMini from "../../ui/SpinnerMini";
 import ShowPasswordIcon from "../../ui/ShowPasswordIcon";
 import { CustomSelect } from "../../ui/CustomSelect";
+import { useAddUser } from "./Hooks/useUsers";
 
 export const role = ["ADMIN", "REVIEWER", "STAFF"];
 

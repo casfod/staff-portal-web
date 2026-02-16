@@ -10,7 +10,7 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import { useCreateIndependentPurchaseOrder } from "./Hooks/usePurchaseOrder";
 import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2 } from "lucide-react";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 import Select from "../../ui/Select";
 import { useVendors } from "../Vendor/Hooks/useVendor";
 import DatePicker from "../../ui/DatePicker";

@@ -69,6 +69,12 @@ import { PaymentVoucherManagement } from "./pages/PaymentVoucherManagement.tsx";
 import CreatePaymentVoucher from "./features/payment-voucher/CreatePaymentVoucher.tsx";
 import EditPaymentVoucher from "./features/payment-voucher/EditPaymentVoucher.tsx";
 import PaymentVoucher from "./features/payment-voucher/PaymentVoucher.tsx";
+import StaffInformation from "./pages/StaffInformation.tsx";
+import HumanResources from "./pages/HumanResources.tsx";
+import StaffInformationView from "./features/employment-info/StaffInformationView.tsx";
+import EditStaffInformation from "./features/employment-info/EditStaffInformation.tsx";
+import HRAdminPanelView from "./features/employment-info/HRAdminPanelView.tsx";
+import { HRAdminPanel } from "./pages/HRAdminPanel.tsx";
 
 const router = createBrowserRouter([
   {
@@ -607,14 +613,133 @@ const router = createBrowserRouter([
           },
         ],
       },
+
+      // src/Router.tsx - Correct nested structure
+      // src/Router.tsx - Human Resources section with proper nesting
+      {
+        path: "human-resources",
+        element: (
+          <AnimatedRoute key="human-resources" element={<HumanResources />} />
+        ),
+        children: [
+          { index: true, element: <Navigate to="staff-information" /> },
+
+          // Staff Information parent route with its own children
+          {
+            path: "staff-information",
+            element: (
+              <AnimatedRoute
+                key="staff-information"
+                element={<StaffInformation />}
+              />
+            ),
+            children: [
+              { index: true, element: <Navigate to="view" /> },
+
+              // View route - displays staff details
+              {
+                path: "view",
+                element: (
+                  <AnimatedRoute
+                    key="staff-information-view"
+                    element={<StaffInformationView />}
+                  />
+                ),
+              },
+              {
+                path: ":userId/view",
+                element: (
+                  <AnimatedRoute
+                    key="staff-information-view/:userId/view"
+                    element={<StaffInformationView />}
+                  />
+                ),
+              },
+
+              // Edit route - displays the edit form
+              {
+                path: ":userId/edit",
+                element: (
+                  <AnimatedRoute
+                    key="staff-information-edit"
+                    element={<EditStaffInformation />}
+                  />
+                ),
+              },
+            ],
+          },
+          /*
+          // Other HR routes can be added here
+          {
+            path: "recruitment",
+            element: (
+              <AnimatedRoute
+                key="recruitment"
+                element={<div>Recruitment - Coming Soon</div>}
+              />
+            ),
+          },
+
+          {
+            path: "leave-management",
+            element: (
+              <AnimatedRoute
+                key="leave-management"
+                element={<div>Leave Management - Coming Soon</div>}
+              />
+            ),
+          },
+
+          {
+            path: "attendance",
+            element: (
+              <AnimatedRoute
+                key="attendance"
+                element={<div>Attendance - Coming Soon</div>}
+              />
+            ),
+          },
+
+          // Admin routes
+          {
+            path: "admin",
+            element: (
+              <AnimatedRoute
+                key="hr-admin"
+                element={<EmploymentInfoAdminPanel />}
+              />
+            ),
+          },
+
+          */
+        ],
+      },
       {
         path: "user-management",
         element: (
           <AnimatedRoute key="user-management" element={<UserManagement />} />
         ),
       },
+
+      {
+        path: "admin",
+        element: <AnimatedRoute key="hr-admin" element={<HRAdminPanel />} />,
+        children: [
+          { index: true, element: <Navigate to="HRAdmin-panel-view" /> },
+          {
+            path: "HRAdmin-panel-view",
+            element: (
+              <AnimatedRoute
+                key="HRAdmin-panel-view"
+                element={<HRAdminPanelView />}
+              />
+            ),
+          },
+        ],
+      },
     ],
   },
+
   { path: "login", element: <AnimatedRoute key="login" element={<Login />} /> },
   {
     path: "forgot-password",

@@ -7,7 +7,7 @@ import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
 
 import { localStorageUser } from "../../utils/localStorageUser";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 
 import { AdvanceRequestDetails } from "./AdvanceRequestDetails";
 import StatusBadge from "../../ui/StatusBadge";

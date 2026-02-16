@@ -12,7 +12,7 @@ import {
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useDispatch } from "react-redux";
 import { resetPaymentVoucher } from "../../store/paymentVoucherSlice";
-import { useReviewers } from "../user/Hooks/useReviewers";
+import { useReviewers } from "../user/Hooks/useUsers";
 import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
 import {

@@ -24,7 +24,7 @@ import {
   useUpdateConceptNote,
   useUpdateStatus,
 } from "./Hooks/useConceptNotes";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 import { Comment as AppComment } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";

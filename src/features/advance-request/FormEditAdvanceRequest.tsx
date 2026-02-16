@@ -17,8 +17,8 @@ import { useDispatch } from "react-redux";
 
 import { resetAdvanceRequest } from "../../store/advanceRequestSlice";
 
-import { useAdmins } from "../user/Hooks/useAdmins";
-import { useReviewers } from "../user/Hooks/useReviewers";
+import { useAdmins } from "../user/Hooks/useUsers";
+import { useReviewers } from "../user/Hooks/useUsers";
 import { bankNames } from "../../assets/Banks";
 import DatePicker from "../../ui/DatePicker";
 import { useProjects } from "../project/Hooks/useProjects";

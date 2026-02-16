@@ -19,7 +19,7 @@ import Select from "../../ui/Select";
 import { casfodAddress } from "../rfq/FormAddRFQ";
 import toast from "react-hot-toast";
 import { useVendors } from "../Vendor/Hooks/useVendor";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 
 interface FormEditPurchaseOrderProps {
   purchaseOrder: PurchaseOrderType | null;

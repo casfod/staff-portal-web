@@ -6,6 +6,7 @@ interface CustomSelectProps {
   options: string[];
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
   id?: string;
 }
 
@@ -15,6 +16,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   options,
   placeholder = "Select an option",
   required = false,
+  disabled = false,
   id,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +44,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         className="w-full h-8 px-4 text-left text-sm rounded-md border border-gray-300 focus:border-primary focus:outline-none shadow-sm bg-white flex items-center justify-between"
         onClick={() => setIsOpen(!isOpen)}
+        disabled={disabled}
         id={id}
       >
         <span

@@ -56,6 +56,10 @@ export interface useUsersType {
   };
 }
 
+///////////////////////
+//User
+///////////////////////
+
 export interface UserType {
   id?: string;
   first_name: string;
@@ -81,6 +85,11 @@ export interface UserType {
   isDeleted?: boolean;
   password?: string;
   passwordConfirm?: string;
+
+  // Add employmentInfo directly to UserType
+  employmentInfo?: EmploymentInfoType;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PasswordResetTypes {
@@ -89,6 +98,111 @@ export interface PasswordResetTypes {
 }
 export interface PasswordForgotTypes {
   email: string;
+}
+
+///////////////////////
+// Employment Information
+///////////////////////
+
+export interface EmploymentInfoType {
+  isProfileComplete?: boolean;
+  isEmploymentInfoLocked?: boolean; // Match backend: true = locked
+
+  personalDetails?: {
+    fullName?: string;
+    stateOfOrigin?: string;
+    lga?: string;
+    religion?: string;
+    address?: string;
+    homePhone?: string;
+    cellPhone?: string;
+    emailAddress?: string;
+    ninNumber?: string;
+    birthDate?: string | Date;
+    maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
+    spouseName?: string;
+    spouseAddress?: string;
+    spousePhone?: string;
+    numberOfChildren?: number;
+  };
+
+  jobDetails?: {
+    title?: string;
+    idNo?: string;
+    workLocation?: string;
+    workEmail?: string;
+    workPhone?: string;
+    workCellPhone?: string;
+    startDate?: string | Date;
+    endDate?: string | Date | null;
+    supervisor?: string;
+  };
+
+  emergencyContact?: {
+    fullName?: string;
+    address?: string;
+    primaryPhone?: string;
+    cellPhone?: string;
+    relationship?: string;
+  };
+
+  bankDetails?: {
+    bankName?: string;
+    accountName?: string;
+    bankSortCode?: string;
+    accountNumber?: string;
+  };
+}
+
+// API Response Types
+export interface UseEmploymentInfoType {
+  status: number;
+  message: string;
+  data: {
+    employmentInfo: EmploymentInfoType;
+    isProfileComplete: boolean;
+    canUpdate: boolean; // Computed: !isEmploymentInfoLocked
+    isLocked: boolean; // Actual lock status
+    firstName: string;
+    lastName: string;
+    email: string;
+    position: string;
+  };
+}
+
+export interface UseEmploymentInfoStatusType {
+  status: number;
+  message: string;
+  data: Array<{
+    _id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    employmentInfo: {
+      isProfileComplete?: boolean;
+      isEmploymentInfoLocked?: boolean; // Match backend
+      personalDetails?: {
+        fullName?: string;
+      };
+      jobDetails?: {
+        title?: string;
+      };
+    };
+  }>;
+}
+
+export interface SystemSettingsType {
+  globalEmploymentInfoLock: boolean; // Match backend
+  lastUpdatedBy?: string;
+  lastUpdatedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UseSystemSettingsResponse {
+  status: number;
+  message: string;
+  data: SystemSettingsType;
 }
 
 ///////////////////////

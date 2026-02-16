@@ -145,7 +145,7 @@ const Select: React.FC<SelectProps> = ({
       {/* Select Trigger */}
       <div
         id={id}
-        className={`w-full h-10 px-4 py-2 rounded-md border ${
+        className={`w-full h-10 px-4 py-1.5 rounded-md border ${
           isOpen ? "border-primary" : "border-gray-300"
         } focus:outline-none shadow-sm   flex items-center justify-between cursor-pointer bg-white`}
         onClick={() => {

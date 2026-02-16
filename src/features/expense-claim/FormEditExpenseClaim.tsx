@@ -13,10 +13,10 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import { useDispatch } from "react-redux";
 
-import { useReviewers } from "../user/Hooks/useReviewers";
+import { useReviewers } from "../user/Hooks/useUsers";
 import { resetExpenseClaim } from "../../store/expenseClaimSlice";
 import { useProjects } from "../project/Hooks/useProjects";
-import { useAdmins } from "../user/Hooks/useAdmins";
+import { useAdmins } from "../user/Hooks/useUsers";
 import { expenses } from "../../assets/expenses";
 import DatePicker from "../../ui/DatePicker";
 import { FileUpload } from "../../ui/FileUpload";

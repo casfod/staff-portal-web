@@ -24,6 +24,7 @@ import navigationSliceReducer from "./navigationSlice";
 import expenseClaimReducer from "./expenseClaimSlice";
 import vendorReducer from "./vendorSlice";
 import rfqReducer from "./rfqSlice";
+import userReducer from "./userSlice";
 import purchaseOrderReducer from "./purchaseOrderSlice";
 import goodsReceivedSliceReducer from "./goodsReceivedSlice";
 import paymentVoucherSliceReducer from "./paymentVoucherSlice";
@@ -42,6 +43,7 @@ const rootReducer = combineReducers({
   expenseClaim: expenseClaimReducer,
   vendor: vendorReducer,
   rfq: rfqReducer,
+  user: userReducer,
   purchaseOrder: purchaseOrderReducer,
   goodsReceived: goodsReceivedSliceReducer,
   paymentVoucher: paymentVoucherSliceReducer,

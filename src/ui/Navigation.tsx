@@ -10,6 +10,7 @@ import {
   Plane,
   Users,
   Banknote,
+  Settings,
 } from "lucide-react";
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
@@ -81,7 +82,19 @@ const Navigation: React.FC = () => {
         },
       ],
     },
+    {
+      to: "/human-resources",
+      label: "Human Resource",
+      icon: Users,
+      dropdown: [
+        {
+          to: "/human-resources/staff-information",
+          label: "Staff Information",
+        },
+      ],
+    },
     { to: "/user-management", label: "User Management", icon: Users },
+    { to: "/Admin", label: "Settings", icon: Settings },
   ];
 
   // Filter navigation items based on user role

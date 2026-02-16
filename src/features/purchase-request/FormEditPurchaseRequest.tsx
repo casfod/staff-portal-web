@@ -14,7 +14,7 @@ import Select from "../../ui/Select";
 import { useDispatch } from "react-redux";
 
 import { resetPurchaseRequest } from "../../store/purchaseRequestSlice";
-import { useReviewers } from "../user/Hooks/useReviewers";
+import { useReviewers } from "../user/Hooks/useUsers";
 import { useProjects } from "../project/Hooks/useProjects";
 import DatePicker from "../../ui/DatePicker";
 import { FileUpload } from "../../ui/FileUpload";

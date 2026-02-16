@@ -11,7 +11,7 @@ import {
 } from "../../interfaces";
 
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useReviewers } from "../user/Hooks/useReviewers";
+import { useReviewers } from "../user/Hooks/useUsers";
 import Select from "../../ui/Select";
 
 import { useProjects } from "../project/Hooks/useProjects";

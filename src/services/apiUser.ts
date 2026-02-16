@@ -106,6 +106,16 @@ export const getUsers = async function (queryParams: {
   }
 };
 
+export const getUserById = async function (userId: string) {
+  try {
+    const response = await axiosInstance.get<UserType>(`/users/${userId}`);
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updateUser = async function (data: UserType) {
   try {
     const response = await axiosInstance.patch<UserType>(

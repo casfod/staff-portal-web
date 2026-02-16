@@ -1,3 +1,5 @@
+import { UserType } from "../interfaces";
+
 export function localStorageUser() {
   const storedUserJSON = localStorage.getItem("currentLocalUser");
   let storedUser = null;
@@ -10,7 +12,7 @@ export function localStorageUser() {
     }
   }
 
-  return storedUser;
+  return storedUser as UserType;
 }
 
 export function getUserToken(userId: number) {

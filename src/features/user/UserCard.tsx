@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserType } from "../../interfaces";
-import { useUpdateUser } from "./Hooks/useUpdateUser";
 import profilePlaceHolder from "../../assets/img/profile2.jpeg";
 import Swal from "sweetalert2";
 import Button from "../../ui/Button";
@@ -8,6 +7,8 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Input from "../../ui/Input";
 import { CustomSelect } from "../../ui/CustomSelect";
 import { positions, role } from "./AddUserForm";
+import { useUpdateUser } from "./Hooks/useUsers";
+import { useToggleUserUpdate } from "../employment-info/Hooks/useEmploymentInfo";
 
 interface UserCardProps {
   user: UserType;
@@ -61,6 +62,12 @@ const financePermissions = [
 
 const UserCard: React.FC<UserCardProps> = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const { UpdateUser, isPending: isUpdatingUser } = useUpdateUser(user?.id!);
+  const { toggleUserUpdate, isPending: isTogglingPermission } =
+    useToggleUserUpdate();
+
+  const isPending = isUpdatingUser || isTogglingPermission;
+
   const [editedUser, setEditedUser] = useState({
     firstName: user.first_name,
     lastName: user.last_name,
@@ -79,10 +86,36 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       canUpdate: user.financeRole?.canUpdate || false,
       canDelete: user.financeRole?.canDelete || false,
     },
-    isDeleted: user.isDeleted,
+    isDeleted: user.isDeleted || false,
+    isEmploymentInfoLocked:
+      user.employmentInfo?.isEmploymentInfoLocked !== false,
   });
 
-  const { UpdateUser, isPending } = useUpdateUser(user?.id!);
+  // Update local state when user prop changes
+  useEffect(() => {
+    setEditedUser({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      role: user.role,
+      position: user.position || "",
+      procurementRole: {
+        canCreate: user.procurementRole?.canCreate || false,
+        canView: user.procurementRole?.canView || false,
+        canUpdate: user.procurementRole?.canUpdate || false,
+        canDelete: user.procurementRole?.canDelete || false,
+      },
+      financeRole: {
+        canCreate: user.financeRole?.canCreate || false,
+        canView: user.financeRole?.canView || false,
+        canUpdate: user.financeRole?.canUpdate || false,
+        canDelete: user.financeRole?.canDelete || false,
+      },
+      isDeleted: user.isDeleted || false,
+      isEmploymentInfoLocked:
+        user.employmentInfo?.isEmploymentInfoLocked !== false,
+    });
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -123,6 +156,32 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     }));
   };
 
+  const handleEmploymentInfoPermissionToggle = () => {
+    if (!isEditing) return;
+
+    const newValue = !editedUser.isEmploymentInfoLocked;
+
+    // Optimistically update UI
+    setEditedUser((prev) => ({
+      ...prev,
+      isEmploymentInfoLocked: newValue,
+    }));
+
+    // Call API to update permission
+    toggleUserUpdate(
+      { userId: user.id!, enabled: newValue },
+      {
+        onError: () => {
+          // Revert on error
+          setEditedUser((prev) => ({
+            ...prev,
+            isEmploymentInfoLocked: !newValue,
+          }));
+        },
+      }
+    );
+  };
+
   const handleSaveChanges = () => {
     Swal.fire({
       title: "Are you sure?",
@@ -160,7 +219,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
             onError: (error) => {
               Swal.fire({
                 title: "Error!",
-                text: error.message,
+                text: error.message || "Failed to update user",
                 icon: "error",
               });
               resetForm();
@@ -190,7 +249,9 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
         canUpdate: user.financeRole?.canUpdate || false,
         canDelete: user.financeRole?.canDelete || false,
       },
-      isDeleted: user.isDeleted,
+      isDeleted: user.isDeleted || false,
+      isEmploymentInfoLocked:
+        user.employmentInfo?.isEmploymentInfoLocked !== false,
     });
   };
 
@@ -333,7 +394,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
               options={role}
               placeholder="Select role"
               required
-              // disabled={isPending}
+              disabled={isPending}
             />
           ) : (
             <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded-md capitalize">
@@ -352,7 +413,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
               options={positions}
               placeholder="Select position"
               required
-              // disabled={isPending}
+              disabled={isPending}
             />
           ) : (
             <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded-md">
@@ -361,35 +422,17 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
           )}
         </div>
 
-        {/* {user.isDeleted && isEditing && (
-          <div className="flex items-center md:col-span-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="isDeleted"
-                checked={!editedUser.isDeleted}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                disabled={isPending}
-              />
-              <span className="text-sm text-gray-700">
-                Reactivate this account
-              </span>
-            </label>
-          </div>
-        )} */}
-
         {user.isDeleted && isEditing && (
           <div className="flex items-center md:col-span-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="reactivateAccount"
-                checked={!editedUser.isDeleted} // Checked = active, Unchecked = inactive
+                checked={!editedUser.isDeleted}
                 onChange={(e) => {
                   setEditedUser((prev) => ({
                     ...prev,
-                    isDeleted: !e.target.checked, // When checked, isDeleted becomes false
+                    isDeleted: !e.target.checked,
                   }));
                 }}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -401,6 +444,61 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
             </label>
           </div>
         )}
+      </div>
+
+      {/* Update Permission Toggle */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Employment Info Update Permission
+          </label>
+          {isEditing ? (
+            <div
+              className={`flex items-center justify-between p-3 bg-gray-50 rounded-lg border transition-all cursor-pointer ${
+                editedUser.isEmploymentInfoLocked
+                  ? "border-blue-300 bg-blue-50"
+                  : "border-gray-200"
+              }`}
+              onClick={handleEmploymentInfoPermissionToggle}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center justify-center w-5 h-5 rounded-full border-2 transition-colors ${
+                    editedUser.isEmploymentInfoLocked
+                      ? "bg-blue-500 border-blue-500"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {editedUser.isEmploymentInfoLocked && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+                <span className="text-sm text-gray-700">
+                  Allow user to update employment information
+                </span>
+              </div>
+              <span className="text-xs text-gray-500">
+                {editedUser.isEmploymentInfoLocked ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  user.employmentInfo?.isEmploymentInfoLocked !== false
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
+              />
+              <span className="text-sm text-gray-900">
+                Employment info updates:{" "}
+                {user.employmentInfo?.isEmploymentInfoLocked !== false
+                  ? "Enabled"
+                  : "Disabled"}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Permissions Sections */}
