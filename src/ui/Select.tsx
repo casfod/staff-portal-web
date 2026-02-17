@@ -20,6 +20,7 @@ interface SelectProps {
   disabled?: boolean;
   filterable?: boolean;
   clearable?: boolean; // New prop to enable/disable clear button
+  className?: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -187,7 +188,8 @@ const Select: React.FC<SelectProps> = ({
       {/* Options Dropdown */}
       {isOpen && (
         <div
-          className="absolute z-50 w-full max-h-52 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
+          className="absolute z-10 w-full max-h-52 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
+          // className="absolute w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
           style={{
             maxHeight:
               typeof optionsHeight === "number"
@@ -216,7 +218,7 @@ const Select: React.FC<SelectProps> = ({
             filteredOptions.map((option, index) => (
               <div
                 key={option.id}
-                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                className={` bg-gray-50 px-4 py-2 hover:bg-gray-100 cursor-pointer ${
                   selectedValue === option.id ? "bg-blue-50 font-medium" : ""
                 } ${focusedIndex === index ? "bg-gray-200" : ""}`}
                 onClick={() => handleSelect(option.id)}

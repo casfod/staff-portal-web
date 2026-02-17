@@ -31,7 +31,7 @@ const UsersTableRow = ({
   toggleViewItems,
   handleEdit,
   handleDelete,
-  handleAction,
+  // handleAction,
   tableHeadData,
   currentUserRole,
 }: Props) => {

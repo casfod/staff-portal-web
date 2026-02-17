@@ -38,8 +38,8 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       disabled={disabled}
       className={`
         ${sizes[size].wrapper}
-        flex items-center rounded-full p-1
-        ${checked ? "bg-blue-600" : "bg-gray-300"}
+        flex items-center rounded-full p-1 shadow-md
+        ${checked ? "bg-[#08527A]" : "bg-gray-300"}
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         transition-colors duration-200 ease-in-out
       `}

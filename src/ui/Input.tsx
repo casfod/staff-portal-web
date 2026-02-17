@@ -1,21 +1,31 @@
-// Input.tsx
-import React from "react";
+import React, { forwardRef } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   inputSize?: "default" | number;
+  error?: boolean;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { inputSize = "default", style, type, onChange, value, min, max, ...props },
+    {
+      inputSize = "default",
+      style,
+      type,
+      onChange,
+      value,
+      min,
+      max,
+      error,
+      className = "",
+      ...props
+    },
     ref
   ) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (type === "number") {
-        let newValue = e.target.value.replace(/^0+(?=\d)/, ""); // Remove leading zeros
-        if (newValue === "") newValue = "0"; // Prevent empty value
+        let newValue = e.target.value.replace(/^0+(?=\d)/, "");
+        if (newValue === "") newValue = "0";
 
-        // Apply min/max constraints
         const numericValue = parseFloat(newValue);
         if (!isNaN(numericValue)) {
           if (min !== undefined && numericValue < parseFloat(min as string)) {
@@ -49,13 +59,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return val;
     };
 
+    const baseClasses =
+      "border-2 rounded-lg px-2 py-1.5 w-full transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-0";
+    const normalClasses =
+      "border-gray-300 bg-white hover:border-gray-400 focus:border-[#08527A] focus:ring-blue-200";
+    const errorClasses =
+      "border-red-500 bg-red-50 hover:border-red-600 focus:border-red-500 focus:ring-red-200";
+
     return (
       <input
         ref={ref}
         type={type}
         min={min}
         max={max}
-        className="border-2 border-gray-300 bg-white rounded-lg px-2 py-1.5 focus:outline-none"
+        className={`${baseClasses} ${
+          error ? errorClasses : normalClasses
+        } ${className}`}
         style={
           inputSize !== "default"
             ? { width: `${inputSize}px`, ...style }

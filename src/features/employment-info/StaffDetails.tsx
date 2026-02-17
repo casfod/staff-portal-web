@@ -25,7 +25,7 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
   const { userId: userParamId } = useParams();
 
   // Determine if we're viewing the current user or another user
-  const isViewingSelf = !userParamId || userParamId === currentUser?.id;
+  const isViewingSelf = staffInfo.id === currentUser?.id;
   const isSuperAdmin = currentUser?.role === "SUPER-ADMIN";
 
   // Get global settings for lock status
@@ -54,14 +54,69 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
 
   // Permission logic based on backend
   const isUserLocked = employmentInfo.isEmploymentInfoLocked === true;
+
   const isGloballyLocked =
     settingsData?.data?.globalEmploymentInfoLock === true;
 
   // Super-admin can always update
   // Regular users can only update their own info if not locked
-  const canUpdate = isSuperAdmin
-    ? true // Super-admin can update anyone
-    : isViewingSelf && !isUserLocked && !isGloballyLocked;
+  // const canUpdate = isSuperAdmin
+  //   ? true // Super-admin can update anyone
+  //   : isViewingSelf && !isUserLocked && !isGloballyLocked;
+
+  // let canUpdate = false;
+
+  // if (isSuperAdmin) {
+  //   // Super-admin can always update anyone
+  //   canUpdate = true;
+  // } else if (!isViewingSelf) {
+  //   // Regular users cannot update other users
+  //   canUpdate = false;
+  // } else if (isUserLocked === false && isGloballyLocked === false) {
+  //   // Case 1: Both locks false → allow update
+  //   canUpdate = true;
+  // } else if (isUserLocked === false && isGloballyLocked === true) {
+  //   // Case 2: Global true, User false → allow update
+  //   canUpdate = true;
+  // } else if (isUserLocked === true && isGloballyLocked === false) {
+  //   // Case 3: Global false, User true → do not allow update
+  //   canUpdate = false;
+  // } else if (isUserLocked === true && isGloballyLocked === true) {
+  //   // Case 4: Both true → do not allow update
+  //   canUpdate = false;
+  // }
+
+  // let canUpdate = false;
+
+  // if (isSuperAdmin) {
+  //   // Super-admin can always update anyone
+  //   canUpdate = true;
+  // } else if (!isViewingSelf) {
+  //   // Regular users cannot update other users
+  //   canUpdate = false;
+  // } else if (isUserLocked === true && isGloballyLocked === true) {
+  //   // Case: BOTH locks are true → do not allow update
+  //   canUpdate = false;
+  // } else {
+  //   // All other cases: at least one lock is false → allow update
+  //   canUpdate = true;
+  // }
+
+  console.log({ isSuperAdmin, isViewingSelf, isGloballyLocked, isUserLocked });
+
+  let canUpdate = false;
+
+  if (isSuperAdmin) {
+    // Super-admin can always update anyone
+    canUpdate = true;
+  } else if (!isViewingSelf) {
+    // Non-super-admin viewing others → cannot update (regardless of lock status)
+    canUpdate = false;
+  } else if (isViewingSelf) {
+    // Only here when viewing self and not super-admin
+    // Can update if at least one lock is false
+    canUpdate = !(isUserLocked === true && isGloballyLocked === true);
+  }
 
   const canDisplayInspectButton =
     !userParamId && currentUser?.id !== staffInfo.id;
@@ -75,11 +130,11 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-300 overflow-hidden">
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4 border-b border-gray-200">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">
             Employment Information
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
             {!isProfileComplete && (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                 <AlertCircle className="h-3 w-3" />

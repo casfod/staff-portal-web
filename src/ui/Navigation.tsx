@@ -94,9 +94,10 @@ const Navigation: React.FC = () => {
       ],
     },
     { to: "/user-management", label: "User Management", icon: Users },
-    { to: "/Admin", label: "Settings", icon: Settings },
+    { to: "/Admin", label: "Admin Settings", icon: Settings },
   ];
 
+  // Filter navigation items based on user role
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
     if (!currentUser) return false;
@@ -109,6 +110,9 @@ const Navigation: React.FC = () => {
     switch (item.label) {
       case "User Management":
         return role === "ADMIN";
+
+      case "Admin Settings":
+        return false; // Only SUPER-ADMIN can see Admin Settings
 
       case "Procurement":
         return procurementRole?.canView === true;
