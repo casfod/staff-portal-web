@@ -109,7 +109,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
     isLoading: isLoadingUsers,
     // isError,
   } = useUsers({ limit: 1000 });
-  const users = useMemo(() => usersData?.data.users ?? [], [data]);
+  const users = useMemo(() => usersData?.data.users ?? [], [usersData]);
 
   const isPending = isUpdatingSelf || isUpdatingAdmin;
 
