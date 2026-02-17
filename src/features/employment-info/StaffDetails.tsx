@@ -102,7 +102,7 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
   //   canUpdate = true;
   // }
 
-  console.log({ isSuperAdmin, isViewingSelf, isGloballyLocked, isUserLocked });
+  // console.log({ isSuperAdmin, isViewingSelf, isGloballyLocked, isUserLocked });
 
   let canUpdate = false;
 

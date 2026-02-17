@@ -416,7 +416,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
   }
 
   // CORRECTED: Determine if user can update employment info
-  const canUpdateEmployment = !editedUser.isEmploymentInfoLocked;
+  // const canUpdateEmployment = !editedUser.isEmploymentInfoLocked;
   const globalLocked = settingsData?.data.globalEmploymentInfoLock;
 
   return (

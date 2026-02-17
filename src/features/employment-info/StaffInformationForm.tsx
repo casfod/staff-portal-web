@@ -111,7 +111,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
   } = useUsers({ limit: 1000 });
   const users = useMemo(() => usersData?.data.users ?? [], [data]);
 
-  const isPending = isUpdatingSelf;
+  const isPending = isUpdatingSelf || isUpdatingAdmin;
 
   // Initialize form data
   const [formData, setFormData] = useState<EmploymentInfoType>(() => {
