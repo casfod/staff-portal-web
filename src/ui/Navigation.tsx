@@ -3,14 +3,15 @@ import Navlink from "./Navlink";
 import {
   LayoutDashboard,
   FolderOpen,
-  FileText,
-  ShoppingCart,
-  ReceiptTextIcon,
-  Wallet,
-  Plane,
+  // FileText,
+  // ShoppingCart,
+  // ReceiptTextIcon,
+  // Wallet,
+  // Plane,
   Users,
   Banknote,
   Settings,
+  ListChecks,
 } from "lucide-react";
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
@@ -45,20 +46,22 @@ const Navigation: React.FC = () => {
   const navigation = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/projects", label: "Projects", icon: FolderOpen },
-    { to: "/concept-notes", label: "Concept Notes", icon: FileText },
+
+    // New All Requests dropdown containing all request types
     {
-      to: "/purchase-requests",
-      label: "Purchase Requests",
-      icon: ShoppingCart,
+      to: "/requests",
+      label: "All Requests",
+      icon: ListChecks,
+      dropdown: [
+        { to: "/concept-notes", label: "Concept Notes" },
+        { to: "/purchase-requests", label: "Purchase Requests" },
+        { to: "/payment-requests", label: "Payment Requests" },
+        { to: "/advance-requests", label: "Advance Requests" },
+        { to: "/travel-requests", label: "Travel Requests" },
+        { to: "/expense-claims", label: "Expense Claims" },
+      ],
     },
-    {
-      to: "/payment-requests",
-      label: "Payment Requests",
-      icon: ReceiptTextIcon,
-    },
-    { to: "/advance-requests", label: "Advance Requests", icon: Wallet },
-    { to: "/travel-requests", label: "Travel Requests", icon: Plane },
-    { to: "/expense-claims", label: "Expense Claims", icon: Banknote },
+
     {
       to: "/procurement",
       label: "Procurement",
@@ -70,11 +73,10 @@ const Navigation: React.FC = () => {
         { to: "/procurement/goods-received", label: "Goods Received" },
       ],
     },
-
     {
       to: "/finance",
       label: "Finance",
-      icon: Banknote, // You might want to use a different icon like DollarSign
+      icon: Banknote,
       dropdown: [
         {
           to: "/finance/payment-voucher/payment-vouchers",
@@ -98,7 +100,6 @@ const Navigation: React.FC = () => {
   ];
 
   // Filter navigation items based on user role
-  // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
     if (!currentUser) return false;
 
@@ -119,6 +120,11 @@ const Navigation: React.FC = () => {
 
       case "Finance":
         return financeRole?.canView === true;
+
+      case "All Requests":
+        // You might want to add logic here if certain roles shouldn't see certain requests
+        // For now, it returns true for all non-SUPER-ADMIN roles
+        return true;
 
       default:
         return true;
