@@ -49,7 +49,8 @@ const Navigation: React.FC = () => {
 
     // New All Requests dropdown containing all request types
     {
-      to: "/requests",
+      // to: "/requests",
+      to: "/concept-notes",
       label: "All Requests",
       icon: ListChecks,
       dropdown: [
