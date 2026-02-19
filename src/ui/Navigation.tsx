@@ -94,6 +94,10 @@ const Navigation: React.FC = () => {
           to: "/human-resources/staff-information",
           label: "Staff Information",
         },
+        {
+          to: "/human-resources/leave",
+          label: "Staff Leave",
+        },
       ],
     },
     { to: "/user-management", label: "User Management", icon: Users },

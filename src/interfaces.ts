@@ -1176,3 +1176,302 @@ export interface UnifiedItemType {
 }
 
 export type ItemGroupType = UnifiedItemType;
+
+// src/interfaces.ts - Add these interfaces
+
+///////////////////////
+// Leave Management
+///////////////////////
+
+export interface UserReference {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+}
+
+export type UserIdReference = string | null;
+
+export interface LeaveStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+  totalPendingRequests: number;
+  totalReviewedRequests: number;
+  totalRejectedRequests: number;
+  totalDaysApproved: number;
+}
+
+export interface UseLeaveStatsType {
+  status: number;
+  message: string;
+  data: LeaveStats;
+}
+
+export interface UseLeave {
+  status: number;
+  message: string;
+  data: LeaveType;
+}
+
+export interface UseLeaveType {
+  status: number;
+  message: string;
+  data: {
+    leaves: LeaveType[];
+    totalLeaves: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+// Leave Balance Interface
+export interface LeaveBalanceType {
+  id?: string;
+  user: string | UserType;
+  annualLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  compassionateLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  sickLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  maternityLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  paternityLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  emergencyLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  studyLeave: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  leaveWithoutPay: {
+    maxDays: number;
+    totalApplied: number;
+    accrued: number;
+    balance: number;
+    year: number;
+  };
+  lastResetYear: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UseLeaveBalance {
+  status: number;
+  message: string;
+  data: LeaveBalanceType;
+}
+
+// Main Leave Type
+// export interface LeaveType {
+//   id?: string;
+//   leaveNumber?: string;
+//   user?: {
+//     id: string;
+//     first_name: string;
+//     last_name: string;
+//     email: string;
+//     role: string;
+//   };
+//   staff_name?: string;
+//   staff_role?: string;
+
+//   leaveType:
+//     | "Annual leave"
+//     | "Compassionate leave"
+//     | "Sick leave"
+//     | "Maternity leave"
+//     | "Paternity leave"
+//     | "Emergency leave"
+//     | "Study Leave"
+//     | "Leave without pay";
+
+//   leaveTypeConfig?: {
+//     maxDays: number;
+//     description: string;
+//     isCalendarDays: boolean;
+//   };
+
+//   startDate: string;
+//   endDate: string;
+//   totalDaysApplied: number;
+//   leaveBalanceAtApplication: number;
+//   amountAccruedLeave?: number;
+
+//   reviewedBy?: {
+//     id: string;
+//     first_name: string;
+//     last_name: string;
+//     email: string;
+//     role: string;
+//   };
+//   approvedBy?: {
+//     id: string;
+//     first_name: string;
+//     last_name: string;
+//     email: string;
+//     role: string;
+//   };
+
+//   status: "draft" | "pending" | "reviewed" | "approved" | "rejected";
+
+//   comments?: Comment[];
+//   copiedTo?: UserType[];
+
+//   leaveCover?: {
+//     nameOfCover?: string;
+//     signature?: string;
+//   };
+
+//   reasonForLeave?: string;
+//   contactDuringLeave?: string;
+
+//   isDeleted?: boolean;
+//   createdAt?: string;
+//   updatedAt?: string;
+//   files?: FileType[];
+// }
+
+export interface LeaveFormData {
+  leaveType?: string;
+  startDate?: string;
+  endDate?: string;
+  reasonForLeave?: string;
+  contactDuringLeave?: string;
+  reviewedById?: string | null;
+  approvedById?: string | null;
+  leaveCover?: {
+    nameOfCover?: string;
+    signature?: string;
+  };
+}
+
+export interface LeaveType {
+  id?: string;
+  leaveNumber?: string;
+  user?: UserReference;
+  staff_name?: string;
+  staff_role?: string;
+
+  leaveType:
+    | "Annual leave"
+    | "Compassionate leave"
+    | "Sick leave"
+    | "Maternity leave"
+    | "Paternity leave"
+    | "Emergency leave"
+    | "Study Leave"
+    | "Leave without pay";
+
+  leaveTypeConfig?: {
+    maxDays: number;
+    description: string;
+    isCalendarDays: boolean;
+  };
+
+  startDate: string;
+  endDate: string;
+  totalDaysApplied: number;
+  leaveBalanceAtApplication: number;
+  amountAccruedLeave?: number;
+
+  // For API responses - full user objects
+  reviewedBy?: UserReference;
+  approvedBy?: UserReference;
+
+  // For form submissions - just IDs
+  reviewedById?: string;
+  approvedById?: string;
+
+  status: "draft" | "pending" | "reviewed" | "approved" | "rejected";
+
+  comments?: Comment[];
+  copiedTo?: UserReference[];
+
+  leaveCover?: {
+    nameOfCover?: string;
+    signature?: string;
+  };
+
+  reasonForLeave?: string;
+  contactDuringLeave?: string;
+
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  files?: FileType[];
+}
+
+// Leave Type Configuration (for reference)
+export const LEAVE_TYPE_CONFIG = {
+  "Annual leave": {
+    maxDays: 24,
+    description: "24 days",
+    isCalendarDays: false,
+  },
+  "Compassionate leave": {
+    maxDays: 10,
+    description: "10 days Max",
+    isCalendarDays: false,
+  },
+  "Sick leave": { maxDays: 12, description: "12 Days", isCalendarDays: false },
+  "Maternity leave": {
+    maxDays: 90,
+    description: "90 Working days",
+    isCalendarDays: false,
+  },
+  "Paternity leave": {
+    maxDays: 14,
+    description: "14 Calendar Days",
+    isCalendarDays: true,
+  },
+  "Emergency leave": {
+    maxDays: 5,
+    description: "5 days",
+    isCalendarDays: false,
+  },
+  "Study Leave": {
+    maxDays: 10,
+    description: "10 working day",
+    isCalendarDays: false,
+  },
+  "Leave without pay": {
+    maxDays: 365,
+    description: "Up to 1 year",
+    isCalendarDays: true,
+  },
+} as const;

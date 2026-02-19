@@ -75,6 +75,11 @@ import StaffInformationView from "./features/employment-info/StaffInformationVie
 import EditStaffInformation from "./features/employment-info/EditStaffInformation.tsx";
 import HRAdminPanelView from "./features/employment-info/HRAdminPanelView.tsx";
 import { HRAdminPanel } from "./pages/HRAdminPanel.tsx";
+import LeaveManagement from "./pages/LeaveManagement.tsx";
+import AllLeaves from "./features/leave/AllLeaves.tsx";
+import CreateLeave from "./features/leave/CreateLeave.tsx";
+import Leave from "./features/leave/Leave.tsx";
+import EditLeave from "./features/leave/EditLeave.tsx";
 
 const router = createBrowserRouter([
   {
@@ -664,6 +669,41 @@ const router = createBrowserRouter([
                     key="staff-information-edit"
                     element={<EditStaffInformation />}
                   />
+                ),
+              },
+            ],
+          },
+
+          // NEW LEAVE MANAGEMENT ROUTES
+          {
+            path: "leave",
+            element: (
+              <AnimatedRoute key="leave" element={<LeaveManagement />} />
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <AnimatedRoute key="all-leaves" element={<AllLeaves />} />
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <AnimatedRoute key="create-leave" element={<CreateLeave />} />
+                ),
+              },
+              {
+                path: ":leaveId",
+                element: (
+                  <AnimatedRoute key="leave-detail" element={<Leave />} />
+                ),
+              },
+              {
+                path: "edit/:leaveId",
+                element: (
+                  <AnimatedRoute key="edit-leave" element={<EditLeave />} />
                 ),
               },
             ],
