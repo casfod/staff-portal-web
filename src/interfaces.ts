@@ -1296,76 +1296,6 @@ export interface UseLeaveBalance {
   data: LeaveBalanceType;
 }
 
-// Main Leave Type
-// export interface LeaveType {
-//   id?: string;
-//   leaveNumber?: string;
-//   user?: {
-//     id: string;
-//     first_name: string;
-//     last_name: string;
-//     email: string;
-//     role: string;
-//   };
-//   staff_name?: string;
-//   staff_role?: string;
-
-//   leaveType:
-//     | "Annual leave"
-//     | "Compassionate leave"
-//     | "Sick leave"
-//     | "Maternity leave"
-//     | "Paternity leave"
-//     | "Emergency leave"
-//     | "Study Leave"
-//     | "Leave without pay";
-
-//   leaveTypeConfig?: {
-//     maxDays: number;
-//     description: string;
-//     isCalendarDays: boolean;
-//   };
-
-//   startDate: string;
-//   endDate: string;
-//   totalDaysApplied: number;
-//   leaveBalanceAtApplication: number;
-//   amountAccruedLeave?: number;
-
-//   reviewedBy?: {
-//     id: string;
-//     first_name: string;
-//     last_name: string;
-//     email: string;
-//     role: string;
-//   };
-//   approvedBy?: {
-//     id: string;
-//     first_name: string;
-//     last_name: string;
-//     email: string;
-//     role: string;
-//   };
-
-//   status: "draft" | "pending" | "reviewed" | "approved" | "rejected";
-
-//   comments?: Comment[];
-//   copiedTo?: UserType[];
-
-//   leaveCover?: {
-//     nameOfCover?: string;
-//     signature?: string;
-//   };
-
-//   reasonForLeave?: string;
-//   contactDuringLeave?: string;
-
-//   isDeleted?: boolean;
-//   createdAt?: string;
-//   updatedAt?: string;
-//   files?: FileType[];
-// }
-
 export interface LeaveFormData {
   leaveType?: string;
   startDate?: string;
@@ -1374,6 +1304,7 @@ export interface LeaveFormData {
   contactDuringLeave?: string;
   reviewedById?: string | null;
   approvedById?: string | null;
+  approvedBy?: string | null;
   leaveCover?: {
     nameOfCover?: string;
     signature?: string;

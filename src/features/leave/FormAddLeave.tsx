@@ -26,7 +26,7 @@ const FormAddLeave = () => {
     reasonForLeave: "",
     contactDuringLeave: "",
     reviewedById: null,
-    approvedById: null, // Add this
+    approvedById: null,
     leaveCover: {
       nameOfCover: "",
       signature: "",
@@ -164,7 +164,8 @@ const FormAddLeave = () => {
 
     if (!isFormValid) return;
 
-    const data = { ...formData, reviewedById: null, approvedById: null }; // Clear both for draft
+    // Clear reviewer for draft save (matching Concept Note)
+    const data = { ...formData, reviewedById: null, approvedById: null };
     saveLeaveDraft(data);
   };
 
@@ -174,6 +175,7 @@ const FormAddLeave = () => {
 
     if (!isFormValid) return;
 
+    // Validate reviewer is selected (matching Concept Note)
     if (!formData.reviewedById) {
       alert("Please select a reviewer before submitting");
       return;
@@ -199,6 +201,7 @@ const FormAddLeave = () => {
       return;
     }
 
+    // Balance validation (additional business logic)
     if (totalDays > availableBalance) {
       alert(
         `You only have ${availableBalance} days available for this leave type`
@@ -271,7 +274,7 @@ const FormAddLeave = () => {
         </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-4">
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Start Date *">
           <DatePicker
             selected={formData.startDate ? new Date(formData.startDate) : null}
@@ -353,7 +356,7 @@ const FormAddLeave = () => {
           />
         </FormRow>
 
-        <FormRow label="Cover Signature (Optional)">
+        {/* <FormRow label="Cover Signature (Optional)">
           <Input
             type="text"
             id="signature"
@@ -361,9 +364,10 @@ const FormAddLeave = () => {
             onChange={(e) => handleNestedChange("signature", e.target.value)}
             placeholder="Signature or acknowledgment"
           />
-        </FormRow>
+        </FormRow> */}
       </Row>
 
+      {/* File upload only when reviewer is selected (matching Concept Note) */}
       {formData.reviewedById && (
         <FileUpload
           selectedFiles={selectedFiles}
@@ -374,12 +378,14 @@ const FormAddLeave = () => {
       )}
 
       <div className="flex justify-center w-full gap-4">
+        {/* Save as Draft button - only when no reviewer (matching Concept Note) */}
         {!formData.reviewedById && (
           <Button disabled={isSaving} size="medium" onClick={handleSave}>
             {isSaving ? <SpinnerMini /> : "Save as Draft"}
           </Button>
         )}
 
+        {/* Submit for Review button - only when reviewer selected (matching Concept Note) */}
         {formData.reviewedById && (
           <Button
             size="medium"

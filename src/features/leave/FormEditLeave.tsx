@@ -16,6 +16,7 @@ import { localStorageUser } from "../../utils/localStorageUser";
 import { useMyLeaveBalance } from "./Hooks/useLeave";
 import { useDispatch } from "react-redux";
 import { resetLeave } from "../../store/leaveSlice";
+import LeaveBalanceCard from "../../ui/LeaveBalanceCard";
 
 interface FormEditLeaveProps {
   leave: LeaveType;
@@ -40,6 +41,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showFullBalance, setShowFullBalance] = useState(false);
 
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
     limit: 1000,
@@ -147,6 +149,15 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     });
   };
 
+  const handleBalanceClick = (leaveType: string) => {
+    const leaveTypeKey = Object.keys(LEAVE_TYPE_CONFIG).find((key) =>
+      key.toLowerCase().includes(leaveType.toLowerCase())
+    );
+    if (leaveTypeKey) {
+      handleFormChange("leaveType", leaveTypeKey);
+    }
+  };
+
   const {
     saveLeaveDraft,
     isPending: isSaving,
@@ -165,6 +176,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
     if (!isFormValid) return;
 
+    // Clear both reviewer and approver for draft save (matching Concept Note)
     const data = { ...formData, reviewedById: null, approvedById: null };
     saveLeaveDraft(data);
     dispatch(resetLeave());
@@ -176,24 +188,22 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
     if (!isFormValid) return;
 
-    // For draft status, we need reviewer
-    if (leave.status === "draft" && !formData.reviewedById) {
-      alert("Please select a reviewer before submitting");
-      return;
+    // Validate based on current status (matching Concept Note)
+    if (leave.status === "draft" || leave.status === "rejected") {
+      if (!formData.reviewedById) {
+        alert("Please select a reviewer before submitting");
+        return;
+      }
     }
 
-    // For reviewed status, we need approver (second step)
-    if (leave.status === "reviewed" && !formData.approvedById) {
-      alert("Please select an approver before submitting");
-      return;
+    if (leave.status === "reviewed") {
+      if (!formData.approvedById) {
+        alert("Please select an approver before submitting");
+        return;
+      }
     }
 
-    // For rejected status, we need reviewer (resubmission)
-    if (leave.status === "rejected" && !formData.reviewedById) {
-      alert("Please select a reviewer before resubmitting");
-      return;
-    }
-
+    // Balance validation (additional business logic)
     if (totalDays > availableBalance && leave.status !== "approved") {
       alert(
         `You only have ${availableBalance} days available for this leave type`
@@ -212,6 +222,26 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
   return (
     <form className="space-y-6">
+      {/* Leave Balance Card */}
+      <LeaveBalanceCard
+        leaveBalance={leaveBalance}
+        isLoading={isLoadingBalance}
+        showAllTypes={showFullBalance}
+        onBalanceClick={handleBalanceClick}
+        warningThreshold={0.2}
+      />
+
+      {/* Toggle for showing all leave types */}
+      {leaveBalance && (
+        <button
+          type="button"
+          onClick={() => setShowFullBalance(!showFullBalance)}
+          className="text-sm text-blue-600 hover:text-blue-800 transition"
+        >
+          {showFullBalance ? "Show less" : "Show all leave types"}
+        </button>
+      )}
+
       <Row>
         <p className="font-bold" style={{ letterSpacing: "1px" }}>
           {`Status : ${leave.status}`}
@@ -258,7 +288,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         </FormRow>
 
-        {/* Show Reviewer selection for drafts and rejected (first step) */}
+        {/* Conditional selection based on status - matching Concept Note */}
         {(leave.status === "draft" || leave.status === "rejected") && (
           <FormRow label="Reviewer *">
             {isLoadingUsers ? (
@@ -281,7 +311,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           </FormRow>
         )}
 
-        {/* Show Approver selection for reviewed status (second step) */}
         {leave.status === "reviewed" && (
           <FormRow label="Approver *">
             {isLoadingUsers ? (
@@ -304,7 +333,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           </FormRow>
         )}
 
-        {/* Show read-only reviewer/approver info for other statuses */}
+        {/* Show read-only info for other statuses */}
         {(leave.status === "approved" || leave.status === "pending") &&
           leave.reviewedBy && (
             <div className="space-y-2">
@@ -410,7 +439,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         </FormRow>
 
-        <FormRow label="Cover Signature (Optional)">
+        {/* <FormRow label="Cover Signature (Optional)">
           <Input
             type="text"
             id="signature"
@@ -419,10 +448,10 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             placeholder="Signature or acknowledgment"
             disabled={leave.status !== "draft" && leave.status !== "rejected"}
           />
-        </FormRow>
+        </FormRow> */}
       </Row>
 
-      {/* File upload - show when reviewer selected for drafts/rejected */}
+      {/* File upload based on status and selections - matching Concept Note */}
       {(leave.status === "draft" || leave.status === "rejected") &&
         formData.reviewedById && (
           <FileUpload
@@ -433,7 +462,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         )}
 
-      {/* File upload - show when approver selected for reviewed */}
       {leave.status === "reviewed" && formData.approvedById && (
         <FileUpload
           selectedFiles={selectedFiles}
@@ -444,7 +472,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
       )}
 
       <div className="flex justify-center w-full gap-4">
-        {/* Save as Draft button - for drafts/rejected without reviewer */}
+        {/* Save as Draft button - for drafts/rejected without reviewer (matching Concept Note) */}
         {(leave.status === "draft" || leave.status === "rejected") &&
           !formData.reviewedById && (
             <Button size="medium" disabled={isSaving} onClick={handleSave}>
@@ -452,7 +480,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </Button>
           )}
 
-        {/* Submit for Review button - for drafts/rejected with reviewer */}
+        {/* Submit for Review button - for drafts/rejected with reviewer (matching Concept Note) */}
         {(leave.status === "draft" || leave.status === "rejected") &&
           formData.reviewedById && (
             <Button
@@ -464,7 +492,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </Button>
           )}
 
-        {/* Submit for Approval button - for reviewed with approver */}
+        {/* Submit for Approval button - for reviewed with approver (matching Concept Note) */}
         {leave.status === "reviewed" && formData.approvedById && (
           <Button size="medium" disabled={isUpdating} onClick={handleUpdate}>
             {isUpdating ? <SpinnerMini /> : "Submit for Approval"}

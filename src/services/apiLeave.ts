@@ -189,6 +189,8 @@ export const saveLeaveDraft = async function (data: LeaveFormData) {
   }
 };
 
+// src/services/apiLeave.ts
+// Update the updateLeaveApplication function to include approvedBy
 export const updateLeaveApplication = async function (
   leaveId: string,
   data: LeaveFormData,
@@ -204,6 +206,7 @@ export const updateLeaveApplication = async function (
       formData.append("contactDuringLeave", data.contactDuringLeave);
     if (data.reviewedById) formData.append("reviewedBy", data.reviewedById);
     if (data.approvedById) formData.append("approvedBy", data.approvedById);
+    if (data.approvedBy) formData.append("approvedBy", data.approvedBy); // ADD THIS - for when approvedBy comes from formData
 
     if (data.startDate) {
       formData.append("startDate", data.startDate);
@@ -232,7 +235,6 @@ export const updateLeaveApplication = async function (
     return handleError(err);
   }
 };
-
 export const updateLeaveStatus = async function (
   leaveId: string,
   data: { status: string; comment: string }

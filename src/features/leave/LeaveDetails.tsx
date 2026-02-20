@@ -105,7 +105,7 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
       </div>
 
       {/* Approval Chain Section */}
-      <div className="w-fit mt-4 border-t border-gray-300 pt-4 space-y-2">
+      {/* <div className="w-fit mt-4 border-t border-gray-300 pt-4 space-y-2">
         <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
           <span className="font-bold mr-1 uppercase">Staff:</span>
           {request?.staff_name}
@@ -141,7 +141,7 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
             </p>
           </>
         )}
-      </div>
+      </div> */}
 
       <SystemInfo request={request} />
 

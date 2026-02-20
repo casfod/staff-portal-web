@@ -23,6 +23,7 @@ import {
   useUpdateComment,
   useDeleteComment,
   useUpdateLeaveStatus,
+  useUpdateLeaveApplication,
 } from "./Hooks/useLeave";
 import { useUsers } from "../user/Hooks/useUsers";
 import { Comment as AppComment } from "../../interfaces";
@@ -36,12 +37,14 @@ const Leave = () => {
   const navigate = useNavigate();
   const { leaveId } = useParams();
 
+  // Data fetching and reconciliation
   const { data: remoteData, isLoading, isError } = useLeave(leaveId!);
 
   const leave = useSelector((state: RootState) => state.leave.leave);
 
   const request = useMemo(() => remoteData?.data || leave, [remoteData, leave]);
 
+  // Redirect logic
   useEffect(() => {
     if (!leaveId || (!isLoading && !request)) {
       navigate("/human-resources/leave");
@@ -54,21 +57,48 @@ const Leave = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
+  // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(leaveId!);
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(
+    leaveId!
+  );
+  const { updateLeaveApplication, isPending: isUpdating } =
+    useUpdateLeaveApplication(request?.id!);
+
+  // Comment hooks
+  const { addComment, isPending: isAddingComment } = useAddComment(leaveId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    leaveId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    leaveId!
+  );
+
   const { copyto, isPending: isCopying } = useCopyLeave(leaveId!);
 
-  const { addComment, isPending: isAddingComment } = useAddComment(leaveId!);
-  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(leaveId!);
-  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(leaveId!);
-
-  const { data: usersData } = useUsers({ limit: 1000 });
-  const users = useMemo(() => usersData?.data?.users ?? [], [usersData]);
+  // Fetch users data for approval section
+  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
+    limit: 1000,
+  });
+  const admins = useMemo(
+    () =>
+      usersData?.data?.users.filter((u) =>
+        ["SUPER-ADMIN", "ADMIN"].includes(u.role)
+      ) ?? [],
+    [usersData]
+  );
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // EXACTLY matching ConceptNote.tsx handleSend
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateLeaveApplication({ data: formData, files: selectedFiles });
+  };
+
+  // Handle status change with confirmation dialog
   const onStatusChangeHandler = () => {
     handleStatusChange(status, comment, async (data) => {
       try {
@@ -83,6 +113,7 @@ const Leave = () => {
     });
   };
 
+  // Comment handlers
   const handleAddComment = async (text: string) => {
     await addComment({ text });
   };
@@ -95,6 +126,7 @@ const Leave = () => {
     await deleteComment(commentId);
   };
 
+  // PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `Leave-${request?.id}`,
@@ -108,29 +140,35 @@ const Leave = () => {
     downloadPdf(pdfContentRef);
   };
 
+  // User references and permission logic
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
   const requestStatus = request?.status;
 
+  // Permission flags
   const isCreator = request?.user?.id === currentUserId;
   const isReviewer = request?.reviewedBy?.id === currentUserId;
   const isApprover = request?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
+  // Check if user is in copiedTo array
   const isCopiedTo = request?.copiedTo?.some(
     (user: any) => user.id === currentUserId
   );
 
+  // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
   const canShareRequest =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
 
+  // Permission to update status - EXACTLY matching ConceptNote.tsx
   const canUpdateStatus =
     !isCreator &&
     ((requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
+  // Users who can add comments - EXACTLY matching ConceptNote.tsx
   const canAddComments =
     isCreator ||
     isReviewer ||
@@ -139,6 +177,7 @@ const Leave = () => {
     isAdmin ||
     (userRole === "REVIEWER" && requestStatus === "pending");
 
+  // Show admin approval section (for reviewed leave applications)
   const showAdminApproval =
     !request?.approvedBy &&
     requestStatus === "reviewed" &&
@@ -146,17 +185,24 @@ const Leave = () => {
       (isReviewer && !request?.reviewedBy) ||
       (isApprover && !request?.approvedBy));
 
+  // Cast comments to Comment[] type for TypeScript
   const comments = (request?.comments || []) as AppComment[];
 
   const requestCreatedAt = request?.createdAt ?? "";
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
 
+  // Table data configuration - matching ConceptNote.tsx structure
   const tableHeadData = [
     { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
     { label: "Leave Type", showOnMobile: true, minWidth: "150px" },
     { label: "Days", showOnMobile: true, minWidth: "80px" },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Date", showOnMobile: false, showOnTablet: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
     { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
 
@@ -204,7 +250,6 @@ const Leave = () => {
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
           hideInspect={true}
-          variant="detail"
         />
       ),
       showOnMobile: true,
@@ -224,6 +269,7 @@ const Leave = () => {
         </div>
       </div>
 
+      {/* Main Content Section */}
       <div id="pdfContentRef" ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
@@ -233,7 +279,6 @@ const Leave = () => {
           loadingComponent={<Spinner />}
           emptyComponent={<div>No data available</div>}
         >
-          {/* overflow-x-auto is safe now — dropdowns render via portal into document.body */}
           <div className="overflow-x-auto">
             <div className="md:min-w-full">
               <table className="w-full divide-y divide-gray-200">
@@ -243,12 +288,17 @@ const Leave = () => {
                       <th
                         key={index}
                         className={`
-                          px-3 py-2.5 md:px-4 md:py-3
-                          text-left font-medium uppercase
-                          tracking-wider whitespace-nowrap
-                          text-xs md:text-sm
+                          px-3 py-2.5 md:px-4 md:py-3 
+                          text-left font-medium uppercase 
+                          tracking-wider
                           ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${header.showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            header.showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          text-xs md:text-sm
+                          whitespace-nowrap
                         `}
                         style={{ minWidth: header.minWidth }}
                       >
@@ -259,26 +309,34 @@ const Leave = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Desktop/Tablet Row */}
                   <TableRowMain
                     key={request?.id}
                     requestId={request?.id || ""}
                     toggleViewItems={() => {}}
                     className="hidden sm:table-row"
                   >
-                    {tableRowData.map(({ id, content, showOnMobile, showOnTablet }) => (
-                      <TableData
-                        key={`${request?.id}-${id}`}
-                        className={`
-                          px-3 py-2.5 md:px-4 md:py-3
+                    {tableRowData.map(
+                      ({ id, content, showOnMobile, showOnTablet }) => (
+                        <TableData
+                          key={`${request?.id}-${id}`}
+                          className={`
                           ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          px-3 py-2.5 md:px-4 md:py-3
                         `}
-                      >
-                        {content}
-                      </TableData>
-                    ))}
+                        >
+                          {content}
+                        </TableData>
+                      )
+                    )}
                   </TableRowMain>
 
+                  {/* Mobile Card View */}
                   <tr key={`${request?.id}-mobile`} className="sm:hidden">
                     <td
                       colSpan={tableHeadData.length}
@@ -298,7 +356,6 @@ const Leave = () => {
                           showTagDropdown,
                           setShowTagDropdown,
                           hideInspect: true,
-                          variant: "detail",
                         }}
                         context="detail"
                         showActions={true}
@@ -310,16 +367,19 @@ const Leave = () => {
                     </td>
                   </tr>
 
+                  {/* Details Section */}
                   <tr>
                     <td colSpan={tableHeadData.length}>
                       <RequestDetailLayout
                         request={request}
                         requestStatus={request?.status || ""}
+                        // File upload props
                         canUploadFiles={canUploadFiles}
                         selectedFiles={selectedFiles}
                         setSelectedFiles={setSelectedFiles}
-                        isUploading={false}
-                        handleUpload={() => {}}
+                        isUploading={isUpdating}
+                        handleUpload={handleSend}
+                        // Status update props
                         canUpdateStatus={canUpdateStatus}
                         status={status}
                         setStatus={setStatus}
@@ -327,6 +387,7 @@ const Leave = () => {
                         setComment={setComment}
                         isUpdatingStatus={isUpdatingStatus}
                         handleStatusChange={onStatusChangeHandler}
+                        // Comment props
                         comments={comments}
                         canAddComments={canAddComments}
                         handleAddComment={handleAddComment}
@@ -335,11 +396,12 @@ const Leave = () => {
                         isAddingComment={isAddingComment}
                         isUpdatingComment={isUpdatingComment}
                         isDeletingComment={isDeletingComment}
+                        // Admin approval props
                         showAdminApproval={showAdminApproval}
                         formData={formData}
                         handleFormChange={handleFormChange}
-                        admins={users}
-                        isLoadingAmins={false}
+                        admins={admins}
+                        isLoadingAmins={isLoadingUsers}
                       >
                         <LeaveDetails request={request!} />
                       </RequestDetailLayout>

@@ -22,6 +22,8 @@ const AdminApprovalSection = ({
   isUpdating,
   handleSend,
 }: AdminApprovalSectionProps) => {
+  console.log("AdminApprovalSection::::", formData);
+
   // Safely get the approvedBy value
   const approvedByValue =
     typeof formData.approvedBy === "string"

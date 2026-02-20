@@ -6,7 +6,6 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import {
-  // LeaveType,
   UseLeave,
   UseLeaveStatsType,
   UseLeaveType,
@@ -81,7 +80,7 @@ export function useMyLeaveBalance() {
   return useQuery<UseLeaveBalance, Error>({
     queryKey: ["my-leave-balance"],
     queryFn: () => getMyLeaveBalance(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -108,11 +107,10 @@ export function useCopyLeave(requestId: string) {
     onSuccess: (data) => {
       if (data.status === 200) {
         toast.success("Copied successfully");
-
         queryClient.invalidateQueries({
           queryKey: ["leave", requestId],
         });
-      } else if (data.status !== 200) {
+      } else {
         toast.error("Copy not successful");
         setErrorMessage(data.message);
         console.error("Error:", data.message);
@@ -129,9 +127,6 @@ export function useCopyLeave(requestId: string) {
 
   return { copyto, isPending, isError, errorMessage };
 }
-
-// src/features/leave/Hooks/useLeave.ts (partial - key mutations updated)
-// Update the mutation hooks to use LeaveFormData
 
 export function useSaveLeaveDraft() {
   const queryClient = useQueryClient();
@@ -214,7 +209,7 @@ export function useUpdateLeaveApplication(leaveId: string) {
           queryKey: ["leave", leaveId],
         });
         queryClient.invalidateQueries({ queryKey: ["my-leave-balance"] });
-      } else if (data.status !== 200) {
+      } else {
         toast.error("Update not successful");
         setErrorMessage(data.message);
         console.error("Update Error:", data.message);
@@ -251,7 +246,7 @@ export function useUpdateLeaveStatus(leaveId: string) {
           queryKey: ["leave", leaveId],
         });
         queryClient.invalidateQueries({ queryKey: ["my-leave-balance"] });
-      } else if (data.status !== 200) {
+      } else {
         toast.error("Status update not successful");
         setErrorMessage(data.message);
         console.error("Status Update Error:", data.message);
@@ -286,7 +281,7 @@ export function useAddComment(leaveId: string) {
         queryClient.invalidateQueries({
           queryKey: ["leave", leaveId],
         });
-      } else if (data.status !== 201) {
+      } else {
         toast.error("Failed to add comment");
         setErrorMessage(data.message);
         console.error("Error:", data.message);
@@ -322,7 +317,7 @@ export function useUpdateComment(leaveId: string) {
         queryClient.invalidateQueries({
           queryKey: ["leave", leaveId],
         });
-      } else if (data.status !== 200) {
+      } else {
         toast.error("Failed to update comment");
         setErrorMessage(data.message);
         console.error("Error:", data.message);
@@ -357,7 +352,7 @@ export function useDeleteComment(leaveId: string) {
         queryClient.invalidateQueries({
           queryKey: ["leave", leaveId],
         });
-      } else if (data.status !== 200) {
+      } else {
         toast.error("Failed to delete comment");
         setErrorMessage(data.message);
         console.error("Error:", data.message);
