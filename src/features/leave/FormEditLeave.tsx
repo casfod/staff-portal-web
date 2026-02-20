@@ -53,6 +53,11 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     [usersData, currentUser.id]
   );
 
+  const admins = useMemo(
+    () => users.filter((u) => ["SUPER-ADMIN", "ADMIN"].includes(u.role)),
+    [users]
+  );
+
   const leaveBalance = leaveBalanceData?.data;
 
   const leaveTypeOptions = Object.entries(LEAVE_TYPE_CONFIG).map(
@@ -171,13 +176,21 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
     if (!isFormValid) return;
 
+    // For draft status, we need reviewer
     if (leave.status === "draft" && !formData.reviewedById) {
       alert("Please select a reviewer before submitting");
       return;
     }
 
+    // For reviewed status, we need approver (second step)
     if (leave.status === "reviewed" && !formData.approvedById) {
       alert("Please select an approver before submitting");
+      return;
+    }
+
+    // For rejected status, we need reviewer (resubmission)
+    if (leave.status === "rejected" && !formData.reviewedById) {
+      alert("Please select a reviewer before resubmitting");
       return;
     }
 
@@ -245,6 +258,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         </FormRow>
 
+        {/* Show Reviewer selection for drafts and rejected (first step) */}
         {(leave.status === "draft" || leave.status === "rejected") && (
           <FormRow label="Reviewer *">
             {isLoadingUsers ? (
@@ -267,6 +281,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           </FormRow>
         )}
 
+        {/* Show Approver selection for reviewed status (second step) */}
         {leave.status === "reviewed" && (
           <FormRow label="Approver *">
             {isLoadingUsers ? (
@@ -279,18 +294,17 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
                 customLabel="Select Approver"
                 value={formData.approvedById || ""}
                 onChange={(value) => handleFormChange("approvedById", value)}
-                options={users
-                  .filter((u) => ["SUPER-ADMIN", "ADMIN"].includes(u.role))
-                  .map((user) => ({
-                    id: user.id as string,
-                    name: `${user.first_name} ${user.last_name} (${user.role})`,
-                  }))}
+                options={admins.map((user) => ({
+                  id: user.id as string,
+                  name: `${user.first_name} ${user.last_name} (${user.role})`,
+                }))}
                 required
               />
             )}
           </FormRow>
         )}
 
+        {/* Show read-only reviewer/approver info for other statuses */}
         {(leave.status === "approved" || leave.status === "pending") &&
           leave.reviewedBy && (
             <div className="space-y-2">
@@ -334,7 +348,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
               minDate={
                 formData.startDate ? new Date(formData.startDate) : undefined
               }
-              // required={!!formData.startDate}
               disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
@@ -409,6 +422,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         </FormRow>
       </Row>
 
+      {/* File upload - show when reviewer selected for drafts/rejected */}
       {(leave.status === "draft" || leave.status === "rejected") &&
         formData.reviewedById && (
           <FileUpload
@@ -419,7 +433,18 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         )}
 
+      {/* File upload - show when approver selected for reviewed */}
+      {leave.status === "reviewed" && formData.approvedById && (
+        <FileUpload
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          accept=".jpg,.png,.pdf,.docx"
+          multiple={true}
+        />
+      )}
+
       <div className="flex justify-center w-full gap-4">
+        {/* Save as Draft button - for drafts/rejected without reviewer */}
         {(leave.status === "draft" || leave.status === "rejected") &&
           !formData.reviewedById && (
             <Button size="medium" disabled={isSaving} onClick={handleSave}>
@@ -427,6 +452,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </Button>
           )}
 
+        {/* Submit for Review button - for drafts/rejected with reviewer */}
         {(leave.status === "draft" || leave.status === "rejected") &&
           formData.reviewedById && (
             <Button
@@ -438,6 +464,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </Button>
           )}
 
+        {/* Submit for Approval button - for reviewed with approver */}
         {leave.status === "reviewed" && formData.approvedById && (
           <Button size="medium" disabled={isUpdating} onClick={handleUpdate}>
             {isUpdating ? <SpinnerMini /> : "Submit for Approval"}

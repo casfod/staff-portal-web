@@ -41,7 +41,6 @@ const TagUsersDropdown = ({
   );
   const [coords, setCoords] = useState({ top: 0, right: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Calculate position from anchor element
   useEffect(() => {
@@ -51,7 +50,6 @@ const TagUsersDropdown = ({
         top: rect.bottom + window.scrollY + 8,
         right: window.innerWidth - rect.right,
       });
-      setIsInitialized(true);
     }
   }, [anchorRef]);
 
@@ -96,7 +94,7 @@ const TagUsersDropdown = ({
       initialExpandedState[role] = true;
     });
     setExpandedRoles(initialExpandedState);
-  }, [allRoles]);
+  }, []);
 
   const filteredGroupedUsers: GroupedUsers = {};
   Object.keys(groupedUsers).forEach((role) => {
@@ -143,45 +141,23 @@ const TagUsersDropdown = ({
     ).length;
   };
 
-  // Handle click outside - FIXED VERSION with proper event handling
+  // Handle click outside to close dropdown
   useEffect(() => {
-    if (!isInitialized) return;
-
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-
-      // Check if click is inside dropdown
       const isInsideDropdown = dropdownRef.current?.contains(target);
-
-      // Check if click is inside anchor
       const isInsideAnchor = anchorRef?.current?.contains(target);
 
-      // Check if click is on the portal overlay or any of its children
-      const isInsidePortal = dropdownRef.current?.contains(target);
-
-      // Only close if click is completely outside both dropdown and anchor
-      if (!isInsideDropdown && !isInsideAnchor && !isInsidePortal) {
+      if (!isInsideDropdown && !isInsideAnchor) {
         onClose();
       }
     };
 
-    // Use a longer delay to ensure the opening click is completely processed
-    const timerId = setTimeout(() => {
-      // Use mousedown for better responsiveness
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 200);
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      clearTimeout(timerId);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose, anchorRef, isInitialized]);
-
-  // Prevent click events from bubbling up to parent elements
-  const handleDropdownClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-  };
+  }, [onClose, anchorRef]);
 
   const handleSubmit = async () => {
     await onSelectUsers(selectedUsers);
@@ -192,26 +168,19 @@ const TagUsersDropdown = ({
     (users) => users?.length === 0
   );
 
-  // Don't render until we have coordinates
-  if (!isInitialized && anchorRef) {
-    return null;
-  }
-
   const dropdownContent = (
-    <div
-      ref={dropdownRef}
-      style={{
-        position: anchorRef ? "fixed" : "absolute",
-        top: anchorRef ? coords.top : undefined,
-        right: anchorRef ? coords.right : 0,
-        zIndex: 99999, // Increased z-index
-        ...(anchorRef ? {} : { marginTop: "8px" }),
-      }}
-      onClick={handleDropdownClick}
-      onMouseDown={handleDropdownClick}
-    >
+    <div ref={dropdownRef}>
       <motion.div
+        // ref={dropdownRef}
         className="w-72 rounded-md bg-white shadow-lg border border-gray-200 overflow-hidden"
+        style={{
+          position: anchorRef ? "fixed" : "absolute",
+          top: anchorRef ? coords.top : undefined,
+          right: anchorRef ? coords.right : 0,
+          bottom: anchorRef ? undefined : undefined,
+          zIndex: 9999,
+          ...(anchorRef ? {} : { marginTop: "8px" }),
+        }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
@@ -227,17 +196,11 @@ const TagUsersDropdown = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               autoFocus
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
             />
             {searchTerm && (
               <button
                 className="absolute right-2 top-2.5 h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSearchTerm("");
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
+                onClick={() => setSearchTerm("")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -274,10 +237,7 @@ const TagUsersDropdown = ({
             <p className="text-sm">No users found matching "{searchTerm}"</p>
             <button
               className="text-blue-500 text-sm mt-2 hover:underline"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSearchTerm("");
-              }}
+              onClick={() => setSearchTerm("")}
             >
               Clear search
             </button>
@@ -296,10 +256,7 @@ const TagUsersDropdown = ({
                 <div key={role} className="border-b last:border-b-0">
                   <div
                     className="flex items-center px-3 py-2 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleRoleExpansion(role);
-                    }}
+                    onClick={() => toggleRoleExpansion(role)}
                   >
                     <button
                       className="p-1 rounded-sm hover:bg-gray-200 mr-1"
@@ -307,7 +264,6 @@ const TagUsersDropdown = ({
                         e.stopPropagation();
                         toggleAllInRole(role);
                       }}
-                      onMouseDown={(e) => e.stopPropagation()}
                     >
                       {allSelected ? (
                         <CheckCheck className="h-4 w-4 text-blue-500" />
@@ -357,11 +313,7 @@ const TagUsersDropdown = ({
                           <div
                             key={user.id}
                             className="flex items-center px-3 py-2 pl-8 hover:bg-gray-50 cursor-pointer transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleUserSelection(user.id!);
-                            }}
-                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={() => toggleUserSelection(user.id!)}
                           >
                             <div
                               className={`w-4 h-4 rounded-sm border mr-3 flex items-center justify-center transition-colors ${
@@ -389,22 +341,12 @@ const TagUsersDropdown = ({
         )}
 
         <div className="p-3 border-t flex justify-between items-center bg-gray-50">
-          <Button
-            size="small"
-            variant="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-          >
+          <Button size="small" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
           <Button
             size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSubmit();
-            }}
+            onClick={handleSubmit}
             disabled={selectedUsers.length === 0}
           >
             Add {selectedUsers.length > 0 ? `(${selectedUsers.length})` : ""}

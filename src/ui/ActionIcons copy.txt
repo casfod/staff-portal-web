@@ -1,9 +1,9 @@
-// ActionIcons.tsx - Updated with anchorRef for portal-based dropdowns
+// ActionIcons.tsx - Updated with variant prop
 import { HiMiniEye, HiMiniEyeSlash } from "react-icons/hi2";
 import { Download, Edit, Trash2, Users } from "lucide-react";
 import LoadingDots from "./LoadingDots";
 import { useDebounce } from "use-debounce";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useUsers } from "../features/user/Hooks/useUsers";
 import { useVendors } from "../features/Vendor/Hooks/useVendor";
 import TagVendorsDropdown from "./TagVendorsDropdown";
@@ -38,9 +38,12 @@ interface ActionIconsProps {
   downloadIcon?: React.ReactNode;
   previewIcon?: React.ReactNode;
   TagIcon?: React.ReactNode;
-  rfqStatus?: RFQStatus;
+  rfqStatus?: RFQStatus; // More specific type for RFQ status
   mode?: "users" | "vendors" | "purchase-order";
+
+  // NEW: Variant prop to differentiate between list and detail views
   variant?: "list" | "detail";
+  // NEW: Hide inspect button in detail views
   hideInspect?: boolean;
 }
 
@@ -76,21 +79,22 @@ const ActionIcons = ({
   previewIcon = <HiMiniEye className={`h-${iconSize} w-${iconSize}`} />,
   rfqStatus,
   mode = "users",
+
+  // NEW: Variant props
   variant = "list",
   hideInspect = false,
 }: ActionIconsProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
 
-  // Ref for the share button wrapper — used as portal anchor
-  const tagWrapperRef = useRef<HTMLDivElement>(null);
-
+  // Users query (for user sharing)
   const {
     data: usersData,
     isLoading: usersLoading,
     isError: usersError,
   } = useUsers({ search: debouncedSearchTerm, limit: 9999 });
 
+  // Vendors query (for vendor sharing)
   const {
     data: vendorsData,
     isLoading: vendorsLoading,
@@ -118,6 +122,7 @@ const ActionIcons = ({
   const data =
     mode === "vendors" ? vendorsData?.data?.vendors : usersData?.data?.users;
 
+  // RFQ-specific shareability logic
   const isRFQShareable =
     mode === "vendors" &&
     canShareRequest &&
@@ -125,14 +130,23 @@ const ActionIcons = ({
     rfqStatus !== "sent" &&
     rfqStatus !== "cancelled";
 
+  // General share button visibility logic
   const shouldShowShareButton =
     setShowTagDropdown &&
     (mode === "users" ? canShareRequest : isRFQShareable) &&
     mode !== "purchase-order";
 
+  // Get appropriate tooltip based on mode and status
   const getShareButtonTooltip = () => {
-    if (mode === "users") return "Share with users";
-    if (!canShareRequest) return "You don't have permission to share this RFQ";
+    if (mode === "users") {
+      return "Share with users";
+    }
+
+    // RFQ-specific tooltips
+    if (!canShareRequest) {
+      return "You don't have permission to share this RFQ";
+    }
+
     switch (rfqStatus) {
       case "sent":
         return "RFQ already sent to vendors";
@@ -146,64 +160,25 @@ const ActionIcons = ({
     }
   };
 
+  // Get appropriate disabled state for RFQs
   const getRFQDisabledState = () => {
     if (mode !== "vendors") return false;
+
     return !isRFQShareable && canShareRequest;
   };
 
   const isRFQDisabled = getRFQDisabledState();
   const shareButtonTooltip = getShareButtonTooltip();
 
+  // NEW: Determine if we should show the inspect button
   const shouldShowInspectButton =
     variant === "list" && !hideInspect && onToggleView;
 
-  // Shared dropdown JSX — reused in both variants
-  const tagDropdown = showTagDropdown && !isRFQDisabled && (
-    mode === "vendors" ? (
-      <TagVendorsDropdown
-        vendors={data || []}
-        isLoading={isLoading}
-        isError={isError}
-        onSelectVendors={handleSelectVendors}
-        onClose={() => setShowTagDropdown!(false)}
-        anchorRef={tagWrapperRef}
-      />
-    ) : (
-      <TagUsersDropdown
-        users={data || []}
-        isLoading={isLoading}
-        isError={isError}
-        onSelectUsers={handleSelectUsers}
-        onClose={() => setShowTagDropdown!(false)}
-        anchorRef={tagWrapperRef}
-      />
-    )
-  );
-
-  // Shared share button JSX
-  const shareButton = shouldShowShareButton && (
-    <div ref={tagWrapperRef} className="relative">
-      <button
-        className={`hover:cursor-pointer ${
-          mode === "vendors" && isRFQDisabled
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-700"
-        }`}
-        onClick={isRFQDisabled ? undefined : handleTagClick}
-        title={shareButtonTooltip}
-        disabled={isRFQDisabled}
-      >
-        {isCopying ? <LoadingDots /> : TagIcon}
-      </button>
-
-      {tagDropdown}
-    </div>
-  );
-
-  // Detail variant
+  // NEW: Simplified detail view variant
   if (variant === "detail") {
     return (
       <div className="flex space-x-4">
+        {/* PDF Download Button */}
         {onDownloadPDF && (
           <button
             className="hover:cursor-pointer text-green-600"
@@ -217,12 +192,48 @@ const ActionIcons = ({
           </button>
         )}
 
-        {shareButton}
+        {/* Share Button for detail view */}
+        {shouldShowShareButton && (
+          <div className="relative">
+            <button
+              className={`hover:cursor-pointer ${
+                mode === "vendors" && isRFQDisabled
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              }`}
+              onClick={isRFQDisabled ? undefined : handleTagClick}
+              title={shareButtonTooltip}
+              disabled={isRFQDisabled}
+            >
+              {isCopying ? <LoadingDots /> : TagIcon}
+            </button>
+
+            {showTagDropdown &&
+              !isRFQDisabled &&
+              (mode === "vendors" ? (
+                <TagVendorsDropdown
+                  vendors={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectVendors={handleSelectVendors}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ) : (
+                <TagUsersDropdown
+                  users={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectUsers={handleSelectUsers}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ))}
+          </div>
+        )}
       </div>
     );
   }
 
-  // Default list variant
+  // Default list view variant
   return (
     <div className="flex space-x-4">
       {shouldShowInspectButton && (
@@ -263,6 +274,7 @@ const ActionIcons = ({
       )}
 
       <div className="flex space-x-4">
+        {/* PDF Preview Button */}
         {onPreviewPDF && (
           <button
             className="hover:cursor-pointer text-blue-600"
@@ -276,6 +288,7 @@ const ActionIcons = ({
           </button>
         )}
 
+        {/* PDF Download Button */}
         {onDownloadPDF && (
           <button
             className="hover:cursor-pointer text-green-600"
@@ -289,9 +302,45 @@ const ActionIcons = ({
           </button>
         )}
 
-        {shareButton}
+        {/* Share Button - Conditionally Rendered with RFQ-specific logic */}
+        {shouldShowShareButton && (
+          <div className="relative">
+            <button
+              className={`hover:cursor-pointer ${
+                mode === "vendors" && isRFQDisabled
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              }`}
+              onClick={isRFQDisabled ? undefined : handleTagClick}
+              title={shareButtonTooltip}
+              disabled={isRFQDisabled}
+            >
+              {isCopying ? <LoadingDots /> : TagIcon}
+            </button>
 
-        {/* Disabled state for RFQs that can't be shared */}
+            {showTagDropdown &&
+              !isRFQDisabled &&
+              (mode === "vendors" ? (
+                <TagVendorsDropdown
+                  vendors={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectVendors={handleSelectVendors}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ) : (
+                <TagUsersDropdown
+                  users={data || []}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onSelectUsers={handleSelectUsers}
+                  onClose={() => setShowTagDropdown!(false)}
+                />
+              ))}
+          </div>
+        )}
+
+        {/* Show disabled state specifically for RFQs when they can't be shared */}
         {mode === "vendors" && isRFQDisabled && (
           <span
             className={`text-xl font-extrabold h-${iconSize} w-${iconSize} text-gray-400 cursor-not-allowed`}
@@ -301,7 +350,7 @@ const ActionIcons = ({
           </span>
         )}
 
-        {/* Permission denied state */}
+        {/* Show permission denied state */}
         {mode === "vendors" && !canShareRequest && (
           <span
             className={`text-xl font-extrabold h-${iconSize} w-${iconSize} text-gray-400 cursor-not-allowed`}

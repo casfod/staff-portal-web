@@ -55,12 +55,18 @@ const Leave = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(leaveId!);
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(
+    leaveId!
+  );
   const { copyto, isPending: isCopying } = useCopyLeave(leaveId!);
 
   const { addComment, isPending: isAddingComment } = useAddComment(leaveId!);
-  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(leaveId!);
-  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(leaveId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
+    leaveId!
+  );
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
+    leaveId!
+  );
 
   const { data: usersData } = useUsers({ limit: 1000 });
   const users = useMemo(() => usersData?.data?.users ?? [], [usersData]);
@@ -156,7 +162,12 @@ const Leave = () => {
     { label: "Leave Type", showOnMobile: true, minWidth: "150px" },
     { label: "Days", showOnMobile: true, minWidth: "80px" },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Date", showOnMobile: false, showOnTablet: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
     { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
 
@@ -193,19 +204,37 @@ const Leave = () => {
     },
     {
       id: "actions",
+      // content: (
+      //   <ActionIcons
+      //     copyTo={copyto}
+      //     isCopying={isCopying}
+      //     canShareRequest={canShareRequest}
+      //     requestId={request?.id}
+      //     isGeneratingPDF={isGenerating}
+      //     onDownloadPDF={handleDownloadPDF}
+      //     showTagDropdown={showTagDropdown}
+      //     setShowTagDropdown={setShowTagDropdown}
+      //     hideInspect={true}
+      //   />
+      // ),
+
       content: (
-        <ActionIcons
-          copyTo={copyto}
-          isCopying={isCopying}
-          canShareRequest={canShareRequest}
-          requestId={request?.id}
-          isGeneratingPDF={isGenerating}
-          onDownloadPDF={handleDownloadPDF}
-          showTagDropdown={showTagDropdown}
-          setShowTagDropdown={setShowTagDropdown}
-          hideInspect={true}
-          variant="detail"
-        />
+        <div className="relative" style={{ zIndex: 9999 }}>
+          {" "}
+          {/* Add high z-index */}
+          <ActionIcons
+            copyTo={copyto}
+            isCopying={isCopying}
+            canShareRequest={canShareRequest}
+            requestId={request?.id}
+            isGeneratingPDF={isGenerating}
+            onDownloadPDF={handleDownloadPDF}
+            showTagDropdown={showTagDropdown}
+            setShowTagDropdown={setShowTagDropdown}
+            hideInspect={true}
+            variant="detail" // Make sure this is set
+          />
+        </div>
       ),
       showOnMobile: true,
       showOnTablet: true,
@@ -233,9 +262,8 @@ const Leave = () => {
           loadingComponent={<Spinner />}
           emptyComponent={<div>No data available</div>}
         >
-          {/* overflow-x-auto is safe now — dropdowns render via portal into document.body */}
           <div className="overflow-x-auto">
-            <div className="md:min-w-full">
+            <div className="md:min-w-full" style={{ overflowY: "visible" }}>
               <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 hidden sm:table-header-group">
                   <tr>
@@ -243,12 +271,17 @@ const Leave = () => {
                       <th
                         key={index}
                         className={`
-                          px-3 py-2.5 md:px-4 md:py-3
-                          text-left font-medium uppercase
-                          tracking-wider whitespace-nowrap
-                          text-xs md:text-sm
+                          px-3 py-2.5 md:px-4 md:py-3 
+                          text-left font-medium uppercase 
+                          tracking-wider
                           ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${header.showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            header.showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          text-xs md:text-sm
+                          whitespace-nowrap
                         `}
                         style={{ minWidth: header.minWidth }}
                       >
@@ -265,18 +298,24 @@ const Leave = () => {
                     toggleViewItems={() => {}}
                     className="hidden sm:table-row"
                   >
-                    {tableRowData.map(({ id, content, showOnMobile, showOnTablet }) => (
-                      <TableData
-                        key={`${request?.id}-${id}`}
-                        className={`
-                          px-3 py-2.5 md:px-4 md:py-3
+                    {tableRowData.map(
+                      ({ id, content, showOnMobile, showOnTablet }) => (
+                        <TableData
+                          key={`${request?.id}-${id}`}
+                          className={`
                           ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
+                          px-3 py-2.5 md:px-4 md:py-3
                         `}
-                      >
-                        {content}
-                      </TableData>
-                    ))}
+                        >
+                          {content}
+                        </TableData>
+                      )
+                    )}
                   </TableRowMain>
 
                   <tr key={`${request?.id}-mobile`} className="sm:hidden">
@@ -286,6 +325,7 @@ const Leave = () => {
                     >
                       <RequestCard
                         request={request!}
+                        // totalDays={request?.totalDaysApplied}
                         requestId={request?.id || ""}
                         identifier={request?.leaveNumber}
                         dateValue={requestCreatedAt}
@@ -298,7 +338,6 @@ const Leave = () => {
                           showTagDropdown,
                           setShowTagDropdown,
                           hideInspect: true,
-                          variant: "detail",
                         }}
                         context="detail"
                         showActions={true}

@@ -26,6 +26,7 @@ const FormAddLeave = () => {
     reasonForLeave: "",
     contactDuringLeave: "",
     reviewedById: null,
+    approvedById: null, // Add this
     leaveCover: {
       nameOfCover: "",
       signature: "",
@@ -137,7 +138,6 @@ const FormAddLeave = () => {
   };
 
   const handleBalanceClick = (leaveType: string) => {
-    // Auto-select the leave type when user clicks on balance card
     const leaveTypeKey = Object.keys(LEAVE_TYPE_CONFIG).find((key) =>
       key.toLowerCase().includes(leaveType.toLowerCase())
     );
@@ -164,31 +164,9 @@ const FormAddLeave = () => {
 
     if (!isFormValid) return;
 
-    const data = { ...formData, reviewedById: null };
+    const data = { ...formData, reviewedById: null, approvedById: null }; // Clear both for draft
     saveLeaveDraft(data);
   };
-
-  // const handleSend = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const isFormValid = (e.target as HTMLFormElement).reportValidity();
-
-  //   if (!isFormValid) return;
-
-  //   if (!formData.reviewedById) {
-  //     alert("Please select a reviewer before submitting");
-  //     return;
-  //   }
-
-  //   if (totalDays > availableBalance) {
-  //     alert(
-  //       `You only have ${availableBalance} days available for this leave type`
-  //     );
-  //     return;
-  //   }
-
-  //   const data = { ...formData };
-  //   createLeaveApplication({ data, files: selectedFiles });
-  // };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +216,7 @@ const FormAddLeave = () => {
 
   return (
     <form className="space-y-6">
-      {/* Leave Balance Card - Now using the reusable component */}
+      {/* Leave Balance Card */}
       <LeaveBalanceCard
         leaveBalance={leaveBalance}
         isLoading={isLoadingBalance}
@@ -317,7 +295,6 @@ const FormAddLeave = () => {
               minDate={
                 formData.startDate ? new Date(formData.startDate) : undefined
               }
-              // required={!!formData.startDate}
             />
           </FormRow>
         )}
