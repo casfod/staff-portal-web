@@ -142,7 +142,7 @@ const LeaveBalanceCard = ({
           </div>
           {!showAllTypes && balanceItems.length > 4 && (
             <button
-              className="text-xs text-blue-600 mt-2 hover:text-blue-800 transition"
+              className="text-xs text-gray-600 mt-2 hover:text-gray-800 transition"
               onClick={() => {}} // Add expand functionality if needed
             >
               +{balanceItems.length - 4} more leave types
@@ -156,14 +156,14 @@ const LeaveBalanceCard = ({
   // Full detailed view
   return (
     <div
-      className={`bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 shadow-sm ${className}`}
+      className={`bg-gray-100 p-4 rounded-xl border border-gray-300 shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-blue-800 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-800 flex items-center gap-2">
           {/* <span className="text-xl">📋</span> */}
           <span>Your Leave Balance Summary</span>
         </h3>
-        <span className="text-xs text-blue-600 bg-blue-200 px-2 py-1 rounded-full">
+        <span className="text-xs text-gray-600 bg-gray-50 border px-2 py-1 rounded-full">
           Year {leaveBalance.annualLeave.year}
         </span>
       </div>
@@ -257,7 +257,7 @@ const LeaveBalanceCard = ({
       </div>
 
       {/* Summary Footer */}
-      {/* <div className="mt-4 pt-3 border-t border-blue-200 flex justify-between text-sm text-blue-700">
+      {/* <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-700">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 bg-green-500 rounded-full"></span>

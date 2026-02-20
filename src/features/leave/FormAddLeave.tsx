@@ -168,6 +168,28 @@ const FormAddLeave = () => {
     saveLeaveDraft(data);
   };
 
+  // const handleSend = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const isFormValid = (e.target as HTMLFormElement).reportValidity();
+
+  //   if (!isFormValid) return;
+
+  //   if (!formData.reviewedById) {
+  //     alert("Please select a reviewer before submitting");
+  //     return;
+  //   }
+
+  //   if (totalDays > availableBalance) {
+  //     alert(
+  //       `You only have ${availableBalance} days available for this leave type`
+  //     );
+  //     return;
+  //   }
+
+  //   const data = { ...formData };
+  //   createLeaveApplication({ data, files: selectedFiles });
+  // };
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
@@ -176,6 +198,26 @@ const FormAddLeave = () => {
 
     if (!formData.reviewedById) {
       alert("Please select a reviewer before submitting");
+      return;
+    }
+
+    if (!formData.leaveType) {
+      alert("Please select a leave type");
+      return;
+    }
+
+    if (!formData.startDate) {
+      alert("Please select a start date");
+      return;
+    }
+
+    if (!formData.endDate) {
+      alert("Please select an end date");
+      return;
+    }
+
+    if (!formData.reasonForLeave) {
+      alert("Please provide a reason for leave");
       return;
     }
 
