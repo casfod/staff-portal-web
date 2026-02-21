@@ -46,8 +46,7 @@ const LeaveTableRow = ({
   const isVisible = !!visibleItems[requestId];
 
   const isEditable =
-    (requestStatus === "draft" || requestStatus === "rejected") &&
-    requestedById === currentUser?.id;
+    requestStatus === "draft" && requestedById === currentUser?.id;
 
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
 
