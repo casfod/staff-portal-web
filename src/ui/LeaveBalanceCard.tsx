@@ -156,7 +156,7 @@ const LeaveBalanceCard = ({
   // Full detailed view
   return (
     <div
-      className={`bg-gray-100 p-4 rounded-xl border border-gray-300 shadow-sm ${className}`}
+      className={`bg-gray-50 p-4 rounded-xl border border-gray-300 shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2">
