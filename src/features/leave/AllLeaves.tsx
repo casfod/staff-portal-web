@@ -23,7 +23,7 @@ import useDeleteRequest from "../../hooks/useDeleteRequest";
 const tableHeadData = [
   { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
   { label: "Leave Type", showOnMobile: true, minWidth: "150px" },
-  { label: "Days", showOnMobile: true, minWidth: "80px" },
+  // { label: "Days", showOnMobile: true, minWidth: "80px" },
   { label: "Status", showOnMobile: true, minWidth: "100px" },
   { label: "Date", showOnMobile: false, showOnTablet: true, minWidth: "100px" },
   { label: "Actions", showOnMobile: true, minWidth: "100px" },

@@ -195,7 +195,7 @@ const Leave = () => {
   const tableHeadData = [
     { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
     { label: "Leave Type", showOnMobile: true, minWidth: "150px" },
-    { label: "Days", showOnMobile: true, minWidth: "80px" },
+    // { label: "Days", showOnMobile: true, minWidth: "80px" },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
     {
       label: "Date",
@@ -219,12 +219,12 @@ const Leave = () => {
       showOnMobile: true,
       showOnTablet: true,
     },
-    {
-      id: "days",
-      content: `${request?.totalDaysApplied} days`,
-      showOnMobile: true,
-      showOnTablet: true,
-    },
+    // {
+    //   id: "days",
+    //   content: `${request?.totalDaysApplied} days`,
+    //   showOnMobile: true,
+    //   showOnTablet: true,
+    // },
     {
       id: "status",
       content: <StatusBadge status={request?.status!} />,

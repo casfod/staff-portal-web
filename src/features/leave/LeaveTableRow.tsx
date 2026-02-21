@@ -65,13 +65,13 @@ const LeaveTableRow = ({
       minWidth: "150px",
       mobileLabel: "Leave Type",
     },
-    {
-      id: "totalDays",
-      content: `${request.totalDaysApplied} days`,
-      showOnMobile: true,
-      minWidth: "100px",
-      mobileLabel: "Days",
-    },
+    // {
+    //   id: "totalDays",
+    //   content: `${request.totalDaysApplied} days`,
+    //   showOnMobile: true,
+    //   minWidth: "100px",
+    //   mobileLabel: "Days",
+    // },
     {
       id: "status",
       content: <StatusBadge status={request.status!} />,
