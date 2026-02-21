@@ -331,7 +331,7 @@ const FormAddLeave = () => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Contact During Leave">
           <Input
             type="text"
@@ -343,9 +343,19 @@ const FormAddLeave = () => {
             placeholder="Phone number or email"
           />
         </FormRow>
+
+        <FormRow label="Name of Cover (Optional)">
+          <Input
+            type="text"
+            id="nameOfCover"
+            value={formData.leaveCover?.nameOfCover}
+            onChange={(e) => handleNestedChange("nameOfCover", e.target.value)}
+            placeholder="Person covering your duties"
+          />
+        </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      {/* <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Name of Cover (Optional)">
           <Input
             type="text"
@@ -356,7 +366,7 @@ const FormAddLeave = () => {
           />
         </FormRow>
 
-        {/* <FormRow label="Cover Signature (Optional)">
+        <FormRow label="Cover Signature (Optional)">
           <Input
             type="text"
             id="signature"
@@ -364,8 +374,8 @@ const FormAddLeave = () => {
             onChange={(e) => handleNestedChange("signature", e.target.value)}
             placeholder="Signature or acknowledgment"
           />
-        </FormRow> */}
-      </Row>
+        </FormRow>
+      </Row> */}
 
       {/* File upload only when reviewer is selected (matching Concept Note) */}
       {formData.reviewedById && (

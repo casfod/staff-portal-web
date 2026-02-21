@@ -352,7 +352,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         )}
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-4">
+      <Row cols="grid-cols-1 md:grid-cols-3">
         <FormRow label="Start Date *">
           <DatePicker
             selected={formData.startDate ? new Date(formData.startDate) : null}
@@ -412,7 +412,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         </FormRow>
       </Row>
 
-      <Row>
+      <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Contact During Leave">
           <Input
             type="text"
@@ -425,9 +425,20 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             disabled={leave.status !== "draft" && leave.status !== "rejected"}
           />
         </FormRow>
+
+        <FormRow label="Name of Cover (Optional)">
+          <Input
+            type="text"
+            id="nameOfCover"
+            value={formData.leaveCover?.nameOfCover}
+            onChange={(e) => handleNestedChange("nameOfCover", e.target.value)}
+            placeholder="Person covering your duties"
+            disabled={leave.status !== "draft" && leave.status !== "rejected"}
+          />
+        </FormRow>
       </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
+      {/* <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Name of Cover (Optional)">
           <Input
             type="text"
@@ -439,7 +450,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         </FormRow>
 
-        {/* <FormRow label="Cover Signature (Optional)">
+        <FormRow label="Cover Signature (Optional)">
           <Input
             type="text"
             id="signature"
@@ -448,8 +459,8 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             placeholder="Signature or acknowledgment"
             disabled={leave.status !== "draft" && leave.status !== "rejected"}
           />
-        </FormRow> */}
-      </Row>
+        </FormRow>
+      </Row> */}
 
       {/* File upload based on status and selections - matching Concept Note */}
       {(leave.status === "draft" || leave.status === "rejected") &&
