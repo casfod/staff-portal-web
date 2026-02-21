@@ -229,7 +229,7 @@ const FormAddLeave = () => {
       />
 
       {/* Toggle for showing all leave types */}
-      {leaveBalance && (
+      {/* {leaveBalance && (
         <button
           type="button"
           onClick={() => setShowFullBalance(!showFullBalance)}
@@ -237,123 +237,131 @@ const FormAddLeave = () => {
         >
           {showFullBalance ? "Show less" : "Show all leave types"}
         </button>
-      )}
+      )} */}
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Leave Type *">
-          <Select
-            filterable={true}
-            clearable={true}
-            id="leaveType"
-            customLabel="Select Leave Type"
-            value={formData.leaveType || ""}
-            onChange={(value) => handleFormChange("leaveType", value)}
-            options={leaveTypeOptions}
-            required
-          />
-        </FormRow>
-
-        <FormRow label="Reviewer *">
-          {isLoadingUsers ? (
-            <SpinnerMini />
-          ) : (
+      <div className="space-y-6 border-2 border-gray-200 p-4 rounded-lg">
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Leave Type *">
             <Select
               filterable={true}
               clearable={true}
-              id="reviewedById"
-              customLabel="Select Reviewer"
-              value={formData.reviewedById || ""}
-              onChange={(value) => handleFormChange("reviewedById", value)}
-              options={users.map((user) => ({
-                id: user.id as string,
-                name: `${user.first_name} ${user.last_name} (${user.role})`,
-              }))}
+              id="leaveType"
+              customLabel="Select Leave Type"
+              value={formData.leaveType || ""}
+              onChange={(value) => handleFormChange("leaveType", value)}
+              options={leaveTypeOptions}
               required
             />
-          )}
-        </FormRow>
-      </Row>
+          </FormRow>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Start Date *">
-          <DatePicker
-            selected={formData.startDate ? new Date(formData.startDate) : null}
-            onChange={(date) =>
-              handleFormChange("startDate", date ? date.toISOString() : "")
-            }
-            variant="secondary"
-            placeholder="Select start date"
-          />
-        </FormRow>
+          <FormRow label="Reviewer *">
+            {isLoadingUsers ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                filterable={true}
+                clearable={true}
+                id="reviewedById"
+                customLabel="Select Reviewer"
+                value={formData.reviewedById || ""}
+                onChange={(value) => handleFormChange("reviewedById", value)}
+                options={users.map((user) => ({
+                  id: user.id as string,
+                  name: `${user.first_name} ${user.last_name} (${user.role})`,
+                }))}
+                required
+              />
+            )}
+          </FormRow>
+        </Row>
 
-        {formData.startDate && (
-          <FormRow label="End Date *">
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Start Date *">
             <DatePicker
-              selected={formData.endDate ? new Date(formData.endDate) : null}
+              selected={
+                formData.startDate ? new Date(formData.startDate) : null
+              }
               onChange={(date) =>
-                handleFormChange("endDate", date ? date.toISOString() : "")
+                handleFormChange("startDate", date ? date.toISOString() : "")
               }
               variant="secondary"
-              placeholder="Select end date"
-              minDate={
-                formData.startDate ? new Date(formData.startDate) : undefined
-              }
+              placeholder="Select start date"
             />
           </FormRow>
-        )}
 
-        {totalDays > 0 && (
-          <div className="col-span-2 flex items-end pb-3">
-            <div
-              className={`p-2 rounded ${
-                totalDays > availableBalance
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              Total Days: {totalDays} | Available: {availableBalance} days
+          {formData.startDate && (
+            <FormRow label="End Date *">
+              <DatePicker
+                selected={formData.endDate ? new Date(formData.endDate) : null}
+                onChange={(date) =>
+                  handleFormChange("endDate", date ? date.toISOString() : "")
+                }
+                variant="secondary"
+                placeholder="Select end date"
+                minDate={
+                  formData.startDate ? new Date(formData.startDate) : undefined
+                }
+              />
+            </FormRow>
+          )}
+
+          {totalDays > 0 && (
+            <div className="col-span-2 flex items-end pb-3">
+              <div
+                className={`p-2 rounded ${
+                  totalDays > availableBalance
+                    ? "bg-red-100 text-red-800"
+                    : "bg-green-100 text-green-800"
+                }`}
+              >
+                Total Days: {totalDays} | Available: {availableBalance} days
+              </div>
             </div>
-          </div>
-        )}
-      </Row>
+          )}
+        </Row>
 
-      <Row>
-        <FormRow label="Reason for Leave *" type="wide">
-          <textarea
-            className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
-            maxLength={1000}
-            id="reasonForLeave"
-            required
-            value={formData.reasonForLeave}
-            onChange={(e) => handleFormChange("reasonForLeave", e.target.value)}
-            placeholder="Please provide reason for your leave application"
-          />
-        </FormRow>
-      </Row>
+        <Row>
+          <FormRow label="Reason for Leave *" type="wide">
+            <textarea
+              className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
+              maxLength={1000}
+              id="reasonForLeave"
+              required
+              value={formData.reasonForLeave}
+              onChange={(e) =>
+                handleFormChange("reasonForLeave", e.target.value)
+              }
+              placeholder="Please provide reason for your leave application"
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact During Leave">
-          <Input
-            type="text"
-            id="contactDuringLeave"
-            value={formData.contactDuringLeave}
-            onChange={(e) =>
-              handleFormChange("contactDuringLeave", e.target.value)
-            }
-            placeholder="Phone number or email"
-          />
-        </FormRow>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact During Leave">
+            <Input
+              type="text"
+              id="contactDuringLeave"
+              value={formData.contactDuringLeave}
+              onChange={(e) =>
+                handleFormChange("contactDuringLeave", e.target.value)
+              }
+              placeholder="Phone number or email"
+            />
+          </FormRow>
 
-        <FormRow label="Name of Cover (Optional)">
-          <Input
-            type="text"
-            id="nameOfCover"
-            value={formData.leaveCover?.nameOfCover}
-            onChange={(e) => handleNestedChange("nameOfCover", e.target.value)}
-            placeholder="Person covering your duties"
-          />
-        </FormRow>
-      </Row>
+          <FormRow label="Name of Cover (Optional)">
+            <Input
+              type="text"
+              id="nameOfCover"
+              value={formData.leaveCover?.nameOfCover}
+              onChange={(e) =>
+                handleNestedChange("nameOfCover", e.target.value)
+              }
+              placeholder="Person covering your duties"
+            />
+          </FormRow>
+        </Row>
+      </div>
 
       {/* <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Name of Cover (Optional)">

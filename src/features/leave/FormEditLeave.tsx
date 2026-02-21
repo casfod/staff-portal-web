@@ -232,7 +232,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
       />
 
       {/* Toggle for showing all leave types */}
-      {leaveBalance && (
+      {/* {leaveBalance && (
         <button
           type="button"
           onClick={() => setShowFullBalance(!showFullBalance)}
@@ -240,18 +240,19 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         >
           {showFullBalance ? "Show less" : "Show all leave types"}
         </button>
-      )}
+      )} */}
 
-      <Row>
-        <p className="font-bold" style={{ letterSpacing: "1px" }}>
-          {`Status : ${leave.status}`}
-        </p>
-        <p className="" style={{ letterSpacing: "1px" }}>
-          {`Staff : ${leave.staff_name}`}
-        </p>
-      </Row>
+      <div className="space-y-6 border-2 border-gray-200 p-4 rounded-lg">
+        <Row>
+          <p className="font-bold" style={{ letterSpacing: "1px" }}>
+            {`Status : ${leave.status}`}
+          </p>
+          <p className="" style={{ letterSpacing: "1px" }}>
+            {`Staff : ${leave.staff_name}`}
+          </p>
+        </Row>
 
-      {isLoadingBalance ? (
+        {/* {isLoadingBalance ? (
         <div className="flex justify-center py-4">
           <SpinnerMini />
         </div>
@@ -271,174 +272,182 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </div>
           </div>
         )
-      )}
+      )} */}
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Leave Type *">
-          <Select
-            filterable={true}
-            clearable={true}
-            id="leaveType"
-            customLabel="Select Leave Type"
-            value={formData.leaveType || ""}
-            onChange={(value) => handleFormChange("leaveType", value)}
-            options={leaveTypeOptions}
-            required
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-
-        {/* Conditional selection based on status - matching Concept Note */}
-        {(leave.status === "draft" || leave.status === "rejected") && (
-          <FormRow label="Reviewer *">
-            {isLoadingUsers ? (
-              <SpinnerMini />
-            ) : (
-              <Select
-                filterable={true}
-                clearable={true}
-                id="reviewedById"
-                customLabel="Select Reviewer"
-                value={formData.reviewedById || ""}
-                onChange={(value) => handleFormChange("reviewedById", value)}
-                options={users.map((user) => ({
-                  id: user.id as string,
-                  name: `${user.first_name} ${user.last_name} (${user.role})`,
-                }))}
-                required
-              />
-            )}
-          </FormRow>
-        )}
-
-        {leave.status === "reviewed" && (
-          <FormRow label="Approver *">
-            {isLoadingUsers ? (
-              <SpinnerMini />
-            ) : (
-              <Select
-                filterable={true}
-                clearable={true}
-                id="approvedById"
-                customLabel="Select Approver"
-                value={formData.approvedById || ""}
-                onChange={(value) => handleFormChange("approvedById", value)}
-                options={admins.map((user) => ({
-                  id: user.id as string,
-                  name: `${user.first_name} ${user.last_name} (${user.role})`,
-                }))}
-                required
-              />
-            )}
-          </FormRow>
-        )}
-
-        {/* Show read-only info for other statuses */}
-        {(leave.status === "approved" || leave.status === "pending") &&
-          leave.reviewedBy && (
-            <div className="space-y-2">
-              <p className="mb-2">
-                <span className="font-bold mr-1 uppercase">Reviewed By:</span>
-                {`${leave.reviewedBy.first_name} ${leave.reviewedBy.last_name}`}
-              </p>
-            </div>
-          )}
-
-        {leave.status === "approved" && leave.approvedBy && (
-          <p className="mb-2">
-            <span className="font-bold mr-1 uppercase">Approved By:</span>
-            {`${leave.approvedBy.first_name} ${leave.approvedBy.last_name}`}
-          </p>
-        )}
-      </Row>
-
-      <Row cols="grid-cols-1 md:grid-cols-3">
-        <FormRow label="Start Date *">
-          <DatePicker
-            selected={formData.startDate ? new Date(formData.startDate) : null}
-            onChange={(date) =>
-              handleFormChange("startDate", date ? date.toISOString() : "")
-            }
-            variant="secondary"
-            placeholder="Select start date"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-
-        {formData.startDate && (
-          <FormRow label="End Date *">
-            <DatePicker
-              selected={formData.endDate ? new Date(formData.endDate) : null}
-              onChange={(date) =>
-                handleFormChange("endDate", date ? date.toISOString() : "")
-              }
-              variant="secondary"
-              placeholder="Select end date"
-              minDate={
-                formData.startDate ? new Date(formData.startDate) : undefined
-              }
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Leave Type *">
+            <Select
+              filterable={true}
+              clearable={true}
+              id="leaveType"
+              customLabel="Select Leave Type"
+              value={formData.leaveType || ""}
+              onChange={(value) => handleFormChange("leaveType", value)}
+              options={leaveTypeOptions}
+              required
               disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
-        )}
 
-        {totalDays > 0 && (
-          <div className="col-span-2 flex items-end pb-3">
-            <div
-              className={`p-2 rounded ${
-                totalDays > availableBalance
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              Total Days: {totalDays} | Available: {availableBalance} days
+          {/* Conditional selection based on status - matching Concept Note */}
+          {(leave.status === "draft" || leave.status === "rejected") && (
+            <FormRow label="Reviewer *">
+              {isLoadingUsers ? (
+                <SpinnerMini />
+              ) : (
+                <Select
+                  filterable={true}
+                  clearable={true}
+                  id="reviewedById"
+                  customLabel="Select Reviewer"
+                  value={formData.reviewedById || ""}
+                  onChange={(value) => handleFormChange("reviewedById", value)}
+                  options={users.map((user) => ({
+                    id: user.id as string,
+                    name: `${user.first_name} ${user.last_name} (${user.role})`,
+                  }))}
+                  required
+                />
+              )}
+            </FormRow>
+          )}
+
+          {leave.status === "reviewed" && (
+            <FormRow label="Approver *">
+              {isLoadingUsers ? (
+                <SpinnerMini />
+              ) : (
+                <Select
+                  filterable={true}
+                  clearable={true}
+                  id="approvedById"
+                  customLabel="Select Approver"
+                  value={formData.approvedById || ""}
+                  onChange={(value) => handleFormChange("approvedById", value)}
+                  options={admins.map((user) => ({
+                    id: user.id as string,
+                    name: `${user.first_name} ${user.last_name} (${user.role})`,
+                  }))}
+                  required
+                />
+              )}
+            </FormRow>
+          )}
+
+          {/* Show read-only info for other statuses */}
+          {(leave.status === "approved" || leave.status === "pending") &&
+            leave.reviewedBy && (
+              <div className="space-y-2">
+                <p className="mb-2">
+                  <span className="font-bold mr-1 uppercase">Reviewed By:</span>
+                  {`${leave.reviewedBy.first_name} ${leave.reviewedBy.last_name}`}
+                </p>
+              </div>
+            )}
+
+          {leave.status === "approved" && leave.approvedBy && (
+            <p className="mb-2">
+              <span className="font-bold mr-1 uppercase">Approved By:</span>
+              {`${leave.approvedBy.first_name} ${leave.approvedBy.last_name}`}
+            </p>
+          )}
+        </Row>
+
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Start Date *">
+            <DatePicker
+              selected={
+                formData.startDate ? new Date(formData.startDate) : null
+              }
+              onChange={(date) =>
+                handleFormChange("startDate", date ? date.toISOString() : "")
+              }
+              variant="secondary"
+              placeholder="Select start date"
+              disabled={leave.status !== "draft" && leave.status !== "rejected"}
+            />
+          </FormRow>
+
+          {formData.startDate && (
+            <FormRow label="End Date *">
+              <DatePicker
+                selected={formData.endDate ? new Date(formData.endDate) : null}
+                onChange={(date) =>
+                  handleFormChange("endDate", date ? date.toISOString() : "")
+                }
+                variant="secondary"
+                placeholder="Select end date"
+                minDate={
+                  formData.startDate ? new Date(formData.startDate) : undefined
+                }
+                disabled={
+                  leave.status !== "draft" && leave.status !== "rejected"
+                }
+              />
+            </FormRow>
+          )}
+
+          {totalDays > 0 && (
+            <div className="col-span-2 flex items-end pb-3">
+              <div
+                className={`p-2 rounded ${
+                  totalDays > availableBalance
+                    ? "bg-red-100 text-red-800"
+                    : "bg-green-100 text-green-800"
+                }`}
+              >
+                Total Days: {totalDays} | Available: {availableBalance} days
+              </div>
             </div>
-          </div>
-        )}
-      </Row>
+          )}
+        </Row>
 
-      <Row>
-        <FormRow label="Reason for Leave *" type="wide">
-          <textarea
-            className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
-            maxLength={1000}
-            id="reasonForLeave"
-            required
-            value={formData.reasonForLeave}
-            onChange={(e) => handleFormChange("reasonForLeave", e.target.value)}
-            placeholder="Please provide reason for your leave application"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-      </Row>
+        <Row>
+          <FormRow label="Reason for Leave *" type="wide">
+            <textarea
+              className="border-2 h-24 min-h-24 rounded-lg focus:outline-none p-3 w-full"
+              maxLength={1000}
+              id="reasonForLeave"
+              required
+              value={formData.reasonForLeave}
+              onChange={(e) =>
+                handleFormChange("reasonForLeave", e.target.value)
+              }
+              placeholder="Please provide reason for your leave application"
+              disabled={leave.status !== "draft" && leave.status !== "rejected"}
+            />
+          </FormRow>
+        </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Contact During Leave">
-          <Input
-            type="text"
-            id="contactDuringLeave"
-            value={formData.contactDuringLeave}
-            onChange={(e) =>
-              handleFormChange("contactDuringLeave", e.target.value)
-            }
-            placeholder="Phone number or email"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
+        <Row cols="grid-cols-1 md:grid-cols-2">
+          <FormRow label="Contact During Leave">
+            <Input
+              type="text"
+              id="contactDuringLeave"
+              value={formData.contactDuringLeave}
+              onChange={(e) =>
+                handleFormChange("contactDuringLeave", e.target.value)
+              }
+              placeholder="Phone number or email"
+              disabled={leave.status !== "draft" && leave.status !== "rejected"}
+            />
+          </FormRow>
 
-        <FormRow label="Name of Cover (Optional)">
-          <Input
-            type="text"
-            id="nameOfCover"
-            value={formData.leaveCover?.nameOfCover}
-            onChange={(e) => handleNestedChange("nameOfCover", e.target.value)}
-            placeholder="Person covering your duties"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-      </Row>
+          <FormRow label="Name of Cover (Optional)">
+            <Input
+              type="text"
+              id="nameOfCover"
+              value={formData.leaveCover?.nameOfCover}
+              onChange={(e) =>
+                handleNestedChange("nameOfCover", e.target.value)
+              }
+              placeholder="Person covering your duties"
+              disabled={leave.status !== "draft" && leave.status !== "rejected"}
+            />
+          </FormRow>
+        </Row>
 
-      {/* <Row cols="grid-cols-1 md:grid-cols-2">
+        {/* <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Name of Cover (Optional)">
           <Input
             type="text"
@@ -461,6 +470,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         </FormRow>
       </Row> */}
+      </div>
 
       {/* File upload based on status and selections - matching Concept Note */}
       {(leave.status === "draft" || leave.status === "rejected") &&
