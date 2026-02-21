@@ -243,7 +243,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         </button>
       )} */}
 
-      <div className="space-y-6 border-2 border-gray-200 p-4 rounded-lg">
+      <div className="bg-gray-100 space-y-6 border-2 border-gray-200 p-4 rounded-lg">
         <Row>
           <p className="font-bold" style={{ letterSpacing: "1px" }}>
             {`Status : ${leave.status}`}
