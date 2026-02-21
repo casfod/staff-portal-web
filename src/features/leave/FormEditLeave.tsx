@@ -244,7 +244,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
       )} */}
 
       <div className="bg-gray-100 space-y-6 border-2 border-gray-200 p-4 rounded-lg">
-        <h1 className="text-lg font-extrabold text-gray-800  text-center">
+        <h1 className="text-lg font-extrabold text-gray-700  text-center">
           <span>Leave Application Form</span>
         </h1>
 
