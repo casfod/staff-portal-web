@@ -108,7 +108,7 @@ const LeaveBalanceCard = ({
         className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}
       >
         <div className="p-3 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
             <span className="text-lg">📊</span>
             <span>Your Leave Balance</span>
           </h3>
@@ -142,7 +142,7 @@ const LeaveBalanceCard = ({
           </div>
           {!showAllTypes && balanceItems.length > 4 && (
             <button
-              className="text-xs text-gray-600 mt-2 hover:text-gray-800 transition"
+              className="text-xs text-gray-800 mt-2 hover:text-gray-800 transition"
               onClick={() => {}} // Add expand functionality if needed
             >
               +{balanceItems.length - 4} more leave types
@@ -163,7 +163,7 @@ const LeaveBalanceCard = ({
           {/* <span className="text-xl">📋</span> */}
           <span>Your Leave Balance Summary</span>
         </h3>
-        <span className="text-xs text-gray-600 bg-gray-50 border px-2 py-1 rounded-full">
+        <span className="text-xs text-gray-800 bg-gray-50 border px-2 py-1 rounded-full">
           Year {leaveBalance.annualLeave.year}
         </span>
       </div>
@@ -177,7 +177,7 @@ const LeaveBalanceCard = ({
           return (
             <div
               key={item.key}
-              className={`bg-white rounded-lg p-3 border-l-4 transition hover:shadow-md cursor-pointer
+              className={`bg-white rounded-lg p-3 border-l-4 transition hover:shadow-md cursor-pointer shadow-md
                 ${
                   status === "exhausted"
                     ? "border-l-red-500"
@@ -191,12 +191,12 @@ const LeaveBalanceCard = ({
                 <div className="flex items-center gap-2">
                   {/* <span className="text-lg">{item.icon}</span> */}
                   <div>
-                    <p className="text-xs font-medium text-gray-600">
+                    <p className="text-xs font-medium text-gray-800">
                       {item.label}
                     </p>
                     <p className="text-lg font-bold">
                       {item.data.balance}
-                      <span className="text-xs font-normal text-gray-500 ml-1">
+                      <span className="text-xs font-normal text-gray-700 ml-1">
                         /{item.data.maxDays}
                       </span>
                     </p>
@@ -222,7 +222,7 @@ const LeaveBalanceCard = ({
 
               {/* Progress bar */}
               <div className="mt-2">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <div className="flex justify-between text-xs text-gray-700 mb-1">
                   <span>Used: {used} days</span>
                   <span>{usagePercentage.toFixed(0)}%</span>
                 </div>
@@ -243,11 +243,11 @@ const LeaveBalanceCard = ({
               {/* Breakdown */}
               <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
                 <div>
-                  <span className="text-gray-500">Pending:</span>{" "}
+                  <span className="text-gray-700">Pending:</span>{" "}
                   <span className="font-medium">{item.data.totalApplied}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Approved:</span>{" "}
+                  <span className="text-gray-700">Approved:</span>{" "}
                   <span className="font-medium">{item.data.accrued}</span>
                 </div>
               </div>
@@ -257,7 +257,7 @@ const LeaveBalanceCard = ({
       </div>
 
       {/* Summary Footer */}
-      {/* <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-700">
+      {/* <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-800">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
