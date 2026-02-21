@@ -241,6 +241,10 @@ const FormAddLeave = () => {
       )} */}
 
       <div className="bg-gray-100 space-y-6 border-2 border-gray-200 p-4 rounded-lg">
+        <h1 className="text-lg font-extrabold text-gray-800  text-center">
+          <span>Leave Application Form</span>
+        </h1>
+
         <Row cols="grid-cols-1 md:grid-cols-2">
           <FormRow label="Leave Type *">
             <Select

@@ -163,7 +163,7 @@ const LeaveBalanceCard = ({
           {/* <span className="text-xl">📋</span> */}
           <span>Your Leave Balance Summary</span>
         </h3>
-        <span className="text-xs text-gray-800 bg-gray-50 border px-2 py-1 rounded-full">
+        <span className="font-semibold text-xs text-gray-800 bg-gray-50 border px-2 py-1 rounded-full shadow-md">
           Year {leaveBalance.annualLeave.year}
         </span>
       </div>
