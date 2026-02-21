@@ -41,7 +41,8 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [showFullBalance, setShowFullBalance] = useState(false);
+  // const [showFullBalance, setShowFullBalance] = useState(false);
+  const [showFullBalance] = useState(false);
 
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
     limit: 1000,
