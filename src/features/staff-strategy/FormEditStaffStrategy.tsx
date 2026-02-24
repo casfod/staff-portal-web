@@ -263,6 +263,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Staff Name *">
           <Input
+            readOnly
             type="text"
             id="staffName"
             required
@@ -329,6 +330,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Supervisor Name *">
           <Input
+            readOnly
             type="text"
             id="supervisor"
             required

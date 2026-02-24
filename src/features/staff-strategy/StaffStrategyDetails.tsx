@@ -37,7 +37,10 @@ export const StaffStrategyDetails = ({
   const getSupervisorName = (supervisor: any) => {
     if (!supervisor) return "N/A";
     if (typeof supervisor === "object") {
-      return `${supervisor.first_name || ""} ${supervisor.last_name || ""}`.trim() || "N/A";
+      return (
+        `${supervisor.first_name || ""} ${supervisor.last_name || ""}`.trim() ||
+        "N/A"
+      );
     }
     return supervisor || "N/A";
   };
@@ -84,7 +87,9 @@ export const StaffStrategyDetails = ({
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
                 Supervisor
               </label>
-              <p className="text-gray-800">{getSupervisorName(request.supervisor)}</p>
+              <p className="text-gray-800">
+                {getSupervisorName(request.supervisor)}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
@@ -119,7 +124,8 @@ export const StaffStrategyDetails = ({
                           key={objIndex}
                           className="bg-white p-4 rounded-lg shadow-sm"
                         >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
+                          <div className="flex flex-col gap-4">
                             <div className="md:col-span-2">
                               <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
                                 Objective
