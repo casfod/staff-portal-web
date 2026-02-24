@@ -72,8 +72,17 @@ const handleError = (err: any) => {
   }
 };
 
-// API Functions
+// ========== GET STATS ==========
+export const getStaffStrategyStats = async function () {
+  try {
+    const response = await axiosInstance.get(`/staff-strategy/stats`);
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
 
+// ========== GET ALL ==========
 export const getAllStaffStrategies = async function (queryParams: {
   search?: string;
   sort?: string;
@@ -93,10 +102,11 @@ export const getAllStaffStrategies = async function (queryParams: {
   }
 };
 
+// ========== GET BY ID ==========
 export const getStaffStrategy = async function (requestId: string) {
   try {
     const response = await axiosInstance.get<UseStaffStrategy>(
-      `/staff-strategies/${requestId}`
+      `/staff-strategy/${requestId}`
     );
     return response.data;
   } catch (err) {
@@ -104,6 +114,7 @@ export const getStaffStrategy = async function (requestId: string) {
   }
 };
 
+// ========== CREATE AND SUBMIT ==========
 export const createStaffStrategy = async function (
   data: Partial<StaffStrategyType>,
   files: File[]
@@ -155,6 +166,7 @@ export const createStaffStrategy = async function (
   }
 };
 
+// ========== SAVE DRAFT ==========
 export const saveStaffStrategyDraft = async function (
   data: Partial<StaffStrategyType>
 ) {
@@ -169,6 +181,33 @@ export const saveStaffStrategyDraft = async function (
   }
 };
 
+// ========== SUBMIT DRAFT ==========
+export const submitStaffStrategyDraft = async function (
+  strategyId: string,
+  files: File[] = []
+) {
+  try {
+    const formData = new FormData();
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await axiosInstance.post<UseStaffStrategyType>(
+      `/staff-strategy/${strategyId}/submit`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// ========== UPDATE ==========
 export const updateStaffStrategy = async function (
   strategyId: string,
   data: Partial<StaffStrategyType>,
@@ -221,14 +260,17 @@ export const updateStaffStrategy = async function (
   }
 };
 
+// ========== UPDATE STATUS ==========
 export const updateStatus = async function (
   requestId: string,
-  data: { status: string; comment: string }
+  data: { status: string; comment?: string }
 ) {
   try {
+    // Create a plain object for the request body, not FormData
+    // The backend expects JSON for status updates
     const response = await axiosInstance.patch<Partial<StaffStrategyType>>(
       `/staff-strategy/update-status/${requestId}`,
-      data
+      data // Send as JSON object, not FormData
     );
     return response.data;
   } catch (err) {
@@ -236,6 +278,7 @@ export const updateStatus = async function (
   }
 };
 
+// ========== COMMENTS ==========
 export const addComment = async function (
   requestId: string,
   data: { text: string }
@@ -281,6 +324,7 @@ export const deleteComment = async function (
   }
 };
 
+// ========== DELETE ==========
 export const deleteStaffStrategy = async function (strategyId: string) {
   try {
     const response = await axiosInstance.delete<StaffStrategyType>(

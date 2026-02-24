@@ -17,14 +17,14 @@ import { Pagination } from "../../ui/Pagination";
 import { StaffStrategyType } from "../../interfaces";
 import { setStaffStrategy } from "../../store/staffStrategySlice";
 import Spinner from "../../ui/Spinner";
-// import { localStorageUser } from "../../utils/localStorageUser";
 import TextHeader from "../../ui/TextHeader";
 import Button from "../../ui/Button";
 import StaffStrategyTableRow from "./StaffStrategyTableRow";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
+// import { StatsCard } from "../../ui/StatsCard";
+// import { useStaffStrategyStats } from "./Hooks/useStaffStrategy";
 
 export function AllStaffStrategies() {
-  // const currentUser = localStorageUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -32,6 +32,10 @@ export function AllStaffStrategies() {
     (state: RootState) => state.genericQuerySlice
   );
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
+
+  // Fetch stats (like Concept Note)
+  // const { data: statsData, isLoading: isLoadingStats } =
+  //   useStaffStrategyStats();
 
   const { data, isLoading, isError, refetch } = useStaffStrategies({
     search: debouncedSearchTerm,
@@ -55,8 +59,17 @@ export function AllStaffStrategies() {
   }, []);
 
   const staffStrategies = useMemo(() => data?.data?.strategies ?? [], [data]);
-
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
+
+  // Stats calculation
+  // const stats = useMemo(() => {
+  //   const total = statsData?.data?.totalStrategies || 0;
+  //   const approved = statsData?.data?.totalApproved || 0;
+  //   const pending = statsData?.data?.totalPending || 0;
+  //   const drafts = statsData?.data?.totalDrafts || 0;
+
+  //   return { total, approved, pending, drafts };
+  // }, [statsData]);
 
   // Toggle nested table visibility
   const toggleViewItems = (id: string) => {
@@ -72,12 +85,12 @@ export function AllStaffStrategies() {
 
   const handleAction = (strategy: StaffStrategyType) => {
     dispatch(setStaffStrategy(strategy));
-    navigate(`/staff-strategy/${strategy.id}`);
+    navigate(`/human-resources/staff-strategy/${strategy.id}`);
   };
 
   const handleEdit = (strategy: StaffStrategyType) => {
     dispatch(setStaffStrategy(strategy));
-    navigate(`/staff-strategy/edit/${strategy.id}`);
+    navigate(`/human-resources/staff-strategy/edit/${strategy.id}`);
   };
 
   const handleDelete = useDeleteRequest(deleteStaffStrategy, {
@@ -90,6 +103,12 @@ export function AllStaffStrategies() {
 
   const tableHeadData = [
     { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
+    {
+      label: "Strategy Code",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "120px",
+    },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
     {
       label: "Date",
@@ -116,6 +135,20 @@ export function AllStaffStrategies() {
             </Button>
           </div>
         </div>
+
+        {/* Stats Cards - Like Concept Note */}
+        {/* {!isLoadingStats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
+            <StatsCard
+              title="Total Strategies"
+              value={stats.total}
+              color="blue"
+            />
+            <StatsCard title="Approved" value={stats.approved} color="green" />
+            <StatsCard title="Pending" value={stats.pending} color="yellow" />
+            <StatsCard title="Drafts" value={stats.drafts} color="gray" />
+          </div>
+        )} */}
 
         {/* Search Bar */}
         <div className="flex items-center space-x-4">

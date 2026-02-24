@@ -71,6 +71,13 @@ const StaffStrategyTableRow = ({
       mobileLabel: "Status",
     },
     {
+      id: "strategy-code",
+      content: request.strategyCode,
+      showOnMobile: true,
+      minWidth: "100px",
+      mobileLabel: "Status",
+    },
+    {
       id: "date",
       content: fullDate,
       showOnMobile: false,

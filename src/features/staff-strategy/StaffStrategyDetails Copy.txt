@@ -33,15 +33,6 @@ export const StaffStrategyDetails = ({
     return "N/A";
   };
 
-  // Helper to resolve supervisor — API may return a full user object or a plain string
-  const getSupervisorName = (supervisor: any) => {
-    if (!supervisor) return "N/A";
-    if (typeof supervisor === "object") {
-      return `${supervisor.first_name || ""} ${supervisor.last_name || ""}`.trim() || "N/A";
-    }
-    return supervisor || "N/A";
-  };
-
   return (
     <DetailContainer>
       {/* Strategy Header */}
@@ -84,7 +75,7 @@ export const StaffStrategyDetails = ({
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
                 Supervisor
               </label>
-              <p className="text-gray-800">{getSupervisorName(request.supervisor)}</p>
+              <p className="text-gray-800">{request.supervisor || "N/A"}</p>
             </div>
             <div>
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
@@ -213,7 +204,7 @@ export const StaffStrategyDetails = ({
             {request.supervisorId && (
               <p className="text-sm md:text-base">
                 <span className="font-bold mr-1 uppercase">Supervisor:</span>
-                {getSupervisorName(request.supervisor)}
+                {request.supervisor || "N/A"}
               </p>
             )}
 

@@ -48,14 +48,24 @@ const FormAddStaffStrategy = () => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Fetch users data
+  // Fetch users data - filter to get only admins and reviewers for approver
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
     limit: 1000,
   });
+
   const users = useMemo(
     () =>
       usersData?.data?.users.filter((user) => user.id !== currentUser.id) ?? [],
     [usersData]
+  );
+
+  // Filter approvers (ADMIN, SUPER-ADMIN, REVIEWER)
+  const approvers = useMemo(
+    () =>
+      users.filter((user) =>
+        ["ADMIN", "SUPER-ADMIN", "REVIEWER"].includes(user.role)
+      ),
+    [users]
   );
 
   const handleFormChange = (field: keyof StaffStrategyType, value: string) => {
@@ -159,10 +169,8 @@ const FormAddStaffStrategy = () => {
     if (!isFormValid) return;
 
     // Clear approver for draft save
-    formData.approvedBy = null;
-
-    const data = { ...formData };
-    saveStaffStrategyDraft(data);
+    const draftData = { ...formData, approvedBy: null };
+    saveStaffStrategyDraft(draftData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -171,8 +179,6 @@ const FormAddStaffStrategy = () => {
 
     if (!isFormValid) return;
 
-    console.log("formData:::", formData);
-
     // Validate that staff and supervisor are selected
     if (!formData.staffId) {
       toast.error("Please select a staff member");
@@ -180,6 +186,12 @@ const FormAddStaffStrategy = () => {
     }
     if (!formData.supervisorId) {
       toast.error("Please select a supervisor");
+      return;
+    }
+
+    // Validate approver is selected for submission (like PO)
+    if (!formData.approvedBy) {
+      toast.error("Please select an approver for this strategy");
       return;
     }
 
@@ -219,44 +231,10 @@ const FormAddStaffStrategy = () => {
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* Staff Information */}
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Staff Name *">
-          <Input
-            type="text"
-            id="staffName"
-            required
-            value={formData.staffName}
-            onChange={(e) => handleFormChange("staffName", e.target.value)}
-            placeholder="Enter staff name"
-          />
-        </FormRow>
-
         <FormRow label="Select Staff *">
           {isLoadingUsers ? (
             <SpinnerMini />
           ) : (
-            // <Select
-            //   filterable={true}
-            //   clearable={true}
-            //   id="staffId"
-            //   customLabel="Select Staff Member"
-            //   value={formData.staffId || ""}
-            //   onChange={(value) => {
-            //     const selectedUser = users.find((u) => u.id === value);
-            //     handleFormChange("staffId", value);
-            //     if (selectedUser) {
-            //       handleFormChange(
-            //         "staffName",
-            //         `${selectedUser.first_name} ${selectedUser.last_name}`
-            //       );
-            //     }
-            //   }}
-            //   options={users.map((user) => ({
-            //     id: user.id as string,
-            //     name: `${user.first_name} ${user.last_name} (${user.email})`,
-            //   }))}
-            //   required
-            // />
-
             <Select
               filterable={true}
               clearable={true}
@@ -264,13 +242,10 @@ const FormAddStaffStrategy = () => {
               customLabel="Select Staff Member"
               value={formData.staffId || ""}
               onChange={(value) => {
-                console.log("Selected staff ID:", value); // Add this to debug
                 const selectedUser = users.find((u) => u.id === value);
-
-                // Update both staffId and staffName
                 setFormData((prev) => ({
                   ...prev,
-                  staffId: value, // This should now be set
+                  staffId: value,
                   staffName: selectedUser
                     ? `${selectedUser.first_name} ${selectedUser.last_name}`
                     : prev.staffName,
@@ -283,6 +258,18 @@ const FormAddStaffStrategy = () => {
               required
             />
           )}
+        </FormRow>
+
+        <FormRow label="Staff Name *">
+          <Input
+            readOnly
+            type="text"
+            id="staffName"
+            required
+            value={formData.staffName}
+            onChange={(e) => handleFormChange("staffName", e.target.value)}
+            placeholder="staff name"
+          />
         </FormRow>
       </Row>
 
@@ -311,44 +298,10 @@ const FormAddStaffStrategy = () => {
       </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Supervisor Name *">
-          <Input
-            type="text"
-            id="supervisor"
-            required
-            value={formData.supervisor}
-            onChange={(e) => handleFormChange("supervisor", e.target.value)}
-            placeholder="Enter supervisor name"
-          />
-        </FormRow>
-
         <FormRow label="Select Supervisor *">
           {isLoadingUsers ? (
             <SpinnerMini />
           ) : (
-            // <Select
-            //   filterable={true}
-            //   clearable={true}
-            //   id="supervisorId"
-            //   customLabel="Select Supervisor"
-            //   value={formData.supervisorId || ""}
-            //   onChange={(value) => {
-            //     const selectedUser = users.find((u) => u.id === value);
-            //     handleFormChange("supervisorId", value);
-            //     if (selectedUser) {
-            //       handleFormChange(
-            //         "supervisor",
-            //         `${selectedUser.first_name} ${selectedUser.last_name}`
-            //       );
-            //     }
-            //   }}
-            //   options={users.map((user) => ({
-            //     id: user.id as string,
-            //     name: `${user.first_name} ${user.last_name} (${user.email})`,
-            //   }))}
-            //   required
-            // />
-
             <Select
               filterable={true}
               clearable={true}
@@ -356,13 +309,10 @@ const FormAddStaffStrategy = () => {
               customLabel="Select Supervisor"
               value={formData.supervisorId || ""}
               onChange={(value) => {
-                console.log("Selected supervisor ID:", value); // Add this to debug
                 const selectedUser = users.find((u) => u.id === value);
-
-                // Update both supervisorId and supervisor
                 setFormData((prev) => ({
                   ...prev,
-                  supervisorId: value, // This should now be set
+                  supervisorId: value,
                   supervisor: selectedUser
                     ? `${selectedUser.first_name} ${selectedUser.last_name}`
                     : prev.supervisor,
@@ -376,21 +326,61 @@ const FormAddStaffStrategy = () => {
             />
           )}
         </FormRow>
-      </Row>
 
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Period *">
+        <FormRow label="Supervisor Name *">
           <Input
+            readOnly
             type="text"
-            id="period"
+            id="supervisor"
             required
-            value={formData.period}
-            onChange={(e) => handleFormChange("period", e.target.value)}
-            placeholder="e.g., Q1 2024, Annual 2024"
+            value={formData.supervisor}
+            onChange={(e) => handleFormChange("supervisor", e.target.value)}
+            placeholder="Enter supervisor name"
           />
         </FormRow>
       </Row>
 
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Period *">
+          <Select
+            id="period"
+            customLabel="Select Period"
+            value={formData.period || ""}
+            onChange={(value) => handleFormChange("period", value)}
+            options={[
+              { id: "January - March", name: "January - March (Q1)" },
+
+              { id: "April - June", name: "April - June (Q2)" },
+
+              { id: "July - September", name: "July - September (Q3)" },
+
+              { id: "October - December", name: "October - December (Q4)" },
+            ]}
+            required
+          />
+        </FormRow>
+
+        {/* Approver Selection - Like Purchase Order */}
+        <FormRow label="Select Approver *">
+          {isLoadingUsers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              filterable={true}
+              clearable={true}
+              id="approvedBy"
+              customLabel="Select Approver"
+              value={(formData.approvedBy as string) || ""}
+              onChange={(value) => handleFormChange("approvedBy", value)}
+              options={approvers.map((user) => ({
+                id: user.id as string,
+                name: `${user.first_name} ${user.last_name} (${user.role})`,
+              }))}
+              required
+            />
+          )}
+        </FormRow>
+      </Row>
       {/* Accountability Areas Section */}
       <Row>
         <FormRow label="Accountability Areas & Objectives *" type="wide">
@@ -455,7 +445,7 @@ const FormAddStaffStrategy = () => {
                       <Row cols="grid-cols-1">
                         <FormRow label="Objective *">
                           <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3"
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.objective}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -595,7 +585,7 @@ const FormAddStaffStrategy = () => {
         </FormRow>
       </Row>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Like Purchase Order */}
       <div className="flex justify-center w-full gap-4 pt-6">
         <div className="flex flex-col md:flex-row gap-4">
           <Button
@@ -609,7 +599,7 @@ const FormAddStaffStrategy = () => {
           </Button>
 
           <Button type="submit" size="medium" disabled={isCreating}>
-            {isCreating ? <SpinnerMini /> : "Submit for Review"}
+            {isCreating ? <SpinnerMini /> : "Submit for Approval"}
           </Button>
 
           <Button

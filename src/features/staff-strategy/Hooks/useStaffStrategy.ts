@@ -12,12 +12,14 @@ import {
   getStaffStrategy,
   createStaffStrategy,
   saveStaffStrategyDraft,
+  submitStaffStrategyDraft,
   updateStaffStrategy,
   updateStatus,
   addComment,
   updateComment,
   deleteComment,
   deleteStaffStrategy,
+  getStaffStrategyStats,
 } from "../../../services/apiStaffStrategy";
 import {
   StaffStrategyType,
@@ -37,13 +39,26 @@ interface ApiError extends AxiosError {
 // Query keys
 export const staffStrategyKeys = {
   all: ["staff-strategies"] as const,
+  stats: () => [...staffStrategyKeys.all, "stats"] as const,
   lists: () => [...staffStrategyKeys.all, "list"] as const,
   list: (filters: any) => [...staffStrategyKeys.lists(), filters] as const,
   details: () => [...staffStrategyKeys.all, "detail"] as const,
   detail: (id: string) => [...staffStrategyKeys.details(), id] as const,
 };
 
-// Hooks
+// ========== GET STATS ==========
+export const useStaffStrategyStats = (
+  options?: UseQueryOptions<any, Error>
+) => {
+  return useQuery({
+    queryKey: staffStrategyKeys.stats(),
+    queryFn: () => getStaffStrategyStats(),
+    staleTime: 5 * 60 * 1000,
+    ...options,
+  });
+};
+
+// ========== GET ALL ==========
 export const useStaffStrategies = (
   queryParams: {
     search?: string;
@@ -62,6 +77,7 @@ export const useStaffStrategies = (
   });
 };
 
+// ========== GET BY ID ==========
 export const useStaffStrategy = (
   strategyId: string,
   options?: UseQueryOptions<UseStaffStrategy, Error>
@@ -75,6 +91,7 @@ export const useStaffStrategy = (
   });
 };
 
+// ========== CREATE ==========
 export const useCreateStaffStrategy = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -89,12 +106,12 @@ export const useCreateStaffStrategy = () => {
     }) => createStaffStrategy(data, files),
 
     onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Staff Strategy created successfully");
+      if (data?.status === 201 || data?.status === 200) {
+        toast.success("Staff Strategy created and submitted successfully");
         queryClient.invalidateQueries({ queryKey: staffStrategyKeys.lists() });
-        navigate(-1);
+        navigate("/human-resources/staff-strategy");
       } else {
-        toast.error(data.message || "Failed to create Staff Strategy");
+        toast.error(data?.message || "Failed to create Staff Strategy");
       }
     },
 
@@ -113,6 +130,7 @@ export const useCreateStaffStrategy = () => {
   };
 };
 
+// ========== SAVE DRAFT ==========
 export const useSaveStaffStrategyDraft = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -122,12 +140,12 @@ export const useSaveStaffStrategyDraft = () => {
       saveStaffStrategyDraft(data),
 
     onSuccess: (data) => {
-      if (data.status === 201) {
+      if (data?.status === 201 || data?.status === 200) {
         toast.success("Staff Strategy saved as draft");
         queryClient.invalidateQueries({ queryKey: staffStrategyKeys.lists() });
-        navigate(-1);
+        navigate("/human-resources/staff-strategy");
       } else {
-        toast.error(data.message || "Failed to save draft");
+        toast.error(data?.message || "Failed to save draft");
       }
     },
 
@@ -145,6 +163,45 @@ export const useSaveStaffStrategyDraft = () => {
   };
 };
 
+// ========== SUBMIT DRAFT ==========
+export const useSubmitStaffStrategyDraft = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      strategyId,
+      files = [],
+    }: {
+      strategyId: string;
+      files?: File[];
+    }) => submitStaffStrategyDraft(strategyId, files),
+
+    onSuccess: (data) => {
+      if (data?.status === 200) {
+        toast.success("Staff Strategy submitted for approval");
+        queryClient.invalidateQueries({ queryKey: staffStrategyKeys.lists() });
+        navigate("/human-resources/staff-strategy");
+      } else {
+        toast.error(data?.message || "Failed to submit Staff Strategy");
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error(
+        err.response?.data?.message || "An error occurred while submitting"
+      );
+    },
+  });
+
+  return {
+    submitStaffStrategyDraft: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+  };
+};
+
+// ========== UPDATE ==========
 export const useUpdateStaffStrategy = (strategyId: string) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -159,15 +216,15 @@ export const useUpdateStaffStrategy = (strategyId: string) => {
     }) => updateStaffStrategy(strategyId, data, files),
 
     onSuccess: (data) => {
-      if (data.status === 200) {
+      if (data?.status === 200) {
         toast.success("Staff Strategy updated successfully");
         queryClient.invalidateQueries({ queryKey: staffStrategyKeys.lists() });
         queryClient.invalidateQueries({
           queryKey: staffStrategyKeys.detail(strategyId),
         });
       } else {
-        toast.error(data.message || "Failed to update Staff Strategy");
-        setErrorMessage(data.message);
+        toast.error(data?.message || "Failed to update Staff Strategy");
+        setErrorMessage(data?.message);
       }
     },
 
@@ -188,30 +245,33 @@ export const useUpdateStaffStrategy = (strategyId: string) => {
   };
 };
 
+// ========== UPDATE STATUS ==========
 export const useUpdateStaffStrategyStatus = (requestId: string) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
+    mutationFn: (data: { status: string; comment?: string }) =>
       updateStatus(requestId, data),
 
     onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+      if (data?.status === 200) {
+        toast.success(
+          `Staff Strategy ${data.data?.status || "updated"} successfully`
+        );
         queryClient.invalidateQueries({ queryKey: staffStrategyKeys.lists() });
         queryClient.invalidateQueries({
           queryKey: staffStrategyKeys.detail(requestId),
         });
       } else {
         toast.error("Status update not successful");
-        setErrorMessage(data.message);
+        setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
       toast.error("Error updating status");
-      const error = err.response?.data.message || "An error occurred";
+      const error = err.response?.data?.message || "An error occurred";
       setErrorMessage(error);
     },
   });
@@ -224,6 +284,7 @@ export const useUpdateStaffStrategyStatus = (requestId: string) => {
   };
 };
 
+// ========== COMMENTS ==========
 export const useAddComment = (requestId: string) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -232,20 +293,20 @@ export const useAddComment = (requestId: string) => {
     mutationFn: (data: { text: string }) => addComment(requestId, data),
 
     onSuccess: (data) => {
-      if (data.status === 201) {
+      if (data?.status === 201) {
         toast.success("Comment added successfully");
         queryClient.invalidateQueries({
           queryKey: staffStrategyKeys.detail(requestId),
         });
       } else {
         toast.error("Failed to add comment");
-        setErrorMessage(data.message);
+        setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
       toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
+      const error = err.response?.data?.message || "An error occurred";
       setErrorMessage(error);
     },
   });
@@ -267,20 +328,20 @@ export const useUpdateComment = (requestId: string) => {
       updateComment(requestId, commentId, { text }),
 
     onSuccess: (data) => {
-      if (data.status === 200) {
+      if (data?.status === 200) {
         toast.success("Comment updated successfully");
         queryClient.invalidateQueries({
           queryKey: staffStrategyKeys.detail(requestId),
         });
       } else {
         toast.error("Failed to update comment");
-        setErrorMessage(data.message);
+        setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
       toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
+      const error = err.response?.data?.message || "An error occurred";
       setErrorMessage(error);
     },
   });
@@ -301,20 +362,20 @@ export const useDeleteComment = (requestId: string) => {
     mutationFn: (commentId: string) => deleteComment(requestId, commentId),
 
     onSuccess: (data) => {
-      if (data.status === 200) {
+      if (data?.status === 200) {
         toast.success("Comment deleted successfully");
         queryClient.invalidateQueries({
           queryKey: staffStrategyKeys.detail(requestId),
         });
       } else {
         toast.error("Failed to delete comment");
-        setErrorMessage(data.message);
+        setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
       toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
+      const error = err.response?.data?.message || "An error occurred";
       setErrorMessage(error);
     },
   });
@@ -327,6 +388,7 @@ export const useDeleteComment = (requestId: string) => {
   };
 };
 
+// ========== DELETE ==========
 export const useDeleteStaffStrategy = (
   search?: string,
   sort?: string,
@@ -340,7 +402,7 @@ export const useDeleteStaffStrategy = (
       await deleteStaffStrategy(strategyId);
     },
     onSuccess: () => {
-      toast.success("Staff Strategy deleted");
+      toast.success("Staff Strategy deleted successfully");
       queryClient.invalidateQueries({
         queryKey: staffStrategyKeys.list({ search, sort, page, limit }),
       });
@@ -348,7 +410,7 @@ export const useDeleteStaffStrategy = (
     onError: (error) => {
       toast.error("Error deleting Staff Strategy");
       const errorMessage =
-        error.response?.data.message ||
+        error.response?.data?.message ||
         "An error occurred while deleting the Staff Strategy.";
       console.error("Delete Staff Strategy Error:", errorMessage);
     },

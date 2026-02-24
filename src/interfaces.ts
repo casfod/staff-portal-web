@@ -1426,6 +1426,7 @@ export interface AccountabilityAreaType {
   objectives: ObjectiveType[];
 }
 
+// Already in your interfaces.ts - this is correct
 export interface StaffStrategyType {
   id: string;
   strategyCode: string;

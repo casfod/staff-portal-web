@@ -13,7 +13,6 @@ import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
-// import { usePdfDownload } from "../../hooks/usePdfDownload";
 import ActionIcons from "../../ui/ActionIcons";
 import {
   useAddComment,
@@ -33,8 +32,13 @@ const StaffStrategy = () => {
   const navigate = useNavigate();
   const { requestId } = useParams();
 
-  // Data fetching and reconciliation
-  const { data: remoteData, isLoading, isError } = useStaffStrategy(requestId!);
+  // Data fetching
+  const {
+    data: remoteData,
+    isLoading,
+    isError,
+    refetch,
+  } = useStaffStrategy(requestId!);
 
   const staffStrategy = useSelector(
     (state: RootState) => state.staffStrategy?.staffStrategy
@@ -48,9 +52,13 @@ const StaffStrategy = () => {
   // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !request)) {
-      navigate("/staff-strategy");
+      navigate("/human-resources/staff-strategy");
     }
   }, [request, requestId, navigate, isLoading]);
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -99,23 +107,21 @@ const StaffStrategy = () => {
   };
 
   // User references and permission logic
-  const currentUserId = currentUser.id;
-  const userRole = currentUser.role;
+  const currentUserId = currentUser?.id;
+  const userRole = currentUser?.role;
   const requestStatus = request?.status;
 
   // Permission flags
   const isCreator = request?.createdBy?.id === currentUserId;
-  const isSupervisor = request?.supervisorId?.id === currentUserId;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
+  const isApprover = request?.approvedBy?.id === currentUserId;
+  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole || "");
 
-  // Permission to update status
+  // Permission to update status (like PO - only approver or admin)
   const canUpdateStatus =
-    (requestStatus === "pending" && isSupervisor) ||
-    (requestStatus === "pending" && isAdmin) ||
-    (requestStatus === "pending" && currentUser.role === "REVIEWER");
+    requestStatus === "pending" && (isApprover || isAdmin);
 
   // Users who can add comments
-  const canAddComments = isCreator || isSupervisor || isAdmin;
+  const canAddComments = isCreator || isApprover || isAdmin;
 
   // Cast comments to Comment[] type for TypeScript
   const comments = (request?.comments || []) as AppComment[];
@@ -125,7 +131,13 @@ const StaffStrategy = () => {
 
   // Table data configuration
   const tableHeadData = [
-    { label: "Prepared By", showOnMobile: true, minWidth: "120px" },
+    { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
+    {
+      label: "Strategy Code",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "120px",
+    },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
     {
       label: "Date",
@@ -141,6 +153,12 @@ const StaffStrategy = () => {
       id: "name",
       content: request?.staffName || "N/A",
       showOnMobile: true,
+      showOnTablet: true,
+    },
+    {
+      id: "code",
+      content: request?.strategyCode || "N/A",
+      showOnMobile: false,
       showOnTablet: true,
     },
     {
@@ -175,7 +193,7 @@ const StaffStrategy = () => {
       <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Staff Strategy - {request?.strategyCode}</TextHeader>
-          <Button onClick={() => navigate("/staff-strategy")}>
+          <Button onClick={() => navigate("/human-resources/staff-strategy")}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>

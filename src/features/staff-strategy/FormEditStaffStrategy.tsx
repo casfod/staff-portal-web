@@ -60,10 +60,20 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
     limit: 1000,
   });
+
   const users = useMemo(
     () =>
       usersData?.data?.users.filter((user) => user.id !== currentUser.id) ?? [],
     [usersData]
+  );
+
+  // Filter approvers (ADMIN, SUPER-ADMIN, REVIEWER)
+  const approvers = useMemo(
+    () =>
+      users.filter((user) =>
+        ["ADMIN", "SUPER-ADMIN", "REVIEWER"].includes(user.role)
+      ),
+    [users]
   );
 
   const {
@@ -203,12 +213,32 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
   const isEditable =
     staffStrategy?.status === "draft" || staffStrategy?.status === "rejected";
 
-  if (!staffStrategy || !isEditable) {
+  if (!staffStrategy) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-lg text-gray-600">Staff Strategy not found</p>
+        <Button
+          type="button"
+          size="medium"
+          variant="secondary"
+          onClick={() => navigate(-1)}
+          className="mt-4"
+        >
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
+  if (!isEditable) {
     return (
       <div className="text-center py-8">
         <p className="text-lg text-gray-600">
           This staff strategy cannot be edited because it is{" "}
-          {staffStrategy?.status || "not available"}.
+          <span className="font-semibold uppercase">
+            {staffStrategy.status}
+          </span>
+          .
         </p>
         <Button
           type="button"
@@ -254,13 +284,13 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
               value={formData.staffId || ""}
               onChange={(value) => {
                 const selectedUser = users.find((u) => u.id === value);
-                handleFormChange("staffId", value);
-                if (selectedUser) {
-                  handleFormChange(
-                    "staffName",
-                    `${selectedUser.first_name} ${selectedUser.last_name}`
-                  );
-                }
+                setFormData((prev) => ({
+                  ...prev,
+                  staffId: value,
+                  staffName: selectedUser
+                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                    : prev.staffName,
+                }));
               }}
               options={users.map((user) => ({
                 id: user.id as string,
@@ -320,13 +350,13 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
               value={formData.supervisorId || ""}
               onChange={(value) => {
                 const selectedUser = users.find((u) => u.id === value);
-                handleFormChange("supervisorId", value);
-                if (selectedUser) {
-                  handleFormChange(
-                    "supervisor",
-                    `${selectedUser.first_name} ${selectedUser.last_name}`
-                  );
-                }
+                setFormData((prev) => ({
+                  ...prev,
+                  supervisorId: value,
+                  supervisor: selectedUser
+                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                    : prev.supervisor,
+                }));
               }}
               options={users.map((user) => ({
                 id: user.id as string,
@@ -340,14 +370,42 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
 
       <Row cols="grid-cols-1 md:grid-cols-2">
         <FormRow label="Period *">
-          <Input
-            type="text"
+          <Select
             id="period"
+            customLabel="Select Period"
+            value={formData.period || ""}
+            onChange={(value) => handleFormChange("period", value)}
+            options={[
+              { id: "January - March", name: "January - March (Q1)" },
+
+              { id: "April - June", name: "April - June (Q2)" },
+
+              { id: "July - September", name: "July - September (Q3)" },
+
+              { id: "October - December", name: "October - December (Q4)" },
+            ]}
             required
-            value={formData.period}
-            onChange={(e) => handleFormChange("period", e.target.value)}
-            placeholder="e.g., Q1 2024, Annual 2024"
           />
+        </FormRow>
+
+        {/* Approver Selection */}
+        <FormRow label="Select Approver">
+          {isLoadingUsers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              filterable={true}
+              clearable={true}
+              id="approvedBy"
+              customLabel="Select Approver"
+              value={(formData.approvedBy as string) || ""}
+              onChange={(value) => handleFormChange("approvedBy", value)}
+              options={approvers.map((user) => ({
+                id: user.id as string,
+                name: `${user.first_name} ${user.last_name} (${user.role})`,
+              }))}
+            />
+          )}
         </FormRow>
       </Row>
 
@@ -415,7 +473,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                       <Row cols="grid-cols-1">
                         <FormRow label="Objective *">
                           <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3"
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.objective}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -576,7 +634,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
       {/* Status Information */}
       <div className="text-center text-sm text-gray-600">
         Current Status:{" "}
-        <span className="font-semibold capitalize">{staffStrategy.status}</span>
+        <span className="font-semibold uppercase">{staffStrategy.status}</span>
       </div>
     </form>
   );
