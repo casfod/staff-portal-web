@@ -1406,3 +1406,62 @@ export const LEAVE_TYPE_CONFIG = {
     isCalendarDays: true,
   },
 } as const;
+
+/////////////////////////////////////
+// StaffStrategyType
+/////////////////////////////////////
+// Add to your existing interfaces file
+
+export interface ObjectiveType {
+  objective: string;
+  timeline: string;
+  expectedOutcome: string;
+  kpi: string;
+  possibleChallenges?: string;
+  supportRequired?: string;
+}
+
+export interface AccountabilityAreaType {
+  areaName: string;
+  objectives: ObjectiveType[];
+}
+
+export interface StaffStrategyType {
+  id: string;
+  strategyCode: string;
+  staffName: string;
+  staffId: any;
+  jobTitle: string;
+  department: string;
+  supervisor: string;
+  supervisorId: any;
+  date: string;
+  period: string;
+  accountabilityAreas: AccountabilityAreaType[];
+  comments: Comment[];
+  createdBy: UserType | any;
+  createdAt: any;
+  updatedAt: any;
+  status: "pending" | "approved" | "rejected" | "draft";
+  approvedBy: any;
+  files: FileType[];
+  pdfUrl?: string;
+  cloudinaryId?: string;
+}
+
+export interface UseStaffStrategyType {
+  status: number;
+  message: string;
+  data: {
+    strategies: StaffStrategyType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UseStaffStrategy {
+  status: number;
+  message: string;
+  data: StaffStrategyType;
+}

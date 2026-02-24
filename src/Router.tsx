@@ -80,6 +80,11 @@ import AllLeaves from "./features/leave/AllLeaves.tsx";
 import CreateLeave from "./features/leave/CreateLeave.tsx";
 import Leave from "./features/leave/Leave.tsx";
 import EditLeave from "./features/leave/EditLeave.tsx";
+import { AllStaffStrategies } from "./features/staff-strategy/AllStaffStrategies.tsx";
+import CreateStaffStrategy from "./features/staff-strategy/CreateStaffStrategy.tsx";
+import StaffStrategy from "./features/staff-strategy/StaffStrategy.tsx";
+import EditStaffStrategy from "./features/staff-strategy/EditStaffStrategy.tsx";
+import StaffStrategyManagement from "./pages/StaffStrategyManagement.tsx";
 
 const router = createBrowserRouter([
   {
@@ -704,6 +709,54 @@ const router = createBrowserRouter([
                 path: "edit/:leaveId",
                 element: (
                   <AnimatedRoute key="edit-leave" element={<EditLeave />} />
+                ),
+              },
+            ],
+          },
+          {
+            path: "staff-strategy",
+            element: (
+              <AnimatedRoute
+                key="staff-strategy-management" // ✅ Changed from "leave" to unique key
+                element={<StaffStrategyManagement />} // ✅ Fixed spelling
+              />
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <AnimatedRoute
+                    key="staff-strategy-all" // ✅ Unique key
+                    element={<AllStaffStrategies />}
+                  />
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <AnimatedRoute
+                    key="staff-strategy-create" // ✅ Unique key
+                    element={<CreateStaffStrategy />}
+                  />
+                ),
+              },
+              {
+                path: ":requestId",
+                element: (
+                  <AnimatedRoute
+                    key="staff-strategy-detail" // ✅ Changed from "leave-detail"
+                    element={<StaffStrategy />}
+                  />
+                ),
+              },
+              {
+                path: "edit/:requestId",
+                element: (
+                  <AnimatedRoute
+                    key="staff-strategy-edit" // ✅ Changed from "edit-leave"
+                    element={<EditStaffStrategy />}
+                  />
                 ),
               },
             ],

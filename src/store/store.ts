@@ -29,6 +29,7 @@ import purchaseOrderReducer from "./purchaseOrderSlice";
 import goodsReceivedSliceReducer from "./goodsReceivedSlice";
 import paymentVoucherSliceReducer from "./paymentVoucherSlice";
 import leaveReducer from "./leaveSlice";
+import staffStrategyReducer from "./staffStrategySlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -49,6 +50,7 @@ const rootReducer = combineReducers({
   goodsReceived: goodsReceivedSliceReducer,
   paymentVoucher: paymentVoucherSliceReducer,
   leave: leaveReducer,
+  staffStrategy: staffStrategyReducer,
 });
 
 // Create persist config
