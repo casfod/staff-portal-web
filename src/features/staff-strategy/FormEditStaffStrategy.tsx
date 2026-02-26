@@ -1,15 +1,18 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { StaffStrategyType, ObjectiveType } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
-import { useUsers } from "../user/Hooks/useUsers";
+
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { FileUpload } from "../../ui/FileUpload";
-import { useUpdateStaffStrategy } from "./Hooks/useStaffStrategy";
+import {
+  useCreateStaffStrategy,
+  useSaveStaffStrategyDraft,
+} from "./Hooks/useStaffStrategy";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -55,32 +58,6 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
       });
     }
   }, [staffStrategy]);
-
-  // Fetch users data
-  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
-    limit: 1000,
-  });
-
-  const users = useMemo(
-    () =>
-      usersData?.data?.users.filter((user) => user.id !== currentUser.id) ?? [],
-    [usersData]
-  );
-
-  // Filter approvers (ADMIN, SUPER-ADMIN, REVIEWER)
-  const approvers = useMemo(
-    () =>
-      users.filter((user) =>
-        ["ADMIN", "SUPER-ADMIN", "REVIEWER"].includes(user.role)
-      ),
-    [users]
-  );
-
-  const {
-    updateStaffStrategy,
-    isPending: isUpdating,
-    isError,
-  } = useUpdateStaffStrategy(staffStrategy?.id || "");
 
   const handleFormChange = (field: keyof StaffStrategyType, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -165,21 +142,33 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const {
+    createStaffStrategy,
+    isPending: isCreating,
+    isError: isErrorCreate,
+  } = useCreateStaffStrategy();
+  const {
+    saveStaffStrategyDraft,
+    isPending: isSaving,
+    isError: isErrorSave,
+  } = useSaveStaffStrategyDraft();
+
+  const handleSaveDraft = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
     if (!isFormValid) return;
 
-    // Validate required fields
-    if (!formData.staffId) {
-      toast.error("Please select a staff member");
-      return;
-    }
-    if (!formData.supervisorId) {
-      toast.error("Please select a supervisor");
-      return;
-    }
+    // Clear approver for draft save
+    const draftData = { ...formData, approvedBy: null };
+    saveStaffStrategyDraft(draftData);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+
+    if (!isFormValid) return;
 
     // Validate accountability areas have objectives
     const hasEmptyAreas = formData.accountabilityAreas?.some(
@@ -206,7 +195,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
     }
 
     const data = { ...formData };
-    updateStaffStrategy({ data, files: selectedFiles });
+    createStaffStrategy({ data, files: selectedFiles });
   };
 
   // Check editability
@@ -253,68 +242,31 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
     );
   }
 
-  if (isError) {
+  if (isErrorCreate || isErrorSave) {
     return <NetworkErrorUI />;
+  }
+
+  if (currentUser.employmentInfo?.isProfileComplete === false) {
+    return (
+      <span className="text-amber-600 font-extrabold">
+        <span className="text-2xl">⚠️</span>
+        Please complete your employment info to access staff strategy form.
+        <span
+          onClick={() => navigate("/human-resources/staff-information")}
+          className="underline hover:text-blue-600"
+        >
+          {" "}
+          Click here
+        </span>
+      </span>
+    );
   }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* Staff Information */}
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Staff Name *">
-          <Input
-            readOnly
-            type="text"
-            id="staffName"
-            required
-            value={formData.staffName}
-            onChange={(e) => handleFormChange("staffName", e.target.value)}
-            placeholder="Enter staff name"
-          />
-        </FormRow>
-
-        <FormRow label="Select Staff *">
-          {isLoadingUsers ? (
-            <SpinnerMini />
-          ) : (
-            <Select
-              filterable={true}
-              clearable={true}
-              id="staffId"
-              customLabel="Select Staff Member"
-              value={formData.staffId || ""}
-              onChange={(value) => {
-                const selectedUser = users.find((u) => u.id === value);
-                setFormData((prev) => ({
-                  ...prev,
-                  staffId: value,
-                  staffName: selectedUser
-                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
-                    : prev.staffName,
-                }));
-              }}
-              options={users.map((user) => ({
-                id: user.id as string,
-                name: `${user.first_name} ${user.last_name} (${user.email})`,
-              }))}
-              required
-            />
-          )}
-        </FormRow>
-      </Row>
 
       <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Job Title *">
-          <Input
-            type="text"
-            id="jobTitle"
-            required
-            value={formData.jobTitle}
-            onChange={(e) => handleFormChange("jobTitle", e.target.value)}
-            placeholder="Enter job title"
-          />
-        </FormRow>
-
         <FormRow label="Department *">
           <Input
             type="text"
@@ -324,49 +276,6 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
             onChange={(e) => handleFormChange("department", e.target.value)}
             placeholder="Enter department"
           />
-        </FormRow>
-      </Row>
-
-      <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Supervisor Name *">
-          <Input
-            readOnly
-            type="text"
-            id="supervisor"
-            required
-            value={formData.supervisor}
-            onChange={(e) => handleFormChange("supervisor", e.target.value)}
-            placeholder="Enter supervisor name"
-          />
-        </FormRow>
-
-        <FormRow label="Select Supervisor *">
-          {isLoadingUsers ? (
-            <SpinnerMini />
-          ) : (
-            <Select
-              filterable={true}
-              clearable={true}
-              id="supervisorId"
-              customLabel="Select Supervisor"
-              value={formData.supervisorId || ""}
-              onChange={(value) => {
-                const selectedUser = users.find((u) => u.id === value);
-                setFormData((prev) => ({
-                  ...prev,
-                  supervisorId: value,
-                  supervisor: selectedUser
-                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
-                    : prev.supervisor,
-                }));
-              }}
-              options={users.map((user) => ({
-                id: user.id as string,
-                name: `${user.first_name} ${user.last_name} (${user.email})`,
-              }))}
-              required
-            />
-          )}
         </FormRow>
       </Row>
 
@@ -390,24 +299,12 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
           />
         </FormRow>
 
-        {/* Approver Selection */}
-        <FormRow label="Select Approver">
-          {isLoadingUsers ? (
-            <SpinnerMini />
-          ) : (
-            <Select
-              filterable={true}
-              clearable={true}
-              id="approvedBy"
-              customLabel="Select Approver"
-              value={(formData.approvedBy as string) || ""}
-              onChange={(value) => handleFormChange("approvedBy", value)}
-              options={approvers.map((user) => ({
-                id: user.id as string,
-                name: `${user.first_name} ${user.last_name} (${user.role})`,
-              }))}
-            />
-          )}
+        <FormRow label="Supervisor *">
+          <Input
+            type="text"
+            readOnly
+            value={currentUser.employmentInfo?.jobDetails?.supervisor}
+          />
         </FormRow>
       </Row>
 
@@ -506,16 +403,18 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                             }
                             options={[
                               { id: "Routine", name: "Routine" },
-                              { id: "Short-term", name: "Short-term" },
-                              { id: "Medium-term", name: "Medium-term" },
-                              { id: "Long-term", name: "Long-term" },
+                              { id: "Monthly", name: "Monthly" },
+                              { id: "Quarterly", name: "Quarterly" },
+                              { id: "Annually", name: "Annually" },
                             ]}
                           />
                         </FormRow>
+                      </Row>
 
+                      <Row>
                         <FormRow label="Expected Outcome *">
-                          <Input
-                            type="text"
+                          <textarea
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.expectedOutcome}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -530,10 +429,10 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                         </FormRow>
                       </Row>
 
-                      <Row cols="grid-cols-1 md:grid-cols-2">
+                      <Row>
                         <FormRow label="KPI *">
-                          <Input
-                            type="text"
+                          <textarea
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.kpi}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -546,10 +445,11 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                             required
                           />
                         </FormRow>
-
+                      </Row>
+                      <Row>
                         <FormRow label="Possible Challenges">
-                          <Input
-                            type="text"
+                          <textarea
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.possibleChallenges || ""}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -559,14 +459,15 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                                 e.target.value
                               )
                             }
+                            required
                           />
                         </FormRow>
                       </Row>
 
                       <Row cols="grid-cols-1">
                         <FormRow label="Support Required">
-                          <Input
-                            type="text"
+                          <textarea
+                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
                             value={objective.supportRequired || ""}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -576,6 +477,7 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
                                 e.target.value
                               )
                             }
+                            required
                           />
                         </FormRow>
                       </Row>
@@ -616,17 +518,28 @@ const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
       </Row>
 
       {/* Action Buttons */}
+
       <div className="flex justify-center w-full gap-4 pt-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <Button type="submit" size="medium" disabled={isUpdating}>
-            {isUpdating ? <SpinnerMini /> : "Update Staff Strategy"}
+          <Button
+            type="button"
+            size="medium"
+            variant="secondary"
+            disabled={isSaving}
+            onClick={handleSaveDraft}
+          >
+            {isSaving ? <SpinnerMini /> : "Save as Draft"}
+          </Button>
+
+          <Button type="submit" size="medium" disabled={isCreating}>
+            {isCreating ? <SpinnerMini /> : "Submit for Approval"}
           </Button>
 
           <Button
             type="button"
             size="medium"
             variant="secondary"
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
           >
             Cancel
           </Button>

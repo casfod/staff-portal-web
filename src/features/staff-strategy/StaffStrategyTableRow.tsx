@@ -1,4 +1,4 @@
-import { StaffStrategyType } from "../../interfaces";
+import { StaffStrategyType, UserType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
 import StatusBadge from "../../ui/StatusBadge";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
@@ -53,12 +53,13 @@ const StaffStrategyTableRow = ({
     (createdById === currentUser?.id || currentUser.role === "SUPER-ADMIN");
 
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
+  const createdBy: UserType | null = request.createdBy;
 
   // Row data configuration
   const rowData = [
     {
       id: "staff_name",
-      content: request.staffName,
+      content: `${createdBy?.first_name} ${createdBy?.last_name}`,
       showOnMobile: true,
       minWidth: "120px",
       mobileLabel: "Prepared By",

@@ -136,6 +136,7 @@ export interface EmploymentInfoType {
     startDate?: string | Date;
     endDate?: string | Date | null;
     supervisor?: string;
+    supervisorId?: any;
   };
 
   emergencyContact?: {
@@ -1430,12 +1431,12 @@ export interface AccountabilityAreaType {
 export interface StaffStrategyType {
   id: string;
   strategyCode: string;
-  staffName: string;
-  staffId: any;
-  jobTitle: string;
+  staffName?: string;
+  staffId?: any;
+  jobTitle?: string;
   department: string;
-  supervisor: string;
-  supervisorId: any;
+  supervisor?: string;
+  supervisorId?: any;
   date: string;
   period: string;
   accountabilityAreas: AccountabilityAreaType[];

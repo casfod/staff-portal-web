@@ -20,6 +20,8 @@ interface StaffDetailsProps {
 }
 
 const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
+  console.log("staffInfo::", staffInfo);
+
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { userId: userParamId } = useParams();

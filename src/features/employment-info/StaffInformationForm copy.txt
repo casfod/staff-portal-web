@@ -143,7 +143,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
         startDate: undefined,
         endDate: undefined,
         supervisor: "",
-        supervisorId: null,
       },
       emergencyContact: {
         fullName: "",
@@ -162,23 +161,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
 
     if (staffInfo) {
       if (staffInfo.employmentInfo) {
-        // Find the supervisor name from users list if supervisorId exists
-        let supervisorName =
-          staffInfo.employmentInfo.jobDetails?.supervisor || "";
-
-        // If we have a supervisorId but no supervisor name, try to find the name from users list
-        if (
-          staffInfo.employmentInfo.jobDetails?.supervisorId &&
-          !supervisorName
-        ) {
-          const supervisor = users.find(
-            (u) => u.id === staffInfo.employmentInfo?.jobDetails?.supervisorId
-          );
-          if (supervisor) {
-            supervisorName = `${supervisor.first_name} ${supervisor.last_name}`;
-          }
-        }
-
         return {
           ...emptyForm,
           ...staffInfo.employmentInfo,
@@ -196,9 +178,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
               staffInfo.employmentInfo.jobDetails?.title ||
               staffInfo.position ||
               "",
-            supervisor: supervisorName,
-            supervisorId:
-              staffInfo.employmentInfo.jobDetails?.supervisorId || null,
           },
           emergencyContact: {
             ...emptyForm.emergencyContact,
@@ -284,18 +263,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
 
     if (data?.data?.employmentInfo) {
       const existingData = data.data.employmentInfo;
-
-      // Find the supervisor name from users list if supervisorId exists
-      let supervisorName = existingData.jobDetails?.supervisor || "";
-      if (existingData.jobDetails?.supervisorId && !supervisorName) {
-        const supervisor = users.find(
-          (u) => u.id === existingData.jobDetails?.supervisorId
-        );
-        if (supervisor) {
-          supervisorName = `${supervisor.first_name} ${supervisor.last_name}`;
-        }
-      }
-
       setFormData((prev) => ({
         ...prev,
         ...existingData,
@@ -306,8 +273,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
         jobDetails: {
           ...prev.jobDetails,
           ...existingData.jobDetails,
-          supervisor: supervisorName,
-          supervisorId: existingData.jobDetails?.supervisorId || null,
         },
         emergencyContact: {
           ...prev.emergencyContact,
@@ -319,7 +284,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
         },
       }));
     }
-  }, [data, isAdminView, users]);
+  }, [data, isAdminView]);
 
   const handleFormChange = (
     section: keyof EmploymentInfoType,
@@ -385,73 +350,12 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
       });
     }
   };
-
   const handleDateChange = (
     section: keyof EmploymentInfoType,
     field: string,
     date: Date | null
   ) => {
     handleFormChange(section, field, date);
-  };
-
-  // const handleSupervisorChange = (
-  //   selectedId: string,
-  //   selectedOption?: { id: string; name: string }
-  // ) => {
-  //   if (selectedId && selectedOption) {
-  //     // Set both the supervisor name (for display) and the supervisorId
-  //     handleFormChange("jobDetails", "supervisor", selectedOption.name);
-  //     handleFormChange("jobDetails", "supervisorId", selectedId);
-  //   } else {
-  //     // Clear both if no selection
-  //     handleFormChange("jobDetails", "supervisor", "");
-  //     handleFormChange("jobDetails", "supervisorId", null);
-  //   }
-  // };
-
-  const handleSupervisorChange = (selectedId: string) => {
-    if (selectedId) {
-      const selectedUser = userOptions.find((u) => u.id === selectedId);
-      if (selectedUser) {
-        handleFormChange("jobDetails", "supervisor", selectedUser.name);
-        handleFormChange("jobDetails", "supervisorId", selectedId);
-      }
-    } else {
-      // Clear both if no selection
-      handleFormChange("jobDetails", "supervisor", "");
-      handleFormChange("jobDetails", "supervisorId", null);
-    }
-  };
-
-  // Create user options for the select dropdown
-  const userOptions = useMemo(() => {
-    return users
-      .filter((user) => user.id)
-      .map((user) => ({
-        id: user.id as string,
-        name: `${user.first_name} ${user.last_name}`,
-      }));
-  }, [users]);
-
-  // Find the currently selected supervisor ID based on the supervisor name or ID
-  const getSelectedSupervisorId = () => {
-    const currentSupervisorName = formData.jobDetails?.supervisor;
-    const currentSupervisorId = formData.jobDetails?.supervisorId;
-
-    // If we have a supervisorId, use that
-    if (currentSupervisorId) {
-      return currentSupervisorId;
-    }
-
-    // Otherwise, try to find by name
-    if (currentSupervisorName) {
-      const user = users.find(
-        (u) => `${u.first_name} ${u.last_name}` === currentSupervisorName
-      );
-      return user?.id || "";
-    }
-
-    return "";
   };
 
   const validateForm = (): boolean => {
@@ -532,6 +436,8 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
     }
 
     if (isAdminView && staffInfo?.id && isSuperAdmin) {
+      // console.log("Super-admin updating user:", staffInfo.id, formData);
+
       superAdminUpdate(
         { userId: staffInfo.id, data: formData },
         {
@@ -554,6 +460,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
     ? isSuperAdmin
     : data?.data?.canUpdate !== false;
 
+  // const allSectionsCompleted = Object.values(completedSections).every((v) => v);
   const completionPercentage = Math.round(
     (Object.values(completedSections).filter((v) => v).length / 4) * 100
   );
@@ -667,6 +574,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
               <FormRow label="LGA">
                 <Select
                   clearable={true}
+                  // filterable={true}
                   id="lga"
                   customLabel="Select LGA"
                   value={formData.personalDetails?.lga || ""}
@@ -719,8 +627,22 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
               error={errors["personalDetails.address"]}
               icon={<MapPin className="h-4 w-4 text-gray-400" />}
             >
+              {/* <Input
+                type="text"
+                id="address"
+                required
+                placeholder="Enter your residential address"
+                value={formData.personalDetails?.address || ""}
+                onChange={(e) =>
+                  handleFormChange("personalDetails", "address", e.target.value)
+                }
+                className={
+                  errors["personalDetails.address"] ? "border-red-500" : ""
+                }
+              /> */}
+
               <textarea
-                className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 w-full"
+                className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
                 maxLength={4000}
                 id="address"
                 required
@@ -931,13 +853,34 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
           ) : (
             <Row cols="grid-cols-1 lg:grid-cols-2">
               <FormRow label="Supervisor">
+                {/* <Input
+                type="text"
+                id="supervisor"
+                placeholder="Enter supervisor's name"
+                value={formData.jobDetails?.supervisor || ""}
+                onChange={(e) =>
+                  handleFormChange("jobDetails", "supervisor", e.target.value)
+                }
+              /> */}
+
                 <Select
                   clearable={true}
                   id="supervisor"
-                  customLabel="Select supervisor"
-                  value={getSelectedSupervisorId()}
-                  onChange={handleSupervisorChange}
-                  options={userOptions}
+                  customLabel="Enter supervisor's name"
+                  value={formData.jobDetails?.supervisor || ""}
+                  onChange={(value) =>
+                    handleFormChange("jobDetails", "supervisor", value)
+                  }
+                  options={
+                    users
+                      ? users
+                          .filter((user) => user.id)
+                          .map((user) => ({
+                            id: user.id as string,
+                            name: `${user.first_name} ${user.last_name}`,
+                          }))
+                      : []
+                  }
                 />
               </FormRow>
             </Row>
@@ -1130,8 +1073,26 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
               type="wide"
               error={errors["emergencyContact.address"]}
             >
+              {/* <Input
+                type="text"
+                id="emergencyAddress"
+                required
+                placeholder="Enter emergency contact's address"
+                value={formData.emergencyContact?.address || ""}
+                onChange={(e) =>
+                  handleFormChange(
+                    "emergencyContact",
+                    "address",
+                    e.target.value
+                  )
+                }
+                className={
+                  errors["emergencyContact.address"] ? "border-red-500" : ""
+                }
+              /> */}
+
               <textarea
-                className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3 w-full"
+                className="border-2 h-32 min-h-32 rounded-lg focus:outline-none p-3"
                 maxLength={4000}
                 id="emergencyAddress"
                 required

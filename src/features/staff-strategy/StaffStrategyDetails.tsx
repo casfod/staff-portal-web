@@ -1,4 +1,4 @@
-import { StaffStrategyType } from "../../interfaces";
+import { StaffStrategyType, UserType } from "../../interfaces";
 import { useParams } from "react-router-dom";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
@@ -13,7 +13,7 @@ export const StaffStrategyDetails = ({
 }: StaffStrategyDetailsProps) => {
   const { requestId } = useParams();
 
-  console.log(request);
+  // console.log(request);
 
   // Helper function to safely get user name
   const getUserName = (user: any) => {
@@ -35,6 +35,8 @@ export const StaffStrategyDetails = ({
 
   // Helper to resolve supervisor — API may return a full user object or a plain string
   const getSupervisorName = (supervisor: any) => {
+    // console.log("supervisor:::", supervisor);
+
     if (!supervisor) return "N/A";
     if (typeof supervisor === "object") {
       return (
@@ -44,6 +46,8 @@ export const StaffStrategyDetails = ({
     }
     return supervisor || "N/A";
   };
+
+  const createdBy: UserType | null = request.createdBy;
 
   return (
     <DetailContainer>
@@ -69,13 +73,17 @@ export const StaffStrategyDetails = ({
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
                 Staff Name
               </label>
-              <p className="text-gray-800">{request.staffName || "N/A"}</p>
+              <p className="text-gray-800">
+                {`${createdBy?.first_name} ${createdBy?.last_name}` || "N/A"}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
                 Job Title
               </label>
-              <p className="text-gray-800">{request.jobTitle || "N/A"}</p>
+              <p className="text-gray-800">
+                {createdBy?.employmentInfo?.jobDetails?.title || "N/A"}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
@@ -88,7 +96,9 @@ export const StaffStrategyDetails = ({
                 Supervisor
               </label>
               <p className="text-gray-800">
-                {getSupervisorName(request.supervisor)}
+                {getSupervisorName(
+                  createdBy?.employmentInfo?.jobDetails?.supervisor
+                )}
               </p>
             </div>
             <div>
@@ -127,8 +137,8 @@ export const StaffStrategyDetails = ({
                           {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
                           <div className="flex flex-col gap-4">
                             <div className="md:col-span-2">
-                              <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                Objective
+                              <label className="block text-md font-bold mb-1 uppercase tracking-wide text-gray-600">
+                                Objective {objIndex + 1}
                               </label>
                               <p className="text-gray-800">
                                 {objective.objective || "N/A"}

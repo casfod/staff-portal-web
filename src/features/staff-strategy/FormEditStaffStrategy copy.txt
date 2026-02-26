@@ -1,24 +1,27 @@
-import { useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { StaffStrategyType, ObjectiveType } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
-// import { useUsers } from "../user/Hooks/useUsers";
+import { useUsers } from "../user/Hooks/useUsers";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { FileUpload } from "../../ui/FileUpload";
-import {
-  useCreateStaffStrategy,
-  useSaveStaffStrategyDraft,
-} from "./Hooks/useStaffStrategy";
+import { useUpdateStaffStrategy } from "./Hooks/useStaffStrategy";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const FormAddStaffStrategy = () => {
+interface FormEditStaffStrategyProps {
+  staffStrategy: StaffStrategyType | null;
+}
+
+const FormEditStaffStrategy: React.FC<FormEditStaffStrategyProps> = ({
+  staffStrategy,
+}) => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
@@ -30,25 +33,54 @@ const FormAddStaffStrategy = () => {
     supervisor: "",
     supervisorId: "",
     period: "",
-    accountabilityAreas: [
-      {
-        areaName: "",
-        objectives: [
-          {
-            objective: "",
-            timeline: "Routine",
-            expectedOutcome: "",
-            kpi: "",
-            possibleChallenges: "",
-            supportRequired: "",
-          },
-        ],
-      },
-    ],
+    accountabilityAreas: [],
     approvedBy: null,
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  // Initialize form data from staffStrategy
+  useEffect(() => {
+    if (staffStrategy) {
+      setFormData({
+        staffName: staffStrategy.staffName,
+        staffId: staffStrategy.staffId?.id || "",
+        jobTitle: staffStrategy.jobTitle,
+        department: staffStrategy.department,
+        supervisor: staffStrategy.supervisor,
+        supervisorId: staffStrategy.supervisorId?.id || "",
+        period: staffStrategy.period,
+        accountabilityAreas: staffStrategy.accountabilityAreas || [],
+        approvedBy: staffStrategy.approvedBy?.id || null,
+      });
+    }
+  }, [staffStrategy]);
+
+  // Fetch users data
+  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
+    limit: 1000,
+  });
+
+  const users = useMemo(
+    () =>
+      usersData?.data?.users.filter((user) => user.id !== currentUser.id) ?? [],
+    [usersData]
+  );
+
+  // Filter approvers (ADMIN, SUPER-ADMIN, REVIEWER)
+  const approvers = useMemo(
+    () =>
+      users.filter((user) =>
+        ["ADMIN", "SUPER-ADMIN", "REVIEWER"].includes(user.role)
+      ),
+    [users]
+  );
+
+  const {
+    updateStaffStrategy,
+    isPending: isUpdating,
+    isError,
+  } = useUpdateStaffStrategy(staffStrategy?.id || "");
 
   const handleFormChange = (field: keyof StaffStrategyType, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -133,49 +165,21 @@ const FormAddStaffStrategy = () => {
     }
   };
 
-  const {
-    createStaffStrategy,
-    isPending: isCreating,
-    isError: isErrorCreate,
-  } = useCreateStaffStrategy();
-  const {
-    saveStaffStrategyDraft,
-    isPending: isSaving,
-    isError: isErrorSave,
-  } = useSaveStaffStrategyDraft();
-
-  const handleSaveDraft = (e: React.FormEvent) => {
-    e.preventDefault();
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
-
-    if (!isFormValid) return;
-
-    // Clear approver for draft save
-    const draftData = { ...formData, approvedBy: null };
-    saveStaffStrategyDraft(draftData);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
     if (!isFormValid) return;
 
-    // Validate that staff and supervisor are selected
-    // if (!formData.staffId) {
-    //   toast.error("Please select a staff member");
-    //   return;
-    // }
-    // if (!formData.supervisorId) {
-    //   toast.error("Please select a supervisor");
-    //   return;
-    // }
-
-    // Validate approver is selected for submission (like PO)
-    // if (!formData.approvedBy) {
-    //   toast.error("Please select an approver for this strategy");
-    //   return;
-    // }
+    // Validate required fields
+    if (!formData.staffId) {
+      toast.error("Please select a staff member");
+      return;
+    }
+    if (!formData.supervisorId) {
+      toast.error("Please select a supervisor");
+      return;
+    }
 
     // Validate accountability areas have objectives
     const hasEmptyAreas = formData.accountabilityAreas?.some(
@@ -202,34 +206,115 @@ const FormAddStaffStrategy = () => {
     }
 
     const data = { ...formData };
-    createStaffStrategy({ data, files: selectedFiles });
+    updateStaffStrategy({ data, files: selectedFiles });
   };
 
-  if (isErrorCreate || isErrorSave) {
-    return <NetworkErrorUI />;
-  }
-  if (currentUser.employmentInfo?.isProfileComplete === false) {
+  // Check editability
+  const isEditable =
+    staffStrategy?.status === "draft" || staffStrategy?.status === "rejected";
+
+  if (!staffStrategy) {
     return (
-      <span className="text-amber-600 font-extrabold">
-        <span className="text-2xl">⚠️</span>
-        Please complete your employment info to access staff strategy form.
-        <span
-          onClick={() => navigate("/human-resources/staff-information")}
-          className="underline hover:text-blue-600"
+      <div className="text-center py-8">
+        <p className="text-lg text-gray-600">Staff Strategy not found</p>
+        <Button
+          type="button"
+          size="medium"
+          variant="secondary"
+          onClick={() => navigate(-1)}
+          className="mt-4"
         >
-          {" "}
-          Click here
-        </span>
-      </span>
+          Go Back
+        </Button>
+      </div>
     );
   }
 
-  currentUser;
+  if (!isEditable) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-lg text-gray-600">
+          This staff strategy cannot be edited because it is{" "}
+          <span className="font-semibold uppercase">
+            {staffStrategy.status}
+          </span>
+          .
+        </p>
+        <Button
+          type="button"
+          size="medium"
+          variant="secondary"
+          onClick={() => navigate(-1)}
+          className="mt-4"
+        >
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <NetworkErrorUI />;
+  }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* Staff Information */}
       <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Staff Name *">
+          <Input
+            readOnly
+            type="text"
+            id="staffName"
+            required
+            value={formData.staffName}
+            onChange={(e) => handleFormChange("staffName", e.target.value)}
+            placeholder="Enter staff name"
+          />
+        </FormRow>
+
+        <FormRow label="Select Staff *">
+          {isLoadingUsers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              filterable={true}
+              clearable={true}
+              id="staffId"
+              customLabel="Select Staff Member"
+              value={formData.staffId || ""}
+              onChange={(value) => {
+                const selectedUser = users.find((u) => u.id === value);
+                setFormData((prev) => ({
+                  ...prev,
+                  staffId: value,
+                  staffName: selectedUser
+                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                    : prev.staffName,
+                }));
+              }}
+              options={users.map((user) => ({
+                id: user.id as string,
+                name: `${user.first_name} ${user.last_name} (${user.email})`,
+              }))}
+              required
+            />
+          )}
+        </FormRow>
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Job Title *">
+          <Input
+            type="text"
+            id="jobTitle"
+            required
+            value={formData.jobTitle}
+            onChange={(e) => handleFormChange("jobTitle", e.target.value)}
+            placeholder="Enter job title"
+          />
+        </FormRow>
+
         <FormRow label="Department *">
           <Input
             type="text"
@@ -239,6 +324,49 @@ const FormAddStaffStrategy = () => {
             onChange={(e) => handleFormChange("department", e.target.value)}
             placeholder="Enter department"
           />
+        </FormRow>
+      </Row>
+
+      <Row cols="grid-cols-1 md:grid-cols-2">
+        <FormRow label="Supervisor Name *">
+          <Input
+            readOnly
+            type="text"
+            id="supervisor"
+            required
+            value={formData.supervisor}
+            onChange={(e) => handleFormChange("supervisor", e.target.value)}
+            placeholder="Enter supervisor name"
+          />
+        </FormRow>
+
+        <FormRow label="Select Supervisor *">
+          {isLoadingUsers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              filterable={true}
+              clearable={true}
+              id="supervisorId"
+              customLabel="Select Supervisor"
+              value={formData.supervisorId || ""}
+              onChange={(value) => {
+                const selectedUser = users.find((u) => u.id === value);
+                setFormData((prev) => ({
+                  ...prev,
+                  supervisorId: value,
+                  supervisor: selectedUser
+                    ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                    : prev.supervisor,
+                }));
+              }}
+              options={users.map((user) => ({
+                id: user.id as string,
+                name: `${user.first_name} ${user.last_name} (${user.email})`,
+              }))}
+              required
+            />
+          )}
         </FormRow>
       </Row>
 
@@ -262,12 +390,24 @@ const FormAddStaffStrategy = () => {
           />
         </FormRow>
 
-        <FormRow label="Supervisor *">
-          <Input
-            type="text"
-            readOnly
-            value={currentUser.employmentInfo?.jobDetails?.supervisor}
-          />
+        {/* Approver Selection */}
+        <FormRow label="Select Approver">
+          {isLoadingUsers ? (
+            <SpinnerMini />
+          ) : (
+            <Select
+              filterable={true}
+              clearable={true}
+              id="approvedBy"
+              customLabel="Select Approver"
+              value={(formData.approvedBy as string) || ""}
+              onChange={(value) => handleFormChange("approvedBy", value)}
+              options={approvers.map((user) => ({
+                id: user.id as string,
+                name: `${user.first_name} ${user.last_name} (${user.role})`,
+              }))}
+            />
+          )}
         </FormRow>
       </Row>
 
@@ -295,6 +435,7 @@ const FormAddStaffStrategy = () => {
                     </Button>
                   )}
                 </div>
+
                 <FormRow label="Area Name *">
                   <Input
                     type="text"
@@ -306,7 +447,8 @@ const FormAddStaffStrategy = () => {
                     required
                   />
                 </FormRow>
-                {/* Objectives */}4
+
+                {/* Objectives */}
                 <div className="space-y-4 pl-4 border-l-2 border-gray-300">
                   <h5 className="font-medium text-gray-600">Objectives</h5>
                   {area.objectives.map((objective, objIndex) => (
@@ -364,18 +506,16 @@ const FormAddStaffStrategy = () => {
                             }
                             options={[
                               { id: "Routine", name: "Routine" },
-                              { id: "Monthly", name: "Monthly" },
-                              { id: "Quarterly", name: "Quarterly" },
-                              { id: "Annually", name: "Annually" },
+                              { id: "Short-term", name: "Short-term" },
+                              { id: "Medium-term", name: "Medium-term" },
+                              { id: "Long-term", name: "Long-term" },
                             ]}
                           />
                         </FormRow>
-                      </Row>
 
-                      <Row>
                         <FormRow label="Expected Outcome *">
-                          <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
+                          <Input
+                            type="text"
                             value={objective.expectedOutcome}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -390,10 +530,10 @@ const FormAddStaffStrategy = () => {
                         </FormRow>
                       </Row>
 
-                      <Row>
+                      <Row cols="grid-cols-1 md:grid-cols-2">
                         <FormRow label="KPI *">
-                          <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
+                          <Input
+                            type="text"
                             value={objective.kpi}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -406,11 +546,10 @@ const FormAddStaffStrategy = () => {
                             required
                           />
                         </FormRow>
-                      </Row>
-                      <Row>
+
                         <FormRow label="Possible Challenges">
-                          <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
+                          <Input
+                            type="text"
                             value={objective.possibleChallenges || ""}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -420,15 +559,14 @@ const FormAddStaffStrategy = () => {
                                 e.target.value
                               )
                             }
-                            required
                           />
                         </FormRow>
                       </Row>
 
                       <Row cols="grid-cols-1">
                         <FormRow label="Support Required">
-                          <textarea
-                            className="border-2 h-20 min-h-20 rounded-lg focus:outline-none p-3 w-full"
+                          <Input
+                            type="text"
                             value={objective.supportRequired || ""}
                             onChange={(e) =>
                               handleObjectiveChange(
@@ -438,7 +576,6 @@ const FormAddStaffStrategy = () => {
                                 e.target.value
                               )
                             }
-                            required
                           />
                         </FormRow>
                       </Row>
@@ -478,35 +615,31 @@ const FormAddStaffStrategy = () => {
         </FormRow>
       </Row>
 
-      {/* Action Buttons - Like Purchase Order */}
+      {/* Action Buttons */}
       <div className="flex justify-center w-full gap-4 pt-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <Button
-            type="button"
-            size="medium"
-            variant="secondary"
-            disabled={isSaving}
-            onClick={handleSaveDraft}
-          >
-            {isSaving ? <SpinnerMini /> : "Save as Draft"}
-          </Button>
-
-          <Button type="submit" size="medium" disabled={isCreating}>
-            {isCreating ? <SpinnerMini /> : "Submit for Approval"}
+          <Button type="submit" size="medium" disabled={isUpdating}>
+            {isUpdating ? <SpinnerMini /> : "Update Staff Strategy"}
           </Button>
 
           <Button
             type="button"
             size="medium"
             variant="secondary"
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
           >
             Cancel
           </Button>
         </div>
       </div>
+
+      {/* Status Information */}
+      <div className="text-center text-sm text-gray-600">
+        Current Status:{" "}
+        <span className="font-semibold uppercase">{staffStrategy.status}</span>
+      </div>
     </form>
   );
 };
 
-export default FormAddStaffStrategy;
+export default FormEditStaffStrategy;
