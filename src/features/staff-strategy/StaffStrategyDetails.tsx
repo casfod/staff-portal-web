@@ -16,22 +16,22 @@ export const StaffStrategyDetails = ({
   // console.log(request);
 
   // Helper function to safely get user name
-  const getUserName = (user: any) => {
-    if (!user) return "N/A";
-    if (typeof user === "object") {
-      return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A";
-    }
-    return "N/A";
-  };
+  // const getUserName = (user: any) => {
+  //   if (!user) return "N/A";
+  //   if (typeof user === "object") {
+  //     return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A";
+  //   }
+  //   return "N/A";
+  // };
 
   // Helper function to safely get user role
-  const getUserRole = (user: any) => {
-    if (!user) return "N/A";
-    if (typeof user === "object") {
-      return user.role || "N/A";
-    }
-    return "N/A";
-  };
+  // const getUserRole = (user: any) => {
+  //   if (!user) return "N/A";
+  //   if (typeof user === "object") {
+  //     return user.role || "N/A";
+  //   }
+  //   return "N/A";
+  // };
 
   // Helper to resolve supervisor — API may return a full user object or a plain string
   const getSupervisorName = (supervisor: any) => {
@@ -65,8 +65,8 @@ export const StaffStrategyDetails = ({
       >
         {/* Staff Information Section */}
         <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
-            Staff Information
+          <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+            STAFF INFOMATION
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -114,8 +114,8 @@ export const StaffStrategyDetails = ({
         {request.accountabilityAreas &&
         request.accountabilityAreas.length > 0 ? (
           <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
-              Accountability Areas & Objectives
+            <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+              ACCOUNTABILITY AREAS & OBJECTIVES
             </h3>
             <div className="space-y-6">
               {request.accountabilityAreas.map((area, areaIndex) => (
@@ -210,46 +210,6 @@ export const StaffStrategyDetails = ({
         )}
 
         {/* Approval Chain Section */}
-        <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
-            Approval Chain
-          </h3>
-          <div className="space-y-2">
-            {/* Created By */}
-            <p className="text-sm md:text-base">
-              <span className="font-bold mr-1 uppercase">Prepared By:</span>
-              {getUserName(request.createdBy)}
-            </p>
-            <p className="text-sm md:text-base">
-              <span className="font-bold mr-1 uppercase">Role:</span>
-              {getUserRole(request.createdBy)}
-            </p>
-
-            {/* Supervisor Information */}
-            {request.supervisorId && (
-              <p className="text-sm md:text-base">
-                <span className="font-bold mr-1 uppercase">Supervisor:</span>
-                {getSupervisorName(request.supervisor)}
-              </p>
-            )}
-
-            {/* Approved By Information */}
-            {request.approvedBy && (
-              <>
-                <p className="text-sm md:text-base">
-                  <span className="font-bold mr-1 uppercase">Approved By:</span>
-                  {getUserName(request.approvedBy)}
-                </p>
-                <p className="text-sm md:text-base">
-                  <span className="font-bold mr-1 uppercase">
-                    Approver Role:
-                  </span>
-                  {getUserRole(request.approvedBy)}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
 
         <SystemInfo request={request} />
 

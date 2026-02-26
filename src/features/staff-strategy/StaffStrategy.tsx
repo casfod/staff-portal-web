@@ -21,7 +21,7 @@ import {
   useUpdateComment,
   useUpdateStaffStrategyStatus,
 } from "./Hooks/useStaffStrategy";
-import { Comment as AppComment } from "../../interfaces";
+import { Comment as AppComment, UserType } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
@@ -128,6 +128,7 @@ const StaffStrategy = () => {
 
   const requestCreatedAt = request?.createdAt ?? "";
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
+  const createdBy: UserType | null = request?.createdBy;
 
   // Table data configuration
   const tableHeadData = [
@@ -151,7 +152,7 @@ const StaffStrategy = () => {
   const tableRowData = [
     {
       id: "name",
-      content: request?.staffName || "N/A",
+      content: `${createdBy?.first_name} ${createdBy?.last_name}`,
       showOnMobile: true,
       showOnTablet: true,
     },
