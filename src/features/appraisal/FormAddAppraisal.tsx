@@ -1,6 +1,10 @@
 // src/features/appraisal/FormAddAppraisal.tsx
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { AppraisalType, ObjectiveRatingType } from "../../interfaces";
+import { useState, useCallback, useMemo } from "react"; // Removed unused useEffect
+import {
+  AppraisalType,
+  ObjectiveRatingType,
+  PerformanceAreaType,
+} from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
@@ -8,8 +12,10 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
-import { useSaveAppraisalDraft } from "./Hooks/useAppraisal";
-import { useSubmitAppraisal } from "./Hooks/useAppraisal";
+import {
+  useSaveAppraisalDraft,
+  useSubmitAppraisal,
+} from "./Hooks/useAppraisal";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -35,8 +41,8 @@ interface FormErrors {
   [key: string]: string;
 }
 
-// Constants
-const PERFORMANCE_AREAS = [
+// Constants with proper typing
+const PERFORMANCE_AREAS: PerformanceAreaType[] = [
   { area: "Job Knowledge", rating: "Meets Expectations" },
   { area: "Judgement", rating: "Meets Expectations" },
   { area: "Reliability", rating: "Meets Expectations" },
@@ -71,8 +77,8 @@ const FormAddAppraisal = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
-  // State
-  const [formData, setFormData] = useState<Partial<AppraisalType>>(() => ({
+  // State - FIXED: Removed the function that was causing type error
+  const [formData, setFormData] = useState<Partial<AppraisalType>>({
     staffId: currentUser?.id || "",
     staffName: `${currentUser?.first_name || ""} ${
       currentUser?.last_name || ""
@@ -100,7 +106,7 @@ const FormAddAppraisal = () => {
       staffSignature: false,
       supervisorSignature: false,
     },
-  }));
+  });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showStaffStrategies, setShowStaffStrategies] = useState(false);
@@ -118,18 +124,14 @@ const FormAddAppraisal = () => {
       limit: 100,
     });
 
-  const { saveAppraisalDraft, isPending: isSaving } = useSaveAppraisalDraft({
-    redirectToList: false,
-  });
-
-  const { submitAppraisal, isPending: isSubmitting } = useSubmitAppraisal({
-    redirectToList: true,
-  });
+  const { saveAppraisalDraft, isPending: isSaving } = useSaveAppraisalDraft();
+  const { submitAppraisal, isPending: isSubmitting } = useSubmitAppraisal();
 
   // Memoized values
   const availableStrategies = useMemo(() => {
-    if (!strategiesData?.strategies || !formData.appraisalPeriod) return [];
-    return strategiesData.strategies.filter(
+    if (!strategiesData?.data?.strategies || !formData.appraisalPeriod)
+      return [];
+    return strategiesData.data.strategies.filter(
       (strategy: any) => strategy.period === formData.appraisalPeriod
     );
   }, [formData.appraisalPeriod, strategiesData]);
@@ -271,7 +273,10 @@ const FormAddAppraisal = () => {
         const updatedAreas = [...(prev.performanceAreas || [])];
         updatedAreas[index] = {
           ...updatedAreas[index],
-          rating: value as any,
+          rating: value as
+            | "Needs Improvement"
+            | "Meets Expectations"
+            | "Exceeds Expectations",
         };
         return { ...prev, performanceAreas: updatedAreas };
       });
@@ -422,7 +427,7 @@ const FormAddAppraisal = () => {
               customLabel="Select Period"
               value={formData.appraisalPeriod || ""}
               onChange={(value) => handleFormChange("appraisalPeriod", value)}
-              onBlur={() => handleBlur("appraisalPeriod")}
+              // FIXED: Removed onBlur prop as it doesn't exist on Select component
               options={APPRAISAL_PERIODS}
               required
               className={
@@ -510,7 +515,7 @@ const FormAddAppraisal = () => {
                           setErrors((prev) => ({ ...prev, staffStrategy: "" }));
                         }
                       }}
-                      onBlur={() => handleBlur("staffStrategy")}
+                      // FIXED: Removed onBlur prop
                       options={availableStrategies.map((s) => ({
                         id: s.id,
                         name: `${s.strategyCode} - ${s.department}`,
@@ -629,7 +634,7 @@ const FormAddAppraisal = () => {
                     onChange={(e) =>
                       handleSafeguardingChange(
                         "trainingCompleted",
-                        e.target.value as any
+                        e.target.value as "Yes" | "Partly" | "No"
                       )
                     }
                     className="h-4 w-4"

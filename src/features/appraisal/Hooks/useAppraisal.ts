@@ -13,6 +13,7 @@ import {
   getAppraisal,
   saveAppraisalDraft,
   submitAppraisal,
+  submitExistingAppraisal, // FIXED: Added import
   updateAppraisal,
   updateAppraisalObjectives,
   signAppraisal,
@@ -124,19 +125,13 @@ export const useSaveAppraisalDraft = () => {
   };
 };
 
-// ========== SUBMIT ==========
+// ========== SUBMIT (Create and Submit) ==========
 export const useSubmitAppraisal = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: ({
-      appraisalId,
-      submitterRole,
-    }: {
-      appraisalId: string;
-      submitterRole: "employee" | "supervisor";
-    }) => submitAppraisal(appraisalId, submitterRole),
+    mutationFn: (data: Partial<AppraisalType>) => submitAppraisal(data),
 
     onSuccess: (data) => {
       if (data?.status === 200) {
@@ -157,6 +152,44 @@ export const useSubmitAppraisal = () => {
 
   return {
     submitAppraisal: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+  };
+};
+
+// ========== SUBMIT EXISTING ==========
+export const useSubmitExistingAppraisal = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      appraisalId,
+      submitterRole,
+    }: {
+      appraisalId: string;
+      submitterRole: "employee" | "supervisor";
+    }) => submitExistingAppraisal(appraisalId, submitterRole),
+
+    onSuccess: (data) => {
+      if (data?.status === 200) {
+        toast.success("Appraisal submitted successfully");
+        queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
+        navigate("/human-resources/appraisals");
+      } else {
+        toast.error(data?.message || "Failed to submit appraisal");
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error(
+        err.response?.data?.message || "An error occurred while submitting"
+      );
+    },
+  });
+
+  return {
+    submitExistingAppraisal: mutation.mutate,
     isPending: mutation.isPending,
     isError: mutation.isError,
   };

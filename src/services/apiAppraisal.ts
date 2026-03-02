@@ -123,7 +123,21 @@ export const saveAppraisalDraft = async function (
 };
 
 // ========== SUBMIT ==========
-export const submitAppraisal = async function (
+export const submitAppraisal = async function (data: Partial<AppraisalType>) {
+  try {
+    // FIXED: Changed from /submit to /appraisals/submit (full path)
+    const response = await axiosInstance.post<UseAppraisalType>(
+      `/appraisals/submit`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// ========== SUBMIT EXISTING ==========
+export const submitExistingAppraisal = async function (
   appraisalId: string,
   submitterRole: "employee" | "supervisor"
 ) {
@@ -186,6 +200,7 @@ export const updateAppraisal = async function (
       "overallRating",
       "futureGoals",
       "comment",
+      "staffStrategy",
     ];
 
     simpleFields.forEach((key) => {

@@ -57,7 +57,7 @@ const Appraisal = () => {
 
   useEffect(() => {
     refetch();
-  }, []);
+  }, [refetch]);
 
   const [comment, setComment] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -163,7 +163,8 @@ const Appraisal = () => {
       id: "name",
       content:
         request?.staffName ||
-        `${createdBy?.first_name} ${createdBy?.last_name}`,
+        `${createdBy?.first_name || ""} ${createdBy?.last_name || ""}`.trim() ||
+        "N/A",
       showOnMobile: true,
       showOnTablet: true,
     },

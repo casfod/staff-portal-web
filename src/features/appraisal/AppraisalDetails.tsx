@@ -84,7 +84,9 @@ export const AppraisalDetails = ({
               </label>
               <p className="text-gray-800">
                 {request.staffName ||
-                  `${createdBy?.first_name} ${createdBy?.last_name}` ||
+                  `${createdBy?.first_name || ""} ${
+                    createdBy?.last_name || ""
+                  }`.trim() ||
                   "N/A"}
               </p>
             </div>
@@ -352,9 +354,11 @@ export const AppraisalDetails = ({
                   <CheckCircle className="h-5 w-5 mr-2" />
                   <span>
                     Signed on{" "}
-                    {new Date(
-                      request.signatures.staffSignatureDate!
-                    ).toLocaleDateString()}
+                    {request.signatures.staffSignatureDate
+                      ? new Date(
+                          request.signatures.staffSignatureDate
+                        ).toLocaleDateString()
+                      : "N/A"}
                   </span>
                 </div>
               ) : (
@@ -379,9 +383,11 @@ export const AppraisalDetails = ({
                   <CheckCircle className="h-5 w-5 mr-2" />
                   <span>
                     Signed on{" "}
-                    {new Date(
-                      request.signatures.supervisorSignatureDate!
-                    ).toLocaleDateString()}
+                    {request.signatures.supervisorSignatureDate
+                      ? new Date(
+                          request.signatures.supervisorSignatureDate
+                        ).toLocaleDateString()
+                      : "N/A"}
                   </span>
                 </div>
               ) : (
