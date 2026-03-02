@@ -129,6 +129,7 @@ export interface EmploymentInfoType {
   jobDetails?: {
     title?: string;
     idNo?: string;
+    staffTaxIdNo?: string;
     workLocation?: string;
     workEmail?: string;
     workPhone?: string;

@@ -136,6 +136,7 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
       jobDetails: {
         title: "",
         idNo: "",
+        staffTaxIdNo: "",
         workLocation: "",
         workEmail: "",
         workPhone: "",
@@ -926,23 +927,6 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
         </div>
 
         <div className="p-6 space-y-4">
-          {isLoadingUsers ? (
-            <SpinnerMini />
-          ) : (
-            <Row cols="grid-cols-1 lg:grid-cols-2">
-              <FormRow label="Supervisor">
-                <Select
-                  clearable={true}
-                  id="supervisor"
-                  customLabel="Select supervisor"
-                  value={getSelectedSupervisorId()}
-                  onChange={handleSupervisorChange}
-                  options={userOptions}
-                />
-              </FormRow>
-            </Row>
-          )}
-
           <Row cols="grid-cols-1 lg:grid-cols-2">
             <FormRow label="Job Title *" error={errors["jobDetails.title"]}>
               <Input
@@ -958,6 +942,33 @@ const StaffInformationForm: React.FC<StaffInformationFormProps> = ({
               />
             </FormRow>
 
+            {isLoadingUsers ? (
+              <SpinnerMini />
+            ) : (
+              <FormRow label="Supervisor">
+                <Select
+                  clearable={true}
+                  id="supervisor"
+                  customLabel="Select supervisor"
+                  value={getSelectedSupervisorId()}
+                  onChange={handleSupervisorChange}
+                  options={userOptions}
+                />
+              </FormRow>
+            )}
+          </Row>
+          <Row cols="grid-cols-1 lg:grid-cols-2">
+            <FormRow label="Staff Tax ID No.">
+              <Input
+                type="text"
+                id="staffTaxIdNo"
+                placeholder="Enter staff Tax ID number"
+                value={formData.jobDetails?.staffTaxIdNo || ""}
+                onChange={(e) =>
+                  handleFormChange("jobDetails", "staffTaxIdNo", e.target.value)
+                }
+              />
+            </FormRow>
             <FormRow label="Staff ID No.">
               <Input
                 type="text"

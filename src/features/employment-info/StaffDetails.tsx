@@ -317,6 +317,12 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
             </p>
           </div>
           <div>
+            <p className="text-xs text-gray-600">Staff Tax ID</p>
+            <p className="text-sm">
+              {employmentInfo.jobDetails?.staffTaxIdNo || "Not specified"}
+            </p>
+          </div>
+          <div>
             <p className="text-xs text-gray-600">Work Location</p>
             <p className="text-sm">
               {employmentInfo.jobDetails?.workLocation || "Not specified"}
