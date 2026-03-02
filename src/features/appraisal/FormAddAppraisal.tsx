@@ -1,5 +1,5 @@
 // src/features/appraisal/FormAddAppraisal.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { AppraisalType, ObjectiveRatingType } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
@@ -9,23 +9,70 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import { useSaveAppraisalDraft } from "./Hooks/useAppraisal";
+import { useSubmitAppraisal } from "./Hooks/useAppraisal";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useStaffStrategies } from "../staff-strategy/Hooks/useStaffStrategy";
-import { Calendar, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  AlertCircle,
+  Save,
+  Send,
+} from "lucide-react";
 
+// Types
 interface SafeguardingType {
   actionsTaken: string;
   trainingCompleted: "Yes" | "Partly" | "No";
   areasNotUnderstood: string[];
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
+// Constants
+const PERFORMANCE_AREAS = [
+  { area: "Job Knowledge", rating: "Meets Expectations" },
+  { area: "Judgement", rating: "Meets Expectations" },
+  { area: "Reliability", rating: "Meets Expectations" },
+  { area: "Quality & Quantity of Work", rating: "Meets Expectations" },
+  {
+    area: "Interpersonal and Communication Skills",
+    rating: "Meets Expectations",
+  },
+  { area: "Teamwork", rating: "Meets Expectations" },
+];
+
+const APPRAISAL_PERIODS = [
+  { id: "January - March", name: "January - March (Q1)" },
+  { id: "April - June", name: "April - June (Q2)" },
+  { id: "July - September", name: "July - September (Q3)" },
+  { id: "October - December", name: "October - December (Q4)" },
+];
+
+const RATING_OPTIONS = [
+  { id: "Achieved", name: "Achieved (3 pts)" },
+  { id: "Partly Achieved", name: "Partly Achieved (2 pts)" },
+  { id: "Not Achieved", name: "Not Achieved (0 pts)" },
+];
+
+const OVERALL_RATINGS = [
+  { id: "Meets Requirements", name: "Meets Requirements" },
+  { id: "Partly Meets Requirements", name: "Partly Meets Requirements" },
+  { id: "Does Not Meet Requirements", name: "Does Not Meet Requirements" },
+];
+
 const FormAddAppraisal = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<Partial<AppraisalType>>({
+  // State
+  const [formData, setFormData] = useState<Partial<AppraisalType>>(() => ({
     staffId: currentUser?.id || "",
     staffName: `${currentUser?.first_name || ""} ${
       currentUser?.last_name || ""
@@ -44,33 +91,25 @@ const FormAddAppraisal = () => {
       trainingCompleted: "No" as const,
       areasNotUnderstood: [],
     },
-    performanceAreas: [
-      { area: "Job Knowledge", rating: "Meets Expectations" },
-      { area: "Judgement", rating: "Meets Expectations" },
-      { area: "Reliability", rating: "Meets Expectations" },
-      { area: "Quality & Quantity of Work", rating: "Meets Expectations" },
-      {
-        area: "Interpersonal and Communication Skills",
-        rating: "Meets Expectations",
-      },
-      { area: "Teamwork", rating: "Meets Expectations" },
-    ],
+    performanceAreas: PERFORMANCE_AREAS,
     supervisorComments: "",
     overallRating: "Meets Requirements",
     futureGoals: "",
+    staffStrategy: null,
     signatures: {
       staffSignature: false,
       supervisorSignature: false,
     },
-  });
+  }));
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showStaffStrategies, setShowStaffStrategies] = useState(false);
-  const [availableStrategies, setAvailableStrategies] = useState<any[]>([]);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string>("");
   const [areasNotUnderstoodInput, setAreasNotUnderstoodInput] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Fetch staff strategies
+  // Queries
   const { data: strategiesData, isLoading: isLoadingStrategies } =
     useStaffStrategies({
       search: "",
@@ -79,180 +118,285 @@ const FormAddAppraisal = () => {
       limit: 100,
     });
 
-  // Filter strategies by selected period
-  useEffect(() => {
-    if (strategiesData?.data?.strategies && formData.appraisalPeriod) {
-      const filtered = strategiesData.data.strategies.filter(
-        (strategy: any) => strategy.period === formData.appraisalPeriod
-      );
-      setAvailableStrategies(filtered);
-    } else {
-      setAvailableStrategies([]);
-    }
+  const { saveAppraisalDraft, isPending: isSaving } = useSaveAppraisalDraft({
+    redirectToList: false,
+  });
+
+  const { submitAppraisal, isPending: isSubmitting } = useSubmitAppraisal({
+    redirectToList: true,
+  });
+
+  // Memoized values
+  const availableStrategies = useMemo(() => {
+    if (!strategiesData?.strategies || !formData.appraisalPeriod) return [];
+    return strategiesData.strategies.filter(
+      (strategy: any) => strategy.period === formData.appraisalPeriod
+    );
   }, [formData.appraisalPeriod, strategiesData]);
 
-  // Load objectives from selected strategy
-  const loadObjectivesFromStrategy = (strategyId: string) => {
-    const strategy = availableStrategies.find((s) => s.id === strategyId);
-    if (strategy && strategy.accountabilityAreas) {
-      const allObjectives: ObjectiveRatingType[] = [];
+  const isFormValid = useMemo(() => {
+    return (
+      formData.department &&
+      formData.appraisalPeriod &&
+      selectedStrategyId &&
+      formData.objectives &&
+      formData.objectives.length > 0
+    );
+  }, [
+    formData.department,
+    formData.appraisalPeriod,
+    selectedStrategyId,
+    formData.objectives,
+  ]);
 
-      strategy.accountabilityAreas.forEach((area: any) => {
-        area.objectives.forEach((obj: any) => {
-          allObjectives.push({
-            objective: obj.objective,
-            employeeRating: "",
-            supervisorRating: "",
-            employeePoints: 0,
-            supervisorPoints: 0,
+  // Validation
+  const validateField = useCallback((name: string, value: any): string => {
+    switch (name) {
+      case "department":
+        return !value ? "Department is required" : "";
+      case "appraisalPeriod":
+        return !value ? "Appraisal period is required" : "";
+      case "staffStrategy":
+        return !value ? "Please select a staff strategy" : "";
+      default:
+        return "";
+    }
+  }, []);
+
+  const validateForm = useCallback(() => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.department) newErrors.department = "Department is required";
+    if (!formData.appraisalPeriod)
+      newErrors.appraisalPeriod = "Appraisal period is required";
+    if (!selectedStrategyId)
+      newErrors.staffStrategy = "Please select a staff strategy";
+    if (!formData.objectives || formData.objectives.length === 0) {
+      newErrors.objectives = "Please load objectives from a strategy";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [
+    formData.department,
+    formData.appraisalPeriod,
+    selectedStrategyId,
+    formData.objectives,
+  ]);
+
+  // Handlers
+  const handleBlur = useCallback(
+    (field: string) => {
+      setTouched((prev) => ({ ...prev, [field]: true }));
+      const error = validateField(
+        field,
+        formData[field as keyof AppraisalType]
+      );
+      setErrors((prev) => ({ ...prev, [field]: error }));
+    },
+    [formData, validateField]
+  );
+
+  const handleFormChange = useCallback(
+    (field: keyof AppraisalType, value: any) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      if (touched[field]) {
+        const error = validateField(field, value);
+        setErrors((prev) => ({ ...prev, [field]: error }));
+      }
+    },
+    [touched, validateField]
+  );
+
+  const loadObjectivesFromStrategy = useCallback(
+    (strategyId: string) => {
+      const strategy = availableStrategies.find((s) => s.id === strategyId);
+      if (strategy?.accountabilityAreas) {
+        const allObjectives: ObjectiveRatingType[] = [];
+
+        strategy.accountabilityAreas.forEach((area: any) => {
+          area.objectives.forEach((obj: any) => {
+            allObjectives.push({
+              objective: obj.objective,
+              employeeRating: "",
+              supervisorRating: "",
+              employeePoints: 0,
+              supervisorPoints: 0,
+            });
           });
         });
+
+        // Add safeguarding as the last objective
+        allObjectives.push({
+          objective: "Safeguarding",
+          employeeRating: "",
+          supervisorRating: "",
+          employeePoints: 0,
+          supervisorPoints: 0,
+        });
+
+        setFormData((prev) => ({ ...prev, objectives: allObjectives }));
+        toast.success(
+          `Loaded ${allObjectives.length} objectives from strategy`
+        );
+
+        // Clear error if any
+        setErrors((prev) => ({ ...prev, objectives: "" }));
+      }
+    },
+    [availableStrategies]
+  );
+
+  const handleObjectiveRatingChange = useCallback(
+    (
+      index: number,
+      field: "employeeRating" | "supervisorRating",
+      value: string
+    ) => {
+      setFormData((prev) => {
+        const updatedObjectives = [...(prev.objectives || [])];
+        updatedObjectives[index] = {
+          ...updatedObjectives[index],
+          [field]: value,
+        };
+        return { ...prev, objectives: updatedObjectives };
       });
+    },
+    []
+  );
 
-      // Add safeguarding as the last objective
-      allObjectives.push({
-        objective: "Safeguarding",
-        employeeRating: "",
-        supervisorRating: "",
-        employeePoints: 0,
-        supervisorPoints: 0,
+  const handlePerformanceAreaChange = useCallback(
+    (index: number, value: string) => {
+      setFormData((prev) => {
+        const updatedAreas = [...(prev.performanceAreas || [])];
+        updatedAreas[index] = {
+          ...updatedAreas[index],
+          rating: value as any,
+        };
+        return { ...prev, performanceAreas: updatedAreas };
       });
+    },
+    []
+  );
 
-      setFormData({ ...formData, objectives: allObjectives });
-      toast.success(`Loaded ${allObjectives.length} objectives from strategy`);
-    }
-  };
-
-  const handleFormChange = (field: keyof AppraisalType, value: any) => {
-    setFormData({ ...formData, [field]: value });
-  };
-
-  const handleObjectiveRatingChange = (
-    index: number,
-    field: "employeeRating" | "supervisorRating",
-    value: string
-  ) => {
-    const updatedObjectives = [...(formData.objectives || [])];
-    updatedObjectives[index] = {
-      ...updatedObjectives[index],
-      [field]: value,
-    };
-    setFormData({ ...formData, objectives: updatedObjectives });
-  };
-
-  const handlePerformanceAreaChange = (index: number, value: string) => {
-    const updatedAreas = [...(formData.performanceAreas || [])];
-    updatedAreas[index] = {
-      ...updatedAreas[index],
-      rating: value as
-        | "Needs Improvement"
-        | "Meets Expectations"
-        | "Exceeds Expectations",
-    };
-    setFormData({ ...formData, performanceAreas: updatedAreas });
-  };
-
-  const handleSafeguardingChange = (
-    field: keyof SafeguardingType,
-    value: any
-  ) => {
-    setFormData({
-      ...formData,
-      safeguarding: {
-        ...(formData.safeguarding as SafeguardingType),
-        [field]: value,
-      },
-    });
-  };
-
-  const addAreaNotUnderstood = () => {
-    if (areasNotUnderstoodInput.trim()) {
-      const currentAreas =
-        (formData.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
-      setFormData({
-        ...formData,
+  const handleSafeguardingChange = useCallback(
+    (field: keyof SafeguardingType, value: any) => {
+      setFormData((prev) => ({
+        ...prev,
         safeguarding: {
-          ...(formData.safeguarding as SafeguardingType),
-          areasNotUnderstood: [...currentAreas, areasNotUnderstoodInput.trim()],
+          ...(prev.safeguarding as SafeguardingType),
+          [field]: value,
         },
+      }));
+    },
+    []
+  );
+
+  const addAreaNotUnderstood = useCallback(() => {
+    if (areasNotUnderstoodInput.trim()) {
+      setFormData((prev) => {
+        const currentAreas =
+          (prev.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
+        return {
+          ...prev,
+          safeguarding: {
+            ...(prev.safeguarding as SafeguardingType),
+            areasNotUnderstood: [
+              ...currentAreas,
+              areasNotUnderstoodInput.trim(),
+            ],
+          },
+        };
       });
       setAreasNotUnderstoodInput("");
     }
-  };
+  }, [areasNotUnderstoodInput]);
 
-  const removeAreaNotUnderstood = (index: number) => {
-    const currentAreas =
-      (formData.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
-    setFormData({
-      ...formData,
-      safeguarding: {
-        ...(formData.safeguarding as SafeguardingType),
-        areasNotUnderstood: currentAreas.filter((_, i) => i !== index),
-      },
+  const removeAreaNotUnderstood = useCallback((index: number) => {
+    setFormData((prev) => {
+      const currentAreas =
+        (prev.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
+      return {
+        ...prev,
+        safeguarding: {
+          ...(prev.safeguarding as SafeguardingType),
+          areasNotUnderstood: currentAreas.filter((_, i) => i !== index),
+        },
+      };
     });
-  };
+  }, []);
 
-  const { saveAppraisalDraft, isPending: isSaving } = useSaveAppraisalDraft();
+  const handleSaveDraft = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-  const handleSaveDraft = (e: React.FormEvent) => {
-    e.preventDefault();
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+      if (!validateForm()) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
 
-    if (!isFormValid) return;
+      saveAppraisalDraft({ ...formData, staffStrategy: selectedStrategyId });
+    },
+    [formData, selectedStrategyId, saveAppraisalDraft, validateForm]
+  );
 
-    saveAppraisalDraft(formData);
-  };
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+      if (!validateForm()) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
 
-    if (!isFormValid) return;
+      submitAppraisal({ ...formData, staffStrategy: selectedStrategyId });
+    },
+    [formData, selectedStrategyId, submitAppraisal, validateForm]
+  );
 
-    if (!formData.objectives || formData.objectives.length === 0) {
-      toast.error(
-        "Please load objectives from a staff strategy or add them manually"
-      );
-      return;
-    }
-
-    saveAppraisalDraft(formData);
-  };
-
+  // Check profile completion
   if (!currentUser?.employmentInfo?.isProfileComplete) {
     return (
-      <div className="text-center py-8">
-        <span className="text-amber-600 font-extrabold">
-          <span className="text-2xl">⚠️</span>
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+        <span className="text-amber-600 font-semibold text-lg">
           Please complete your employment info to access appraisal form.
-          <span
-            onClick={() => navigate("/human-resources/staff-information")}
-            className="underline hover:text-blue-600 cursor-pointer ml-2"
-          >
-            Click here
-          </span>
         </span>
+        <div className="mt-4">
+          <Button
+            onClick={() => navigate("/human-resources/staff-information")}
+          >
+            Complete Profile
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
       {/* Section 1: Staff Information */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
           <FileText className="h-5 w-5 mr-2" />
           SECTION 1: STAFF INFORMATION
         </h3>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
-          <FormRow label="Department *">
+          <FormRow
+            label="Department *"
+            error={touched.department ? errors.department : undefined}
+          >
             <Input
               type="text"
               required
               value={formData.department}
               onChange={(e) => handleFormChange("department", e.target.value)}
+              onBlur={() => handleBlur("department")}
               placeholder="Enter department"
+              className={
+                errors.department && touched.department ? "border-red-500" : ""
+              }
             />
           </FormRow>
 
@@ -269,19 +413,23 @@ const FormAddAppraisal = () => {
         </Row>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
-          <FormRow label="Appraisal Period *">
+          <FormRow
+            label="Appraisal Period *"
+            error={touched.appraisalPeriod ? errors.appraisalPeriod : undefined}
+          >
             <Select
               id="appraisalPeriod"
               customLabel="Select Period"
               value={formData.appraisalPeriod || ""}
               onChange={(value) => handleFormChange("appraisalPeriod", value)}
-              options={[
-                { id: "January - March", name: "January - March (Q1)" },
-                { id: "April - June", name: "April - June (Q2)" },
-                { id: "July - September", name: "July - September (Q3)" },
-                { id: "October - December", name: "October - December (Q4)" },
-              ]}
+              onBlur={() => handleBlur("appraisalPeriod")}
+              options={APPRAISAL_PERIODS}
               required
+              className={
+                errors.appraisalPeriod && touched.appraisalPeriod
+                  ? "border-red-500"
+                  : ""
+              }
             />
           </FormRow>
 
@@ -345,19 +493,35 @@ const FormAddAppraisal = () => {
                 </div>
               ) : availableStrategies.length > 0 ? (
                 <>
-                  <Select
-                    id="strategySelect"
-                    customLabel="Select a strategy to load objectives"
-                    value={selectedStrategyId}
-                    onChange={(value) => {
-                      setSelectedStrategyId(value);
-                      loadObjectivesFromStrategy(value);
-                    }}
-                    options={availableStrategies.map((s) => ({
-                      id: s.id,
-                      name: `${s.strategyCode} - ${s.department}`,
-                    }))}
-                  />
+                  <FormRow
+                    label="Select Strategy *"
+                    error={
+                      touched.staffStrategy ? errors.staffStrategy : undefined
+                    }
+                  >
+                    <Select
+                      id="strategySelect"
+                      customLabel="Select a strategy to load objectives"
+                      value={selectedStrategyId}
+                      onChange={(value) => {
+                        setSelectedStrategyId(value);
+                        loadObjectivesFromStrategy(value);
+                        if (touched.staffStrategy) {
+                          setErrors((prev) => ({ ...prev, staffStrategy: "" }));
+                        }
+                      }}
+                      onBlur={() => handleBlur("staffStrategy")}
+                      options={availableStrategies.map((s) => ({
+                        id: s.id,
+                        name: `${s.strategyCode} - ${s.department}`,
+                      }))}
+                      className={
+                        errors.staffStrategy && touched.staffStrategy
+                          ? "border-red-500"
+                          : ""
+                      }
+                    />
+                  </FormRow>
                   <p className="text-xs text-gray-600">
                     This will populate Section 2 with all objectives from the
                     selected strategy. Safeguarding will be added as the final
@@ -377,7 +541,7 @@ const FormAddAppraisal = () => {
       )}
 
       {/* Section 2: Performance Objectives */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 2: PERFORMANCE OBJECTIVES
         </h3>
@@ -385,7 +549,7 @@ const FormAddAppraisal = () => {
         {formData.objectives && formData.objectives.length > 0 ? (
           <div className="space-y-4">
             {formData.objectives.map((obj, index) => (
-              <div key={index} className="p-3 bg-white rounded-lg border">
+              <div key={index} className="p-3 bg-gray-50 rounded-lg border">
                 <div className="font-medium text-gray-700 mb-2">
                   Objective {index + 1}:{" "}
                   {obj.objective || `Objective ${index + 1}`}
@@ -403,14 +567,7 @@ const FormAddAppraisal = () => {
                           value
                         )
                       }
-                      options={[
-                        { id: "Achieved", name: "Achieved (3 pts)" },
-                        {
-                          id: "Partly Achieved",
-                          name: "Partly Achieved (2 pts)",
-                        },
-                        { id: "Not Achieved", name: "Not Achieved (0 pts)" },
-                      ]}
+                      options={RATING_OPTIONS}
                     />
                   </FormRow>
 
@@ -426,14 +583,7 @@ const FormAddAppraisal = () => {
                           value
                         )
                       }
-                      options={[
-                        { id: "Achieved", name: "Achieved (3 pts)" },
-                        {
-                          id: "Partly Achieved",
-                          name: "Partly Achieved (2 pts)",
-                        },
-                        { id: "Not Achieved", name: "Not Achieved (0 pts)" },
-                      ]}
+                      options={RATING_OPTIONS}
                     />
                   </FormRow>
                 </Row>
@@ -465,7 +615,7 @@ const FormAddAppraisal = () => {
           </FormRow>
 
           <FormRow label="Have you completed the safeguarding training?">
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-4">
               {["Yes", "Partly", "No"].map((option) => (
                 <label key={option} className="flex items-center space-x-2">
                   <input
@@ -479,7 +629,7 @@ const FormAddAppraisal = () => {
                     onChange={(e) =>
                       handleSafeguardingChange(
                         "trainingCompleted",
-                        e.target.value as "Yes" | "Partly" | "No"
+                        e.target.value as any
                       )
                     }
                     className="h-4 w-4"
@@ -499,6 +649,10 @@ const FormAddAppraisal = () => {
                   onChange={(e) => setAreasNotUnderstoodInput(e.target.value)}
                   placeholder="Add an area you don't understand"
                   className="flex-1"
+                  onKeyPress={(e) =>
+                    e.key === "Enter" &&
+                    (e.preventDefault(), addAreaNotUnderstood())
+                  }
                 />
                 <Button
                   type="button"
@@ -516,13 +670,14 @@ const FormAddAppraisal = () => {
                   className="flex items-center justify-between bg-gray-100 p-2 rounded"
                 >
                   <span>{area}</span>
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => removeAreaNotUnderstood(idx)}
                     className="text-red-500 hover:text-red-700"
                   >
                     ×
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -531,7 +686,7 @@ const FormAddAppraisal = () => {
       </div>
 
       {/* Section 3: Performance Areas */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 3: SUPERVISOR'S ASSESSMENT
         </h3>
@@ -540,7 +695,7 @@ const FormAddAppraisal = () => {
           {formData.performanceAreas?.map((area, index) => (
             <div
               key={index}
-              className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-white rounded-lg"
+              className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-gray-50 rounded-lg"
             >
               <span className="font-medium text-gray-700 mb-2 md:mb-0">
                 {area.area}:
@@ -578,23 +733,13 @@ const FormAddAppraisal = () => {
             customLabel="Select Overall Rating"
             value={formData.overallRating || ""}
             onChange={(value) => handleFormChange("overallRating", value)}
-            options={[
-              { id: "Meets Requirements", name: "Meets Requirements" },
-              {
-                id: "Partly Meets Requirements",
-                name: "Partly Meets Requirements",
-              },
-              {
-                id: "Does Not Meet Requirements",
-                name: "Does Not Meet Requirements",
-              },
-            ]}
+            options={OVERALL_RATINGS}
           />
         </FormRow>
       </div>
 
       {/* Section 4: Future Goals */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 4: FUTURE GOALS
         </h3>
@@ -623,31 +768,58 @@ const FormAddAppraisal = () => {
 
       {/* Action Buttons */}
       <div className="flex justify-center w-full gap-4 pt-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button
             type="button"
             size="medium"
             variant="secondary"
             disabled={isSaving}
             onClick={handleSaveDraft}
+            className="min-w-[140px]"
           >
-            {isSaving ? <SpinnerMini /> : "Save as Draft"}
+            {isSaving ? (
+              <SpinnerMini />
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Draft
+              </>
+            )}
           </Button>
 
-          <Button type="submit" size="medium" disabled={isSaving}>
-            {isSaving ? <SpinnerMini /> : "Create Appraisal"}
+          <Button
+            type="submit"
+            size="medium"
+            disabled={isSubmitting || !isFormValid}
+            className="min-w-[140px]"
+          >
+            {isSubmitting ? (
+              <SpinnerMini />
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Create Appraisal
+              </>
+            )}
           </Button>
 
           <Button
             type="button"
             size="medium"
             variant="secondary"
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
           >
             Cancel
           </Button>
         </div>
       </div>
+
+      {/* Form Status */}
+      {!isFormValid && (
+        <p className="text-center text-sm text-amber-600">
+          Please complete all required fields (*) to create appraisal
+        </p>
+      )}
     </form>
   );
 };

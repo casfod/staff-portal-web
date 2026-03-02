@@ -1584,7 +1584,7 @@ export interface AppraisalType {
 
   // For form submissions
   comment?: string;
-  staffStrategy: StaffStrategyType | string;
+  staffStrategy: StaffStrategyType | string | null;
 }
 
 export interface UseAppraisalType {
