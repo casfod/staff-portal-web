@@ -12,8 +12,9 @@ import {
   getAllAppraisals,
   getAppraisal,
   saveAppraisalDraft,
-  submitAppraisal,
-  submitExistingAppraisal, // FIXED: Added import
+  createAndSubmitAppraisal,
+  submitExistingAppraisal,
+  updateAppraisalStatus, // FIXED: Added import
   updateAppraisal,
   updateAppraisalObjectives,
   signAppraisal,
@@ -125,17 +126,18 @@ export const useSaveAppraisalDraft = () => {
   };
 };
 
-// ========== SUBMIT (Create and Submit) ==========
-export const useSubmitAppraisal = () => {
+// ========== CREATE AND SUBMIT ==========
+export const useCreateAndSubmitAppraisal = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<AppraisalType>) => submitAppraisal(data),
+    mutationFn: (data: Partial<AppraisalType>) =>
+      createAndSubmitAppraisal(data),
 
     onSuccess: (data) => {
       if (data?.status === 200) {
-        toast.success("Appraisal submitted successfully");
+        toast.success("Appraisal created and submitted successfully");
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
         navigate("/human-resources/appraisals");
       } else {
@@ -151,7 +153,7 @@ export const useSubmitAppraisal = () => {
   });
 
   return {
-    submitAppraisal: mutation.mutate,
+    createAndSubmitAppraisal: mutation.mutate,
     isPending: mutation.isPending,
     isError: mutation.isError,
   };
@@ -163,13 +165,7 @@ export const useSubmitExistingAppraisal = () => {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: ({
-      appraisalId,
-      submitterRole,
-    }: {
-      appraisalId: string;
-      submitterRole: "employee" | "supervisor";
-    }) => submitExistingAppraisal(appraisalId, submitterRole),
+    mutationFn: (appraisalId: string) => submitExistingAppraisal(appraisalId),
 
     onSuccess: (data) => {
       if (data?.status === 200) {
@@ -192,6 +188,44 @@ export const useSubmitExistingAppraisal = () => {
     submitExistingAppraisal: mutation.mutate,
     isPending: mutation.isPending,
     isError: mutation.isError,
+  };
+};
+
+// ========== UPDATE STATUS (Approve/Reject) ==========
+export const useUpdateAppraisalStatus = (appraisalId: string) => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data: { status: "approved" | "rejected"; comment?: string }) =>
+      updateAppraisalStatus(appraisalId, data),
+
+    onSuccess: (data) => {
+      if (data?.status === 200) {
+        toast.success(`Appraisal ${data.data.status} successfully`);
+        queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
+        queryClient.invalidateQueries({
+          queryKey: appraisalKeys.detail(appraisalId),
+        });
+      } else {
+        toast.error(data?.message || "Failed to update status");
+        setErrorMessage(data?.message);
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error(
+        err.response?.data?.message || "An error occurred while updating status"
+      );
+      setErrorMessage(err.response?.data?.message || "An error occurred");
+    },
+  });
+
+  return {
+    updateStatus: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    errorMessage,
   };
 };
 

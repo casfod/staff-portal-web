@@ -10,6 +10,7 @@ import Button from "../../ui/Button";
 import StatusBadge from "../../ui/StatusBadge";
 import { AppraisalDetails } from "./AppraisalDetails";
 import TextHeader from "../../ui/TextHeader";
+import { useStatusUpdate } from "../../hooks/useStatusUpdate";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import Spinner from "../../ui/Spinner";
 import { DataStateContainer } from "../../ui/DataStateContainer";
@@ -19,20 +20,20 @@ import {
   useAddComment,
   useDeleteComment,
   useUpdateComment,
-  useSignAppraisal,
+  useUpdateAppraisalStatus,
 } from "./Hooks/useAppraisal";
 import { Comment as AppComment, UserType } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
-import toast from "react-hot-toast";
 
 const Appraisal = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { appraisalId } = useParams();
 
+  // Data fetching
   const {
     data: remoteData,
     isLoading,
@@ -49,6 +50,7 @@ const Appraisal = () => {
     [remoteData, appraisal]
   );
 
+  // Redirect logic
   useEffect(() => {
     if (!appraisalId || (!isLoading && !request)) {
       navigate("/human-resources/appraisals");
@@ -58,9 +60,15 @@ const Appraisal = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+  const [status, setStatus] = useState("");
 
   const [comment, setComment] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
+
+  // Custom hooks
+  const { handleStatusChange } = useStatusUpdate();
+  const { updateStatus, isPending: isUpdatingStatus } =
+    useUpdateAppraisalStatus(appraisalId!);
 
   // Comment hooks
   const { addComment, isPending: isAddingComment } = useAddComment(
@@ -72,9 +80,28 @@ const Appraisal = () => {
   const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
     appraisalId!
   );
-  const { signAppraisal, isPending: isSigning } = useSignAppraisal(
-    appraisalId!
-  );
+
+  // Handle status change with confirmation dialog
+  const onStatusChangeHandler = () => {
+    handleStatusChange(status, comment, async () => {
+      try {
+        // FIXED: Type assertion to match expected type
+        await updateStatus(
+          { status, comment } as {
+            status: "approved" | "rejected";
+            comment?: string;
+          },
+          {
+            onError: (error) => {
+              throw error;
+            },
+          }
+        );
+      } catch (error) {
+        throw error;
+      }
+    });
+  };
 
   // Comment handlers
   const handleAddComment = async (text: string) => {
@@ -89,44 +116,27 @@ const Appraisal = () => {
     await deleteComment(commentId);
   };
 
-  // Sign handlers
-  const handleSignAsStaff = () => {
-    if (!request?.signatures?.staffSignature) {
-      signAppraisal({ signatureType: "staff" });
-    } else {
-      toast.error("You have already signed this appraisal");
-    }
-  };
-
-  const handleSignAsSupervisor = () => {
-    if (!request?.signatures?.supervisorSignature) {
-      signAppraisal({ signatureType: "supervisor" });
-    } else {
-      toast.error("Supervisor has already signed this appraisal");
-    }
-  };
-
-  // Permission flags
+  // User references and permission logic
   const currentUserId = currentUser?.id;
   const userRole = currentUser?.role;
   const requestStatus = request?.status;
 
+  // Permission flags
   const isStaff = request?.staffId?.id === currentUserId;
   const isSupervisor = request?.supervisorId?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole || "");
 
-  // Permission to sign
-  const canSignAsStaff =
-    isStaff &&
-    requestStatus === "pending-supervisor" &&
-    !request?.signatures?.staffSignature;
-  const canSignAsSupervisor =
-    isSupervisor &&
-    requestStatus === "pending-employee" &&
-    !request?.signatures?.supervisorSignature;
+  // FIXED: Permission to update status - check for "pending" status (new enum)
+  const canUpdateStatus =
+    requestStatus === "pending" && (isSupervisor || isAdmin);
 
   // Users who can add comments
   const canAddComments = isStaff || isSupervisor || isAdmin;
+
+  // FIXED: Permission to edit different sections with correct status mapping
+  const canEditStaffSections =
+    isStaff && (requestStatus === "draft" || requestStatus === "pending");
+  const canEditSupervisorSections = isSupervisor && requestStatus === "pending";
 
   const comments = (request?.comments || []) as AppComment[];
 
@@ -219,6 +229,7 @@ const Appraisal = () => {
         </div>
       </div>
 
+      {/* Main Content Section */}
       <div>
         <DataStateContainer
           isLoading={isLoading}
@@ -258,6 +269,7 @@ const Appraisal = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Desktop/Tablet Row */}
                   <TableRowMain
                     key={request?.id}
                     requestId={request?.id || ""}
@@ -284,6 +296,7 @@ const Appraisal = () => {
                     )}
                   </TableRowMain>
 
+                  {/* Mobile Card View */}
                   <tr key={`${request?.id}-mobile`} className="sm:hidden">
                     <td
                       colSpan={tableHeadData.length}
@@ -310,18 +323,21 @@ const Appraisal = () => {
                     </td>
                   </tr>
 
+                  {/* Details Section */}
                   <tr>
                     <td colSpan={tableHeadData.length}>
                       <RequestDetailLayout
                         request={request}
                         requestStatus={request?.status || ""}
-                        canUpdateStatus={false}
-                        status=""
-                        setStatus={() => {}}
+                        // Status update props
+                        canUpdateStatus={canUpdateStatus}
+                        status={status}
+                        setStatus={setStatus}
                         comment={comment}
                         setComment={setComment}
-                        isUpdatingStatus={false}
-                        handleStatusChange={() => {}}
+                        isUpdatingStatus={isUpdatingStatus}
+                        handleStatusChange={onStatusChangeHandler}
+                        // Comment props
                         comments={comments}
                         canAddComments={canAddComments}
                         handleAddComment={handleAddComment}
@@ -333,11 +349,11 @@ const Appraisal = () => {
                       >
                         <AppraisalDetails
                           request={request!}
-                          canSignAsStaff={canSignAsStaff}
-                          canSignAsSupervisor={canSignAsSupervisor}
-                          onSignAsStaff={handleSignAsStaff}
-                          onSignAsSupervisor={handleSignAsSupervisor}
-                          isSigning={isSigning}
+                          canEditStaffSections={canEditStaffSections}
+                          canEditSupervisorSections={canEditSupervisorSections}
+                          isStaff={isStaff}
+                          isSupervisor={isSupervisor}
+                          isAdmin={isAdmin}
                         />
                       </RequestDetailLayout>
                     </td>

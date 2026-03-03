@@ -13,7 +13,7 @@ export const StaffStrategyDetails = ({
 }: StaffStrategyDetailsProps) => {
   const { requestId } = useParams();
 
-  // console.log(request);
+  console.log("SS:::::", request);
 
   // Helper function to safely get user name
   // const getUserName = (user: any) => {

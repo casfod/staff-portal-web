@@ -1,30 +1,31 @@
 // src/features/appraisal/AppraisalDetails.tsx
 import { AppraisalType, UserType } from "../../interfaces";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import SystemInfo from "../../ui/SystemInfo";
 import Button from "../../ui/Button";
-import { CheckCircle, PenTool } from "lucide-react";
+import { CheckCircle, PenTool, Edit } from "lucide-react";
 
 interface AppraisalDetailsProps {
   request: AppraisalType;
-  canSignAsStaff?: boolean;
-  canSignAsSupervisor?: boolean;
-  onSignAsStaff?: () => void;
-  onSignAsSupervisor?: () => void;
-  isSigning?: boolean;
+  canEditStaffSections?: boolean;
+  canEditSupervisorSections?: boolean;
+  isStaff?: boolean;
+  isSupervisor?: boolean;
+  isAdmin?: boolean;
 }
 
 export const AppraisalDetails = ({
   request,
-  canSignAsStaff,
-  canSignAsSupervisor,
-  onSignAsStaff,
-  onSignAsSupervisor,
-  isSigning,
+  canEditStaffSections,
+  canEditSupervisorSections,
+  isStaff,
+  isSupervisor,
+  isAdmin,
 }: AppraisalDetailsProps) => {
   const { appraisalId } = useParams();
+  const navigate = useNavigate();
 
   const getRatingDisplay = (rating: string) => {
     const colors = {
@@ -58,6 +59,12 @@ export const AppraisalDetails = ({
 
   const createdBy: UserType | null = request.createdBy;
 
+  // Check if user can edit the entire appraisal
+  const canEditFull =
+    isAdmin ||
+    (isStaff && request.status === "draft") ||
+    (isSupervisor && request.status === "pending");
+
   return (
     <DetailContainer>
       {/* Appraisal Header */}
@@ -65,6 +72,22 @@ export const AppraisalDetails = ({
         <h1 className="text-center text-lg font-extrabold p-6">
           {request.appraisalCode}
         </h1>
+      )}
+
+      {/* Edit Button */}
+      {canEditFull && (
+        <div className="flex justify-end mb-4">
+          <Button
+            type="button"
+            size="small"
+            onClick={() =>
+              navigate(`/human-resources/appraisals/edit/${appraisalId}`)
+            }
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Appraisal
+          </Button>
+        </div>
       )}
 
       <div
@@ -199,6 +222,11 @@ export const AppraisalDetails = ({
                         ) : (
                           <span className="text-gray-400">Not rated</span>
                         )}
+                        {canEditStaffSections && (
+                          <span className="ml-2 text-xs text-blue-500">
+                            (You can edit)
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {obj.supervisorRating ? (
@@ -211,6 +239,11 @@ export const AppraisalDetails = ({
                           </span>
                         ) : (
                           <span className="text-gray-400">Not rated</span>
+                        )}
+                        {canEditSupervisorSections && (
+                          <span className="ml-2 text-xs text-blue-500">
+                            (You can edit)
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -233,6 +266,11 @@ export const AppraisalDetails = ({
                     <p className="text-gray-800">
                       {request.safeguarding.actionsTaken || "N/A"}
                     </p>
+                    {canEditStaffSections && (
+                      <span className="text-xs text-blue-500">
+                        (You can edit)
+                      </span>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
@@ -304,6 +342,9 @@ export const AppraisalDetails = ({
                   Supervisor's Comments
                 </label>
                 <p className="text-gray-800">{request.supervisorComments}</p>
+                {canEditSupervisorSections && (
+                  <span className="text-xs text-blue-500">(You can edit)</span>
+                )}
               </div>
             )}
 
@@ -403,34 +444,6 @@ export const AppraisalDetails = ({
               )}
             </div>
           </div>
-
-          {/* Signature Action Buttons */}
-          {(canSignAsStaff || canSignAsSupervisor) && (
-            <div className="mt-4 flex flex-wrap gap-3">
-              {canSignAsStaff && (
-                <Button
-                  type="button"
-                  size="small"
-                  onClick={onSignAsStaff}
-                  disabled={isSigning}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {isSigning ? "Signing..." : "Sign as Staff"}
-                </Button>
-              )}
-              {canSignAsSupervisor && (
-                <Button
-                  type="button"
-                  size="small"
-                  onClick={onSignAsSupervisor}
-                  disabled={isSigning}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {isSigning ? "Signing..." : "Sign as Supervisor"}
-                </Button>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Scores Summary */}

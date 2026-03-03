@@ -122,12 +122,13 @@ export const saveAppraisalDraft = async function (
   }
 };
 
-// ========== SUBMIT ==========
-export const submitAppraisal = async function (data: Partial<AppraisalType>) {
+// ========== CREATE AND SUBMIT ==========
+export const createAndSubmitAppraisal = async function (
+  data: Partial<AppraisalType>
+) {
   try {
-    // FIXED: Changed from /submit to /appraisals/submit (full path)
     const response = await axiosInstance.post<UseAppraisalType>(
-      `/appraisals/submit`,
+      `/appraisals/create-and-submit`,
       data
     );
     return response.data;
@@ -136,15 +137,28 @@ export const submitAppraisal = async function (data: Partial<AppraisalType>) {
   }
 };
 
-// ========== SUBMIT EXISTING ==========
-export const submitExistingAppraisal = async function (
-  appraisalId: string,
-  submitterRole: "employee" | "supervisor"
-) {
+// ========== SUBMIT EXISTING DRAFT ==========
+export const submitExistingAppraisal = async function (appraisalId: string) {
   try {
     const response = await axiosInstance.post<UseAppraisalType>(
       `/appraisals/${appraisalId}/submit`,
-      { submitterRole }
+      {}
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// ========== UPDATE STATUS (Approve/Reject) ==========
+export const updateAppraisalStatus = async function (
+  appraisalId: string,
+  data: { status: "approved" | "rejected"; comment?: string }
+) {
+  try {
+    const response = await axiosInstance.patch(
+      `/appraisals/${appraisalId}/status`,
+      data
     );
     return response.data;
   } catch (err) {

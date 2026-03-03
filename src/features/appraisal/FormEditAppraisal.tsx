@@ -1,6 +1,6 @@
 // src/features/appraisal/FormEditAppraisal.tsx
-import { useState, useEffect } from "react";
-import { AppraisalType } from "../../interfaces";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { AppraisalType, ObjectiveRatingType } from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
@@ -8,10 +8,26 @@ import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
-import { useUpdateAppraisal } from "./Hooks/useAppraisal";
+import {
+  useCreateAndSubmitAppraisal,
+  useUpdateAppraisal,
+} from "./Hooks/useAppraisal";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useNavigate } from "react-router-dom";
-import { FileText, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  AlertCircle,
+  User,
+  UserCog,
+  Clock,
+  Send,
+  Calendar,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
+import { useStaffStrategies } from "../staff-strategy/Hooks/useStaffStrategy";
+import toast from "react-hot-toast";
+import { FormErrors } from "./FormAddAppraisal";
 
 interface SafeguardingType {
   actionsTaken: string;
@@ -27,6 +43,14 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
+  // FIXED: Determine user role and relationships
+  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(currentUser?.role || "");
+  const currentUserId = currentUser?.id;
+
+  // Check if current user is the staff member or supervisor for THIS appraisal
+  const isStaff = appraisal?.staffId?.id === currentUserId;
+  const isSupervisor = appraisal?.supervisorId?.id === currentUserId;
+
   const [formData, setFormData] = useState<Partial<AppraisalType>>({
     staffId: "",
     staffName: "",
@@ -41,12 +65,12 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     objectives: [],
     safeguarding: {
       actionsTaken: "",
-      trainingCompleted: "No",
+      trainingCompleted: "No" as const,
       areasNotUnderstood: [],
     },
     performanceAreas: [],
     supervisorComments: "",
-    overallRating: "Meets Requirements",
+    overallRating: "Pending",
     futureGoals: "",
     signatures: {
       staffSignature: false,
@@ -55,7 +79,20 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showStaffStrategies, setShowStaffStrategies] = useState(true);
+
   const [areasNotUnderstoodInput, setAreasNotUnderstoodInput] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [selectedStrategyId, setSelectedStrategyId] = useState<string>("");
+
+  const { data: strategiesData, isLoading: isLoadingStrategies } =
+    useStaffStrategies({
+      search: "",
+      sort: "-createdAt",
+      page: 1,
+      limit: 100,
+    });
 
   // Initialize form data from appraisal
   useEffect(() => {
@@ -79,7 +116,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         },
         performanceAreas: appraisal.performanceAreas || [],
         supervisorComments: appraisal.supervisorComments || "",
-        overallRating: appraisal.overallRating || "Meets Requirements",
+        overallRating: appraisal.overallRating || "Pending",
         futureGoals: appraisal.futureGoals || "",
         signatures: appraisal.signatures || {
           staffSignature: false,
@@ -93,95 +130,237 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     appraisal?.id || ""
   );
 
-  const handleFormChange = (field: keyof AppraisalType, value: any) => {
-    setFormData({ ...formData, [field]: value });
+  const { createAndSubmitAppraisal, isPending: isSubmitting } =
+    useCreateAndSubmitAppraisal();
+
+  const availableStrategies = useMemo(() => {
+    if (!strategiesData?.data?.strategies || !formData.appraisalPeriod)
+      return [];
+    return strategiesData.data.strategies.filter(
+      (strategy: any) => strategy.period === formData.appraisalPeriod
+    );
+  }, [formData.appraisalPeriod, strategiesData]);
+
+  // Validation
+  const validateField = (name: string, value: any): string => {
+    switch (name) {
+      case "department":
+        return !value ? "Department is required" : "";
+      default:
+        return "";
+    }
   };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field as keyof AppraisalType]);
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const handleFormChange = (field: keyof AppraisalType, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors((prev) => ({ ...prev, [field]: error }));
+    }
+  };
+
+  const loadObjectivesFromStrategy = useCallback(
+    (strategyId: string) => {
+      const strategy = availableStrategies.find((s) => s.id === strategyId);
+      if (strategy?.accountabilityAreas) {
+        const allObjectives: ObjectiveRatingType[] = [];
+
+        strategy.accountabilityAreas.forEach((area: any) => {
+          area.objectives.forEach((obj: any) => {
+            allObjectives.push({
+              objective: obj.objective,
+              employeeRating: "",
+              supervisorRating: "",
+              employeePoints: 0,
+              supervisorPoints: 0,
+            });
+          });
+        });
+
+        // Add safeguarding as the last objective
+        allObjectives.push({
+          objective: "Safeguarding",
+          employeeRating: "",
+          supervisorRating: "",
+          employeePoints: 0,
+          supervisorPoints: 0,
+        });
+
+        setFormData((prev) => ({ ...prev, objectives: allObjectives }));
+        toast.success(
+          `Loaded ${allObjectives.length} objectives from strategy`
+        );
+
+        // Clear error if any
+        setErrors((prev) => ({ ...prev, objectives: "" }));
+      }
+    },
+    [availableStrategies]
+  );
+
+  const validateForm = useCallback(() => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.department) newErrors.department = "Department is required";
+    if (!formData.appraisalPeriod)
+      newErrors.appraisalPeriod = "Appraisal period is required";
+    if (!selectedStrategyId)
+      newErrors.staffStrategy = "Please select a staff strategy";
+    if (!formData.objectives || formData.objectives.length === 0) {
+      newErrors.objectives = "Please load objectives from a strategy";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [
+    formData.department,
+    formData.appraisalPeriod,
+    selectedStrategyId,
+    formData.objectives,
+  ]);
 
   const handleObjectiveRatingChange = (
     index: number,
     field: "employeeRating" | "supervisorRating",
     value: string
   ) => {
-    const updatedObjectives = [...(formData.objectives || [])];
-    updatedObjectives[index] = {
-      ...updatedObjectives[index],
-      [field]: value,
-    };
-    setFormData({ ...formData, objectives: updatedObjectives });
+    setFormData((prev) => {
+      const updatedObjectives = [...(prev.objectives || [])];
+      updatedObjectives[index] = {
+        ...updatedObjectives[index],
+        [field]: value,
+      };
+      return { ...prev, objectives: updatedObjectives };
+    });
   };
 
   const handlePerformanceAreaChange = (index: number, value: string) => {
-    const updatedAreas = [...(formData.performanceAreas || [])];
-    updatedAreas[index] = {
-      ...updatedAreas[index],
-      rating: value as
-        | "Needs Improvement"
-        | "Meets Expectations"
-        | "Exceeds Expectations",
-    };
-    setFormData({ ...formData, performanceAreas: updatedAreas });
+    setFormData((prev) => {
+      const updatedAreas = [...(prev.performanceAreas || [])];
+      updatedAreas[index] = {
+        ...updatedAreas[index],
+        rating: value as
+          | "Pending"
+          | "Needs Improvement"
+          | "Meets Expectations"
+          | "Exceeds Expectations",
+      };
+      return { ...prev, performanceAreas: updatedAreas };
+    });
   };
 
   const handleSafeguardingChange = (
     field: keyof SafeguardingType,
     value: any
   ) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       safeguarding: {
-        ...(formData.safeguarding as SafeguardingType),
+        ...(prev.safeguarding as SafeguardingType),
         [field]: value,
       },
-    });
+    }));
   };
 
   const addAreaNotUnderstood = () => {
     if (areasNotUnderstoodInput.trim()) {
-      const currentAreas =
-        (formData.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
-      setFormData({
-        ...formData,
-        safeguarding: {
-          ...(formData.safeguarding as SafeguardingType),
-          areasNotUnderstood: [...currentAreas, areasNotUnderstoodInput.trim()],
-        },
+      setFormData((prev) => {
+        const currentAreas =
+          (prev.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
+        return {
+          ...prev,
+          safeguarding: {
+            ...(prev.safeguarding as SafeguardingType),
+            areasNotUnderstood: [
+              ...currentAreas,
+              areasNotUnderstoodInput.trim(),
+            ],
+          },
+        };
       });
       setAreasNotUnderstoodInput("");
     }
   };
 
   const removeAreaNotUnderstood = (index: number) => {
-    const currentAreas =
-      (formData.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
-    setFormData({
-      ...formData,
-      safeguarding: {
-        ...(formData.safeguarding as SafeguardingType),
-        areasNotUnderstood: currentAreas.filter((_, i) => i !== index),
-      },
+    setFormData((prev) => {
+      const currentAreas =
+        (prev.safeguarding as SafeguardingType)?.areasNotUnderstood || [];
+      return {
+        ...prev,
+        safeguarding: {
+          ...(prev.safeguarding as SafeguardingType),
+          areasNotUnderstood: currentAreas.filter((_, i) => i !== index),
+        },
+      };
     });
   };
 
-  // Check editability
-  const isEditable =
-    appraisal?.status === "draft" ||
-    appraisal?.status === "pending-employee" ||
-    appraisal?.status === "pending-supervisor";
+  // Check editability based on role and status
+  const requestStatus = appraisal?.status;
 
-  const isStaff = formData.staffId === currentUser?.id;
-  const isSupervisor = formData.supervisorId === currentUser?.id;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(currentUser?.role || "");
+  // FIXED: Role-based edit permissions with correct status mapping
+  const canEditStaffSections =
+    isStaff && (requestStatus === "draft" || requestStatus === "pending");
+  const canEditSupervisorSections = isSupervisor && requestStatus === "pending";
+  const canEditAdmin =
+    isAdmin && (requestStatus === "draft" || requestStatus === "pending");
 
-  const canEdit = isEditable && (isStaff || isSupervisor || isAdmin);
+  const canSend = isStaff && requestStatus === "draft";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const canEdit =
+    canEditStaffSections || canEditSupervisorSections || canEditAdmin;
+
+  const isFormValid = useMemo(() => {
+    return (
+      formData.department &&
+      formData.appraisalPeriod &&
+      selectedStrategyId &&
+      formData.objectives &&
+      formData.objectives.length > 0
+    );
+  }, [
+    formData.department,
+    formData.appraisalPeriod,
+    selectedStrategyId,
+    formData.objectives,
+  ]);
+
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
-    if (!isFormValid) return;
+    // Validate required fields
+    if (!formData.department) {
+      setErrors((prev) => ({ ...prev, department: "Department is required" }));
+      setTouched((prev) => ({ ...prev, department: true }));
+      return;
+    }
 
     updateAppraisal({ data: formData, files: selectedFiles });
   };
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!validateForm()) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
+      createAndSubmitAppraisal({
+        ...formData,
+        staffStrategy: selectedStrategyId,
+      });
+    },
+    [formData, selectedStrategyId, createAndSubmitAppraisal, validateForm]
+  );
 
   if (!appraisal) {
     return (
@@ -207,7 +386,8 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         <p className="text-lg text-gray-600">
           This appraisal cannot be edited because it is{" "}
           <span className="font-semibold uppercase">{appraisal.status}</span>
-          {appraisal.status === "completed" && " and has been completed"}.
+          {appraisal.status === "approved" && " and has been approved."}
+          {appraisal.status === "rejected" && " and has been rejected."}
         </p>
         <p className="text-sm text-gray-500 mt-2">
           Only draft or pending appraisals can be edited.
@@ -226,7 +406,44 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-6" onSubmit={handleUpdate} noValidate>
+      {/* FIXED: Role indicator */}
+      <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+        {isStaff && (
+          <>
+            <User className="h-5 w-5 text-blue-600" />
+            <span className="text-sm text-blue-800">
+              You are editing as:{" "}
+              <span className="font-semibold">Staff Member</span>
+            </span>
+          </>
+        )}
+        {isSupervisor && (
+          <>
+            <UserCog className="h-5 w-5 text-green-600" />
+            <span className="text-sm text-green-800">
+              You are editing as:{" "}
+              <span className="font-semibold">Supervisor</span>
+            </span>
+          </>
+        )}
+        {isAdmin && !isStaff && !isSupervisor && (
+          <>
+            <UserCog className="h-5 w-5 text-purple-600" />
+            <span className="text-sm text-purple-800">
+              You are editing as: <span className="font-semibold">Admin</span>
+            </span>
+          </>
+        )}
+        <div className="ml-auto flex items-center gap-1">
+          <Clock className="h-4 w-4 text-gray-500" />
+          <span className="text-xs text-gray-600">
+            Status:{" "}
+            <span className="font-semibold uppercase">{appraisal.status}</span>
+          </span>
+        </div>
+      </div>
+
       {/* Section 1: Staff Information */}
       <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
@@ -235,14 +452,21 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         </h3>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
-          <FormRow label="Department *">
+          <FormRow
+            label="Department *"
+            error={touched.department ? errors.department : undefined}
+          >
             <Input
               type="text"
               required
               value={formData.department}
               onChange={(e) => handleFormChange("department", e.target.value)}
+              onBlur={() => handleBlur("department")}
               placeholder="Enter department"
               disabled={!isAdmin && !isSupervisor}
+              className={
+                errors.department && touched.department ? "border-red-500" : ""
+              }
             />
           </FormRow>
 
@@ -305,6 +529,78 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         </Row>
       </div>
 
+      {/* Staff Strategy Integration */}
+      {isStaff && formData.appraisalPeriod && (
+        <div className="rounded-lg p-4 border bg-blue-50 border-blue-200">
+          <div
+            className="flex justify-between items-center cursor-pointer"
+            onClick={() => setShowStaffStrategies(!showStaffStrategies)}
+          >
+            <h3 className="text-lg font-semibold text-blue-800 flex items-center">
+              <Calendar className="h-5 w-5 mr-2" />
+              Load Objectives from Staff Strategy
+            </h3>
+            {showStaffStrategies ? (
+              <ChevronUp className="h-5 w-5" />
+            ) : (
+              <ChevronDown className="h-5 w-5" />
+            )}
+          </div>
+
+          {showStaffStrategies && (
+            <div className="mt-4 space-y-4">
+              {isLoadingStrategies ? (
+                <div className="flex justify-center py-4">
+                  <SpinnerMini />
+                </div>
+              ) : availableStrategies.length > 0 ? (
+                <>
+                  <FormRow
+                    label="Select Strategy *"
+                    error={
+                      touched.staffStrategy ? errors.staffStrategy : undefined
+                    }
+                  >
+                    <Select
+                      id="strategySelect"
+                      customLabel="Select a strategy to load objectives"
+                      value={selectedStrategyId}
+                      onChange={(value) => {
+                        setSelectedStrategyId(value);
+                        loadObjectivesFromStrategy(value);
+                        if (touched.staffStrategy) {
+                          setErrors((prev) => ({ ...prev, staffStrategy: "" }));
+                        }
+                      }}
+                      options={availableStrategies.map((s) => ({
+                        id: s.id,
+                        name: `${s.strategyCode} - ${s.department}`,
+                      }))}
+                      className={
+                        errors.staffStrategy && touched.staffStrategy
+                          ? "border-red-500"
+                          : ""
+                      }
+                    />
+                  </FormRow>
+                  <p className="text-xs text-gray-600">
+                    This will populate Section 2 with all objectives from the
+                    selected strategy. Safeguarding will be added as the final
+                    objective.
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-600">
+                  No staff strategies found for period{" "}
+                  {formData.appraisalPeriod}. You can still create objectives
+                  manually below.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Section 2: Performance Objectives */}
       <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
@@ -320,6 +616,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                   {obj.objective || `Objective ${index + 1}`}
                 </div>
                 <Row cols="grid-cols-1 md:grid-cols-2">
+                  {/* FIXED: Employee Rating - editable only by staff or admin */}
                   <FormRow label="Employee Rating">
                     <Select
                       id={`emp-rating-${index}`}
@@ -333,6 +630,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                         )
                       }
                       options={[
+                        { id: "", name: "Select Rating" },
                         { id: "Achieved", name: "Achieved (3 pts)" },
                         {
                           id: "Partly Achieved",
@@ -340,33 +638,47 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                         },
                         { id: "Not Achieved", name: "Not Achieved (0 pts)" },
                       ]}
-                      disabled={!isStaff && !isAdmin}
+                      disabled={!canEditStaffSections && !isAdmin}
                     />
+                    {canEditStaffSections && (
+                      <span className="text-xs text-blue-500 ml-2">
+                        (You can edit)
+                      </span>
+                    )}
                   </FormRow>
 
-                  <FormRow label="Supervisor Rating">
-                    <Select
-                      id={`sup-rating-${index}`}
-                      customLabel="Select Rating"
-                      value={obj.supervisorRating || ""}
-                      onChange={(value) =>
-                        handleObjectiveRatingChange(
-                          index,
-                          "supervisorRating",
-                          value
-                        )
-                      }
-                      options={[
-                        { id: "Achieved", name: "Achieved (3 pts)" },
-                        {
-                          id: "Partly Achieved",
-                          name: "Partly Achieved (2 pts)",
-                        },
-                        { id: "Not Achieved", name: "Not Achieved (0 pts)" },
-                      ]}
-                      disabled={!isSupervisor && !isAdmin}
-                    />
-                  </FormRow>
+                  {/* FIXED: Supervisor Rating - visible and editable only by supervisor or admin */}
+                  {(isSupervisor || isAdmin) && (
+                    <FormRow label="Supervisor Rating">
+                      <Select
+                        id={`sup-rating-${index}`}
+                        customLabel="Select Rating"
+                        value={obj.supervisorRating || ""}
+                        onChange={(value) =>
+                          handleObjectiveRatingChange(
+                            index,
+                            "supervisorRating",
+                            value
+                          )
+                        }
+                        options={[
+                          { id: "", name: "Select Rating" },
+                          { id: "Achieved", name: "Achieved (3 pts)" },
+                          {
+                            id: "Partly Achieved",
+                            name: "Partly Achieved (2 pts)",
+                          },
+                          { id: "Not Achieved", name: "Not Achieved (0 pts)" },
+                        ]}
+                        disabled={!canEditSupervisorSections && !isAdmin}
+                      />
+                      {canEditSupervisorSections && (
+                        <span className="text-xs text-green-500 ml-2">
+                          (You can edit)
+                        </span>
+                      )}
+                    </FormRow>
+                  )}
                 </Row>
               </div>
             ))}
@@ -377,7 +689,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           </p>
         )}
 
-        {/* Safeguarding Section */}
+        {/* Safeguarding Section - Visible to both staff and supervisor */}
         <div className="mt-6 p-4 bg-white rounded-lg border">
           <h4 className="font-semibold text-gray-700 mb-3">Safeguarding</h4>
 
@@ -391,12 +703,15 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                 handleSafeguardingChange("actionsTaken", e.target.value)
               }
               placeholder="I followed due process and protocols..."
-              disabled={!isStaff && !isAdmin}
+              disabled={!canEditStaffSections && !isAdmin}
             />
+            {canEditStaffSections && (
+              <span className="text-xs text-blue-500">(You can edit)</span>
+            )}
           </FormRow>
 
           <FormRow label="Have you completed the safeguarding training?">
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-4">
               {["Yes", "Partly", "No"].map((option) => (
                 <label key={option} className="flex items-center space-x-2">
                   <input
@@ -414,7 +729,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                       )
                     }
                     className="h-4 w-4"
-                    disabled={!isStaff && !isAdmin}
+                    disabled={!canEditStaffSections && !isAdmin}
                   />
                   <span>{option}</span>
                 </label>
@@ -431,13 +746,13 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                   onChange={(e) => setAreasNotUnderstoodInput(e.target.value)}
                   placeholder="Add an area you don't understand"
                   className="flex-1"
-                  disabled={!isStaff && !isAdmin}
+                  disabled={!canEditStaffSections && !isAdmin}
                 />
                 <Button
                   type="button"
                   onClick={addAreaNotUnderstood}
                   size="small"
-                  disabled={!isStaff && !isAdmin}
+                  disabled={!canEditStaffSections && !isAdmin}
                 >
                   Add
                 </Button>
@@ -454,7 +769,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                     type="button"
                     onClick={() => removeAreaNotUnderstood(idx)}
                     className="text-red-500 hover:text-red-700"
-                    disabled={!isStaff && !isAdmin}
+                    disabled={!canEditStaffSections && !isAdmin}
                   >
                     ×
                   </button>
@@ -465,73 +780,94 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         </div>
       </div>
 
-      {/* Section 3: Performance Areas */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-          SECTION 3: SUPERVISOR'S ASSESSMENT
-        </h3>
-
-        <div className="space-y-3">
-          {formData.performanceAreas?.map((area, index) => (
-            <div
-              key={index}
-              className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-white rounded-lg"
-            >
-              <span className="font-medium text-gray-700 mb-2 md:mb-0">
-                {area.area}:
+      {/* FIXED: Section 3: Performance Areas - Only visible to supervisors and admins */}
+      {(isSupervisor || isAdmin) && (
+        <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
+            <UserCog className="h-5 w-5 mr-2" />
+            SECTION 3: SUPERVISOR'S ASSESSMENT{" "}
+            {canEditSupervisorSections && (
+              <span className="text-xs text-green-500 ml-2">
+                (You can edit)
               </span>
-              <Select
-                id={`area-${index}`}
-                customLabel=""
-                value={area.rating}
-                onChange={(value) => handlePerformanceAreaChange(index, value)}
-                options={[
-                  { id: "Needs Improvement", name: "Needs Improvement" },
-                  { id: "Meets Expectations", name: "Meets Expectations" },
-                  { id: "Exceeds Expectations", name: "Exceeds Expectations" },
-                ]}
-                className="w-full md:w-64"
-                disabled={!isSupervisor && !isAdmin}
-              />
-            </div>
-          ))}
+            )}
+          </h3>
+
+          <div className="space-y-3">
+            {formData.performanceAreas?.map((area, index) => (
+              <div
+                key={index}
+                className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-white rounded-lg"
+              >
+                <span className="font-medium text-gray-700 mb-2 md:mb-0">
+                  {area.area}:
+                </span>
+                <Select
+                  id={`area-${index}`}
+                  customLabel=""
+                  value={area.rating}
+                  onChange={(value) =>
+                    handlePerformanceAreaChange(index, value)
+                  }
+                  options={[
+                    { id: "Pending", name: "Pending" },
+                    { id: "Needs Improvement", name: "Needs Improvement" },
+                    { id: "Meets Expectations", name: "Meets Expectations" },
+                    {
+                      id: "Exceeds Expectations",
+                      name: "Exceeds Expectations",
+                    },
+                  ]}
+                  className="w-full md:w-64"
+                  disabled={!canEditSupervisorSections && !isAdmin}
+                />
+              </div>
+            ))}
+          </div>
+
+          <FormRow label="Supervisor's Comments" className="mt-4">
+            <textarea
+              className="border-2 h-24 rounded-lg focus:outline-none p-3 w-full"
+              value={formData.supervisorComments}
+              onChange={(e) =>
+                handleFormChange("supervisorComments", e.target.value)
+              }
+              placeholder="Enter supervisor's comments..."
+              disabled={!canEditSupervisorSections && !isAdmin}
+            />
+            {canEditSupervisorSections && (
+              <span className="text-xs text-green-500">(You can edit)</span>
+            )}
+          </FormRow>
+
+          <FormRow label="Overall Assessment" className="mt-4">
+            <Select
+              id="overallRating"
+              customLabel="Select Overall Rating"
+              value={formData.overallRating || ""}
+              onChange={(value) => handleFormChange("overallRating", value)}
+              options={[
+                { id: "Pending", name: "Pending" },
+                { id: "Meets Requirements", name: "Meets Requirements" },
+                {
+                  id: "Partly Meets Requirements",
+                  name: "Partly Meets Requirements",
+                },
+                {
+                  id: "Does Not Meet Requirements",
+                  name: "Does Not Meet Requirements",
+                },
+              ]}
+              disabled={!canEditSupervisorSections && !isAdmin}
+            />
+            {canEditSupervisorSections && (
+              <span className="text-xs text-green-500">(You can edit)</span>
+            )}
+          </FormRow>
         </div>
+      )}
 
-        <FormRow label="Supervisor's Comments" className="mt-4">
-          <textarea
-            className="border-2 h-24 rounded-lg focus:outline-none p-3 w-full"
-            value={formData.supervisorComments}
-            onChange={(e) =>
-              handleFormChange("supervisorComments", e.target.value)
-            }
-            placeholder="Enter supervisor's comments..."
-            disabled={!isSupervisor && !isAdmin}
-          />
-        </FormRow>
-
-        <FormRow label="Overall Assessment" className="mt-4">
-          <Select
-            id="overallRating"
-            customLabel="Select Overall Rating"
-            value={formData.overallRating || ""}
-            onChange={(value) => handleFormChange("overallRating", value)}
-            options={[
-              { id: "Meets Requirements", name: "Meets Requirements" },
-              {
-                id: "Partly Meets Requirements",
-                name: "Partly Meets Requirements",
-              },
-              {
-                id: "Does Not Meet Requirements",
-                name: "Does Not Meet Requirements",
-              },
-            ]}
-            disabled={!isSupervisor && !isAdmin}
-          />
-        </FormRow>
-      </div>
-
-      {/* Section 4: Future Goals */}
+      {/* Section 4: Future Goals - Visible to both */}
       <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 4: FUTURE GOALS
@@ -543,8 +879,11 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             value={formData.futureGoals}
             onChange={(e) => handleFormChange("futureGoals", e.target.value)}
             placeholder="Enter future goals..."
-            disabled={!isStaff && !isAdmin}
+            disabled={!canEditStaffSections && !isAdmin}
           />
+          {canEditStaffSections && (
+            <span className="text-xs text-blue-500">(You can edit)</span>
+          )}
         </FormRow>
       </div>
 
@@ -567,6 +906,25 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             {isUpdating ? <SpinnerMini /> : "Update Appraisal"}
           </Button>
 
+          {canSend && (
+            <Button
+              type="submit"
+              size="medium"
+              disabled={isSubmitting || !isFormValid}
+              className="min-w-[140px]"
+              onClick={handleSubmit}
+            >
+              {isSubmitting ? (
+                <SpinnerMini />
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Create Appraisal
+                </>
+              )}
+            </Button>
+          )}
+
           <Button
             type="button"
             size="medium"
@@ -576,21 +934,6 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             Cancel
           </Button>
         </div>
-      </div>
-
-      {/* Status Information */}
-      <div className="text-center text-sm text-gray-600">
-        Current Status:{" "}
-        <span className="font-semibold uppercase">{appraisal.status}</span>
-        {appraisal.status === "completed" && (
-          <span className="ml-2 text-green-600">
-            (Completed on{" "}
-            {appraisal.completedAt
-              ? new Date(appraisal.completedAt).toLocaleDateString()
-              : ""}
-            )
-          </span>
-        )}
       </div>
     </form>
   );

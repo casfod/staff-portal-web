@@ -1,5 +1,5 @@
 // src/features/appraisal/FormAddAppraisal.tsx
-import { useState, useCallback, useMemo } from "react"; // Removed unused useEffect
+import { useState, useCallback, useMemo } from "react";
 import {
   AppraisalType,
   ObjectiveRatingType,
@@ -14,7 +14,7 @@ import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import {
   useSaveAppraisalDraft,
-  useSubmitAppraisal,
+  useCreateAndSubmitAppraisal,
 } from "./Hooks/useAppraisal";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +28,8 @@ import {
   AlertCircle,
   Save,
   Send,
+  User,
+  UserCog,
 } from "lucide-react";
 
 // Types
@@ -37,21 +39,21 @@ interface SafeguardingType {
   areasNotUnderstood: string[];
 }
 
-interface FormErrors {
+export interface FormErrors {
   [key: string]: string;
 }
 
 // Constants with proper typing
 const PERFORMANCE_AREAS: PerformanceAreaType[] = [
-  { area: "Job Knowledge", rating: "Meets Expectations" },
-  { area: "Judgement", rating: "Meets Expectations" },
-  { area: "Reliability", rating: "Meets Expectations" },
-  { area: "Quality & Quantity of Work", rating: "Meets Expectations" },
+  { area: "Job Knowledge", rating: "Pending" },
+  { area: "Judgement", rating: "Pending" },
+  { area: "Reliability", rating: "Pending" },
+  { area: "Quality & Quantity of Work", rating: "Pending" },
   {
     area: "Interpersonal and Communication Skills",
-    rating: "Meets Expectations",
+    rating: "Pending",
   },
-  { area: "Teamwork", rating: "Meets Expectations" },
+  { area: "Teamwork", rating: "Pending" },
 ];
 
 const APPRAISAL_PERIODS = [
@@ -62,12 +64,21 @@ const APPRAISAL_PERIODS = [
 ];
 
 const RATING_OPTIONS = [
+  { id: "", name: "Select Rating" },
+  { id: "Achieved", name: "Achieved (3 pts)" },
+  { id: "Partly Achieved", name: "Partly Achieved (2 pts)" },
+  { id: "Not Achieved", name: "Not Achieved (0 pts)" },
+];
+
+const SUPERVISOR_RATING_OPTIONS = [
+  { id: "", name: "Select Rating" },
   { id: "Achieved", name: "Achieved (3 pts)" },
   { id: "Partly Achieved", name: "Partly Achieved (2 pts)" },
   { id: "Not Achieved", name: "Not Achieved (0 pts)" },
 ];
 
 const OVERALL_RATINGS = [
+  { id: "Pending", name: "Pending" },
   { id: "Meets Requirements", name: "Meets Requirements" },
   { id: "Partly Meets Requirements", name: "Partly Meets Requirements" },
   { id: "Does Not Meet Requirements", name: "Does Not Meet Requirements" },
@@ -77,7 +88,12 @@ const FormAddAppraisal = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
-  // State - FIXED: Removed the function that was causing type error
+  // FIXED: Determine user role - check if current user is staff or supervisor
+  // For creating a new appraisal, the user is always the staff member
+  // const isStaff = true; // User creating appraisal is always the staff member
+  const isSupervisor = false; // Not supervisor when creating
+
+  // State
   const [formData, setFormData] = useState<Partial<AppraisalType>>({
     staffId: currentUser?.id || "",
     staffName: `${currentUser?.first_name || ""} ${
@@ -99,7 +115,7 @@ const FormAddAppraisal = () => {
     },
     performanceAreas: PERFORMANCE_AREAS,
     supervisorComments: "",
-    overallRating: "Meets Requirements",
+    overallRating: "Pending",
     futureGoals: "",
     staffStrategy: null,
     signatures: {
@@ -109,7 +125,7 @@ const FormAddAppraisal = () => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [showStaffStrategies, setShowStaffStrategies] = useState(false);
+  const [showStaffStrategies, setShowStaffStrategies] = useState(true);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string>("");
   const [areasNotUnderstoodInput, setAreasNotUnderstoodInput] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
@@ -125,7 +141,8 @@ const FormAddAppraisal = () => {
     });
 
   const { saveAppraisalDraft, isPending: isSaving } = useSaveAppraisalDraft();
-  const { submitAppraisal, isPending: isSubmitting } = useSubmitAppraisal();
+  const { createAndSubmitAppraisal, isPending: isSubmitting } =
+    useCreateAndSubmitAppraisal();
 
   // Memoized values
   const availableStrategies = useMemo(() => {
@@ -274,6 +291,7 @@ const FormAddAppraisal = () => {
         updatedAreas[index] = {
           ...updatedAreas[index],
           rating: value as
+            | "Pending"
             | "Needs Improvement"
             | "Meets Expectations"
             | "Exceeds Expectations",
@@ -354,9 +372,12 @@ const FormAddAppraisal = () => {
         return;
       }
 
-      submitAppraisal({ ...formData, staffStrategy: selectedStrategyId });
+      createAndSubmitAppraisal({
+        ...formData,
+        staffStrategy: selectedStrategyId,
+      });
     },
-    [formData, selectedStrategyId, submitAppraisal, validateForm]
+    [formData, selectedStrategyId, createAndSubmitAppraisal, validateForm]
   );
 
   // Check profile completion
@@ -380,6 +401,15 @@ const FormAddAppraisal = () => {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+      {/* FIXED: Role indicator */}
+      <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+        <User className="h-5 w-5 text-blue-600" />
+        <span className="text-sm text-blue-800">
+          You are creating this appraisal as:{" "}
+          <span className="font-semibold">Staff Member</span>
+        </span>
+      </div>
+
       {/* Section 1: Staff Information */}
       <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
@@ -427,7 +457,6 @@ const FormAddAppraisal = () => {
               customLabel="Select Period"
               value={formData.appraisalPeriod || ""}
               onChange={(value) => handleFormChange("appraisalPeriod", value)}
-              // FIXED: Removed onBlur prop as it doesn't exist on Select component
               options={APPRAISAL_PERIODS}
               required
               className={
@@ -515,7 +544,6 @@ const FormAddAppraisal = () => {
                           setErrors((prev) => ({ ...prev, staffStrategy: "" }));
                         }
                       }}
-                      // FIXED: Removed onBlur prop
                       options={availableStrategies.map((s) => ({
                         id: s.id,
                         name: `${s.strategyCode} - ${s.department}`,
@@ -560,6 +588,7 @@ const FormAddAppraisal = () => {
                   {obj.objective || `Objective ${index + 1}`}
                 </div>
                 <Row cols="grid-cols-1 md:grid-cols-2">
+                  {/* FIXED: Employee Rating - always visible to staff */}
                   <FormRow label="Employee Rating">
                     <Select
                       id={`emp-rating-${index}`}
@@ -574,23 +603,29 @@ const FormAddAppraisal = () => {
                       }
                       options={RATING_OPTIONS}
                     />
+                    <span className="text-xs text-blue-500 ml-2">
+                      (You can edit)
+                    </span>
                   </FormRow>
 
-                  <FormRow label="Supervisor Rating">
-                    <Select
-                      id={`sup-rating-${index}`}
-                      customLabel="Select Rating"
-                      value={obj.supervisorRating || ""}
-                      onChange={(value) =>
-                        handleObjectiveRatingChange(
-                          index,
-                          "supervisorRating",
-                          value
-                        )
-                      }
-                      options={RATING_OPTIONS}
-                    />
-                  </FormRow>
+                  {/* FIXED: Supervisor Rating - NOT visible to staff when creating */}
+                  {isSupervisor && (
+                    <FormRow label="Supervisor Rating">
+                      <Select
+                        id={`sup-rating-${index}`}
+                        customLabel="Select Rating"
+                        value={obj.supervisorRating || ""}
+                        onChange={(value) =>
+                          handleObjectiveRatingChange(
+                            index,
+                            "supervisorRating",
+                            value
+                          )
+                        }
+                        options={SUPERVISOR_RATING_OPTIONS}
+                      />
+                    </FormRow>
+                  )}
                 </Row>
               </div>
             ))}
@@ -602,7 +637,7 @@ const FormAddAppraisal = () => {
           </p>
         )}
 
-        {/* Safeguarding Section */}
+        {/* Safeguarding Section - Visible to staff */}
         <div className="mt-6 p-4 bg-white rounded-lg border">
           <h4 className="font-semibold text-gray-700 mb-3">Safeguarding</h4>
 
@@ -690,60 +725,70 @@ const FormAddAppraisal = () => {
         </div>
       </div>
 
-      {/* Section 3: Performance Areas */}
-      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-          SECTION 3: SUPERVISOR'S ASSESSMENT
-        </h3>
+      {/* FIXED: Section 3: Supervisor's Assessment - NOT visible to staff when creating */}
+      {/* This section is hidden during creation because only supervisors fill it out later */}
+      {isSupervisor && (
+        <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
+            <UserCog className="h-5 w-5 mr-2" />
+            SECTION 3: SUPERVISOR'S ASSESSMENT
+          </h3>
 
-        <div className="space-y-3">
-          {formData.performanceAreas?.map((area, index) => (
-            <div
-              key={index}
-              className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <span className="font-medium text-gray-700 mb-2 md:mb-0">
-                {area.area}:
-              </span>
-              <Select
-                id={`area-${index}`}
-                customLabel=""
-                value={area.rating}
-                onChange={(value) => handlePerformanceAreaChange(index, value)}
-                options={[
-                  { id: "Needs Improvement", name: "Needs Improvement" },
-                  { id: "Meets Expectations", name: "Meets Expectations" },
-                  { id: "Exceeds Expectations", name: "Exceeds Expectations" },
-                ]}
-                className="w-full md:w-64"
-              />
-            </div>
-          ))}
+          <div className="space-y-3">
+            {formData.performanceAreas?.map((area, index) => (
+              <div
+                key={index}
+                className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <span className="font-medium text-gray-700 mb-2 md:mb-0">
+                  {area.area}:
+                </span>
+                <Select
+                  id={`area-${index}`}
+                  customLabel=""
+                  value={area.rating}
+                  onChange={(value) =>
+                    handlePerformanceAreaChange(index, value)
+                  }
+                  options={[
+                    { id: "Pending", name: "Pending" },
+                    { id: "Needs Improvement", name: "Needs Improvement" },
+                    { id: "Meets Expectations", name: "Meets Expectations" },
+                    {
+                      id: "Exceeds Expectations",
+                      name: "Exceeds Expectations",
+                    },
+                  ]}
+                  className="w-full md:w-64"
+                />
+              </div>
+            ))}
+          </div>
+
+          <FormRow label="Supervisor's Comments" className="mt-4">
+            <textarea
+              className="border-2 h-24 rounded-lg focus:outline-none p-3 w-full"
+              value={formData.supervisorComments}
+              onChange={(e) =>
+                handleFormChange("supervisorComments", e.target.value)
+              }
+              placeholder="Enter supervisor's comments..."
+            />
+          </FormRow>
+
+          <FormRow label="Overall Assessment" className="mt-4">
+            <Select
+              id="overallRating"
+              customLabel="Select Overall Rating"
+              value={formData.overallRating || ""}
+              onChange={(value) => handleFormChange("overallRating", value)}
+              options={OVERALL_RATINGS}
+            />
+          </FormRow>
         </div>
+      )}
 
-        <FormRow label="Supervisor's Comments" className="mt-4">
-          <textarea
-            className="border-2 h-24 rounded-lg focus:outline-none p-3 w-full"
-            value={formData.supervisorComments}
-            onChange={(e) =>
-              handleFormChange("supervisorComments", e.target.value)
-            }
-            placeholder="Enter supervisor's comments..."
-          />
-        </FormRow>
-
-        <FormRow label="Overall Assessment" className="mt-4">
-          <Select
-            id="overallRating"
-            customLabel="Select Overall Rating"
-            value={formData.overallRating || ""}
-            onChange={(value) => handleFormChange("overallRating", value)}
-            options={OVERALL_RATINGS}
-          />
-        </FormRow>
-      </div>
-
-      {/* Section 4: Future Goals */}
+      {/* Section 4: Future Goals - Visible to staff */}
       <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 4: FUTURE GOALS
