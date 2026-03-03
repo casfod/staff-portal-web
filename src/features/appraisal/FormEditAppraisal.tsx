@@ -1,6 +1,11 @@
 // src/features/appraisal/FormEditAppraisal.tsx
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { AppraisalType, ObjectiveRatingType } from "../../interfaces";
+import {
+  AppraisalType,
+  ObjectiveRatingType,
+  SafeguardingType,
+  PerformanceAreaType,
+} from "../../interfaces";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Row from "../../ui/Row";
@@ -9,8 +14,8 @@ import Select from "../../ui/Select";
 import Button from "../../ui/Button";
 import { FileUpload } from "../../ui/FileUpload";
 import {
-  useCreateAndSubmitAppraisal,
   useUpdateAppraisal,
+  useSubmitExistingAppraisal,
 } from "./Hooks/useAppraisal";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +26,7 @@ import {
   UserCog,
   Clock,
   Send,
+  Save,
   Calendar,
   ChevronUp,
   ChevronDown,
@@ -29,11 +35,39 @@ import { useStaffStrategies } from "../staff-strategy/Hooks/useStaffStrategy";
 import toast from "react-hot-toast";
 import { FormErrors } from "./FormAddAppraisal";
 
-interface SafeguardingType {
-  actionsTaken: string;
-  trainingCompleted: "Yes" | "Partly" | "No";
-  areasNotUnderstood: string[];
-}
+// Constants (same as FormAddAppraisal)
+const PERFORMANCE_AREAS: PerformanceAreaType[] = [
+  { area: "Job Knowledge", rating: "Pending" },
+  { area: "Judgement", rating: "Pending" },
+  { area: "Reliability", rating: "Pending" },
+  { area: "Quality & Quantity of Work", rating: "Pending" },
+  {
+    area: "Interpersonal and Communication Skills",
+    rating: "Pending",
+  },
+  { area: "Teamwork", rating: "Pending" },
+];
+
+const APPRAISAL_PERIODS = [
+  { id: "January - March", name: "January - March (Q1)" },
+  { id: "April - June", name: "April - June (Q2)" },
+  { id: "July - September", name: "July - September (Q3)" },
+  { id: "October - December", name: "October - December (Q4)" },
+];
+
+const RATING_OPTIONS = [
+  { id: "", name: "Select Rating" },
+  { id: "Achieved", name: "Achieved (3 pts)" },
+  { id: "Partly Achieved", name: "Partly Achieved (2 pts)" },
+  { id: "Not Achieved", name: "Not Achieved (0 pts)" },
+];
+
+const OVERALL_RATINGS = [
+  { id: "Pending", name: "Pending" },
+  { id: "Meets Requirements", name: "Meets Requirements" },
+  { id: "Partly Meets Requirements", name: "Partly Meets Requirements" },
+  { id: "Does Not Meet Requirements", name: "Does Not Meet Requirements" },
+];
 
 interface FormEditAppraisalProps {
   appraisal: AppraisalType | null;
@@ -43,7 +77,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
 
-  // FIXED: Determine user role and relationships
+  // Determine user role and relationships
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(currentUser?.role || "");
   const currentUserId = currentUser?.id;
 
@@ -65,10 +99,10 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     objectives: [],
     safeguarding: {
       actionsTaken: "",
-      trainingCompleted: "No" as const,
+      trainingCompleted: "No",
       areasNotUnderstood: [],
     },
-    performanceAreas: [],
+    performanceAreas: PERFORMANCE_AREAS, // Initialize with default performance areas
     supervisorComments: "",
     overallRating: "Pending",
     futureGoals: "",
@@ -80,7 +114,6 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showStaffStrategies, setShowStaffStrategies] = useState(true);
-
   const [areasNotUnderstoodInput, setAreasNotUnderstoodInput] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -114,7 +147,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           trainingCompleted: "No",
           areasNotUnderstood: [],
         },
-        performanceAreas: appraisal.performanceAreas || [],
+        performanceAreas: appraisal.performanceAreas || PERFORMANCE_AREAS,
         supervisorComments: appraisal.supervisorComments || "",
         overallRating: appraisal.overallRating || "Pending",
         futureGoals: appraisal.futureGoals || "",
@@ -130,8 +163,8 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     appraisal?.id || ""
   );
 
-  const { createAndSubmitAppraisal, isPending: isSubmitting } =
-    useCreateAndSubmitAppraisal();
+  const { submitExistingAppraisal, isPending: isSubmitting } =
+    useSubmitExistingAppraisal();
 
   const availableStrategies = useMemo(() => {
     if (!strategiesData?.data?.strategies || !formData.appraisalPeriod)
@@ -146,6 +179,8 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     switch (name) {
       case "department":
         return !value ? "Department is required" : "";
+      case "appraisalPeriod":
+        return !value ? "Appraisal period is required" : "";
       default:
         return "";
     }
@@ -197,7 +232,6 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           `Loaded ${allObjectives.length} objectives from strategy`
         );
 
-        // Clear error if any
         setErrors((prev) => ({ ...prev, objectives: "" }));
       }
     },
@@ -210,20 +244,13 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     if (!formData.department) newErrors.department = "Department is required";
     if (!formData.appraisalPeriod)
       newErrors.appraisalPeriod = "Appraisal period is required";
-    if (!selectedStrategyId)
-      newErrors.staffStrategy = "Please select a staff strategy";
     if (!formData.objectives || formData.objectives.length === 0) {
       newErrors.objectives = "Please load objectives from a strategy";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [
-    formData.department,
-    formData.appraisalPeriod,
-    selectedStrategyId,
-    formData.objectives,
-  ]);
+  }, [formData.department, formData.appraisalPeriod, formData.objectives]);
 
   const handleObjectiveRatingChange = (
     index: number,
@@ -235,6 +262,16 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
       updatedObjectives[index] = {
         ...updatedObjectives[index],
         [field]: value,
+        // Update points based on rating
+        ...(field === "employeeRating" && {
+          employeePoints:
+            value === "Achieved" ? 3 : value === "Partly Achieved" ? 2 : 0,
+        }),
+        ...(field === "supervisorRating" && {
+          supervisorPoints:
+            value === "Achieved" ? 3 : value === "Partly Achieved" ? 2 : 0,
+          supervisorRatingStatus: value ? "completed" : "pending",
+        }),
       };
       return { ...prev, objectives: updatedObjectives };
     });
@@ -250,6 +287,8 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           | "Needs Improvement"
           | "Meets Expectations"
           | "Exceeds Expectations",
+        supervisorStatus:
+          value && value !== "Pending" ? "completed" : "pending",
       };
       return { ...prev, performanceAreas: updatedAreas };
     });
@@ -264,6 +303,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
       safeguarding: {
         ...(prev.safeguarding as SafeguardingType),
         [field]: value,
+        ...(isSupervisor && {
+          supervisorStatus: "completed",
+        }),
       },
     }));
   };
@@ -305,32 +347,37 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
   // Check editability based on role and status
   const requestStatus = appraisal?.status;
 
-  // FIXED: Role-based edit permissions with correct status mapping
-  const canEditStaffSections =
-    isStaff && (requestStatus === "draft" || requestStatus === "pending");
-  const canEditSupervisorSections = isSupervisor && requestStatus === "pending";
-  const canEditAdmin =
-    isAdmin && (requestStatus === "draft" || requestStatus === "pending");
+  // FIXED: For draft status - staff should have same experience as FormAddAppraisal
+  // For pending status - supervisors can do their part
+  const isDraft = requestStatus === "draft";
+  const isPending = requestStatus === "pending";
 
-  const canSend = isStaff && requestStatus === "draft";
+  // Staff can edit everything in draft mode (same as FormAddAppraisal)
+  const canStaffEditDraft = isStaff && isDraft;
 
-  const canEdit =
-    canEditStaffSections || canEditSupervisorSections || canEditAdmin;
+  // Staff cannot edit in pending mode (waiting for supervisor)
+  const canStaffViewOnly = isStaff && isPending;
+
+  // Supervisors can edit their sections in pending mode
+  const canSupervisorEdit = isSupervisor && isPending;
+
+  // Admins can edit everything in both draft and pending
+  const canAdminEdit = isAdmin && (isDraft || isPending);
+
+  // Overall edit permission
+  const canEdit = canStaffEditDraft || canSupervisorEdit || canAdminEdit;
+
+  // Can submit - only staff in draft mode
+  const canSubmit = isStaff && isDraft;
 
   const isFormValid = useMemo(() => {
-    return (
-      formData.department &&
-      formData.appraisalPeriod &&
-      selectedStrategyId &&
-      formData.objectives &&
-      formData.objectives.length > 0
-    );
-  }, [
-    formData.department,
-    formData.appraisalPeriod,
-    selectedStrategyId,
-    formData.objectives,
-  ]);
+    // For draft, only basic info is required
+    if (isDraft) {
+      return formData.department && formData.appraisalPeriod;
+    }
+    // For pending, more validation might be needed
+    return true;
+  }, [formData.department, formData.appraisalPeriod, isDraft]);
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -339,6 +386,15 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     if (!formData.department) {
       setErrors((prev) => ({ ...prev, department: "Department is required" }));
       setTouched((prev) => ({ ...prev, department: true }));
+      return;
+    }
+
+    if (!formData.appraisalPeriod) {
+      setErrors((prev) => ({
+        ...prev,
+        appraisalPeriod: "Appraisal period is required",
+      }));
+      setTouched((prev) => ({ ...prev, appraisalPeriod: true }));
       return;
     }
 
@@ -354,12 +410,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         return;
       }
 
-      createAndSubmitAppraisal({
-        ...formData,
-        staffStrategy: selectedStrategyId,
-      });
+      submitExistingAppraisal(appraisal?.id || "");
     },
-    [formData, selectedStrategyId, createAndSubmitAppraisal, validateForm]
+    [appraisal?.id, submitExistingAppraisal, validateForm]
   );
 
   if (!appraisal) {
@@ -379,7 +432,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
     );
   }
 
-  if (!canEdit) {
+  if (!canEdit && !canStaffViewOnly) {
     return (
       <div className="text-center py-8">
         <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
@@ -390,7 +443,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           {appraisal.status === "rejected" && " and has been rejected."}
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          Only draft or pending appraisals can be edited.
+          {isStaff && isPending
+            ? "Your appraisal is under review by your supervisor."
+            : "Only draft or pending appraisals can be edited."}
         </p>
         <Button
           type="button"
@@ -407,14 +462,19 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
 
   return (
     <form className="space-y-6" onSubmit={handleUpdate} noValidate>
-      {/* FIXED: Role indicator */}
+      {/* Role and Status Indicator */}
       <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
         {isStaff && (
           <>
             <User className="h-5 w-5 text-blue-600" />
             <span className="text-sm text-blue-800">
-              You are editing as:{" "}
+              You are {canStaffEditDraft ? "editing" : "viewing"} as:{" "}
               <span className="font-semibold">Staff Member</span>
+              {canStaffViewOnly && (
+                <span className="ml-2 text-xs text-amber-600">
+                  (View only - under supervisor review)
+                </span>
+              )}
             </span>
           </>
         )}
@@ -445,7 +505,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
       </div>
 
       {/* Section 1: Staff Information */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
           <FileText className="h-5 w-5 mr-2" />
           SECTION 1: STAFF INFORMATION
@@ -463,7 +523,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
               onChange={(e) => handleFormChange("department", e.target.value)}
               onBlur={() => handleBlur("department")}
               placeholder="Enter department"
-              disabled={!isAdmin && !isSupervisor}
+              disabled={!canStaffEditDraft && !canAdminEdit}
               className={
                 errors.department && touched.department ? "border-red-500" : ""
               }
@@ -478,19 +538,38 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                 handleFormChange("lengthOfTimeInPosition", e.target.value)
               }
               placeholder="e.g., 2 years"
-              disabled={!isAdmin && !isSupervisor}
+              disabled={!canStaffEditDraft && !canAdminEdit}
             />
           </FormRow>
         </Row>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
-          <FormRow label="Appraisal Period">
-            <Input
-              type="text"
-              value={formData.appraisalPeriod}
-              disabled
-              className="bg-gray-100"
-            />
+          <FormRow
+            label="Appraisal Period *"
+            error={touched.appraisalPeriod ? errors.appraisalPeriod : undefined}
+          >
+            {canStaffEditDraft || canAdminEdit ? (
+              <Select
+                id="appraisalPeriod"
+                customLabel="Select Period"
+                value={formData.appraisalPeriod || ""}
+                onChange={(value) => handleFormChange("appraisalPeriod", value)}
+                options={APPRAISAL_PERIODS}
+                required
+                className={
+                  errors.appraisalPeriod && touched.appraisalPeriod
+                    ? "border-red-500"
+                    : ""
+                }
+              />
+            ) : (
+              <Input
+                type="text"
+                value={formData.appraisalPeriod}
+                disabled
+                className="bg-gray-100"
+              />
+            )}
           </FormRow>
 
           <FormRow label="Date of Appraisal">
@@ -500,7 +579,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
               onChange={(e) =>
                 handleFormChange("dateOfAppraisal", e.target.value)
               }
-              disabled={!isAdmin && !isSupervisor}
+              disabled={!canStaffEditDraft && !canAdminEdit}
             />
           </FormRow>
         </Row>
@@ -523,14 +602,14 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                 handleFormChange("lengthOfTimeSupervised", e.target.value)
               }
               placeholder="e.g., 1 year"
-              disabled={!isAdmin && !isSupervisor}
+              disabled={!canStaffEditDraft && !canAdminEdit}
             />
           </FormRow>
         </Row>
       </div>
 
-      {/* Staff Strategy Integration */}
-      {isStaff && formData.appraisalPeriod && (
+      {/* Staff Strategy Integration - Only for staff in draft mode (same as FormAddAppraisal) */}
+      {isStaff && isDraft && formData.appraisalPeriod && (
         <div className="rounded-lg p-4 border bg-blue-50 border-blue-200">
           <div
             className="flex justify-between items-center cursor-pointer"
@@ -556,7 +635,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
               ) : availableStrategies.length > 0 ? (
                 <>
                   <FormRow
-                    label="Select Strategy *"
+                    label="Select Strategy"
                     error={
                       touched.staffStrategy ? errors.staffStrategy : undefined
                     }
@@ -602,7 +681,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
       )}
 
       {/* Section 2: Performance Objectives */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 2: PERFORMANCE OBJECTIVES
         </h3>
@@ -610,13 +689,13 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         {formData.objectives && formData.objectives.length > 0 ? (
           <div className="space-y-4">
             {formData.objectives.map((obj, index) => (
-              <div key={index} className="p-3 bg-white rounded-lg border">
+              <div key={index} className="p-3 bg-gray-50 rounded-lg border">
                 <div className="font-medium text-gray-700 mb-2">
                   Objective {index + 1}:{" "}
                   {obj.objective || `Objective ${index + 1}`}
                 </div>
                 <Row cols="grid-cols-1 md:grid-cols-2">
-                  {/* FIXED: Employee Rating - editable only by staff or admin */}
+                  {/* Employee Rating - editable by staff in draft, view-only in pending */}
                   <FormRow label="Employee Rating">
                     <Select
                       id={`emp-rating-${index}`}
@@ -629,26 +708,18 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                           value
                         )
                       }
-                      options={[
-                        { id: "", name: "Select Rating" },
-                        { id: "Achieved", name: "Achieved (3 pts)" },
-                        {
-                          id: "Partly Achieved",
-                          name: "Partly Achieved (2 pts)",
-                        },
-                        { id: "Not Achieved", name: "Not Achieved (0 pts)" },
-                      ]}
-                      disabled={!canEditStaffSections && !isAdmin}
+                      options={RATING_OPTIONS}
+                      disabled={!canStaffEditDraft && !canAdminEdit}
                     />
-                    {canEditStaffSections && (
+                    {canStaffEditDraft && (
                       <span className="text-xs text-blue-500 ml-2">
                         (You can edit)
                       </span>
                     )}
                   </FormRow>
 
-                  {/* FIXED: Supervisor Rating - visible and editable only by supervisor or admin */}
-                  {(isSupervisor || isAdmin) && (
+                  {/* Supervisor Rating - visible and editable only by supervisor or admin in pending mode */}
+                  {(isSupervisor || isAdmin) && isPending && (
                     <FormRow label="Supervisor Rating">
                       <Select
                         id={`sup-rating-${index}`}
@@ -661,18 +732,10 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                             value
                           )
                         }
-                        options={[
-                          { id: "", name: "Select Rating" },
-                          { id: "Achieved", name: "Achieved (3 pts)" },
-                          {
-                            id: "Partly Achieved",
-                            name: "Partly Achieved (2 pts)",
-                          },
-                          { id: "Not Achieved", name: "Not Achieved (0 pts)" },
-                        ]}
-                        disabled={!canEditSupervisorSections && !isAdmin}
+                        options={RATING_OPTIONS}
+                        disabled={!canSupervisorEdit && !canAdminEdit}
                       />
-                      {canEditSupervisorSections && (
+                      {canSupervisorEdit && (
                         <span className="text-xs text-green-500 ml-2">
                           (You can edit)
                         </span>
@@ -685,11 +748,14 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
           </div>
         ) : (
           <p className="text-gray-500 italic text-center py-4">
-            No objectives found
+            No objectives loaded.{" "}
+            {isStaff &&
+              isDraft &&
+              "Select a period and load from staff strategy above."}
           </p>
         )}
 
-        {/* Safeguarding Section - Visible to both staff and supervisor */}
+        {/* Safeguarding Section */}
         <div className="mt-6 p-4 bg-white rounded-lg border">
           <h4 className="font-semibold text-gray-700 mb-3">Safeguarding</h4>
 
@@ -703,9 +769,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                 handleSafeguardingChange("actionsTaken", e.target.value)
               }
               placeholder="I followed due process and protocols..."
-              disabled={!canEditStaffSections && !isAdmin}
+              disabled={!canStaffEditDraft && !canAdminEdit}
             />
-            {canEditStaffSections && (
+            {canStaffEditDraft && (
               <span className="text-xs text-blue-500">(You can edit)</span>
             )}
           </FormRow>
@@ -729,7 +795,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                       )
                     }
                     className="h-4 w-4"
-                    disabled={!canEditStaffSections && !isAdmin}
+                    disabled={!canStaffEditDraft && !canAdminEdit}
                   />
                   <span>{option}</span>
                 </label>
@@ -746,13 +812,17 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                   onChange={(e) => setAreasNotUnderstoodInput(e.target.value)}
                   placeholder="Add an area you don't understand"
                   className="flex-1"
-                  disabled={!canEditStaffSections && !isAdmin}
+                  disabled={!canStaffEditDraft && !canAdminEdit}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" &&
+                    (e.preventDefault(), addAreaNotUnderstood())
+                  }
                 />
                 <Button
                   type="button"
                   onClick={addAreaNotUnderstood}
                   size="small"
-                  disabled={!canEditStaffSections && !isAdmin}
+                  disabled={!canStaffEditDraft && !canAdminEdit}
                 >
                   Add
                 </Button>
@@ -765,14 +835,15 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                   className="flex items-center justify-between bg-gray-100 p-2 rounded"
                 >
                   <span>{area}</span>
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => removeAreaNotUnderstood(idx)}
                     className="text-red-500 hover:text-red-700"
-                    disabled={!canEditStaffSections && !isAdmin}
+                    disabled={!canStaffEditDraft && !canAdminEdit}
                   >
                     ×
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -780,13 +851,13 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         </div>
       </div>
 
-      {/* FIXED: Section 3: Performance Areas - Only visible to supervisors and admins */}
-      {(isSupervisor || isAdmin) && (
-        <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      {/* Section 3: Supervisor's Assessment - Only visible to supervisors and admins in pending mode */}
+      {(isSupervisor || isAdmin) && isPending && (
+        <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
             <UserCog className="h-5 w-5 mr-2" />
-            SECTION 3: SUPERVISOR'S ASSESSMENT{" "}
-            {canEditSupervisorSections && (
+            SECTION 3: SUPERVISOR'S ASSESSMENT
+            {canSupervisorEdit && (
               <span className="text-xs text-green-500 ml-2">
                 (You can edit)
               </span>
@@ -797,7 +868,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             {formData.performanceAreas?.map((area, index) => (
               <div
                 key={index}
-                className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-white rounded-lg"
+                className="flex flex-col md:flex-row md:items-center md:justify-between p-3 bg-gray-50 rounded-lg"
               >
                 <span className="font-medium text-gray-700 mb-2 md:mb-0">
                   {area.area}:
@@ -819,7 +890,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                     },
                   ]}
                   className="w-full md:w-64"
-                  disabled={!canEditSupervisorSections && !isAdmin}
+                  disabled={!canSupervisorEdit && !canAdminEdit}
                 />
               </div>
             ))}
@@ -833,9 +904,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
                 handleFormChange("supervisorComments", e.target.value)
               }
               placeholder="Enter supervisor's comments..."
-              disabled={!canEditSupervisorSections && !isAdmin}
+              disabled={!canSupervisorEdit && !canAdminEdit}
             />
-            {canEditSupervisorSections && (
+            {canSupervisorEdit && (
               <span className="text-xs text-green-500">(You can edit)</span>
             )}
           </FormRow>
@@ -846,29 +917,18 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
               customLabel="Select Overall Rating"
               value={formData.overallRating || ""}
               onChange={(value) => handleFormChange("overallRating", value)}
-              options={[
-                { id: "Pending", name: "Pending" },
-                { id: "Meets Requirements", name: "Meets Requirements" },
-                {
-                  id: "Partly Meets Requirements",
-                  name: "Partly Meets Requirements",
-                },
-                {
-                  id: "Does Not Meet Requirements",
-                  name: "Does Not Meet Requirements",
-                },
-              ]}
-              disabled={!canEditSupervisorSections && !isAdmin}
+              options={OVERALL_RATINGS}
+              disabled={!canSupervisorEdit && !canAdminEdit}
             />
-            {canEditSupervisorSections && (
+            {canSupervisorEdit && (
               <span className="text-xs text-green-500">(You can edit)</span>
             )}
           </FormRow>
         </div>
       )}
 
-      {/* Section 4: Future Goals - Visible to both */}
-      <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+      {/* Section 4: Future Goals */}
+      <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
           SECTION 4: FUTURE GOALS
         </h3>
@@ -879,9 +939,9 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             value={formData.futureGoals}
             onChange={(e) => handleFormChange("futureGoals", e.target.value)}
             placeholder="Enter future goals..."
-            disabled={!canEditStaffSections && !isAdmin}
+            disabled={!canStaffEditDraft && !canAdminEdit}
           />
-          {canEditStaffSections && (
+          {canStaffEditDraft && (
             <span className="text-xs text-blue-500">(You can edit)</span>
           )}
         </FormRow>
@@ -899,16 +959,40 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
         </FormRow>
       </Row>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Same as FormAddAppraisal for draft mode */}
       <div className="flex justify-center w-full gap-4 pt-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Button type="submit" size="medium" disabled={isUpdating}>
-            {isUpdating ? <SpinnerMini /> : "Update Appraisal"}
-          </Button>
-
-          {canSend && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Save Draft button - only for staff in draft mode */}
+          {canStaffEditDraft && (
             <Button
               type="submit"
+              size="medium"
+              variant="secondary"
+              disabled={isUpdating}
+              className="min-w-[140px]"
+            >
+              {isUpdating ? (
+                <SpinnerMini />
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Draft
+                </>
+              )}
+            </Button>
+          )}
+
+          {/* Update button for supervisors/admins */}
+          {(canSupervisorEdit || canAdminEdit) && !canStaffEditDraft && (
+            <Button type="submit" size="medium" disabled={isUpdating}>
+              {isUpdating ? <SpinnerMini /> : "Update Appraisal"}
+            </Button>
+          )}
+
+          {/* Submit button - only for staff in draft mode */}
+          {canSubmit && (
+            <Button
+              type="button"
               size="medium"
               disabled={isSubmitting || !isFormValid}
               className="min-w-[140px]"
@@ -919,7 +1003,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Create Appraisal
+                  Submit Appraisal
                 </>
               )}
             </Button>
@@ -929,12 +1013,19 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
             type="button"
             size="medium"
             variant="secondary"
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
           >
             Cancel
           </Button>
         </div>
       </div>
+
+      {/* Form Status */}
+      {isDraft && !isFormValid && (
+        <p className="text-center text-sm text-amber-600">
+          Please complete all required fields (*) to submit appraisal
+        </p>
+      )}
     </form>
   );
 };

@@ -5,7 +5,8 @@ import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import SystemInfo from "../../ui/SystemInfo";
 import Button from "../../ui/Button";
-import { CheckCircle, PenTool, Edit } from "lucide-react";
+// import { CheckCircle, PenTool, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
 
 interface AppraisalDetailsProps {
   request: AppraisalType;
@@ -380,7 +381,7 @@ export const AppraisalDetails = ({
         )}
 
         {/* Section 5: Signatures */}
-        <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
+        {/* <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
           <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
             SECTION 5: SIGNATURES
           </h3>
@@ -444,7 +445,7 @@ export const AppraisalDetails = ({
               )}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Scores Summary */}
         {request.scores && (

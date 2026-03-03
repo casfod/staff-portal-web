@@ -33,6 +33,7 @@ const Select: React.FC<SelectProps> = ({
   optionsHeight = "auto",
   filterable = false,
   clearable = true, // Default to true
+  disabled = false, // Add default value
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState<any>(value);
@@ -82,6 +83,8 @@ const Select: React.FC<SelectProps> = ({
   }, [isOpen, selectedValue, filteredOptions]);
 
   const handleSelect = (val: string) => {
+    if (disabled) return; // Don't allow selection when disabled
+
     setSelectedValue(val);
     onChange(val);
     setIsOpen(false);
@@ -91,13 +94,16 @@ const Select: React.FC<SelectProps> = ({
   // New reset function
   const handleReset = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the select open/close
+
+    if (disabled) return; // Don't allow reset when disabled
+
     setSelectedValue(null);
     onChange("");
     setSearchTerm("");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (!isOpen) return;
+    if (disabled || !isOpen) return; // Don't handle keys when disabled
 
     switch (e.key) {
       case "ArrowDown":
@@ -128,17 +134,23 @@ const Select: React.FC<SelectProps> = ({
     }
   };
 
+  const handleTriggerClick = () => {
+    if (disabled) return; // Don't open dropdown when disabled
+    setIsOpen(!isOpen);
+    setSearchTerm("");
+  };
+
   const selectedOption = options.find((option) => option.id === selectedValue);
 
   return (
     <div
-      className="  relative w-full md:w-[250px]"
+      className="relative w-full md:w-[250px]"
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
       {/* Label */}
       {label && (
-        <label htmlFor={id} className="block mb-1 font-bold text-sm  ">
+        <label htmlFor={id} className="block mb-1 font-bold text-sm">
           {label}
         </label>
       )}
@@ -147,15 +159,17 @@ const Select: React.FC<SelectProps> = ({
       <div
         id={id}
         className={`w-full h-10 px-4 py-1.5 rounded-md border ${
-          isOpen ? "border-primary" : "border-gray-300"
-        } focus:outline-none shadow-sm   flex items-center justify-between cursor-pointer bg-white`}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setSearchTerm("");
-        }}
+          isOpen && !disabled ? "border-primary" : "border-gray-300"
+        } focus:outline-none shadow-sm flex items-center justify-between cursor-pointer ${
+          disabled
+            ? "bg-gray-100 cursor-not-allowed opacity-60"
+            : "bg-white hover:border-gray-400"
+        }`}
+        onClick={handleTriggerClick}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
       >
         <span className="truncate">
           {selectedOption
@@ -164,12 +178,12 @@ const Select: React.FC<SelectProps> = ({
         </span>
 
         <div className="flex items-center gap-1">
-          {/* Clear button (only shown when there's a selected value and clearable is true) */}
-          {clearable && selectedValue && (
+          {/* Clear button (only shown when there's a selected value, clearable is true, and not disabled) */}
+          {clearable && selectedValue && !disabled && (
             <button
               type="button"
               onClick={handleReset}
-              className="text-gray-400 hover:  transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Clear selection"
             >
               <X size={16} />
@@ -177,7 +191,7 @@ const Select: React.FC<SelectProps> = ({
           )}
           <span
             className={`transform transition-transform ${
-              isOpen ? "rotate-180" : ""
+              isOpen && !disabled ? "rotate-180" : ""
             }`}
           >
             ▼
@@ -185,11 +199,10 @@ const Select: React.FC<SelectProps> = ({
         </div>
       </div>
 
-      {/* Options Dropdown */}
-      {isOpen && (
+      {/* Options Dropdown - only render when open and not disabled */}
+      {isOpen && !disabled && (
         <div
           className="absolute z-10 w-full max-h-52 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
-          // className="absolute w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
           style={{
             maxHeight:
               typeof optionsHeight === "number"
@@ -218,7 +231,7 @@ const Select: React.FC<SelectProps> = ({
             filteredOptions.map((option, index) => (
               <div
                 key={option.id}
-                className={` bg-gray-50 px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
                   selectedValue === option.id ? "bg-blue-50 font-medium" : ""
                 } ${focusedIndex === index ? "bg-gray-200" : ""}`}
                 onClick={() => handleSelect(option.id)}
@@ -229,7 +242,7 @@ const Select: React.FC<SelectProps> = ({
               </div>
             ))
           ) : (
-            <div className="px-4 py-2   text-center">No options found</div>
+            <div className="px-4 py-2 text-center">No options found</div>
           )}
         </div>
       )}
