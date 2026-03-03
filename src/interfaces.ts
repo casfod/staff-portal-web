@@ -56,10 +56,6 @@ export interface useUsersType {
   };
 }
 
-///////////////////////
-//User
-///////////////////////
-
 export interface UserType {
   id?: string;
   first_name: string;
@@ -1467,4 +1463,229 @@ export interface UseStaffStrategy {
   status: number;
   message: string;
   data: StaffStrategyType;
+}
+
+///////////////////////
+// StaffStrategyType
+///////////////////////
+
+export interface ObjectiveType {
+  objective: string;
+  timeline: string;
+  expectedOutcome: string;
+  kpi: string;
+  possibleChallenges?: string;
+  supportRequired?: string;
+}
+
+export interface AccountabilityAreaType {
+  areaName: string;
+  objectives: ObjectiveType[];
+}
+
+export interface StaffStrategyType {
+  id: string;
+  strategyCode: string;
+  staffName?: string;
+  staffId?: any;
+  jobTitle?: string;
+  department: string;
+  supervisor?: string;
+  supervisorId?: any;
+  date: string;
+  period: string;
+  accountabilityAreas: AccountabilityAreaType[];
+  comments: Comment[];
+  createdBy: UserType | any;
+  createdAt: any;
+  updatedAt: any;
+  status: "pending" | "approved" | "rejected" | "draft";
+  approvedBy: any;
+  files: FileType[];
+  pdfUrl?: string;
+  cloudinaryId?: string;
+}
+
+export interface UseStaffStrategyType {
+  status: number;
+  message: string;
+  data: {
+    strategies: StaffStrategyType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UseStaffStrategy {
+  status: number;
+  message: string;
+  data: StaffStrategyType;
+}
+
+// src/interfaces.ts (add these to your existing Appraisal types)
+
+///////////////////////
+// Appraisal Types
+///////////////////////
+
+export interface ObjectiveRatingType {
+  _id?: string;
+  objective: string;
+  employeeRating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+  supervisorRating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+  employeePoints: number;
+  supervisorPoints: number;
+  // FIXED: Add pending state
+  supervisorRatingStatus?: "pending" | "completed";
+}
+
+export interface PerformanceAreaType {
+  area:
+    | "Not Rated"
+    | "Job Knowledge"
+    | "Judgement"
+    | "Reliability"
+    | "Quality & Quantity of Work"
+    | "Interpersonal and Communication Skills"
+    | "Teamwork";
+  rating:
+    | "Pending"
+    | "Needs Improvement"
+    | "Meets Expectations"
+    | "Exceeds Expectations";
+  // FIXED: Add pending state
+  supervisorStatus?: "pending" | "completed";
+}
+
+export interface SafeguardingType {
+  actionsTaken: string;
+  trainingCompleted: "Yes" | "Partly" | "No";
+  areasNotUnderstood: string[];
+  // FIXED: Add pending state
+  supervisorStatus?: "pending" | "completed";
+}
+
+export interface AppraisalSignaturesType {
+  staffSignature: boolean;
+  staffSignatureDate?: string;
+  staffComments?: string;
+  supervisorSignature: boolean;
+  supervisorSignatureDate?: string;
+  hrComments?: string;
+}
+
+export interface AppraisalScoresType {
+  employeeTotal: number;
+  supervisorTotal: number;
+  performanceAreasCount: {
+    needsImprovement: number;
+    meetsExpectations: number;
+    exceedsExpectations: number;
+  };
+}
+
+export interface AppraisalType {
+  id: string;
+  appraisalCode: string;
+
+  // Staff Information
+  staffId: any;
+  staffName: string;
+  position: string;
+  department: string;
+  lengthOfTimeInPosition: string;
+  appraisalPeriod: string;
+  dateOfAppraisal: string;
+
+  // Supervisor Information
+  supervisorId: any;
+  supervisorName: string;
+  lengthOfTimeSupervised: string;
+  // FIXED: Add supervisor status
+  supervisorStatus: "pending" | "completed";
+
+  // Section 2: Objectives
+  objectives: ObjectiveRatingType[];
+
+  // Safeguarding
+  safeguarding: SafeguardingType;
+
+  // Section 3: Performance Areas
+  performanceAreas: PerformanceAreaType[];
+  supervisorComments: string;
+  overallRating:
+    | "Pending"
+    | "Meets Requirements"
+    | "Partly Meets Requirements"
+    | "Does Not Meet Requirements";
+
+  // Section 4: Future Goals
+  futureGoals: string;
+
+  // Section 5: Signatures
+  signatures: AppraisalSignaturesType;
+
+  // Calculated scores
+  scores: AppraisalScoresType;
+
+  // Comments
+  comments: Comment[];
+
+  // Metadata
+  createdBy: any;
+  createdAt: string;
+  updatedAt: string;
+
+  // Status
+  status: "pending" | "approved" | "rejected" | "draft";
+
+  submittedByEmployee: boolean;
+  submittedBySupervisor: boolean;
+  completedAt?: string;
+
+  // Files
+  files: FileType[];
+  pdfUrl?: string;
+  cloudinaryId?: string;
+
+  // For form submissions
+  comment?: string;
+  staffStrategy: StaffStrategyType | string | null;
+}
+
+export interface UseAppraisalType {
+  status: number;
+  message: string;
+  data: {
+    appraisals: AppraisalType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UseAppraisal {
+  status: number;
+  message: string;
+  data: AppraisalType;
+}
+
+export interface UseAppraisalStatsType {
+  status: number;
+  message: string;
+  data: {
+    byStatus: Array<{
+      _id: string;
+      count: number;
+      avgEmployeeScore: number;
+      avgSupervisorScore: number;
+    }>;
+    overall: {
+      total: number;
+      completed: number;
+      pending: number;
+      draft: number;
+    };
+  };
 }

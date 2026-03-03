@@ -85,6 +85,11 @@ import CreateStaffStrategy from "./features/staff-strategy/CreateStaffStrategy.t
 import StaffStrategy from "./features/staff-strategy/StaffStrategy.tsx";
 import EditStaffStrategy from "./features/staff-strategy/EditStaffStrategy.tsx";
 import StaffStrategyManagement from "./pages/StaffStrategyManagement.tsx";
+import AppraisalManagement from "./pages/AppraisalManagement.tsx";
+import { AllAppraisals } from "./features/appraisal/AllAppraisals.tsx";
+import CreateAppraisal from "./features/appraisal/CreateAppraisal.tsx";
+import Appraisal from "./features/appraisal/Appraisal.tsx";
+import EditAppraisal from "./features/appraisal/EditAppraisal.tsx";
 
 const router = createBrowserRouter([
   {
@@ -756,6 +761,56 @@ const router = createBrowserRouter([
                   <AnimatedRoute
                     key="staff-strategy-edit" // ✅ Changed from "edit-leave"
                     element={<EditStaffStrategy />}
+                  />
+                ),
+              },
+            ],
+          },
+
+          // In your router configuration, add:
+          {
+            path: "appraisals",
+            element: (
+              <AnimatedRoute
+                key="appraisal"
+                element={<AppraisalManagement />}
+              />
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <AnimatedRoute
+                    key="all-appraisals"
+                    element={<AllAppraisals />}
+                  />
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <AnimatedRoute
+                    key="create-appraisal"
+                    element={<CreateAppraisal />}
+                  />
+                ),
+              },
+              {
+                path: ":appraisalId",
+                element: (
+                  <AnimatedRoute
+                    key="appraisal-detail"
+                    element={<Appraisal />}
+                  />
+                ),
+              },
+              {
+                path: "edit/:appraisalId",
+                element: (
+                  <AnimatedRoute
+                    key="edit-appraisal"
+                    element={<EditAppraisal />}
                   />
                 ),
               },

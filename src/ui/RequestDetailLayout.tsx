@@ -169,15 +169,17 @@ const RequestDetailLayout = ({
 
   const getStatusOptions = () => {
     const options = [];
-  
+
     // Check if this is a purchase order (has POCode field)
     const isPurchaseOrder = request?.POCode !== undefined;
-  
-    if (isPurchaseOrder) {
+    const isStaffStrategy = request?.strategyCode !== undefined;
+    const isAppraisal = request?.appraisalCode !== undefined;
+
+    if (isPurchaseOrder || isStaffStrategy || isAppraisal) {
       // Purchase orders have direct approval
       options.push(
-        { value: "approved", label: "Approve Purchase Order" },
-        { value: "rejected", label: "Reject Purchase Order" }
+        { value: "approved", label: "Approve" },
+        { value: "rejected", label: "Reject" }
       );
     } else if (canReviewFinance) {
       options.push(
@@ -204,7 +206,7 @@ const RequestDetailLayout = ({
       }
       options.push({ value: "rejected", label: "Reject" });
     }
-  
+
     return options;
   };
   const statusOptions = getStatusOptions();
