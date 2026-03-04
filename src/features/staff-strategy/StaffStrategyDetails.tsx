@@ -110,7 +110,7 @@ export const StaffStrategyDetails = ({
                   key={areaIndex}
                   className="border-l-4 border-blue-500 pl-4"
                 >
-                  <h4 className="text-lg font-bold text-blue-800 mb-3">
+                  <h4 className="text-base font-bold text-blue-800 mb-3">
                     {area.areaName || "Unnamed Area"}
                   </h4>
 
@@ -123,7 +123,7 @@ export const StaffStrategyDetails = ({
                         >
                           {/* Objective title */}
                           <div>
-                            <label className="block text-lg font-bold mb-1 uppercase tracking-wide text-gray-600">
+                            <label className="block text-base font-bold mb-1 uppercase tracking-wide text-gray-600">
                               Objective {objIndex + 1}
                             </label>
                             <p className="text-gray-800 whitespace-pre-wrap">
