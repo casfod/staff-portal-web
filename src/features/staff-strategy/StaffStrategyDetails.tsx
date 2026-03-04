@@ -13,30 +13,9 @@ export const StaffStrategyDetails = ({
 }: StaffStrategyDetailsProps) => {
   const { requestId } = useParams();
 
-  console.log("SS:::::", request);
+  const createdBy: UserType | null = request.createdBy;
 
-  // Helper function to safely get user name
-  // const getUserName = (user: any) => {
-  //   if (!user) return "N/A";
-  //   if (typeof user === "object") {
-  //     return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A";
-  //   }
-  //   return "N/A";
-  // };
-
-  // Helper function to safely get user role
-  // const getUserRole = (user: any) => {
-  //   if (!user) return "N/A";
-  //   if (typeof user === "object") {
-  //     return user.role || "N/A";
-  //   }
-  //   return "N/A";
-  // };
-
-  // Helper to resolve supervisor — API may return a full user object or a plain string
   const getSupervisorName = (supervisor: any) => {
-    // console.log("supervisor:::", supervisor);
-
     if (!supervisor) return "N/A";
     if (typeof supervisor === "object") {
       return (
@@ -47,7 +26,46 @@ export const StaffStrategyDetails = ({
     return supervisor || "N/A";
   };
 
-  const createdBy: UserType | null = request.createdBy;
+  // Staff info fields config
+  const staffFields = [
+    {
+      label: "Staff Name",
+      value:
+        `${createdBy?.first_name ?? ""} ${createdBy?.last_name ?? ""}`.trim() ||
+        "N/A",
+    },
+    {
+      label: "Job Title",
+      value: createdBy?.employmentInfo?.jobDetails?.title || "N/A",
+    },
+    {
+      label: "Department",
+      value: request.department || "N/A",
+    },
+    {
+      label: "Supervisor",
+      value: getSupervisorName(
+        createdBy?.employmentInfo?.jobDetails?.supervisor
+      ),
+    },
+    {
+      label: "Period",
+      value: request.period || "N/A",
+    },
+  ];
+
+  // Objective fields config — defines which keys to show per objective
+  const objectiveFields: {
+    label: string;
+    key: keyof (typeof request.accountabilityAreas)[0]["objectives"][0];
+    always?: boolean;
+  }[] = [
+    { label: "Timeline", key: "timeline", always: true },
+    { label: "Expected Outcome", key: "expectedOutcome", always: true },
+    { label: "KPI", key: "kpi", always: true },
+    { label: "Possible Challenges", key: "possibleChallenges" },
+    { label: "Support Required", key: "supportRequired" },
+  ];
 
   return (
     <DetailContainer>
@@ -66,53 +84,22 @@ export const StaffStrategyDetails = ({
         {/* Staff Information Section */}
         <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
           <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
-            STAFF INFOMATION
+            STAFF INFORMATION
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
-                Staff Name
-              </label>
-              <p className="text-gray-800">
-                {`${createdBy?.first_name} ${createdBy?.last_name}` || "N/A"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
-                Job Title
-              </label>
-              <p className="text-gray-800">
-                {createdBy?.employmentInfo?.jobDetails?.title || "N/A"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
-                Department
-              </label>
-              <p className="text-gray-800">{request.department || "N/A"}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
-                Supervisor
-              </label>
-              <p className="text-gray-800">
-                {getSupervisorName(
-                  createdBy?.employmentInfo?.jobDetails?.supervisor
-                )}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
-                Period
-              </label>
-              <p className="text-gray-800">{request.period || "N/A"}</p>
-            </div>
+            {staffFields.map(({ label, value }) => (
+              <div key={label}>
+                <label className="block text-sm font-extrabold mb-1 uppercase tracking-wide text-gray-600">
+                  {label}
+                </label>
+                <p className="text-gray-800 whitespace-pre-wrap">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Accountability Areas Section */}
-        {request.accountabilityAreas &&
-        request.accountabilityAreas.length > 0 ? (
+        {request.accountabilityAreas?.length > 0 ? (
           <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
             <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
               ACCOUNTABILITY AREAS & OBJECTIVES
@@ -127,68 +114,38 @@ export const StaffStrategyDetails = ({
                     {area.areaName || "Unnamed Area"}
                   </h4>
 
-                  {area.objectives && area.objectives.length > 0 ? (
+                  {area.objectives?.length > 0 ? (
                     <div className="space-y-4">
                       {area.objectives.map((objective, objIndex) => (
                         <div
                           key={objIndex}
-                          className="bg-white p-4 rounded-lg shadow-sm"
+                          className="bg-white p-4 rounded-lg shadow-sm flex flex-col gap-4"
                         >
-                          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
-                          <div className="flex flex-col gap-4">
-                            <div className="md:col-span-2">
-                              <label className="block text-md font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                Objective {objIndex + 1}
-                              </label>
-                              <p className="text-gray-800">
-                                {objective.objective || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                Timeline
-                              </label>
-                              <p className="text-gray-800">
-                                {objective.timeline || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                Expected Outcome
-                              </label>
-                              <p className="text-gray-800">
-                                {objective.expectedOutcome || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                KPI
-                              </label>
-                              <p className="text-gray-800">
-                                {objective.kpi || "N/A"}
-                              </p>
-                            </div>
-                            {objective.possibleChallenges && (
-                              <div>
-                                <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                  Possible Challenges
-                                </label>
-                                <p className="text-gray-800">
-                                  {objective.possibleChallenges}
-                                </p>
-                              </div>
-                            )}
-                            {objective.supportRequired && (
-                              <div>
-                                <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                                  Support Required
-                                </label>
-                                <p className="text-gray-800">
-                                  {objective.supportRequired}
-                                </p>
-                              </div>
-                            )}
+                          {/* Objective title */}
+                          <div>
+                            <label className="block text-md font-bold mb-1 uppercase tracking-wide text-gray-600">
+                              Objective {objIndex + 1}
+                            </label>
+                            <p className="text-gray-800 whitespace-pre-wrap">
+                              {objective.objective || "N/A"}
+                            </p>
                           </div>
+
+                          {/* Remaining objective fields */}
+                          {objectiveFields.map(({ label, key, always }) => {
+                            const value = objective[key];
+                            if (!always && !value) return null;
+                            return (
+                              <div key={key}>
+                                <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
+                                  {label}
+                                </label>
+                                <p className="text-gray-800 whitespace-pre-wrap">
+                                  {value || "N/A"}
+                                </p>
+                              </div>
+                            );
+                          })}
                         </div>
                       ))}
                     </div>
@@ -209,11 +166,8 @@ export const StaffStrategyDetails = ({
           </div>
         )}
 
-        {/* Approval Chain Section */}
-
         <SystemInfo request={request} />
 
-        {/* File Attachments Section */}
         {request.files && request.files.length > 0 && (
           <FileAttachmentContainer files={request.files} />
         )}
