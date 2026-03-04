@@ -123,7 +123,7 @@ export const StaffStrategyDetails = ({
                         >
                           {/* Objective title */}
                           <div>
-                            <label className="block text-md font-bold mb-1 uppercase tracking-wide text-gray-600">
+                            <label className="block text font-bold mb-1 uppercase tracking-wide text-gray-600">
                               Objective {objIndex + 1}
                             </label>
                             <p className="text-gray-800 whitespace-pre-wrap">
@@ -137,7 +137,7 @@ export const StaffStrategyDetails = ({
                             if (!always && !value) return null;
                             return (
                               <div key={key}>
-                                <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
+                                <label className="block text-sm font-bold mb-1 uppercase tracking-wide text-gray-600">
                                   {label}
                                 </label>
                                 <p className="text-gray-800 whitespace-pre-wrap">
