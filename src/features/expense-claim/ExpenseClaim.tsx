@@ -129,10 +129,12 @@ const ExpenseClaim = () => {
     multiPage: true,
 
     titleOptions: {
-      text: `Expense Claim : ${capitalizeFirstLetter(request?.status ?? "")}`,
+      text: `CASFOD Expense Claim : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
     },
     footerCode: {
-      label: "Expense Claim",
+      label: "CASFOD Expense Claim",
       value: request?.ecNumber ?? "",
     },
   });
