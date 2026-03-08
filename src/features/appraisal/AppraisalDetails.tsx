@@ -1,3 +1,4 @@
+import React from "react";
 // src/features/appraisal/AppraisalDetails.tsx
 import { AppraisalType, UserType } from "../../interfaces";
 import { useParams, useNavigate } from "react-router-dom";
@@ -28,23 +29,26 @@ export const AppraisalDetails = ({
   const { appraisalId } = useParams();
   const navigate = useNavigate();
 
-  const getRatingDisplay = (rating: string) => {
-    const colors = {
-      Achieved: "text-green-600 bg-green-100",
-      "Partly Achieved": "text-yellow-600 bg-yellow-100",
-      "Not Achieved": "text-red-600 bg-red-100",
-      "": "text-gray-600 bg-gray-100",
+  // Inline styles instead of dynamic Tailwind classes — dynamic class strings
+  // are purged by Tailwind JIT and never make it into the CSS bundle, which
+  // means they also won't render in html2canvas PDF captures.
+  const getRatingStyle = (rating: string): React.CSSProperties => {
+    const map: Record<string, React.CSSProperties> = {
+      Achieved: { color: "#16a34a", backgroundColor: "#dcfce7" },
+      "Partly Achieved": { color: "#ca8a04", backgroundColor: "#fef9c3" },
+      "Not Achieved": { color: "#dc2626", backgroundColor: "#fee2e2" },
+      "": { color: "#4b5563", backgroundColor: "#f3f4f6" },
     };
-    return colors[rating as keyof typeof colors] || "text-gray-600 bg-gray-100";
+    return map[rating] ?? { color: "#4b5563", backgroundColor: "#f3f4f6" };
   };
 
-  const getPerformanceRatingDisplay = (rating: string) => {
-    const colors = {
-      "Exceeds Expectations": "text-green-600 bg-green-100",
-      "Meets Expectations": "text-blue-600 bg-blue-100",
-      "Needs Improvement": "text-orange-600 bg-orange-100",
+  const getPerformanceRatingStyle = (rating: string): React.CSSProperties => {
+    const map: Record<string, React.CSSProperties> = {
+      "Exceeds Expectations": { color: "#16a34a", backgroundColor: "#dcfce7" },
+      "Meets Expectations": { color: "#2563eb", backgroundColor: "#dbeafe" },
+      "Needs Improvement": { color: "#ea580c", backgroundColor: "#ffedd5" },
     };
-    return colors[rating as keyof typeof colors] || "text-gray-600 bg-gray-100";
+    return map[rating] ?? { color: "#4b5563", backgroundColor: "#f3f4f6" };
   };
 
   const getSupervisorName = (supervisor: any) => {
@@ -70,7 +74,7 @@ export const AppraisalDetails = ({
     <DetailContainer>
       {/* Appraisal Header */}
       {request?.appraisalCode && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-3">
           {request.appraisalCode}
         </h1>
       )}
@@ -190,8 +194,11 @@ export const AppraisalDetails = ({
             <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
               SECTION 2: PERFORMANCE OBJECTIVES
             </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div style={{ width: "100%", overflowX: "visible" }}>
+              <table
+                style={{ width: "100%", borderCollapse: "collapse" }}
+                className="min-w-full divide-y divide-gray-200"
+              >
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -214,9 +221,8 @@ export const AppraisalDetails = ({
                       <td className="px-4 py-3">
                         {obj.employeeRating ? (
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getRatingDisplay(
-                              obj.employeeRating
-                            )}`}
+                            style={getRatingStyle(obj.employeeRating)}
+                            className="px-2 py-1 rounded-full text-xs font-medium"
                           >
                             {obj.employeeRating} ({obj.employeePoints} pts)
                           </span>
@@ -232,9 +238,8 @@ export const AppraisalDetails = ({
                       <td className="px-4 py-3">
                         {obj.supervisorRating ? (
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getRatingDisplay(
-                              obj.supervisorRating
-                            )}`}
+                            style={getRatingStyle(obj.supervisorRating)}
+                            className="px-2 py-1 rounded-full text-xs font-medium"
                           >
                             {obj.supervisorRating} ({obj.supervisorPoints} pts)
                           </span>
@@ -291,13 +296,14 @@ export const AppraisalDetails = ({
                       Training Completed
                     </label>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      style={
                         request.safeguarding.trainingCompleted === "Yes"
-                          ? "text-green-600 bg-green-100"
+                          ? { color: "#16a34a", backgroundColor: "#dcfce7" }
                           : request.safeguarding.trainingCompleted === "Partly"
-                          ? "text-yellow-600 bg-yellow-100"
-                          : "text-red-600 bg-red-100"
-                      }`}
+                          ? { color: "#ca8a04", backgroundColor: "#fef9c3" }
+                          : { color: "#dc2626", backgroundColor: "#fee2e2" }
+                      }
+                      className="px-2 py-1 rounded-full text-xs font-medium"
                     >
                       {request.safeguarding.trainingCompleted}
                     </span>
@@ -340,9 +346,8 @@ export const AppraisalDetails = ({
                     {area.area}:
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getPerformanceRatingDisplay(
-                      area.rating
-                    )}`}
+                    style={getPerformanceRatingStyle(area.rating)}
+                    className="px-3 py-1 rounded-full text-xs font-medium"
                   >
                     {area.rating}
                   </span>
@@ -368,13 +373,15 @@ export const AppraisalDetails = ({
                   Overall Assessment
                 </label>
                 <p
-                  className={`font-semibold ${
-                    request.overallRating === "Meets Requirements"
-                      ? "text-green-600"
-                      : request.overallRating === "Partly Meets Requirements"
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }`}
+                  style={{
+                    color:
+                      request.overallRating === "Meets Requirements"
+                        ? "#16a34a"
+                        : request.overallRating === "Partly Meets Requirements"
+                        ? "#ca8a04"
+                        : "#dc2626",
+                    fontWeight: 600,
+                  }}
                 >
                   {request.overallRating}
                 </p>
@@ -469,13 +476,19 @@ export const AppraisalDetails = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white p-3 rounded-lg text-center">
                 <div className="text-sm text-gray-600">Employee Total</div>
-                <div className="text-2xl font-bold text-blue-600">
+                <div
+                  style={{ color: "#2563eb" }}
+                  className="text-2xl font-bold"
+                >
                   {request.scores.employeeTotal}
                 </div>
               </div>
               <div className="bg-white p-3 rounded-lg text-center">
                 <div className="text-sm text-gray-600">Supervisor Total</div>
-                <div className="text-2xl font-bold text-green-600">
+                <div
+                  style={{ color: "#16a34a" }}
+                  className="text-2xl font-bold"
+                >
                   {request.scores.supervisorTotal}
                 </div>
               </div>
@@ -484,15 +497,15 @@ export const AppraisalDetails = ({
                   Performance Areas
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-orange-600">
+                  <span style={{ color: "#ea580c" }}>
                     Needs Improvement:{" "}
                     {request.scores.performanceAreasCount.needsImprovement}
                   </span>
-                  <span className="text-blue-600">
+                  <span style={{ color: "#2563eb" }}>
                     Meets:{" "}
                     {request.scores.performanceAreasCount.meetsExpectations}
                   </span>
-                  <span className="text-green-600">
+                  <span style={{ color: "#16a34a" }}>
                     Exceeds:{" "}
                     {request.scores.performanceAreasCount.exceedsExpectations}
                   </span>

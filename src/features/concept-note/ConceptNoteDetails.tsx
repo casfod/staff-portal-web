@@ -88,7 +88,7 @@ export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
     <DetailContainer>
       {/* Concept Note Details Section */}
       {request?.cnNumber && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-3">
           {request?.cnNumber}
         </h1>
       )}

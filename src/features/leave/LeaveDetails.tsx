@@ -67,7 +67,7 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
   return (
     <DetailContainer>
       {request?.leaveNumber && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-3">
           {request?.leaveNumber}
         </h1>
       )}

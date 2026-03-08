@@ -1,0 +1,503 @@
+// generatePdf.ts - Unified version with footerCode support and File return mode
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
+export type PdfOptions = {
+  title?: string;
+  filename?: string;
+  format?: "a4" | "a3" | "letter" | "legal";
+  orientation?: "portrait" | "landscape";
+  scale?: number;
+  margin?: number;
+  quality?: number;
+  backgroundColor?: string;
+  letterRendering?: boolean;
+  enableLinks?: boolean;
+  pagebreak?: {
+    mode?: "css";
+    avoid?: string[];
+  };
+  multiPage?: boolean;
+  titleOptions?: {
+    text?: string;
+    fontSize?: number;
+    fontStyle?: "normal" | "bold" | "italic" | "bolditalic";
+    color?: string;
+    marginBottom?: number;
+  };
+  footerOptions?: {
+    left?: string;
+    right?: string | ((currentPage: number, totalPages: number) => string);
+    center?: string;
+    fontSize?: number;
+    color?: string;
+    lineColor?: string;
+    marginTop?: number;
+  };
+  /**
+   * Shorthand footer: renders "Code: <value>  |  Page N of M" at the bottom.
+   * If footerOptions is also provided, footerOptions takes precedence.
+   */
+  footerCode?: {
+    label?: string; // e.g. "PV Number" — defaults to "Code"
+    value: string; // e.g. "CASFOD/MF2025/11/2025/004"
+  };
+  /**
+   * When true, generatePdf returns a File object instead of saving/downloading.
+   * Use this when you need to upload the PDF rather than trigger a browser download.
+   */
+  returnFile?: boolean;
+  save?: boolean;
+};
+
+const defaultOptions: PdfOptions = {
+  filename: "document.pdf",
+  format: "a4",
+  orientation: "portrait",
+  scale: 2,
+  margin: 10,
+  quality: 1,
+  backgroundColor: "#FFFFFF",
+  letterRendering: true,
+  enableLinks: true,
+  pagebreak: {
+    mode: "css",
+    avoid: [".pdf-avoid-break"],
+  },
+  multiPage: false,
+  titleOptions: {
+    text: "",
+    fontSize: 16,
+    fontStyle: "bold",
+    color: "#000000",
+    marginBottom: 5,
+  },
+  save: true,
+};
+
+const getPdfDimensions = (format: string, orientation: string) => {
+  const pageSizes: Record<string, [number, number]> = {
+    a4: [210, 297],
+    a3: [297, 420],
+    letter: [215.9, 279.4],
+    legal: [215.9, 355.6],
+  };
+
+  const [width, height] = pageSizes[format] || pageSizes.a4;
+  return orientation === "landscape"
+    ? { width: height, height: width }
+    : { width, height };
+};
+
+/**
+ * Render a footer line at the bottom of the current PDF page.
+ * Used by both footerCode shorthand and custom footerOptions.
+ */
+const renderFooter = (
+  pdf: jsPDF,
+  pdfWidth: number,
+  pdfHeight: number,
+  margin: number,
+  currentPage: number,
+  totalPages: number,
+  footerOptions?: PdfOptions["footerOptions"],
+  footerCode?: PdfOptions["footerCode"]
+) => {
+  // Resolve which footer to render — footerOptions wins if both provided
+  if (footerOptions) {
+    const footer = footerOptions;
+    pdf.setFontSize(footer.fontSize || 9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(footer.color || "#666666");
+
+    if (footer.lineColor) {
+      pdf.setDrawColor(footer.lineColor);
+      pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
+    }
+
+    if (footer.left) {
+      pdf.text(footer.left, margin, pdfHeight - 5);
+    }
+
+    if (footer.right) {
+      const rightText =
+        typeof footer.right === "function"
+          ? footer.right(currentPage, totalPages)
+          : footer.right;
+      const textWidth = pdf.getTextWidth(rightText);
+      pdf.text(rightText, pdfWidth - margin - textWidth, pdfHeight - 5);
+    }
+
+    if (footer.center) {
+      const textWidth = pdf.getTextWidth(footer.center);
+      pdf.text(footer.center, (pdfWidth - textWidth) / 2, pdfHeight - 5);
+    }
+    return;
+  }
+
+  if (footerCode) {
+    const label = footerCode.label || "Code";
+    const leftText = `${label}: ${footerCode.value}`;
+    const rightText = `Page ${currentPage} of ${totalPages}`;
+
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor("#666666");
+    pdf.setDrawColor("#E0E0E0");
+    pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
+
+    pdf.text(leftText, margin, pdfHeight - 4);
+
+    const rightWidth = pdf.getTextWidth(rightText);
+    pdf.text(rightText, pdfWidth - margin - rightWidth, pdfHeight - 4);
+  }
+};
+
+/**
+ * Core PDF generation function.
+ *
+ * - Returns `void` by default (saves/downloads the file).
+ * - Returns `File` when `options.returnFile === true`.
+ *
+ * All existing call sites that don't pass `returnFile` continue to work unchanged.
+ */
+export async function generatePdf(
+  element: HTMLElement,
+  options?: Partial<PdfOptions> & { returnFile?: false }
+): Promise<void>;
+export async function generatePdf(
+  element: HTMLElement,
+  options: Partial<PdfOptions> & { returnFile: true }
+): Promise<File>;
+export async function generatePdf(
+  element: HTMLElement,
+  options: Partial<PdfOptions> = {}
+): Promise<void | File> {
+  const merged = { ...defaultOptions, ...options } as PdfOptions & {
+    compression?: string;
+  };
+
+  const {
+    filename = "document.pdf",
+    format = "a4",
+    orientation = "portrait",
+    scale = 2,
+    margin = 5,
+    quality = 1,
+    backgroundColor = "#FFFFFF",
+    enableLinks = true,
+    pagebreak = { mode: "css", avoid: [".pdf-avoid-break"] },
+    multiPage = false,
+    titleOptions,
+    footerOptions,
+    footerCode,
+    returnFile = false,
+    save,
+  } = merged;
+
+  const compression = (merged as any).compression ?? "FAST";
+
+  const hasFooter = !!(footerOptions || footerCode);
+  // Reserve space at the bottom for the footer line
+  const footerReservedMm = hasFooter ? 12 : 0;
+
+  try {
+    const originalClasses = element.className;
+    element.classList.add("pdf-container");
+
+    const canvas = await html2canvas(element, {
+      scale: scale * quality,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor,
+      windowWidth: Math.max(
+        element.scrollWidth,
+        document.documentElement.scrollWidth
+      ),
+      windowHeight: element.scrollHeight,
+      onclone: (clonedDoc, clonedElement) => {
+        // ── 1. Snapshot computed styles → inline styles ──────────────────────
+        // Tailwind JIT classes are not available in the html2canvas iframe.
+        // Copying computed styles ensures colours, fonts, and layout render.
+        const liveEls = Array.from(
+          element.querySelectorAll("*")
+        ) as HTMLElement[];
+        const cloneEls = Array.from(
+          clonedElement.querySelectorAll("*")
+        ) as HTMLElement[];
+
+        const STYLE_PROPS = [
+          "color",
+          "backgroundColor",
+          "borderColor",
+          "borderTopColor",
+          "borderRightColor",
+          "borderBottomColor",
+          "borderLeftColor",
+          "borderWidth",
+          "borderTopWidth",
+          "borderRightWidth",
+          "borderBottomWidth",
+          "borderLeftWidth",
+          "borderStyle",
+          "borderRadius",
+          "fontSize",
+          "fontWeight",
+          "fontFamily",
+          "lineHeight",
+          "letterSpacing",
+          "textAlign",
+          "textTransform",
+          "padding",
+          "paddingTop",
+          "paddingRight",
+          "paddingBottom",
+          "paddingLeft",
+          "margin",
+          "marginTop",
+          "marginRight",
+          "marginBottom",
+          "marginLeft",
+          "display",
+          "flexDirection",
+          "alignItems",
+          "justifyContent",
+          "gap",
+          "boxSizing",
+          "whiteSpace",
+          "verticalAlign",
+          "opacity",
+          "visibility",
+        ];
+
+        liveEls.forEach((liveEl, i) => {
+          const cloneEl = cloneEls[i];
+          if (!cloneEl) return;
+          const cs = window.getComputedStyle(liveEl);
+          STYLE_PROPS.forEach((p) => {
+            try {
+              const v = (cs as any)[p];
+              if (v) (cloneEl.style as any)[p] = v;
+            } catch {}
+          });
+
+          // ── 2. Remove ALL overflow constraints ────────────────────────────
+          // overflow:auto/scroll/hidden causes html2canvas to clip content to
+          // the element's clientWidth/Height. We force everything visible so
+          // the full scrollable area is captured.
+          cloneEl.style.overflow = "visible";
+          cloneEl.style.overflowX = "visible";
+          cloneEl.style.overflowY = "visible";
+
+          // ── 3. Expand scroll containers to their full scroll dimensions ───
+          // Even with overflow:visible, if width/height was set explicitly to
+          // a smaller value the content can still be cut. Expand to scrollSize.
+          const rect = liveEl.getBoundingClientRect();
+          if (liveEl.scrollWidth > Math.ceil(rect.width) + 2) {
+            cloneEl.style.width = `${liveEl.scrollWidth}px`;
+            cloneEl.style.minWidth = `${liveEl.scrollWidth}px`;
+          }
+          if (liveEl.scrollHeight > Math.ceil(rect.height) + 2) {
+            cloneEl.style.height = `${liveEl.scrollHeight}px`;
+          }
+
+          // ── 4. Fix flex vertical alignment ───────────────────────────────
+          if (cs.display === "inline-flex" || cs.display === "flex") {
+            if (cs.alignItems === "center" && rect.height > 0) {
+              cloneEl.style.height = `${rect.height}px`;
+            }
+          }
+
+          // ── 5. Badge text visibility ──────────────────────────────────────
+          const isBadge =
+            liveEl.dataset?.pdfBadge !== undefined ||
+            (cs.borderRadius &&
+              parseFloat(cs.borderRadius) >= 4 &&
+              cs.backgroundColor !== "rgba(0, 0, 0, 0)" &&
+              cs.backgroundColor !== "transparent" &&
+              cs.backgroundColor !== "rgb(255, 255, 255)");
+
+          if (isBadge) {
+            cloneEl.style.display = "inline-block";
+            cloneEl.style.textAlign = "center";
+            cloneEl.style.verticalAlign = "middle";
+            cloneEl.querySelectorAll("span,p,div").forEach((c) => {
+              (c as HTMLElement).style.color = cs.color;
+              (c as HTMLElement).style.display = "inline";
+            });
+          }
+        });
+
+        // ── 6. Links ─────────────────────────────────────────────────────────
+        if (enableLinks) {
+          clonedDoc.querySelectorAll("a").forEach((link) => {
+            link.style.color = "inherit";
+            link.style.textDecoration = "underline";
+          });
+        }
+
+        // ── 7. Page-break avoidance ───────────────────────────────────────────
+        pagebreak?.avoid?.forEach((selector) => {
+          clonedDoc.querySelectorAll(selector).forEach((el) => {
+            (el as HTMLElement).style.pageBreakInside = "avoid";
+          });
+        });
+      },
+    });
+
+    element.className = originalClasses;
+
+    const pdf = new jsPDF({
+      orientation,
+      unit: "mm",
+      format,
+      compress: true,
+    });
+
+    const { width: pdfWidth, height: pdfHeight } = getPdfDimensions(
+      format,
+      orientation
+    );
+    const contentWidth = pdfWidth - margin * 2;
+    const contentHeight = pdfHeight - margin * 2 - footerReservedMm;
+
+    const imgWidth = contentWidth;
+
+    // ── Title helper ──────────────────────────────────────────────────────────
+    let titleHeight = 0;
+    const addTitle = (pageIndex: number) => {
+      if (!titleOptions?.text) return;
+      const {
+        text,
+        fontSize = 16,
+        fontStyle = "bold",
+        color = "#000000",
+        marginBottom = 5,
+      } = titleOptions;
+
+      if (pageIndex > 0) {
+        // Only add title on the first page by default
+        return;
+      }
+
+      pdf.setFontSize(fontSize);
+      pdf.setFont("helvetica", fontStyle as any);
+      pdf.setTextColor(color);
+
+      const titleWidth = pdf.getTextWidth(text);
+      const titleX = margin + (contentWidth - titleWidth) / 2;
+      const titleY = margin + fontSize / 2;
+      pdf.text(text, titleX, titleY);
+      titleHeight = fontSize + (marginBottom ?? 5);
+    };
+
+    if (multiPage) {
+      addTitle(0);
+
+      const availableContentHeight = contentHeight - titleHeight;
+      const pageContentHeightPx =
+        (availableContentHeight * canvas.width) / imgWidth;
+      const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
+
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) {
+          pdf.addPage(format as any, orientation);
+          addTitle(i);
+        }
+
+        const startY = i * pageContentHeightPx;
+        const remainingHeight = canvas.height - startY;
+        const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
+
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageImgHeightPx;
+
+        const ctx = pageCanvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context not available");
+
+        ctx.drawImage(
+          canvas,
+          0,
+          startY,
+          canvas.width,
+          pageImgHeightPx,
+          0,
+          0,
+          canvas.width,
+          pageImgHeightPx
+        );
+
+        const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
+        const adjustedMarginTop = margin + (i === 0 ? titleHeight : 0);
+
+        pdf.addImage(
+          pageCanvas.toDataURL("image/jpeg", quality),
+          "JPEG",
+          margin,
+          adjustedMarginTop,
+          imgWidth,
+          pageImgHeight,
+          undefined,
+          compression
+        );
+
+        renderFooter(
+          pdf,
+          pdfWidth,
+          pdfHeight,
+          margin,
+          i + 1,
+          totalPages,
+          footerOptions,
+          footerCode
+        );
+      }
+    } else {
+      // ── Single page ──────────────────────────────────────────────────────────
+      addTitle(0);
+
+      const availableContentHeight = contentHeight - titleHeight;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const scaleFactor = Math.min(
+        contentWidth / imgWidth,
+        availableContentHeight / imgHeight
+      );
+
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", quality),
+        "JPEG",
+        margin,
+        margin + titleHeight,
+        imgWidth * scaleFactor,
+        imgHeight * scaleFactor,
+        undefined,
+        compression
+      );
+
+      renderFooter(
+        pdf,
+        pdfWidth,
+        pdfHeight,
+        margin,
+        1,
+        1,
+        footerOptions,
+        footerCode
+      );
+    }
+
+    // ── Output ────────────────────────────────────────────────────────────────
+    if (returnFile) {
+      const blob = pdf.output("blob");
+      return new File([blob], filename, { type: "application/pdf" });
+    }
+
+    if (save !== false) {
+      pdf.save(filename);
+    }
+  } catch (error) {
+    console.error("PDF generation failed:", error);
+    throw error;
+  }
+}

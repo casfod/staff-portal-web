@@ -31,6 +31,7 @@ import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const ExpenseClaim = () => {
   const currentUser = localStorageUser();
@@ -124,10 +125,15 @@ const ExpenseClaim = () => {
   // PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `ExpenseClaim-${request?.id}`,
+    filename: `CASFOD-ExpenseClaim-${request?.id}`,
     multiPage: true,
+
     titleOptions: {
-      text: "Expense Claim",
+      text: `Expense Claim : ${capitalizeFirstLetter(request?.status ?? "")}`,
+    },
+    footerCode: {
+      label: "Expense Claim",
+      value: request?.ecNumber ?? "",
     },
   });
 
@@ -258,7 +264,7 @@ const ExpenseClaim = () => {
       </div>
 
       {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -392,7 +398,9 @@ const ExpenseClaim = () => {
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >
-                        <ExpenseClaimDetails request={request!} />
+                        <div id="pdfContentRef" ref={pdfContentRef}>
+                          <ExpenseClaimDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

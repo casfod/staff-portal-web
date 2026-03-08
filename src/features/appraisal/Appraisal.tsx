@@ -29,6 +29,7 @@ import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const Appraisal = () => {
   const currentUser = localStorageUser();
@@ -88,15 +89,21 @@ const Appraisal = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `Appraisal-${request?.appraisalCode || request?.id}`,
+    filename: `CASFOD-Appraisal-${request?.appraisalCode || request?.id}`,
     multiPage: true,
     // FIX: titleOptions should be an object with 'text' property, not just a string
     titleOptions: {
-      text: "Appraisal", // This is correct
+      text: `CASFOD Appraisal: ${capitalizeFirstLetter(request?.status ?? "")}`,
+
       fontSize: 16,
       fontStyle: "bold",
       color: "#000000",
       marginBottom: 10,
+    },
+
+    footerCode: {
+      label: "CASFOD Appraisal",
+      value: request?.appraisalCode ?? "",
     },
   });
   const handleDownloadPDF = () => {
@@ -170,19 +177,21 @@ const Appraisal = () => {
 
   const tableHeadData = [
     { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
+    { label: "Status", showOnMobile: true, minWidth: "100px" },
+
     {
       label: "Appraisal Code",
       showOnMobile: false,
       showOnTablet: true,
       minWidth: "120px",
     },
-    {
-      label: "Period",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "120px",
-    },
-    { label: "Status", showOnMobile: true, minWidth: "100px" },
+
+    // {
+    //   label: "Period",
+    //   showOnMobile: false,
+    //   showOnTablet: true,
+    //   minWidth: "120px",
+    // },
     {
       label: "Date",
       showOnMobile: false,
@@ -203,23 +212,24 @@ const Appraisal = () => {
       showOnTablet: true,
     },
     {
-      id: "code",
-      content: request?.appraisalCode || "N/A",
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    {
-      id: "period",
-      content: request?.appraisalPeriod || "N/A",
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    {
       id: "status",
       content: <StatusBadge status={request?.status!} />,
       showOnMobile: true,
       showOnTablet: true,
     },
+    {
+      id: "code",
+      content: request?.appraisalCode || "N/A",
+      showOnMobile: false,
+      showOnTablet: true,
+    },
+    // {
+    //   id: "period",
+    //   content: request?.appraisalPeriod || "N/A",
+    //   showOnMobile: false,
+    //   showOnTablet: true,
+    // },
+
     {
       id: "date",
       content: fullDate,
@@ -259,7 +269,7 @@ const Appraisal = () => {
       </div>
 
       {/* Main Content Section */}
-      <div ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -381,14 +391,18 @@ const Appraisal = () => {
                         isUpdatingComment={isUpdatingComment}
                         isDeletingComment={isDeletingComment}
                       >
-                        <AppraisalDetails
-                          request={request!}
-                          canEditStaffSections={canEditStaffSections}
-                          canEditSupervisorSections={canEditSupervisorSections}
-                          isStaff={isStaff}
-                          isSupervisor={isSupervisor}
-                          isAdmin={isAdmin}
-                        />
+                        <div ref={pdfContentRef}>
+                          <AppraisalDetails
+                            request={request!}
+                            canEditStaffSections={canEditStaffSections}
+                            canEditSupervisorSections={
+                              canEditSupervisorSections
+                            }
+                            isStaff={isStaff}
+                            isSupervisor={isSupervisor}
+                            isAdmin={isAdmin}
+                          />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

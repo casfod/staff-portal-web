@@ -100,7 +100,10 @@ const PaymentVoucher = () => {
     previewPdf,
     isGenerating: isGeneratingPDF,
   } = usePdfDownload({
-    filename: `PV-${(voucherData?.pvNumber ?? "").replace(/\//g, "-")}.pdf`,
+    filename: `CASFOD-PAYMENT-VOUCHER-${(voucherData?.pvNumber ?? "").replace(
+      /\//g,
+      "-"
+    )}.pdf`,
     format: "a4",
     orientation: "landscape",
     scale: 2,
@@ -110,7 +113,7 @@ const PaymentVoucher = () => {
     backgroundColor: "#FFFFFF",
     // ✅ Standard footer: "PV Number: CASFOD/… | Page 1 of 1"
     footerCode: {
-      label: "PV Number",
+      label: "CASDFOD PV Number",
       value: voucherData?.pvNumber ?? "",
     },
     templateRef: pvTemplateRef,

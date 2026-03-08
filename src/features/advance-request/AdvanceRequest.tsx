@@ -33,6 +33,7 @@ import TableData from "../../ui/TableData";
 import TableRowMain from "../../ui/TableRowMain";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const Request = () => {
   const currentUser = localStorageUser();
@@ -134,10 +135,17 @@ const Request = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `AdvanceRequest-${advanceRequest?.id}`,
+    filename: `CASFOD-AdvanceRequest-${advanceRequest?.id}`,
     multiPage: true,
+
     titleOptions: {
-      text: "Advance Request",
+      text: `CASFOD Advance Request : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
+    },
+    footerCode: {
+      label: "CASFOD Advance Request",
+      value: request?.arNumber ?? "",
     },
   });
   const handleDownloadPDF = () => {
@@ -269,7 +277,7 @@ const Request = () => {
 
       {/* Main Table Section */}
 
-      <div ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -399,7 +407,9 @@ const Request = () => {
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >
-                        <AdvanceRequestDetails request={request!} />
+                        <div ref={pdfContentRef}>
+                          <AdvanceRequestDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

@@ -28,6 +28,7 @@ import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
 import { usePdfDownload } from "../../hooks/usePdfDownload";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const StaffStrategy = () => {
   const currentUser = localStorageUser();
@@ -85,15 +86,22 @@ const StaffStrategy = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `StaffStrategy-${request?.strategyCode || request?.id}`,
+    filename: `CASFOD-StaffStrategy-${request?.strategyCode || request?.id}`,
     multiPage: true,
     // FIX: titleOptions should be an object with 'text' property
     titleOptions: {
-      text: "Staff Strategy", // This is correct
+      text: `CASFOD Staff Strategy : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
       fontSize: 16,
       fontStyle: "bold",
       color: "#000000",
       marginBottom: 10,
+    },
+
+    footerCode: {
+      label: "CASFOD Purchase Order",
+      value: request?.strategyCode ?? "",
     },
   });
   const handleDownloadPDF = () => {
@@ -232,7 +240,7 @@ const StaffStrategy = () => {
       </div>
 
       {/* Main Content Section */}
-      <div ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -354,7 +362,9 @@ const StaffStrategy = () => {
                         isUpdatingComment={isUpdatingComment}
                         isDeletingComment={isDeletingComment}
                       >
-                        <StaffStrategyDetails request={request!} />
+                        <div ref={pdfContentRef}>
+                          <StaffStrategyDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

@@ -71,7 +71,7 @@ export const StaffStrategyDetails = ({
     <DetailContainer>
       {/* Strategy Header */}
       {request?.strategyCode && (
-        <h1 className="text-center text-lg font-extrabold p-6">
+        <h1 className="text-center text-lg font-extrabold p-3">
           {request.strategyCode}
         </h1>
       )}

@@ -34,6 +34,7 @@ import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const PaymentRequest = () => {
   const currentUser = localStorageUser();
@@ -129,10 +130,17 @@ const PaymentRequest = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `PaymentRequest-${request?.id}`,
+    filename: `CASFOD-PaymentRequest-${request?.id}`,
     multiPage: true,
+
     titleOptions: {
-      text: "Payment Request",
+      text: `CASFOD Payment Request : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
+    },
+    footerCode: {
+      label: "CASFOD Payment Request",
+      value: request?.pmrNumber ?? "",
     },
   });
 
@@ -261,7 +269,7 @@ const PaymentRequest = () => {
       </div>
 
       {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -395,7 +403,9 @@ const PaymentRequest = () => {
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >
-                        <PaymentRequestDetails request={request!} />
+                        <div id="pdfContentRef" ref={pdfContentRef}>
+                          <PaymentRequestDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

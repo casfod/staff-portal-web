@@ -30,6 +30,7 @@ import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const ConceptNote = () => {
   const currentUser = localStorageUser();
@@ -125,10 +126,16 @@ const ConceptNote = () => {
   //PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `ConceptNote-${request?.id}`,
+    filename: `CASFOD-ConceptNote-${request?.id}`,
     multiPage: true,
     titleOptions: {
-      text: "Concept Note",
+      text: `CASFOD Concept Note : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
+    },
+    footerCode: {
+      label: "CASFOD Concept Note",
+      value: request?.cnNumber ?? "",
     },
   });
 
@@ -252,7 +259,7 @@ const ConceptNote = () => {
       </div>
 
       {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -386,7 +393,9 @@ const ConceptNote = () => {
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >
-                        <ConceptNoteDetails request={request!} />
+                        <div ref={pdfContentRef}>
+                          <ConceptNoteDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

@@ -24,9 +24,13 @@ import {
   useCheckGRNExists,
   useGoodsReceivedByPurchaseOrder,
 } from "../goods-recieved/Hooks/useGoodsReceived";
-import { usePurchaseOrder, useUpdatePurchaseOrderStatus } from "./Hooks/usePurchaseOrder";
+import {
+  usePurchaseOrder,
+  useUpdatePurchaseOrderStatus,
+} from "./Hooks/usePurchaseOrder";
 import POPDFTemplate from "./POPDFTemplate";
 import { PurchaseOrderDetails } from "./PurchaseOrderDetails";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const PurchaseOrder = () => {
   const currentUser = localStorageUser();
@@ -124,10 +128,17 @@ const PurchaseOrder = () => {
   // PDF download logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating: isDownloadingPDF } = usePdfDownload({
-    filename: `PurchaseOrder-${requestData?.POCode || requestData?.id}`,
+    filename: `CASFOD-PurchaseOrder-${requestData?.POCode || requestData?.id}`,
     multiPage: true,
+
     titleOptions: {
-      text: "CASFOD Purchase Order",
+      text: `CASFOD Purchase Order : ${capitalizeFirstLetter(
+        requestData?.status ?? ""
+      )}`,
+    },
+    footerCode: {
+      label: "CASFOD Purchase Order",
+      value: requestData?.POCode ?? "",
     },
   });
 
@@ -249,9 +260,7 @@ const PurchaseOrder = () => {
               {grnStatus?.data.isCompleted !== true && (
                 <Button
                   onClick={handleCreateGRN}
-                  variant={
-                    grnStatus?.data.exists ? "secondary" : "primary"
-                  }
+                  variant={grnStatus?.data.exists ? "secondary" : "primary"}
                 >
                   {grnStatus?.data.exists ? (
                     <>
@@ -300,7 +309,7 @@ const PurchaseOrder = () => {
         </div>
 
         {/* Main Table Section */}
-        <div ref={pdfContentRef}>
+        <div>
           <DataStateContainer
             isLoading={isLoading}
             isError={isError}
@@ -352,9 +361,11 @@ const PurchaseOrder = () => {
                       handleStatusChange={onStatusChangeHandler}
                       isApprover={true} // Since purchase orders only have direct approval
                     >
-                      {/* Purchase Order Details */}
-                      <PurchaseOrderDetails purchaseOrder={requestData!} />
-                      
+                      <div ref={pdfContentRef}>
+                        {/* Purchase Order Details */}
+                        <PurchaseOrderDetails purchaseOrder={requestData!} />
+                      </div>
+
                       {/* Goods Received Section */}
                       {goodsReceivedSection}
                     </RequestDetailLayout>

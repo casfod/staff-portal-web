@@ -32,6 +32,7 @@ import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
 
 const TravelRequest = () => {
   const currentUser = localStorageUser();
@@ -125,10 +126,17 @@ const TravelRequest = () => {
   // PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `TravelRequest-${request?.id}`,
+    filename: `CASFOD-TravelRequest-${request?.id}`,
     multiPage: true,
+
     titleOptions: {
-      text: "Travel Request",
+      text: `CASFOD Travel Request : ${capitalizeFirstLetter(
+        request?.status ?? ""
+      )}`,
+    },
+    footerCode: {
+      label: "CASFOD Travel Request",
+      value: request?.trNumber ?? "",
     },
   });
 
@@ -259,7 +267,7 @@ const TravelRequest = () => {
       </div>
 
       {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      <div>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -393,7 +401,9 @@ const TravelRequest = () => {
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >
-                        <TravelRequestDetails request={request!} />
+                        <div id="pdfContentRef" ref={pdfContentRef}>
+                          <TravelRequestDetails request={request!} />
+                        </div>
                       </RequestDetailLayout>
                     </td>
                   </tr>

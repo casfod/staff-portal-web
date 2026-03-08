@@ -25,10 +25,15 @@ const Vendor = () => {
   // PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `Vendor-${vendor?.vendorCode}`,
+    filename: `CASFOD-Vendor-${vendor?.vendorCode}`,
     multiPage: true,
+
     titleOptions: {
-      text: "Vendor Registration Details",
+      text: `CASFOD Vendor Registration Details`,
+    },
+    footerCode: {
+      label: "CASFOD Vendor",
+      value: vendor?.vendorCode ?? "",
     },
   });
   const handleDownloadPDF = () => {
