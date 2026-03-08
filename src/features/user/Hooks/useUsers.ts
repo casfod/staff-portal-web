@@ -13,6 +13,7 @@ import {
   updateUserAdmin as updateUserAdminAPI,
   deleteUser as deleteUserApi,
   getUserById,
+  exportUsersToExcel,
 } from "../../../services/apiUser";
 import { getUser } from "../../../services/apiAuth";
 import { useDispatch } from "react-redux";
@@ -211,3 +212,43 @@ export function useDeleteUser() {
     errorDeleting,
   };
 }
+
+export const useExportUsersToExcel = () => {
+  const {
+    mutate: exportUsersMutation,
+    isPending: isExporting,
+    isError: isExportError,
+    isSuccess: isExportSuccess,
+  } = useMutation({
+    mutationFn: exportUsersToExcel,
+
+    onSuccess: (blob: Blob) => {
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `users_export_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("users exported successfully");
+    },
+
+    onError: (err: HookError) => {
+      const errorMessage =
+        err.response?.data?.message ||
+        "An error occurred while exporting users";
+      toast.error(errorMessage);
+      console.error("Users export error:", errorMessage);
+    },
+  });
+
+  return {
+    exportUsers: exportUsersMutation,
+    isExporting,
+    isExportError,
+    isExportSuccess,
+  };
+};

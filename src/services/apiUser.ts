@@ -71,6 +71,18 @@ const handleError = (err: any) => {
 
 // API Functions
 
+export const exportUsersToExcel = async function (): Promise<Blob> {
+  try {
+    const response = await axiosInstance.get(`/users/export/excel`, {
+      responseType: "blob", // Important for file downloads
+    });
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const getAdmins = async function () {
   try {
     const response = await axiosInstance.get<useAdminsType>(`/users/admins`);

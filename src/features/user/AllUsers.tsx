@@ -4,10 +4,14 @@ import { BiSearch } from "react-icons/bi";
 import { GoXCircle } from "react-icons/go";
 import { useDebounce } from "use-debounce";
 import { RiArrowUpDownLine } from "react-icons/ri";
-import { useDeleteUser, useUsers } from "./Hooks/useUsers";
+import {
+  useDeleteUser,
+  useExportUsersToExcel,
+  useUsers,
+} from "./Hooks/useUsers";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Modal from "../../ui/Modal";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import Spinner from "../../ui/Spinner";
 import { Pagination } from "../../ui/Pagination";
 import AddUserForm from "./AddUserForm";
@@ -28,6 +32,7 @@ import UsersTableRow from "./UsersTableRow";
 import { useNavigate } from "react-router-dom";
 import { UserType } from "../../interfaces";
 import { setUser } from "../../store/userSlice";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 export function AllUsers() {
   const currentUser = localStorageUser();
@@ -55,6 +60,9 @@ export function AllUsers() {
     page,
     limit,
   });
+
+  // Use the new export hook
+  const { exportUsers, isExporting } = useExportUsersToExcel();
 
   const { deleteUser } = useDeleteUser();
   // Add null checks for `data` and `data.data`
@@ -87,6 +95,10 @@ export function AllUsers() {
 
   const handlePageChange = (newPage: number) => {
     dispatch(setPage(newPage));
+  };
+
+  const handleExportExcel = () => {
+    exportUsers();
   };
 
   const handleDelete = (id: string) => {
@@ -134,16 +146,35 @@ export function AllUsers() {
       <div className="flex justify-between items-center">
         <TextHeader> User Management</TextHeader>
 
-        {currentUser.role === "SUPER-ADMIN" && (
-          <Modal>
-            <Modal.Open open="addUser">
-              <Button>
-                <Plus className="h-4 w-4 mr-1 md:mr-2" />
-                Add User
-              </Button>
-            </Modal.Open>
-          </Modal>
-        )}
+        <div className="space-x-2">
+          {(currentUser.role === "SUPER-ADMIN" ||
+            currentUser.procurementRole?.canView) && (
+            <Button onClick={handleExportExcel} disabled={isExporting}>
+              {isExporting ? (
+                <>
+                  <SpinnerMini width={4} height={4} />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-1 md:mr-2" />
+                  Export Excel
+                </>
+              )}
+            </Button>
+          )}
+
+          {currentUser.role === "SUPER-ADMIN" && (
+            <Modal>
+              <Modal.Open open="addUser">
+                <Button>
+                  <Plus className="h-4 w-4 mr-1 md:mr-2" />
+                  Add User
+                </Button>
+              </Modal.Open>
+            </Modal>
+          )}
+        </div>
       </div>
 
       {/* Search Bar and Sort Dropdown */}

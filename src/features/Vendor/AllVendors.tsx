@@ -105,7 +105,7 @@ export function AllVendors() {
 
           <div className="flex items-center gap-3">
             {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser.procurementRole.canCreate) && (
+              currentUser.procurementRole?.canCreate) && (
               <Button
                 onClick={() =>
                   navigate("/procurement/vendor-management/create-vendor")
@@ -117,7 +117,7 @@ export function AllVendors() {
             )}
 
             {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser.procurementRole.canView) && (
+              currentUser.procurementRole?.canView) && (
               <Button onClick={handleExportExcel} disabled={isExporting}>
                 {isExporting ? (
                   <>
