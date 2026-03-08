@@ -112,6 +112,8 @@ export const saveAppraisalDraft = async function (
   data: Partial<AppraisalType>
 ) {
   try {
+    console.log({ data });
+
     const response = await axiosInstance.post<UseAppraisalType>(
       `/appraisals/save`,
       data
@@ -209,6 +211,7 @@ export const updateAppraisal = async function (
       "dateOfAppraisal",
       "supervisorId",
       "supervisorName",
+      "achievements",
       "lengthOfTimeSupervised",
       "supervisorComments",
       "overallRating",
@@ -234,6 +237,21 @@ export const updateAppraisal = async function (
       {
         headers: { "Content-Type": "multipart/form-data" },
       }
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<UseAppraisalType>>(
+      `/appraisals/copy/${requestId}`,
+      data
     );
     return response.data;
   } catch (err) {

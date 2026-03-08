@@ -108,6 +108,7 @@ const FormAddAppraisal = () => {
     supervisorName: currentUser?.employmentInfo?.jobDetails?.supervisor || "",
     lengthOfTimeSupervised: "",
     objectives: [],
+    achievements: "",
     safeguarding: {
       actionsTaken: "",
       trainingCompleted: "No" as const,
@@ -791,8 +792,17 @@ const FormAddAppraisal = () => {
       {/* Section 4: Future Goals - Visible to staff */}
       <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-          SECTION 4: FUTURE GOALS
+          SECTION 4: ACHIEVEMENTS & FUTURE GOALS
         </h3>
+
+        <FormRow label="Achievements">
+          <textarea
+            className="border-2 h-20 rounded-lg focus:outline-none p-3 w-full"
+            value={formData.achievements || ""}
+            onChange={(e) => handleFormChange("achievements", e.target.value)}
+            placeholder="Mention your achievements if any..."
+          />
+        </FormRow>
 
         <FormRow label="Future Goals for next appraisal period">
           <textarea

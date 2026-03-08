@@ -3,7 +3,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Button from "../../ui/Button";
@@ -21,12 +21,14 @@ import {
   useDeleteComment,
   useUpdateComment,
   useUpdateAppraisalStatus,
+  useCopy,
 } from "./Hooks/useAppraisal";
 import { Comment as AppComment, UserType } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
 
 const Appraisal = () => {
   const currentUser = localStorageUser();
@@ -60,8 +62,8 @@ const Appraisal = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
-  const [status, setStatus] = useState("");
 
+  const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
@@ -69,6 +71,8 @@ const Appraisal = () => {
   const { handleStatusChange } = useStatusUpdate();
   const { updateStatus, isPending: isUpdatingStatus } =
     useUpdateAppraisalStatus(appraisalId!);
+
+  const { copyto, isPending: isCopying } = useCopy(appraisalId!);
 
   // Comment hooks
   const { addComment, isPending: isAddingComment } = useAddComment(
@@ -81,11 +85,23 @@ const Appraisal = () => {
     appraisalId!
   );
 
+  //PDF logic
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { downloadPdf, isGenerating } = usePdfDownload({
+    filename: `Appraisal-${request?.appraisalCode || request?.id}`,
+    multiPage: true,
+    titleOptions: {
+      text: "Appraisal",
+    },
+  });
+  const handleDownloadPDF = () => {
+    downloadPdf(pdfContentRef);
+  };
+
   // Handle status change with confirmation dialog
   const onStatusChangeHandler = () => {
     handleStatusChange(status, comment, async () => {
       try {
-        // FIXED: Type assertion to match expected type
         await updateStatus(
           { status, comment } as {
             status: "approved" | "rejected";
@@ -126,14 +142,17 @@ const Appraisal = () => {
   const isSupervisor = request?.supervisorId?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole || "");
 
-  // FIXED: Permission to update status - check for "pending" status (new enum)
+  // Permission to update status
   const canUpdateStatus =
     requestStatus === "pending" && (isSupervisor || isAdmin);
+
+  // Permission to share/copy request
+  const canShareRequest = isStaff || isSupervisor || isAdmin;
 
   // Users who can add comments
   const canAddComments = isStaff || isSupervisor || isAdmin;
 
-  // FIXED: Permission to edit different sections with correct status mapping
+  // Permission to edit different sections with correct status mapping
   const canEditStaffSections =
     isStaff && (requestStatus === "draft" || requestStatus === "pending");
   const canEditSupervisorSections = isSupervisor && requestStatus === "pending";
@@ -206,7 +225,12 @@ const Appraisal = () => {
       id: "actions",
       content: (
         <ActionIcons
+          copyTo={copyto}
+          isCopying={isCopying}
+          canShareRequest={canShareRequest}
           requestId={request?.id}
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
           hideInspect={true}
@@ -230,7 +254,7 @@ const Appraisal = () => {
       </div>
 
       {/* Main Content Section */}
-      <div>
+      <div ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -309,6 +333,11 @@ const Appraisal = () => {
                         identifier={request?.appraisalCode}
                         dateValue={requestCreatedAt}
                         actionIconsProps={{
+                          copyTo: copyto,
+                          isCopying,
+                          canShareRequest,
+                          isGeneratingPDF: isGenerating,
+                          onDownloadPDF: handleDownloadPDF,
                           showTagDropdown,
                           setShowTagDropdown,
                           hideInspect: true,

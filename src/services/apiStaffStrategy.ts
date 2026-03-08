@@ -278,6 +278,21 @@ export const updateStatus = async function (
   }
 };
 
+export const copyTo = async function (
+  requestId: string,
+  data: { userIds: string[] }
+) {
+  try {
+    const response = await axiosInstance.patch<Partial<StaffStrategyType>>(
+      `/staff-strategy/copy/${requestId}`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 // ========== COMMENTS ==========
 export const addComment = async function (
   requestId: string,

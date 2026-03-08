@@ -1607,6 +1607,7 @@ export interface AppraisalType {
 
   // Section 2: Objectives
   objectives: ObjectiveRatingType[];
+  achievements?: string;
 
   // Safeguarding
   safeguarding: SafeguardingType;

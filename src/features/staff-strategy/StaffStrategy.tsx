@@ -2,7 +2,7 @@ import { List } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { localStorageUser } from "../../utils/localStorageUser";
 import Button from "../../ui/Button";
@@ -20,12 +20,14 @@ import {
   useStaffStrategy,
   useUpdateComment,
   useUpdateStaffStrategyStatus,
+  useCopy,
 } from "./Hooks/useStaffStrategy";
 import { Comment as AppComment, UserType } from "../../interfaces";
 import TableRowMain from "../../ui/TableRowMain";
 import TableData from "../../ui/TableData";
 import RequestCard from "../../ui/RequestCard";
 import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { usePdfDownload } from "../../hooks/usePdfDownload";
 
 const StaffStrategy = () => {
   const currentUser = localStorageUser();
@@ -69,6 +71,8 @@ const StaffStrategy = () => {
   const { updateStatus, isPending: isUpdatingStatus } =
     useUpdateStaffStrategyStatus(requestId!);
 
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
+
   // Comment hooks
   const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
   const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
@@ -77,6 +81,19 @@ const StaffStrategy = () => {
   const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
     requestId!
   );
+
+  //PDF logic
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { downloadPdf, isGenerating } = usePdfDownload({
+    filename: `StaffStrategy-${request?.strategyCode || request?.id}`,
+    multiPage: true,
+    titleOptions: {
+      text: "Staff Strategy",
+    },
+  });
+  const handleDownloadPDF = () => {
+    downloadPdf(pdfContentRef);
+  };
 
   // Handle status change with confirmation dialog
   const onStatusChangeHandler = () => {
@@ -119,6 +136,9 @@ const StaffStrategy = () => {
   // Permission to update status (like PO - only approver or admin)
   const canUpdateStatus =
     requestStatus === "pending" && (isApprover || isAdmin);
+
+  // Permission to share/copy request
+  const canShareRequest = isCreator || isApprover || isAdmin;
 
   // Users who can add comments
   const canAddComments = isCreator || isApprover || isAdmin;
@@ -178,7 +198,12 @@ const StaffStrategy = () => {
       id: "actions",
       content: (
         <ActionIcons
+          copyTo={copyto}
+          isCopying={isCopying}
+          canShareRequest={canShareRequest}
           requestId={request?.id}
+          isGeneratingPDF={isGenerating}
+          onDownloadPDF={handleDownloadPDF}
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
           hideInspect={true}
@@ -202,7 +227,7 @@ const StaffStrategy = () => {
       </div>
 
       {/* Main Content Section */}
-      <div>
+      <div ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
@@ -281,6 +306,11 @@ const StaffStrategy = () => {
                         identifier={request?.strategyCode}
                         dateValue={requestCreatedAt}
                         actionIconsProps={{
+                          copyTo: copyto,
+                          isCopying,
+                          canShareRequest,
+                          isGeneratingPDF: isGenerating,
+                          onDownloadPDF: handleDownloadPDF,
                           showTagDropdown,
                           setShowTagDropdown,
                           hideInspect: true,

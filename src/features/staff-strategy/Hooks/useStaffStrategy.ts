@@ -20,6 +20,7 @@ import {
   deleteComment,
   deleteStaffStrategy,
   getStaffStrategyStats,
+  copyTo as copyToApi,
 } from "../../../services/apiStaffStrategy";
 import {
   StaffStrategyType,
@@ -283,6 +284,44 @@ export const useUpdateStaffStrategyStatus = (requestId: string) => {
     errorMessage,
   };
 };
+
+export function useCopy(requestId: string) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: copyto,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        toast.success("Copied successfully");
+
+        //Invalidate
+        queryClient.invalidateQueries({
+          queryKey: ["advance-request", requestId],
+        });
+      } else if (data.status !== 200) {
+        toast.error("Copy not successful");
+        setErrorMessage(data.message);
+        console.error("Error:", data.message); // Log error directly here
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error("Error");
+      const error = err.response?.data.message || "An error occurred";
+
+      console.error("Copy Error:", error);
+      setErrorMessage(error); // Set the error message to display
+    },
+  });
+
+  return { copyto, isPending, isError, errorMessage };
+}
 
 // ========== COMMENTS ==========
 export const useAddComment = (requestId: string) => {

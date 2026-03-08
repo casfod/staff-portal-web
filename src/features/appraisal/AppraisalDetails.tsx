@@ -275,6 +275,19 @@ export const AppraisalDetails = ({
                   </div>
                   <div>
                     <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
+                      Achievements
+                    </label>
+                    <p className="text-gray-800">
+                      {request.achievements || "N/A"}
+                    </p>
+                    {canEditStaffSections && (
+                      <span className="text-xs text-blue-500">
+                        (You can edit)
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
                       Training Completed
                     </label>
                     <span
