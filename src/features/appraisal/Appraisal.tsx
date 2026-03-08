@@ -90,8 +90,13 @@ const Appraisal = () => {
   const { downloadPdf, isGenerating } = usePdfDownload({
     filename: `Appraisal-${request?.appraisalCode || request?.id}`,
     multiPage: true,
+    // FIX: titleOptions should be an object with 'text' property, not just a string
     titleOptions: {
-      text: "Appraisal",
+      text: "Appraisal", // This is correct
+      fontSize: 16,
+      fontStyle: "bold",
+      color: "#000000",
+      marginBottom: 10,
     },
   });
   const handleDownloadPDF = () => {

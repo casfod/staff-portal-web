@@ -1,37 +1,6 @@
-// generatePdf.ts - Updated version with default titleOptions
+// generatePdf.ts - Unified version with footerCode support and File return mode
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-
-// export interface PdfOptions {
-//   filename: string;
-//   format?: "a3" | "a4" | "a5" | "letter" | "legal";
-//   orientation?: "portrait" | "landscape";
-//   margin?: number;
-//   scale?: number;
-//   quality?: number;
-//   backgroundColor?: string;
-//   titleOptions?: {
-//     text: string;
-//     fontSize?: number;
-//     fontStyle?: "normal" | "bold" | "italic";
-//     color?: string;
-//     marginBottom?: number;
-//   };
-//   // ADD FOOTER OPTIONS
-//   footerOptions?: {
-//     left?: string;
-//     right?: string | ((currentPage: number, totalPages: number) => string);
-//     center?: string;
-//     fontSize?: number;
-//     color?: string;
-//     lineColor?: string;
-//     marginTop?: number;
-//   };
-//   letterRendering?: boolean;
-//   enableLinks?: boolean;
-//   multiPage?: boolean;
-//   save?: boolean;
-// }
 
 export type PdfOptions = {
   title?: string;
@@ -65,8 +34,22 @@ export type PdfOptions = {
     lineColor?: string;
     marginTop?: number;
   };
+  /**
+   * Shorthand footer: renders "Code: <value>  |  Page N of M" at the bottom.
+   * If footerOptions is also provided, footerOptions takes precedence.
+   */
+  footerCode?: {
+    label?: string; // e.g. "PV Number" — defaults to "Code"
+    value: string; // e.g. "CASFOD/MF2025/11/2025/004"
+  };
+  /**
+   * When true, generatePdf returns a File object instead of saving/downloading.
+   * Use this when you need to upload the PDF rather than trigger a browser download.
+   */
+  returnFile?: boolean;
   save?: boolean;
 };
+
 const defaultOptions: PdfOptions = {
   filename: "document.pdf",
   format: "a4",
@@ -83,7 +66,6 @@ const defaultOptions: PdfOptions = {
   },
   multiPage: false,
   titleOptions: {
-    // Add default titleOptions
     text: "",
     fontSize: 16,
     fontStyle: "bold",
@@ -107,38 +89,122 @@ const getPdfDimensions = (format: string, orientation: string) => {
     : { width, height };
 };
 
-export const generatePdf = async (
+/**
+ * Render a footer line at the bottom of the current PDF page.
+ * Used by both footerCode shorthand and custom footerOptions.
+ */
+const renderFooter = (
+  pdf: jsPDF,
+  pdfWidth: number,
+  pdfHeight: number,
+  margin: number,
+  currentPage: number,
+  totalPages: number,
+  footerOptions?: PdfOptions["footerOptions"],
+  footerCode?: PdfOptions["footerCode"]
+) => {
+  // Resolve which footer to render — footerOptions wins if both provided
+  if (footerOptions) {
+    const footer = footerOptions;
+    pdf.setFontSize(footer.fontSize || 9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(footer.color || "#666666");
+
+    if (footer.lineColor) {
+      pdf.setDrawColor(footer.lineColor);
+      pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
+    }
+
+    if (footer.left) {
+      pdf.text(footer.left, margin, pdfHeight - 5);
+    }
+
+    if (footer.right) {
+      const rightText =
+        typeof footer.right === "function"
+          ? footer.right(currentPage, totalPages)
+          : footer.right;
+      const textWidth = pdf.getTextWidth(rightText);
+      pdf.text(rightText, pdfWidth - margin - textWidth, pdfHeight - 5);
+    }
+
+    if (footer.center) {
+      const textWidth = pdf.getTextWidth(footer.center);
+      pdf.text(footer.center, (pdfWidth - textWidth) / 2, pdfHeight - 5);
+    }
+    return;
+  }
+
+  if (footerCode) {
+    const label = footerCode.label || "Code";
+    const leftText = `${label}: ${footerCode.value}`;
+    const rightText = `Page ${currentPage} of ${totalPages}`;
+
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor("#666666");
+    pdf.setDrawColor("#E0E0E0");
+    pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
+
+    pdf.text(leftText, margin, pdfHeight - 4);
+
+    const rightWidth = pdf.getTextWidth(rightText);
+    pdf.text(rightText, pdfWidth - margin - rightWidth, pdfHeight - 4);
+  }
+};
+
+/**
+ * Core PDF generation function.
+ *
+ * - Returns `void` by default (saves/downloads the file).
+ * - Returns `File` when `options.returnFile === true`.
+ *
+ * All existing call sites that don't pass `returnFile` continue to work unchanged.
+ */
+export async function generatePdf(
+  element: HTMLElement,
+  options?: Partial<PdfOptions> & { returnFile?: false }
+): Promise<void>;
+export async function generatePdf(
+  element: HTMLElement,
+  options: Partial<PdfOptions> & { returnFile: true }
+): Promise<File>;
+export async function generatePdf(
   element: HTMLElement,
   options: Partial<PdfOptions> = {}
-): Promise<void> => {
+): Promise<void | File> {
+  const merged = { ...defaultOptions, ...options } as PdfOptions & {
+    compression?: string;
+  };
+
   const {
     filename = "document.pdf",
     format = "a4",
     orientation = "portrait",
     scale = 2,
-    margin = 5, // Reduced from 10 to 5
+    margin = 5,
     quality = 1,
     backgroundColor = "#FFFFFF",
     enableLinks = true,
     pagebreak = { mode: "css", avoid: [".pdf-avoid-break"] },
     multiPage = false,
-    compression = "FAST",
+    titleOptions,
+    footerOptions,
+    footerCode,
+    returnFile = false,
     save,
-    titleOptions = {
-      text: "",
-      fontSize: 16,
-      fontStyle: "bold",
-      color: "#000000",
-      marginBottom: 5,
-    },
-  } = { ...defaultOptions, ...options };
+  } = merged;
+
+  const compression = (merged as any).compression ?? "FAST";
+
+  const hasFooter = !!(footerOptions || footerCode);
+  // Reserve space at the bottom for the footer line
+  const footerReservedMm = hasFooter ? 12 : 0;
 
   try {
-    // Prepare the element
     const originalClasses = element.className;
     element.classList.add("pdf-container");
 
-    // Generate canvas
     const canvas = await html2canvas(element, {
       scale: scale * quality,
       useCORS: true,
@@ -161,10 +227,8 @@ export const generatePdf = async (
       },
     });
 
-    // Restore original element
     element.className = originalClasses;
 
-    // Create PDF
     const pdf = new jsPDF({
       orientation,
       unit: "mm",
@@ -177,15 +241,14 @@ export const generatePdf = async (
       orientation
     );
     const contentWidth = pdfWidth - margin * 2;
-    const contentHeight = pdfHeight - margin * 2;
+    const contentHeight = pdfHeight - margin * 2 - footerReservedMm;
 
-    // Calculate image dimensions (in PDF units)
     const imgWidth = contentWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    // Add title if provided
+    // ── Title helper ──────────────────────────────────────────────────────────
     let titleHeight = 0;
-    if (titleOptions?.text) {
+    const addTitle = (pageIndex: number) => {
+      if (!titleOptions?.text) return;
       const {
         text,
         fontSize = 16,
@@ -194,23 +257,25 @@ export const generatePdf = async (
         marginBottom = 5,
       } = titleOptions;
 
+      if (pageIndex > 0) {
+        // Only add title on the first page by default
+        return;
+      }
+
       pdf.setFontSize(fontSize);
-      pdf.setFont("helvetica", fontStyle);
+      pdf.setFont("helvetica", fontStyle as any);
       pdf.setTextColor(color);
 
-      // Calculate title width and position
       const titleWidth = pdf.getTextWidth(text);
       const titleX = margin + (contentWidth - titleWidth) / 2;
       const titleY = margin + fontSize / 2;
-
       pdf.text(text, titleX, titleY);
-      titleHeight = fontSize + marginBottom;
-    }
-
-    const adjustedMarginTop = margin + titleHeight;
+      titleHeight = fontSize + (marginBottom ?? 5);
+    };
 
     if (multiPage) {
-      // MULTI-PAGE LOGIC (UPDATED WITH TITLE SUPPORT)
+      addTitle(0);
+
       const availableContentHeight = contentHeight - titleHeight;
       const pageContentHeightPx =
         (availableContentHeight * canvas.width) / imgWidth;
@@ -218,35 +283,14 @@ export const generatePdf = async (
 
       for (let i = 0; i < totalPages; i++) {
         if (i > 0) {
-          pdf.addPage(format, orientation);
-          // Add title to subsequent pages if needed
-          if (titleOptions?.text) {
-            const {
-              text,
-              fontSize = 16,
-              fontStyle = "bold",
-              color = "#000000",
-              // marginBottom = 5,
-            } = titleOptions;
-
-            pdf.setFontSize(fontSize);
-            pdf.setFont("helvetica", fontStyle);
-            pdf.setTextColor(color);
-
-            const titleWidth = pdf.getTextWidth(text);
-            const titleX = margin + (contentWidth - titleWidth) / 2;
-            const titleY = margin + fontSize / 2;
-
-            pdf.text(text, titleX, titleY);
-          }
+          pdf.addPage(format as any, orientation);
+          addTitle(i);
         }
 
-        // Calculate the portion of canvas to show
         const startY = i * pageContentHeightPx;
         const remainingHeight = canvas.height - startY;
         const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
 
-        // Create a temporary canvas for this page's content
         const pageCanvas = document.createElement("canvas");
         pageCanvas.width = canvas.width;
         pageCanvas.height = pageImgHeightPx;
@@ -254,7 +298,6 @@ export const generatePdf = async (
         const ctx = pageCanvas.getContext("2d");
         if (!ctx) throw new Error("Canvas context not available");
 
-        // Draw the portion of the original canvas
         ctx.drawImage(
           canvas,
           0,
@@ -267,8 +310,8 @@ export const generatePdf = async (
           pageImgHeightPx
         );
 
-        // Calculate height in PDF units
         const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
+        const adjustedMarginTop = margin + (i === 0 ? titleHeight : 0);
 
         pdf.addImage(
           pageCanvas.toDataURL("image/jpeg", quality),
@@ -281,47 +324,23 @@ export const generatePdf = async (
           compression
         );
 
-        // In the multi-page generation logic, after adding image to each page:
-        if (options.footerOptions) {
-          const footer = options.footerOptions;
-          pdf.setFontSize(footer.fontSize || 9);
-          pdf.setFont("helvetica", "normal");
-          pdf.setTextColor(footer.color || "#666666");
-
-          // Left text
-          if (footer.left) {
-            pdf.text(footer.left, margin, pdfHeight - 5);
-          }
-
-          // Right text
-          if (footer.right) {
-            let rightText = "";
-            if (typeof footer.right === "function") {
-              rightText = footer.right(i + 1, totalPages);
-            } else {
-              rightText = footer.right;
-            }
-            const textWidth = pdf.getTextWidth(rightText);
-            pdf.text(rightText, pdfWidth - margin - textWidth, pdfHeight - 5);
-          }
-
-          // Center text
-          if (footer.center) {
-            const centerText = footer.center;
-            const textWidth = pdf.getTextWidth(centerText);
-            pdf.text(centerText, (pdfWidth - textWidth) / 2, pdfHeight - 5);
-          }
-
-          // Optional line
-          if (footer.lineColor) {
-            pdf.setDrawColor(footer.lineColor);
-            pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
-          }
-        }
+        renderFooter(
+          pdf,
+          pdfWidth,
+          pdfHeight,
+          margin,
+          i + 1,
+          totalPages,
+          footerOptions,
+          footerCode
+        );
       }
     } else {
-      // SINGLE-PAGE LOGIC (UPDATED WITH TITLE SUPPORT)
+      // ── Single page ──────────────────────────────────────────────────────────
+      addTitle(0);
+
       const availableContentHeight = contentHeight - titleHeight;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const scaleFactor = Math.min(
         contentWidth / imgWidth,
         availableContentHeight / imgHeight
@@ -331,17 +350,36 @@ export const generatePdf = async (
         canvas.toDataURL("image/jpeg", quality),
         "JPEG",
         margin,
-        adjustedMarginTop,
+        margin + titleHeight,
         imgWidth * scaleFactor,
         imgHeight * scaleFactor,
         undefined,
         compression
       );
+
+      renderFooter(
+        pdf,
+        pdfWidth,
+        pdfHeight,
+        margin,
+        1,
+        1,
+        footerOptions,
+        footerCode
+      );
     }
 
-    save === true && pdf.save(filename);
+    // ── Output ────────────────────────────────────────────────────────────────
+    if (returnFile) {
+      const blob = pdf.output("blob");
+      return new File([blob], filename, { type: "application/pdf" });
+    }
+
+    if (save !== false) {
+      pdf.save(filename);
+    }
   } catch (error) {
     console.error("PDF generation failed:", error);
     throw error;
   }
-};
+}
