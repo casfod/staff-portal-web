@@ -121,7 +121,7 @@ const FormEditAppraisal = ({ appraisal }: FormEditAppraisalProps) => {
 
   const { data: strategiesData, isLoading: isLoadingStrategies } =
     useStaffStrategies({
-      search: "",
+      search: "approved",
       sort: "-createdAt",
       page: 1,
       limit: 100,
