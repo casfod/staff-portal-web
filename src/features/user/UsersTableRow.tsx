@@ -6,6 +6,7 @@ import RequestCard from "../../ui/RequestCard";
 import UserBadge from "../../ui/UserBadge";
 import Modal from "../../ui/Modal";
 import { Trash2, UserCog } from "lucide-react";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 type TableHeaderConfig = {
   label: string;
@@ -39,6 +40,8 @@ const UsersTableRow = ({
   const staffCreatedAt = staffInfo.createdAt ?? "";
   const isVisible = !!visibleItems[staffId];
   const isEditable = true;
+
+  const currentUser = localStorageUser();
 
   // Row data configuration
   const rowData = [
@@ -197,7 +200,13 @@ const UsersTableRow = ({
             colSpan={headers.length}
             className="w-full bg-[#F8F8F8] border border-gray-300 px-4 md:px-6 py-4 rounded-lg shadow-sm"
           >
-            <StaffDetails staffInfo={staffInfo} />
+            {currentUser.role === "SUPER-ADMIN" ? (
+              <StaffDetails staffInfo={staffInfo} />
+            ) : (
+              <p className="text-center text-amber-600">
+                <span>⚠️</span> You are not authorized to view user details
+              </p>
+            )}
           </td>
         </tr>
       )}

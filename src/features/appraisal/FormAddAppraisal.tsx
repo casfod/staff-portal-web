@@ -108,7 +108,6 @@ const FormAddAppraisal = () => {
     supervisorName: currentUser?.employmentInfo?.jobDetails?.supervisor || "",
     lengthOfTimeSupervised: "",
     objectives: [],
-    achievements: "",
     safeguarding: {
       actionsTaken: "",
       trainingCompleted: "No" as const,
@@ -238,7 +237,7 @@ const FormAddAppraisal = () => {
           area.objectives.forEach((obj: any) => {
             allObjectives.push({
               objective: obj.objective,
-              employeeRating: "",
+              employeeRating: { rating: "", achievements: "" },
               supervisorRating: "",
               employeePoints: 0,
               supervisorPoints: 0,
@@ -249,7 +248,7 @@ const FormAddAppraisal = () => {
         // Add safeguarding as the last objective
         allObjectives.push({
           objective: "Safeguarding",
-          employeeRating: "",
+          employeeRating: { rating: "", achievements: "" },
           supervisorRating: "",
           employeePoints: 0,
           supervisorPoints: 0,
@@ -275,9 +274,36 @@ const FormAddAppraisal = () => {
     ) => {
       setFormData((prev) => {
         const updatedObjectives = [...(prev.objectives || [])];
+        if (field === "employeeRating") {
+          updatedObjectives[index] = {
+            ...updatedObjectives[index],
+            employeeRating: {
+              ...(updatedObjectives[index].employeeRating as any),
+              rating: value,
+            },
+          };
+        } else {
+          updatedObjectives[index] = {
+            ...updatedObjectives[index],
+            supervisorRating: value as ObjectiveRatingType["supervisorRating"],
+          };
+        }
+        return { ...prev, objectives: updatedObjectives };
+      });
+    },
+    []
+  );
+
+  const handleObjectiveAchievementsChange = useCallback(
+    (index: number, value: string) => {
+      setFormData((prev) => {
+        const updatedObjectives = [...(prev.objectives || [])];
         updatedObjectives[index] = {
           ...updatedObjectives[index],
-          [field]: value,
+          employeeRating: {
+            ...(updatedObjectives[index].employeeRating as any),
+            achievements: value,
+          },
         };
         return { ...prev, objectives: updatedObjectives };
       });
@@ -589,12 +615,12 @@ const FormAddAppraisal = () => {
                   {obj.objective || `Objective ${index + 1}`}
                 </div>
                 <Row cols="grid-cols-1 md:grid-cols-2">
-                  {/* FIXED: Employee Rating - always visible to staff */}
+                  {/* Employee Rating - always visible to staff */}
                   <FormRow label="Employee Rating">
                     <Select
                       id={`emp-rating-${index}`}
                       customLabel="Select Rating"
-                      value={obj.employeeRating || ""}
+                      value={(obj.employeeRating as any)?.rating || ""}
                       onChange={(value) =>
                         handleObjectiveRatingChange(
                           index,
@@ -628,6 +654,19 @@ const FormAddAppraisal = () => {
                     </FormRow>
                   )}
                 </Row>
+
+                {/* Achievements justification — employee only */}
+                <FormRow label="Achievements / Justification">
+                  <textarea
+                    className="border-2 h-16 rounded-lg focus:outline-none p-3 w-full text-sm"
+                    value={(obj.employeeRating as any)?.achievements || ""}
+                    onChange={(e) =>
+                      handleObjectiveAchievementsChange(index, e.target.value)
+                    }
+                    placeholder="Briefly justify your rating for this objective..."
+                  />
+                  <span className="text-xs text-blue-500">(You can edit)</span>
+                </FormRow>
               </div>
             ))}
           </div>
@@ -792,17 +831,8 @@ const FormAddAppraisal = () => {
       {/* Section 4: Future Goals - Visible to staff */}
       <div className="rounded-lg p-4 border bg-white border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-          SECTION 4: ACHIEVEMENTS & FUTURE GOALS
+          SECTION 4: FUTURE GOALS
         </h3>
-
-        <FormRow label="Achievements">
-          <textarea
-            className="border-2 h-20 rounded-lg focus:outline-none p-3 w-full"
-            value={formData.achievements || ""}
-            onChange={(e) => handleFormChange("achievements", e.target.value)}
-            placeholder="Mention your achievements if any..."
-          />
-        </FormRow>
 
         <FormRow label="Future Goals for next appraisal period">
           <textarea

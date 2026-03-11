@@ -211,7 +211,6 @@ export const updateAppraisal = async function (
       "dateOfAppraisal",
       "supervisorId",
       "supervisorName",
-      "achievements",
       "lengthOfTimeSupervised",
       "supervisorComments",
       "overallRating",

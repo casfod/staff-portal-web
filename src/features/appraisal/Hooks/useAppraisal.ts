@@ -137,7 +137,7 @@ export const useCreateAndSubmitAppraisal = () => {
       createAndSubmitAppraisal(data),
 
     onSuccess: (data) => {
-      if (data?.status === 200) {
+      if (data?.status === 201) {
         toast.success("Appraisal created and submitted successfully");
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
         navigate("/human-resources/appraisals");

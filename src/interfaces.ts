@@ -1529,14 +1529,18 @@ export interface UseStaffStrategy {
 // Appraisal Types
 ///////////////////////
 
+export interface EmployeeRatingType {
+  rating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+  achievements: string;
+}
+
 export interface ObjectiveRatingType {
   _id?: string;
   objective: string;
-  employeeRating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+  employeeRating: EmployeeRatingType; // ← was a plain string union
   supervisorRating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
   employeePoints: number;
   supervisorPoints: number;
-  // FIXED: Add pending state
   supervisorRatingStatus?: "pending" | "completed";
 }
 

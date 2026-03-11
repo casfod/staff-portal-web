@@ -32,6 +32,25 @@ export const AppraisalDetails = ({
   // Inline styles instead of dynamic Tailwind classes — dynamic class strings
   // are purged by Tailwind JIT and never make it into the CSS bundle, which
   // means they also won't render in html2canvas PDF captures.
+
+  /**
+   * Supports both data shapes:
+   *   Old: employeeRating = "Achieved" | "Partly Achieved" | "Not Achieved" | ""
+   *   New: employeeRating = { rating: "...", achievements: "..." }
+   */
+  const getEmployeeRating = (employeeRating: any): string => {
+    if (!employeeRating) return "";
+    if (typeof employeeRating === "string") return employeeRating;
+    return employeeRating.rating ?? "";
+  };
+
+  const getEmployeeAchievements = (employeeRating: any): string => {
+    if (!employeeRating) return "";
+    if (typeof employeeRating === "object")
+      return employeeRating.achievements ?? "";
+    return ""; // old structure had no per-objective achievements
+  };
+
   const getRatingStyle = (rating: string): React.CSSProperties => {
     const map: Record<string, React.CSSProperties> = {
       Achieved: { color: "#16a34a", backgroundColor: "#dcfce7" },
@@ -194,68 +213,87 @@ export const AppraisalDetails = ({
             <h3 className="text-lg capitalize font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
               SECTION 2: PERFORMANCE OBJECTIVES
             </h3>
-            <div style={{ width: "100%", overflowX: "visible" }}>
-              <table
-                style={{ width: "100%", borderCollapse: "collapse" }}
-                className="min-w-full divide-y divide-gray-200"
-              >
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Objectives
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Employee Rating
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Supervisor Rating
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {request.objectives.map((obj, index) => (
-                    <tr key={index}>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {obj.objective || `Objective ${index + 1}`}
-                      </td>
-                      <td className="px-4 py-3">
-                        {obj.employeeRating ? (
+            <div className="space-y-4">
+              {request.objectives.map((obj, index) => {
+                const empRating = getEmployeeRating(obj.employeeRating);
+                const empAchievements = getEmployeeAchievements(
+                  obj.employeeRating
+                );
+                return (
+                  <div
+                    key={index}
+                    className="p-4 bg-white rounded-lg border border-gray-200"
+                  >
+                    {/* Objective title */}
+                    <p className="font-semibold text-gray-800 mb-3">
+                      {index + 1}. {obj.objective || `Objective ${index + 1}`}
+                    </p>
+
+                    {/* Both ratings on the same row */}
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      {/* Employee Rating */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                          Employee Rating
+                        </span>
+                        {empRating ? (
                           <span
-                            style={getRatingStyle(obj.employeeRating)}
-                            className="px-2 py-1 rounded-full text-xs font-medium"
+                            style={getRatingStyle(empRating)}
+                            className="px-2 py-0.5 rounded-full text-xs font-medium"
                           >
-                            {obj.employeeRating} ({obj.employeePoints} pts)
+                            {empRating} ({obj.employeePoints} pts)
                           </span>
                         ) : (
-                          <span className="text-gray-400">Not rated</span>
+                          <span className="text-xs text-gray-400">
+                            Not rated
+                          </span>
                         )}
                         {canEditStaffSections && (
-                          <span className="ml-2 text-xs text-blue-500">
+                          <span className="text-xs text-blue-500">
                             (You can edit)
                           </span>
                         )}
-                      </td>
-                      <td className="px-4 py-3">
+                      </div>
+
+                      {/* Supervisor Rating */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                          Supervisor Rating
+                        </span>
                         {obj.supervisorRating ? (
                           <span
                             style={getRatingStyle(obj.supervisorRating)}
-                            className="px-2 py-1 rounded-full text-xs font-medium"
+                            className="px-2 py-0.5 rounded-full text-xs font-medium"
                           >
                             {obj.supervisorRating} ({obj.supervisorPoints} pts)
                           </span>
                         ) : (
-                          <span className="text-gray-400">Not rated</span>
+                          <span className="text-xs text-gray-400">
+                            Not rated
+                          </span>
                         )}
                         {canEditSupervisorSections && (
-                          <span className="ml-2 text-xs text-blue-500">
+                          <span className="text-xs text-blue-500">
                             (You can edit)
                           </span>
                         )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+
+                    {/* Achievements — full width below the ratings row */}
+                    {empAchievements ? (
+                      <div className="border-t border-gray-100 pt-3">
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-500 block mb-1">
+                          Employee Achievements
+                        </span>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-2 border border-gray-100">
+                          {empAchievements}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Safeguarding Section */}
@@ -278,19 +316,17 @@ export const AppraisalDetails = ({
                       </span>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
-                      Achievements
-                    </label>
-                    <p className="text-gray-800">
-                      {request.achievements || "N/A"}
-                    </p>
-                    {canEditStaffSections && (
-                      <span className="text-xs text-blue-500">
-                        (You can edit)
-                      </span>
-                    )}
-                  </div>
+                  {/* Legacy field — only present on records saved before the per-objective achievements migration */}
+                  {(request as any).achievements && (
+                    <div>
+                      <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
+                        Achievements (legacy)
+                      </label>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-2 border border-gray-100">
+                        {(request as any).achievements}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs font-bold mb-1 uppercase tracking-wide text-gray-600">
                       Training Completed
