@@ -119,17 +119,10 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
-    updateVendor(
-      {
-        vendorId: vendor?.id!,
-        data: { ...formData, files: selectedFiles },
-      },
-      {
-        onSuccess: () => {
-          navigate("/procurement/vendor-management");
-        },
-      }
-    );
+    updateVendor({
+      vendorId: vendor?.id!,
+      data: { ...formData, files: selectedFiles },
+    });
   };
 
   const handleSubmitForApproval = (e: React.FormEvent) => {
@@ -149,18 +142,10 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
       {
         onSuccess: () => {
           // After update, submit for approval
-          updateVendorStatus(
-            {
-              vendorId: vendor?.id!,
-              data: { status: "pending" },
-            },
-            {
-              onSuccess: () => {
-                toast.success("Vendor submitted for approval successfully");
-                navigate("/procurement/vendor-management");
-              },
-            }
-          );
+          updateVendorStatus({
+            vendorId: vendor?.id!,
+            data: { status: "pending" },
+          });
         },
       }
     );

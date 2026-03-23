@@ -137,14 +137,7 @@ const FormAddVendor: React.FC = () => {
 
     // Remove approvedBy for draft
     const { approvedBy, ...draftData } = formData;
-    createVendorDraft(
-      { ...draftData, files: selectedFiles },
-      {
-        onSuccess: () => {
-          navigate("/procurement/vendor-management");
-        },
-      }
-    );
+    createVendorDraft({ ...draftData, files: selectedFiles });
   };
 
   const handleSubmitForApproval = (e: React.FormEvent) => {
@@ -157,14 +150,7 @@ const FormAddVendor: React.FC = () => {
       return;
     }
 
-    createVendor(
-      { ...formData, files: selectedFiles },
-      {
-        onSuccess: () => {
-          navigate("/procurement/vendor-management");
-        },
-      }
-    );
+    createVendor({ ...formData, files: selectedFiles });
   };
 
   return (
