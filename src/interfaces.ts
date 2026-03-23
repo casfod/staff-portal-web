@@ -731,6 +731,8 @@ export interface VendorType {
   contactPerson: string;
   position: string;
   vendorCode: string;
+  createdBy: UserType | any;
+  approvedBy?: any;
   tinNumber: string;
   createdAt: string;
   updatedAt: string;

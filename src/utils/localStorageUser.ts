@@ -15,6 +15,6 @@ export function localStorageUser() {
   return storedUser as UserType;
 }
 
-export function getUserToken(userId: number) {
+export function getUserToken(userId: string | undefined) {
   return localStorage.getItem(`token-${userId}`);
 }
