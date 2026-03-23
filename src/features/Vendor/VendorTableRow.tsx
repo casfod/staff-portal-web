@@ -43,7 +43,7 @@ const VendorTableRow = ({
     { id: "businessName", content: truncateText(vendor.businessName, 40) },
     { id: "vendorCode", content: vendor.vendorCode },
     { id: "contactPerson", content: vendor.contactPerson },
-    { id: "status", content: <StatusBadge status={vendor.status!} /> },
+    { id: "status", content: <StatusBadge status={vendor.status || "N/A"} /> },
     {
       id: "actions",
       content: (

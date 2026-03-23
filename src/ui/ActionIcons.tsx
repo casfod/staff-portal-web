@@ -5,7 +5,7 @@ import LoadingDots from "./LoadingDots";
 import { useDebounce } from "use-debounce";
 import { useRef, useState } from "react";
 import { useUsers } from "../features/user/Hooks/useUsers";
-import { useVendors } from "../features/Vendor/Hooks/useVendor";
+import { useVendorsByStatus } from "../features/Vendor/Hooks/useVendor";
 import TagVendorsDropdown from "./TagVendorsDropdown";
 import TagUsersDropdown from "./TagUsersDropdown";
 
@@ -95,7 +95,11 @@ const ActionIcons = ({
     data: vendorsData,
     isLoading: vendorsLoading,
     isError: vendorsError,
-  } = useVendors({ page: 1, limit: 1000, search: debouncedSearchTerm });
+  } = useVendorsByStatus("approved", {
+    page: 1,
+    limit: 1000,
+    search: debouncedSearchTerm,
+  });
 
   const handleTagClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -158,8 +162,10 @@ const ActionIcons = ({
     variant === "list" && !hideInspect && onToggleView;
 
   // Shared dropdown JSX — reused in both variants
-  const tagDropdown = showTagDropdown && !isRFQDisabled && (
-    mode === "vendors" ? (
+  const tagDropdown =
+    showTagDropdown &&
+    !isRFQDisabled &&
+    (mode === "vendors" ? (
       <TagVendorsDropdown
         vendors={data || []}
         isLoading={isLoading}
@@ -177,8 +183,7 @@ const ActionIcons = ({
         onClose={() => setShowTagDropdown!(false)}
         anchorRef={tagWrapperRef}
       />
-    )
-  );
+    ));
 
   // Shared share button JSX
   const shareButton = shouldShowShareButton && (

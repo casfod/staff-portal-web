@@ -12,7 +12,7 @@ import { FileUpload } from "../../ui/FileUpload";
 import { Plus, Trash2 } from "lucide-react";
 import { useAdmins } from "../user/Hooks/useUsers";
 import Select from "../../ui/Select";
-import { useVendors } from "../Vendor/Hooks/useVendor";
+import { useVendorsByStatus } from "../Vendor/Hooks/useVendor";
 import DatePicker from "../../ui/DatePicker";
 import { casfodAddress } from "../rfq/FormAddRFQ";
 import toast from "react-hot-toast";
@@ -39,10 +39,13 @@ const FormCreatePurchaseOrder: React.FC = () => {
     useCreateIndependentPurchaseOrder();
 
   // Fetch vendors and admins
-  const { data: vendorsData, isLoading: isLoadingVendors } = useVendors({
-    page: 1,
-    limit: 1000,
-  });
+  const { data: vendorsData, isLoading: isLoadingVendors } = useVendorsByStatus(
+    "approved",
+    {
+      page: 1,
+      limit: 1000,
+    }
+  );
   const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
 
   const vendors = useMemo(
@@ -464,7 +467,7 @@ const FormCreatePurchaseOrder: React.FC = () => {
                 <div className="flex flex-col border-t pt-2 gap-2 text-right">
                   <div className="flex justify-end gap-4">
                     {/* VAT Input */}
-                    <FormRow label="WHT (%)" type="small">
+                    <FormRow label="WHT (%)" type="normal">
                       <Input
                         id="VAT"
                         type="number"

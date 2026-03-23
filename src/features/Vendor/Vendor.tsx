@@ -83,7 +83,10 @@ const Vendor = () => {
     },
     { id: "vendorCode", content: vendor?.vendorCode },
     { id: "contactPerson", content: vendor?.contactPerson },
-    { id: "status", content: <StatusBadge status={vendor?.status!} /> },
+    {
+      id: "status",
+      content: <StatusBadge status={vendor?.status.toUpperCase() || "N/A"} />,
+    },
     {
       id: "action",
       content: (
