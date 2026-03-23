@@ -1,5 +1,5 @@
 const StatusBadge = ({
-  status = "pending",
+  status = "N/A",
   size = "base",
 }: {
   status: string;
