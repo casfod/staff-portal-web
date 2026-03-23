@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
@@ -7,9 +7,11 @@ import Row from "../../ui/Row";
 import { CreateVendorType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
-import { useCreateVendor } from "./Hooks/useVendor";
+import { useCreateVendor, useCreateVendorDraft } from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
 import { bankNames } from "../../assets/Banks";
+import toast from "react-hot-toast";
+import { useAdmins } from "../user/Hooks/useUsers";
 
 export const categories = [
   {
@@ -43,10 +45,7 @@ export const categories = [
   { id: "Petroleum Products", name: "Petroleum Products" },
   { id: " Hotels and Hospitality", name: " Hotels and Hospitality" },
   { id: "Travel Agents and Agency", name: "Travel Agents and Agency" },
-  {
-    id: "Car/Vehicle Hire and Leasing",
-    name: "Car/Vehicle Hire and Leasing",
-  },
+  { id: "Car/Vehicle Hire and Leasing", name: "Car/Vehicle Hire and Leasing" },
 ];
 
 export const businessState = [
@@ -68,9 +67,14 @@ export const businessTypes = [
   { id: "Non-Profit Organization", name: "Non-Profit Organization" },
 ];
 
+// Extend CreateVendorType to include approvedBy
+interface VendorFormData extends CreateVendorType {
+  approvedBy?: string;
+}
+
 const FormAddVendor: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<CreateVendorType>({
+  const [formData, setFormData] = useState<VendorFormData>({
     businessName: "",
     businessType: "",
     address: "",
@@ -87,13 +91,19 @@ const FormAddVendor: React.FC = () => {
     businessState: "",
     operatingLGA: "",
     tinNumber: "",
+    approvedBy: "",
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { createVendor, isPending } = useCreateVendor();
+  const { createVendor, isPending: isSending } = useCreateVendor();
+  const { createVendorDraft, isPending: isSaving } = useCreateVendorDraft();
 
-  const handleFormChange = (field: keyof CreateVendorType, value: string) => {
+  // Fetch admins for approver selection
+  const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
+  const handleFormChange = (field: keyof VendorFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -106,13 +116,11 @@ const FormAddVendor: React.FC = () => {
         ? prev.filter((cat) => cat !== categoryId)
         : [...prev, categoryId];
 
-      // Convert IDs to names
       const categoryNames = newCategoryIds.map((id) => {
         const category = categories.find((cat) => cat.id === id);
-        return category?.name || id; // Use name or fallback to ID
+        return category?.name || id;
       });
 
-      // Update form data
       setFormData((prev) => ({
         ...prev,
         categories: categoryNames,
@@ -122,25 +130,45 @@ const FormAddVendor: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSaveAsDraft = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
+    // Remove approvedBy for draft
+    const { approvedBy, ...draftData } = formData;
+    createVendorDraft(
+      { ...draftData, files: selectedFiles },
+      {
+        onSuccess: () => {
+          navigate("/procurement/vendor-management");
+        },
+      }
+    );
+  };
+
+  const handleSubmitForApproval = (e: React.FormEvent) => {
+    e.preventDefault();
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+    if (!isFormValid) return;
+
+    if (!formData.approvedBy) {
+      toast.error("Please select an approver");
+      return;
+    }
+
     createVendor(
       { ...formData, files: selectedFiles },
       {
-        onSuccess: (data: any) => {
-          if (data.status === 200) {
-            navigate("/procurement/vendor-management");
-          }
+        onSuccess: () => {
+          navigate("/procurement/vendor-management");
         },
       }
     );
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-6">
       <div className="space-y-6">
         <Row cols="grid-cols-1 md:grid-cols-2">
           <FormRow label="Business Name *">
@@ -224,12 +252,12 @@ const FormAddVendor: React.FC = () => {
               id="businessState"
               customLabel="Select a State"
               value={formData.businessState || ""}
-              onChange={(value) => handleFormChange("businessState", value)} // Direct value now
+              onChange={(value) => handleFormChange("businessState", value)}
               options={
                 businessState
-                  ? businessState.map((bank) => ({
-                      id: bank.name as string,
-                      name: `${bank.name}`,
+                  ? businessState.map((state) => ({
+                      id: state.name as string,
+                      name: `${state.name}`,
                     }))
                   : []
               }
@@ -241,7 +269,7 @@ const FormAddVendor: React.FC = () => {
 
           <FormRow label="Preferred LGA of Operation *">
             <Input
-              type="text" // Use standard text type
+              type="text"
               id="operatingLGA"
               value={formData.operatingLGA}
               onChange={(e) => handleFormChange("operatingLGA", e.target.value)}
@@ -263,7 +291,7 @@ const FormAddVendor: React.FC = () => {
           </FormRow>
           <FormRow label="Business Registration Number *">
             <Input
-              type="businessRegNumber"
+              type="text"
               id="businessRegNumber"
               required
               value={formData.businessRegNumber}
@@ -370,6 +398,7 @@ const FormAddVendor: React.FC = () => {
             />
           </FormRow>
         </Row>
+
         <Row>
           <FormRow label="Bank Name *">
             <Select
@@ -377,7 +406,7 @@ const FormAddVendor: React.FC = () => {
               id="bankName"
               customLabel="Select a Bank"
               value={formData.bankName || ""}
-              onChange={(value) => handleFormChange("bankName", value)} // Direct value now
+              onChange={(value) => handleFormChange("bankName", value)}
               options={
                 bankNames
                   ? bankNames.map((bank) => ({
@@ -392,6 +421,34 @@ const FormAddVendor: React.FC = () => {
             />
           </FormRow>
         </Row>
+
+        {/* Approver Selection - Like Concept Notes */}
+        <Row>
+          <FormRow label="Approved By *">
+            {isLoadingAdmins ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                clearable={true}
+                id="approvedBy"
+                customLabel="Select an approver"
+                value={formData.approvedBy || ""}
+                onChange={(value) => handleFormChange("approvedBy", value)}
+                options={
+                  admins
+                    ? admins
+                        .filter((admin) => admin.id)
+                        .map((admin) => ({
+                          id: admin.id as string,
+                          name: `${admin.first_name} ${admin.last_name}`,
+                        }))
+                    : []
+                }
+                required
+              />
+            )}
+          </FormRow>
+        </Row>
       </div>
 
       <FileUpload
@@ -402,8 +459,22 @@ const FormAddVendor: React.FC = () => {
       />
 
       <div className="flex justify-center w-full gap-4 pt-6">
-        <Button type="submit" size="medium" disabled={isPending}>
-          {isPending ? <SpinnerMini /> : "Create Vendor"}
+        <Button
+          type="button"
+          size="medium"
+          disabled={isSaving}
+          onClick={handleSaveAsDraft}
+        >
+          {isSaving ? <SpinnerMini /> : "Save as Draft"}
+        </Button>
+
+        <Button
+          type="button"
+          size="medium"
+          disabled={isSending}
+          onClick={handleSubmitForApproval}
+        >
+          {isSending ? <SpinnerMini /> : "Save and Submit for Approval"}
         </Button>
 
         <Button

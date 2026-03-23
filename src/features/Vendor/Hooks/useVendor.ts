@@ -13,9 +13,13 @@ import {
   getVendor,
   getVendorByCode,
   createVendor,
+  createVendorDraft,
   updateVendor,
+  updateVendorStatus,
   deleteVendor,
-  exportVendorsToExcel, // Add this import
+  exportVendorsToExcel,
+  getVendorsByStatus,
+  getVendorApprovalSummary,
 } from "../../../services/apiVendor";
 import {
   CreateVendorType,
@@ -40,7 +44,10 @@ export const vendorKeys = {
   details: () => [...vendorKeys.all, "detail"] as const,
   detail: (id: string) => [...vendorKeys.details(), id] as const,
   stats: () => [...vendorKeys.all, "stats"] as const,
-  export: () => [...vendorKeys.all, "export"] as const, // Add export key
+  export: () => [...vendorKeys.all, "export"] as const,
+  byStatus: (status: string, filters: any) =>
+    [...vendorKeys.all, "status", status, filters] as const,
+  approvalSummary: () => [...vendorKeys.all, "approval-summary"] as const,
 };
 
 // Hooks
@@ -48,7 +55,7 @@ export const useVendorsStats = (options?: UseQueryOptions<any, Error>) => {
   return useQuery({
     queryKey: vendorKeys.stats(),
     queryFn: () => getVendorsStats(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     ...options,
   });
 };
@@ -65,9 +72,39 @@ export const useVendors = (
   return useQuery({
     queryKey: vendorKeys.list(queryParams),
     queryFn: () => getAllVendors(queryParams),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    // Use placeholderData instead of keepPreviousData for newer React Query versions
+    staleTime: 2 * 60 * 1000,
     placeholderData: (previousData) => previousData,
+    ...options,
+  });
+};
+
+export const useVendorsByStatus = (
+  status: string,
+  queryParams: {
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  },
+  options?: UseQueryOptions<UseVendorType, Error>
+) => {
+  return useQuery({
+    queryKey: vendorKeys.byStatus(status, queryParams),
+    queryFn: () => getVendorsByStatus(status, queryParams),
+    enabled: !!status,
+    staleTime: 2 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
+    ...options,
+  });
+};
+
+export const useVendorApprovalSummary = (
+  options?: UseQueryOptions<any, Error>
+) => {
+  return useQuery({
+    queryKey: vendorKeys.approvalSummary(),
+    queryFn: () => getVendorApprovalSummary(),
+    staleTime: 5 * 60 * 1000,
     ...options,
   });
 };
@@ -80,7 +117,7 @@ export const useVendor = (
     queryKey: vendorKeys.detail(vendorId),
     queryFn: () => getVendor(vendorId),
     enabled: !!vendorId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     ...options,
   });
 };
@@ -93,7 +130,7 @@ export const useVendorByCode = (
     queryKey: [...vendorKeys.details(), "code", vendorCode],
     queryFn: () => getVendorByCode(vendorCode),
     enabled: !!vendorCode,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     ...options,
   });
 };
@@ -110,13 +147,15 @@ export const useCreateVendor = () => {
     mutationFn: (data: CreateVendorType) => createVendor(data, data.files),
 
     onSuccess: (data) => {
-      // Check based on your API response structure
-      if (data.status.toString() === "201") {
-        toast.success("Vendor created successfully");
+      if (data.status === 201) {
+        toast.success("Vendor created successfully and submitted for approval");
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
         queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
-        navigate(-1);
+        queryClient.invalidateQueries({
+          queryKey: vendorKeys.approvalSummary(),
+        });
+        navigate("/procurement/vendor-management");
       } else {
         toast.error(data.message || "Failed to create vendor");
       }
@@ -131,6 +170,44 @@ export const useCreateVendor = () => {
   });
 
   return { createVendor: createVendorMutation, isPending, isError };
+};
+
+export const useCreateVendorDraft = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const {
+    mutate: createVendorDraftMutation,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (data: CreateVendorType) => createVendorDraft(data, data.files),
+
+    onSuccess: (data) => {
+      if (data.status === 201) {
+        toast.success("Vendor draft saved successfully");
+
+        queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
+        queryClient.invalidateQueries({
+          queryKey: vendorKeys.approvalSummary(),
+        });
+        navigate("/procurement/vendor-management");
+      } else {
+        toast.error(data.message || "Failed to save vendor draft");
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error(
+        err.response?.data?.message ||
+          "An error occurred while saving vendor draft"
+      );
+      console.error("Vendor draft error:", err.response?.data?.message);
+    },
+  });
+
+  return { createVendorDraft: createVendorDraftMutation, isPending, isError };
 };
 
 export const useUpdateVendor = () => {
@@ -150,8 +227,7 @@ export const useUpdateVendor = () => {
     }) => updateVendor(vendorId, data, data.files),
 
     onSuccess: (data, variables) => {
-      // Check based on your API response structure
-      if (data.status.toString() === "200") {
+      if (data.status === 200) {
         toast.success("Vendor updated successfully");
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
@@ -175,6 +251,51 @@ export const useUpdateVendor = () => {
   return { updateVendor: updateVendorMutation, isPending, isError };
 };
 
+export const useUpdateVendorStatus = () => {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateVendorStatusMutation,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: ({
+      vendorId,
+      data,
+    }: {
+      vendorId: string;
+      data: { status: string; comment?: string };
+    }) => updateVendorStatus(vendorId, data),
+
+    onSuccess: (data, variables) => {
+      if (data.status === 200) {
+        toast.success(`Vendor ${variables.data.status} successfully`);
+
+        queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
+        queryClient.invalidateQueries({
+          queryKey: vendorKeys.detail(variables.vendorId),
+        });
+        queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
+        queryClient.invalidateQueries({
+          queryKey: vendorKeys.approvalSummary(),
+        });
+      } else {
+        toast.error(data.message || "Failed to update vendor status");
+      }
+    },
+
+    onError: (err: ApiError) => {
+      toast.error(
+        err.response?.data?.message ||
+          "An error occurred while updating vendor status"
+      );
+      console.error("Vendor status update error:", err.response?.data?.message);
+    },
+  });
+
+  return { updateVendorStatus: updateVendorStatusMutation, isPending, isError };
+};
+
 export const useDeleteVendor = () => {
   const queryClient = useQueryClient();
 
@@ -186,12 +307,14 @@ export const useDeleteVendor = () => {
     mutationFn: (vendorId: string) => deleteVendor(vendorId),
 
     onSuccess: (data) => {
-      // Check based on your API response structure
-      if (data.status.toString() === "200") {
+      if ((data.status as any) === 200) {
         toast.success("Vendor deleted successfully");
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
         queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
+        queryClient.invalidateQueries({
+          queryKey: vendorKeys.approvalSummary(),
+        });
       } else {
         toast.error(data.message || "Failed to delete vendor");
       }
@@ -208,7 +331,6 @@ export const useDeleteVendor = () => {
   return { deleteVendor: deleteVendorMutation, isPending, isError };
 };
 
-// Add this new hook for exporting vendors to Excel
 export const useExportVendorsToExcel = () => {
   const {
     mutate: exportVendorsMutation,
@@ -219,7 +341,6 @@ export const useExportVendorsToExcel = () => {
     mutationFn: exportVendorsToExcel,
 
     onSuccess: (blob: Blob) => {
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

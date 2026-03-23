@@ -103,6 +103,37 @@ export const getAllVendors = async function (queryParams: {
   }
 };
 
+export const getVendorsByStatus = async function (
+  status: string,
+  queryParams: {
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }
+): Promise<UseVendorType> {
+  try {
+    const response = await axiosInstance.get<UseVendorType>(
+      `/vendors/status/${status}`,
+      {
+        params: queryParams,
+      }
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const getVendorApprovalSummary = async function (): Promise<any> {
+  try {
+    const response = await axiosInstance.get(`/vendors/approval/summary`);
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const getVendor = async function (vendorId: string): Promise<UseVendor> {
   try {
     const response = await axiosInstance.get<UseVendor>(`/vendors/${vendorId}`);
@@ -126,13 +157,13 @@ export const getVendorByCode = async function (
 };
 
 export const createVendor = async function (
-  data: CreateVendorType,
+  data: CreateVendorType & { approvedBy?: string },
   files: File[] = []
 ): Promise<UseVendor> {
   try {
     const formData = new FormData();
 
-    // Append all vendor fields - ADD THE MISSING FIELDS
+    // Append all vendor fields
     const vendorFields: (keyof CreateVendorType)[] = [
       "businessName",
       "businessType",
@@ -144,18 +175,17 @@ export const createVendor = async function (
       "contactPerson",
       "position",
       "tinNumber",
-      "businessRegNumber", // ADDED
-      "bankName", // ADDED
-      "accountName", // ADDED
-      "accountNumber", // ADDED
-      "businessState", // ADDED
-      "operatingLGA", // ADDED
+      "businessRegNumber",
+      "bankName",
+      "accountName",
+      "accountNumber",
+      "businessState",
+      "operatingLGA",
     ];
 
     vendorFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
         if (key === "categories" && Array.isArray(data[key])) {
-          // Append each category individually or as JSON string
           (data[key] as string[]).forEach((category) => {
             formData.append("categories", category);
           });
@@ -164,6 +194,11 @@ export const createVendor = async function (
         }
       }
     });
+
+    // Append approvedBy separately
+    if (data.approvedBy) {
+      formData.append("approvedBy", data.approvedBy);
+    }
 
     // Append files
     files.forEach((file) => {
@@ -180,6 +215,64 @@ export const createVendor = async function (
   }
 };
 
+export const createVendorDraft = async function (
+  data: CreateVendorType,
+  files: File[] = []
+): Promise<UseVendor> {
+  try {
+    const formData = new FormData();
+
+    // Append all vendor fields
+    const vendorFields: (keyof CreateVendorType)[] = [
+      "businessName",
+      "businessType",
+      "address",
+      "email",
+      "businessPhoneNumber",
+      "contactPhoneNumber",
+      "categories",
+      "contactPerson",
+      "position",
+      "tinNumber",
+      "businessRegNumber",
+      "bankName",
+      "accountName",
+      "accountNumber",
+      "businessState",
+      "operatingLGA",
+    ];
+
+    vendorFields.forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        if (key === "categories" && Array.isArray(data[key])) {
+          (data[key] as string[]).forEach((category) => {
+            formData.append("categories", category);
+          });
+        } else {
+          formData.append(key, String(data[key]));
+        }
+      }
+    });
+
+    // Append files
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await axiosInstance.post<UseVendor>(
+      `/vendors/draft`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updateVendor = async function (
   vendorId: string,
   data: UpdateVendorType,
@@ -188,7 +281,6 @@ export const updateVendor = async function (
   try {
     const formData = new FormData();
 
-    // Append all vendor fields - ADD THE MISSING FIELDS
     const vendorFields: (keyof UpdateVendorType)[] = [
       "businessName",
       "businessType",
@@ -200,18 +292,17 @@ export const updateVendor = async function (
       "contactPerson",
       "position",
       "tinNumber",
-      "businessRegNumber", // ADDED
-      "bankName", // ADDED
-      "accountName", // ADDED
-      "accountNumber", // ADDED
-      "businessState", // ADDED
-      "operatingLGA", // ADDED
+      "businessRegNumber",
+      "bankName",
+      "accountName",
+      "accountNumber",
+      "businessState",
+      "operatingLGA",
     ];
 
     vendorFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
         if (key === "categories" && Array.isArray(data[key])) {
-          // Append each category individually
           (data[key] as string[]).forEach((category) => {
             formData.append("categories", category);
           });
@@ -221,7 +312,6 @@ export const updateVendor = async function (
       }
     });
 
-    // Append files
     files.forEach((file) => {
       formData.append("files", file);
     });
@@ -240,12 +330,26 @@ export const updateVendor = async function (
   }
 };
 
+export const updateVendorStatus = async function (
+  vendorId: string,
+  data: { status: string; comment?: string }
+): Promise<any> {
+  try {
+    const response = await axiosInstance.patch(
+      `/vendors/${vendorId}/status`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const exportVendorsToExcel = async function (): Promise<Blob> {
   try {
     const response = await axiosInstance.get(`/vendors/export/excel`, {
-      responseType: "blob", // Important for file downloads
+      responseType: "blob",
     });
-
     return response.data;
   } catch (err) {
     return handleError(err);

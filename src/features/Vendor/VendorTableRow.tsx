@@ -1,12 +1,12 @@
 import { VendorType } from "../../interfaces";
 import { localStorageUser } from "../../utils/localStorageUser";
-// import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
 import TableRowMain from "../../ui/TableRowMain";
 import ActionIcons from "../../ui/ActionIcons";
 import TableData from "../../ui/TableData";
 import { VendorDetails } from "./VendorDetails";
 import { truncateText } from "../../utils/truncateText";
+import StatusBadge from "../../ui/StatusBadge";
 
 const VendorTableRow = ({
   vendor,
@@ -26,20 +26,21 @@ const VendorTableRow = ({
   const currentUser = localStorageUser();
 
   const isEditable =
-    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canUpdate;
+    (vendor.status === "draft" || vendor.status === "rejected") &&
+    vendor.createdBy?.id === currentUser?.id;
   const isDeletable =
-    currentUser.role === "SUPER-ADMIN" || currentUser.procurementRole.canDelete;
+    (currentUser.role === "SUPER-ADMIN" ||
+      currentUser.procurementRole?.canDelete) &&
+    vendor.status !== "approved";
 
   const vendorId = vendor.id ?? "";
-  // const vendorCreatedAt = vendor.createdAt ?? "";
-
   const isVisible = !!visibleItems[vendorId];
 
   const rowData = [
     { id: "businessName", content: truncateText(vendor.businessName, 40) },
     { id: "vendorCode", content: vendor.vendorCode },
-    // { id: "categories", content: vendor.categories || "N/A" },
     { id: "contactPerson", content: vendor.contactPerson },
+    { id: "status", content: <StatusBadge status={vendor.status!} /> },
     {
       id: "actions",
       content: (
@@ -49,8 +50,8 @@ const VendorTableRow = ({
           requestId={vendorId}
           visibleItems={visibleItems}
           onToggleView={toggleViewItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={() => handleEdit(vendor)}
+          onDelete={() => handleDelete?.(vendorId)}
           request={vendor}
         />
       ),

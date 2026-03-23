@@ -6,7 +6,8 @@ import {
   useVendors,
   useExportVendorsToExcel,
   useDeleteVendor,
-} from "./Hooks/useVendor"; // Update import
+  useVendorApprovalSummary,
+} from "./Hooks/useVendor";
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import { RootState } from "../../store/store";
@@ -24,7 +25,7 @@ import Button from "../../ui/Button";
 import VendorTableRow from "./VendorTableRow";
 import SpinnerMini from "../../ui/SpinnerMini";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
-// Remove the direct import: import { exportVendorsToExcel } from "../../services/apiVendor";
+import Select from "../../ui/Select";
 
 export function AllVendors() {
   const currentUser = localStorageUser();
@@ -35,6 +36,11 @@ export function AllVendors() {
     (state: RootState) => state.genericQuerySlice
   );
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Fetch approval summary for dashboard stats
+  const { data: summaryData } = useVendorApprovalSummary();
+  const summary = summaryData?.data;
 
   const { data, isLoading, isError } = useVendors({
     search: debouncedSearchTerm,
@@ -43,18 +49,14 @@ export function AllVendors() {
     limit,
   });
 
-  // Use the new export hook
   const { exportVendors, isExporting } = useExportVendorsToExcel();
-
   const { deleteVendor } = useDeleteVendor();
 
-  // State for toggling nested tables
   const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
 
   const vendors = useMemo(() => data?.data?.vendors ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
 
-  // Toggle nested table visibility
   const toggleViewItems = (id: string) => {
     setVisibleItems((prev) => ({
       ...prev,
@@ -84,15 +86,32 @@ export function AllVendors() {
     exportVendors();
   };
 
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    if (value !== "all") {
+      navigate(`/procurement/vendor-management/status/${value}`);
+    } else {
+      navigate("/procurement/vendor-management");
+    }
+  };
+
   if (isError) {
     return <NetworkErrorUI />;
   }
 
+  const statusOptions = [
+    { id: "all", name: "All Vendors" },
+    { id: "draft", name: `Draft (${summary?.draft || 0})` },
+    { id: "pending", name: `Pending (${summary?.pending || 0})` },
+    { id: "approved", name: `Approved (${summary?.approved || 0})` },
+    { id: "rejected", name: `Rejected (${summary?.rejected || 0})` },
+  ];
+
   const tableHeadData = [
     "Business Name",
     "Vendor Code",
-    // "Category",
     "Contact Person",
+    "Status",
     "Actions",
   ];
 
@@ -135,7 +154,7 @@ export function AllVendors() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar and Status Filter */}
         <div className="flex items-center space-x-4">
           <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
             <span className="p-2 text-gray-400">
@@ -155,6 +174,17 @@ export function AllVendors() {
               <GoXCircle />
             </span>
           </div>
+
+          {/* Status Filter Dropdown */}
+          <Select
+            clearable={false}
+            id="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            options={statusOptions}
+            customLabel="Filter by status"
+            className="w-48"
+          />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
@@ -7,25 +7,33 @@ import Row from "../../ui/Row";
 import { UpdateVendorType, VendorType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
-import { useUpdateVendor } from "./Hooks/useVendor";
+import { useUpdateVendor, useUpdateVendorStatus } from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
-import { businessState, categories } from "./FormAddVendor";
+import { businessState, categories, businessTypes } from "./FormAddVendor";
 import { bankNames } from "../../assets/Banks";
+import toast from "react-hot-toast";
+import StatusBadge from "../../ui/StatusBadge";
+import { useAdmins } from "../user/Hooks/useUsers";
 
 interface FormEditVendorProps {
   vendor: VendorType | null;
 }
 
+// Extend UpdateVendorType to include approvedBy for submission
+interface VendorUpdateFormData extends UpdateVendorType {
+  approvedBy?: string;
+}
+
 const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<UpdateVendorType>({
+  const [formData, setFormData] = useState<VendorUpdateFormData>({
     businessName: vendor?.businessName,
     businessType: vendor?.businessType,
     address: vendor?.address,
     email: vendor?.email,
     businessPhoneNumber: vendor?.businessPhoneNumber,
     contactPhoneNumber: vendor?.contactPhoneNumber,
-    categories: vendor?.categories || [], // Changed to array
+    categories: vendor?.categories || [],
     contactPerson: vendor?.contactPerson,
     position: vendor?.position,
     tinNumber: vendor?.tinNumber,
@@ -35,6 +43,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     accountNumber: vendor?.accountNumber,
     businessState: vendor?.businessState,
     operatingLGA: vendor?.operatingLGA,
+    approvedBy: vendor?.approvedBy?.id || "",
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -42,18 +51,14 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     vendor?.categories || []
   );
 
-  const { updateVendor, isPending } = useUpdateVendor();
+  const { updateVendor, isPending: isUpdating } = useUpdateVendor();
+  const { updateVendorStatus, isPending: isSubmitting } =
+    useUpdateVendorStatus();
 
-  const businessTypes = [
-    { id: "Sole Proprietorship", name: "Sole Proprietorship" },
-    { id: "Partnership", name: "Partnership" },
-    { id: "Corporation", name: "Corporation" },
-    {
-      id: "Limited Liability Company (LLC)",
-      name: "Limited Liability Company (LLC)",
-    },
-    { id: "Non-Profit Organization", name: "Non-Profit Organization" },
-  ];
+  // Fetch admins for approver selection
+  const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
+  const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
+
   useEffect(() => {
     if (vendor) {
       setFormData({
@@ -67,18 +72,22 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         contactPerson: vendor.contactPerson,
         position: vendor.position,
         tinNumber: vendor.tinNumber,
-        businessRegNumber: vendor.businessRegNumber, // Added
-        bankName: vendor.bankName, // Added
-        accountName: vendor.accountName, // Added
-        accountNumber: vendor.accountNumber, // Added
-        businessState: vendor.businessState, // Added
-        operatingLGA: vendor.operatingLGA, // Added
+        businessRegNumber: vendor.businessRegNumber,
+        bankName: vendor.bankName,
+        accountName: vendor.accountName,
+        accountNumber: vendor.accountNumber,
+        businessState: vendor.businessState,
+        operatingLGA: vendor.operatingLGA,
+        approvedBy: vendor.approvedBy?.id || "",
       });
       setSelectedCategories(vendor.categories || []);
     }
   }, [vendor]);
 
-  const handleFormChange = (field: keyof UpdateVendorType, value: string) => {
+  const handleFormChange = (
+    field: keyof VendorUpdateFormData,
+    value: string
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -91,13 +100,11 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         ? prev.filter((cat) => cat !== categoryId)
         : [...prev, categoryId];
 
-      // Convert IDs to names
       const categoryNames = newCategoryIds.map((id) => {
         const category = categories.find((cat) => cat.id === id);
-        return category?.name || id; // Use name or fallback to ID
+        return category?.name || id;
       });
 
-      // Update form data
       setFormData((prev) => ({
         ...prev,
         categories: categoryNames,
@@ -107,7 +114,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
@@ -118,18 +125,62 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         data: { ...formData, files: selectedFiles },
       },
       {
-        onSuccess: (data: any) => {
-          if (data.status === 200) {
-            navigate("/procurement/vendor-management");
-          }
+        onSuccess: () => {
+          navigate("/procurement/vendor-management");
         },
       }
     );
   };
 
+  const handleSubmitForApproval = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.approvedBy) {
+      toast.error("Please select an approver");
+      return;
+    }
+
+    // Update vendor and submit for approval
+    updateVendor(
+      {
+        vendorId: vendor?.id!,
+        data: { ...formData, files: selectedFiles },
+      },
+      {
+        onSuccess: () => {
+          // After update, submit for approval
+          updateVendorStatus(
+            {
+              vendorId: vendor?.id!,
+              data: { status: "pending" },
+            },
+            {
+              onSuccess: () => {
+                toast.success("Vendor submitted for approval successfully");
+                navigate("/procurement/vendor-management");
+              },
+            }
+          );
+        },
+      }
+    );
+  };
+
+  const canEdit = vendor?.status === "draft" || vendor?.status === "rejected";
+  const canSubmitForApproval = vendor?.status === "draft";
+
+  if (!vendor) {
+    return <div>No vendor data available.</div>;
+  }
+
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-6">
       <div className="space-y-6">
+        {/* Status Badge */}
+        <div className="flex justify-end">
+          <StatusBadge status={vendor.status!} />
+        </div>
+
         <Row cols="grid-cols-1 md:grid-cols-2">
           <FormRow label="Business Name *">
             <Input
@@ -137,6 +188,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               id="businessName"
               minLength={3}
               required
+              disabled={!canEdit}
               value={formData.businessName}
               onChange={(e) => handleFormChange("businessName", e.target.value)}
               placeholder="Enter business name"
@@ -149,6 +201,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               id="businessType"
               customLabel="Select Business Type"
               required
+              disabled={!canEdit}
               value={formData.businessType || ""}
               onChange={(value) => handleFormChange("businessType", value)}
               options={businessTypes}
@@ -167,6 +220,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
                   >
                     <input
                       type="checkbox"
+                      disabled={!canEdit}
                       checked={selectedCategories.includes(category.id)}
                       onChange={() => handleCategoryChange(category.id)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -198,6 +252,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               maxLength={500}
               placeholder="Enter full business address"
               id="address"
+              disabled={!canEdit}
               value={formData.address}
               onChange={(e) => handleFormChange("address", e.target.value)}
               required
@@ -211,13 +266,14 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               clearable={true}
               id="businessState"
               customLabel="Select a State"
+              disabled={!canEdit}
               value={formData.businessState || ""}
-              onChange={(value) => handleFormChange("businessState", value)} // Direct value now
+              onChange={(value) => handleFormChange("businessState", value)}
               options={
                 businessState
-                  ? businessState.map((bank) => ({
-                      id: bank.name as string,
-                      name: `${bank.name}`,
+                  ? businessState.map((state) => ({
+                      id: state.name as string,
+                      name: `${state.name}`,
                     }))
                   : []
               }
@@ -229,8 +285,9 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
 
           <FormRow label="Preferred LGA of Operation *">
             <Input
-              type="text" // Use standard text type
+              type="text"
               id="operatingLGA"
+              disabled={!canEdit}
               value={formData.operatingLGA}
               onChange={(e) => handleFormChange("operatingLGA", e.target.value)}
               placeholder="Enter Local Government Area"
@@ -244,6 +301,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="email"
               id="email"
               required
+              disabled={!canEdit}
               value={formData.email}
               onChange={(e) => handleFormChange("email", e.target.value)}
               placeholder="email@company.com"
@@ -251,9 +309,10 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
           </FormRow>
           <FormRow label="Business Registration Number *">
             <Input
-              type="businessRegNumber"
+              type="text"
               id="businessRegNumber"
               required
+              disabled={!canEdit}
               value={formData.businessRegNumber}
               onChange={(e) =>
                 handleFormChange("businessRegNumber", e.target.value)
@@ -268,6 +327,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="tel"
               id="businessPhoneNumber"
               required
+              disabled={!canEdit}
               value={formData.businessPhoneNumber}
               onChange={(e) =>
                 handleFormChange("businessPhoneNumber", e.target.value)
@@ -285,6 +345,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="text"
               id="contactPerson"
               required
+              disabled={!canEdit}
               value={formData.contactPerson}
               onChange={(e) =>
                 handleFormChange("contactPerson", e.target.value)
@@ -298,6 +359,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="text"
               id="position"
               required
+              disabled={!canEdit}
               value={formData.position}
               onChange={(e) => handleFormChange("position", e.target.value)}
               placeholder="Position in company"
@@ -311,6 +373,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="tel"
               id="contactPhoneNumber"
               required
+              disabled={!canEdit}
               value={formData.contactPhoneNumber}
               onChange={(e) =>
                 handleFormChange("contactPhoneNumber", e.target.value)
@@ -326,6 +389,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="text"
               id="tinNumber"
               required
+              disabled={!canEdit}
               value={formData.tinNumber}
               onChange={(e) => handleFormChange("tinNumber", e.target.value)}
               placeholder="Tax Identification Number"
@@ -339,6 +403,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="text"
               id="accountNumber"
               required
+              disabled={!canEdit}
               value={formData.accountNumber}
               onChange={(e) =>
                 handleFormChange("accountNumber", e.target.value)
@@ -353,19 +418,22 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               type="text"
               id="accountName"
               required
+              disabled={!canEdit}
               value={formData.accountName}
               onChange={(e) => handleFormChange("accountName", e.target.value)}
             />
           </FormRow>
         </Row>
+
         <Row>
           <FormRow label="Bank Name *">
             <Select
               clearable={true}
               id="bankName"
               customLabel="Select a Bank"
+              disabled={!canEdit}
               value={formData.bankName || ""}
-              onChange={(value) => handleFormChange("bankName", value)} // Direct value now
+              onChange={(value) => handleFormChange("bankName", value)}
               options={
                 bankNames
                   ? bankNames.map((bank) => ({
@@ -380,7 +448,38 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
             />
           </FormRow>
         </Row>
+
+        {/* Approver Selection - Only show for draft vendors being submitted */}
+        {canSubmitForApproval && (
+          <Row>
+            <FormRow label="Approved By *">
+              {isLoadingAdmins ? (
+                <SpinnerMini />
+              ) : (
+                <Select
+                  clearable={true}
+                  id="approvedBy"
+                  customLabel="Select an approver"
+                  value={formData.approvedBy || ""}
+                  onChange={(value) => handleFormChange("approvedBy", value)}
+                  options={
+                    admins
+                      ? admins
+                          .filter((admin) => admin.id)
+                          .map((admin) => ({
+                            id: admin.id as string,
+                            name: `${admin.first_name} ${admin.last_name}`,
+                          }))
+                      : []
+                  }
+                  required
+                />
+              )}
+            </FormRow>
+          </Row>
+        )}
       </div>
+
       <FileUpload
         selectedFiles={selectedFiles}
         setSelectedFiles={setSelectedFiles}
@@ -389,15 +488,28 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
       />
 
       <div className="flex justify-center w-full gap-4 pt-6">
-        <Button type="submit" size="medium" disabled={isPending}>
-          {isPending ? <SpinnerMini /> : "Update Vendor"}
-        </Button>
+        {canEdit && (
+          <Button size="medium" disabled={isUpdating} onClick={handleUpdate}>
+            {isUpdating ? <SpinnerMini /> : "Update Vendor"}
+          </Button>
+        )}
+
+        {canSubmitForApproval && (
+          <Button
+            size="medium"
+            disabled={isSubmitting}
+            onClick={handleSubmitForApproval}
+            variant="primary"
+          >
+            {isSubmitting ? <SpinnerMini /> : "Submit for Approval"}
+          </Button>
+        )}
 
         <Button
           type="button"
           size="medium"
           variant="secondary"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/procurement/vendor-management")}
         >
           Cancel
         </Button>

@@ -720,6 +720,7 @@ export interface ConceptNoteType {
 //Vendor //
 ///////////////////////
 export interface VendorType {
+  status: string; // Make sure this is included
   id: string;
   businessName: string;
   businessType: string;
@@ -743,6 +744,7 @@ export interface VendorType {
   accountName: string;
   bankName: string;
   files?: [];
+  comments?: any[];
 }
 
 export interface UseVendorType {
@@ -757,7 +759,7 @@ export interface UseVendorType {
 }
 
 export interface UseVendor {
-  status: string;
+  status: string | number;
   message: string;
   data: {
     vendor: VendorType;
@@ -765,7 +767,7 @@ export interface UseVendor {
 }
 
 export interface UseVendorStatsType {
-  status: number;
+  status: number | number;
   message: string;
   data: {
     totalVendors: number;
