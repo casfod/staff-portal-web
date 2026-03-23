@@ -4,10 +4,14 @@ import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
-import { UpdateVendorType, VendorType } from "../../interfaces";
+import {
+  CreateVendorType,
+  UpdateVendorType,
+  VendorType,
+} from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
-import { useUpdateVendor, useUpdateVendorStatus } from "./Hooks/useVendor";
+import { useCreateVendor, useCreateVendorDraft } from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
 import { businessState, categories, businessTypes } from "./FormAddVendor";
 import { bankNames } from "../../assets/Banks";
@@ -27,33 +31,29 @@ interface VendorUpdateFormData extends UpdateVendorType {
 const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<VendorUpdateFormData>({
-    businessName: vendor?.businessName,
-    businessType: vendor?.businessType,
-    address: vendor?.address,
-    email: vendor?.email,
-    businessPhoneNumber: vendor?.businessPhoneNumber,
-    contactPhoneNumber: vendor?.contactPhoneNumber,
-    categories: vendor?.categories || [],
-    contactPerson: vendor?.contactPerson,
-    position: vendor?.position,
-    tinNumber: vendor?.tinNumber,
-    businessRegNumber: vendor?.businessRegNumber,
-    bankName: vendor?.bankName,
-    accountName: vendor?.accountName,
-    accountNumber: vendor?.accountNumber,
-    businessState: vendor?.businessState,
-    operatingLGA: vendor?.operatingLGA,
-    approvedBy: vendor?.approvedBy?.id || "",
+    businessName: "",
+    businessType: "",
+    address: "",
+    email: "",
+    businessPhoneNumber: "",
+    contactPhoneNumber: "",
+    categories: [],
+    contactPerson: "",
+    position: "",
+    businessRegNumber: "",
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    businessState: "",
+    operatingLGA: "",
+    tinNumber: "",
+    approvedBy: "",
   });
-
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    vendor?.categories || []
-  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { updateVendor, isPending: isUpdating } = useUpdateVendor();
-  const { updateVendorStatus, isPending: isSubmitting } =
-    useUpdateVendorStatus();
+  const { createVendor, isPending: isSending } = useCreateVendor();
+  const { createVendorDraft, isPending: isSaving } = useCreateVendorDraft();
 
   // Fetch admins for approver selection
   const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
@@ -61,26 +61,33 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
 
   useEffect(() => {
     if (vendor) {
+      // Map category names to IDs for checkboxes
+      const categoryIds =
+        vendor.categories?.map((catName) => {
+          const category = categories.find((cat) => cat.name === catName);
+          return category?.id || catName;
+        }) || [];
+
       setFormData({
-        businessName: vendor.businessName,
-        businessType: vendor.businessType,
-        address: vendor.address,
-        email: vendor.email,
-        businessPhoneNumber: vendor.businessPhoneNumber,
-        contactPhoneNumber: vendor.contactPhoneNumber,
+        businessName: vendor.businessName || "",
+        businessType: vendor.businessType || "",
+        address: vendor.address || "",
+        email: vendor.email || "",
+        businessPhoneNumber: vendor.businessPhoneNumber || "",
+        contactPhoneNumber: vendor.contactPhoneNumber || "",
         categories: vendor.categories || [],
-        contactPerson: vendor.contactPerson,
-        position: vendor.position,
-        tinNumber: vendor.tinNumber,
-        businessRegNumber: vendor.businessRegNumber,
-        bankName: vendor.bankName,
-        accountName: vendor.accountName,
-        accountNumber: vendor.accountNumber,
-        businessState: vendor.businessState,
-        operatingLGA: vendor.operatingLGA,
+        contactPerson: vendor.contactPerson || "",
+        position: vendor.position || "",
+        businessRegNumber: vendor.businessRegNumber || "",
+        bankName: vendor.bankName || "",
+        accountName: vendor.accountName || "",
+        accountNumber: vendor.accountNumber || "",
+        businessState: vendor.businessState || "",
+        operatingLGA: vendor.operatingLGA || "",
+        tinNumber: vendor.tinNumber || "",
         approvedBy: vendor.approvedBy?.id || "",
       });
-      setSelectedCategories(vendor.categories || []);
+      setSelectedCategories(categoryIds);
     }
   }, [vendor]);
 
@@ -114,41 +121,30 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     });
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSaveAsDraft = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
     if (!isFormValid) return;
 
-    updateVendor({
-      vendorId: vendor?.id!,
-      data: { ...formData, files: selectedFiles },
-    });
+    // Remove approvedBy for draft
+    const { approvedBy, ...draftData } = formData;
+    createVendorDraft({
+      ...draftData,
+      files: selectedFiles,
+    } as CreateVendorType);
   };
 
   const handleSubmitForApproval = (e: React.FormEvent) => {
     e.preventDefault();
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+    if (!isFormValid) return;
 
     if (!formData.approvedBy) {
       toast.error("Please select an approver");
       return;
     }
 
-    // Update vendor and submit for approval
-    updateVendor(
-      {
-        vendorId: vendor?.id!,
-        data: { ...formData, files: selectedFiles },
-      },
-      {
-        onSuccess: () => {
-          // After update, submit for approval
-          updateVendorStatus({
-            vendorId: vendor?.id!,
-            data: { status: "pending" },
-          });
-        },
-      }
-    );
+    createVendor({ ...formData, files: selectedFiles } as CreateVendorType);
   };
 
   const canEdit = vendor?.status === "draft" || vendor?.status === "rejected";
@@ -187,7 +183,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
               customLabel="Select Business Type"
               required
               disabled={!canEdit}
-              value={formData.businessType || ""}
+              value={formData.businessType!}
               onChange={(value) => handleFormChange("businessType", value)}
               options={businessTypes}
             />
@@ -434,7 +430,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
           </FormRow>
         </Row>
 
-        {/* Approver Selection - Only show for draft vendors being submitted */}
+        {/* Approver Selection - Show for draft vendors being submitted */}
         {canSubmitForApproval && (
           <Row>
             <FormRow label="Approved By *">
@@ -474,19 +470,24 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
 
       <div className="flex justify-center w-full gap-4 pt-6">
         {canEdit && (
-          <Button size="medium" disabled={isUpdating} onClick={handleUpdate}>
-            {isUpdating ? <SpinnerMini /> : "Update Vendor"}
+          <Button
+            type="button"
+            size="medium"
+            disabled={isSaving}
+            onClick={handleSaveAsDraft}
+          >
+            {isSaving ? <SpinnerMini /> : "Save as Draft"}
           </Button>
         )}
 
         {canSubmitForApproval && (
           <Button
+            type="button"
             size="medium"
-            disabled={isSubmitting}
+            disabled={isSending}
             onClick={handleSubmitForApproval}
-            variant="primary"
           >
-            {isSubmitting ? <SpinnerMini /> : "Submit for Approval"}
+            {isSending ? <SpinnerMini /> : "Save and Submit for Approval"}
           </Button>
         )}
 

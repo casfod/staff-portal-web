@@ -27,7 +27,7 @@ const Vendor = () => {
 
   // Fetch vendor data - FIXED: Access vendor from data.vendor
   const { data: vendorResponse, isLoading, isError } = useVendor(vendorId!);
-  const vendor = vendorResponse?.data?.vendor;
+  const vendor = vendorResponse?.data;
 
   const { updateVendorStatus, isPending: isUpdatingStatus } =
     useUpdateVendorStatus();

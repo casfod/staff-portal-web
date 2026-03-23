@@ -747,6 +747,16 @@ export interface VendorType {
   comments?: any[];
 }
 
+// export interface UseVendorType {
+//   status: string;
+//   message: string;
+//   data: {
+//     vendors: VendorType[];
+//     totalVendors: number;
+//     totalPages: number;
+//     currentPage: number;
+//   };
+// }
 export interface UseVendorType {
   status: string;
   message: string;
@@ -761,9 +771,7 @@ export interface UseVendorType {
 export interface UseVendor {
   status: string | number;
   message: string;
-  data: {
-    vendor: VendorType;
-  };
+  data: VendorType;
 }
 
 export interface UseVendorStatsType {
@@ -777,6 +785,7 @@ export interface UseVendorStatsType {
 }
 
 export interface CreateVendorType {
+  approvedBy?: string;
   businessName: string;
   businessType: string;
   address: string;
