@@ -90,6 +90,7 @@ const Vendor = () => {
         <ActionIcons
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
+          hideInspect={true}
         />
       ),
     },

@@ -29,7 +29,7 @@ const EditVendor = () => {
     }
   }, [remoteData, vendor, vendorId, navigate, isLoading]);
 
-  const requestData = remoteData?.data?.vendor || vendor;
+  const requestData = remoteData?.data || vendor;
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
