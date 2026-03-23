@@ -15,6 +15,7 @@ import {
   CreditCard,
   Landmark,
   UserCircle,
+  User2,
 } from "lucide-react";
 import { ReactElement } from "react";
 import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
@@ -187,6 +188,15 @@ export const VendorDetails = ({ vendor }: VendorDetailsProps) => {
           label: "Last Updated",
           content: formatToDDMMYYYY(vendor.updatedAt),
           icon: <FileText className="w-4 h-4" />,
+        },
+
+        {
+          id: "createdBy",
+          label: "Created By",
+          content: `${vendor.createdBy.first_name || ""} ${
+            vendor.createdBy.last_name || ""
+          }`,
+          icon: <User2 className="w-4 h-4" />,
         },
       ],
     },
