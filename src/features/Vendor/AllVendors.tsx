@@ -176,7 +176,7 @@ export function AllVendors() {
           </div>
 
           {/* Status Filter Dropdown */}
-          <Select
+          {/* <Select
             clearable={false}
             id="statusFilter"
             value={statusFilter}
@@ -184,7 +184,7 @@ export function AllVendors() {
             options={statusOptions}
             customLabel="Filter by status"
             className="w-48"
-          />
+          /> */}
         </div>
       </div>
 
