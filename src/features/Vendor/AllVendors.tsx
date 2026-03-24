@@ -6,7 +6,7 @@ import {
   useVendors,
   useExportVendorsToExcel,
   useDeleteVendor,
-  useVendorApprovalSummary,
+  // useVendorApprovalSummary,
 } from "./Hooks/useVendor";
 import { useDispatch, useSelector } from "react-redux";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
@@ -25,7 +25,7 @@ import Button from "../../ui/Button";
 import VendorTableRow from "./VendorTableRow";
 import SpinnerMini from "../../ui/SpinnerMini";
 import useDeleteRequest from "../../hooks/useDeleteRequest";
-import Select from "../../ui/Select";
+// import Select from "../../ui/Select";
 
 export function AllVendors() {
   const currentUser = localStorageUser();
@@ -36,11 +36,12 @@ export function AllVendors() {
     (state: RootState) => state.genericQuerySlice
   );
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-  const [statusFilter, setStatusFilter] = useState("all");
+  // const [statusFilter, setStatusFilter] = useState("all");
+  // console.log(statusFilter);
 
   // Fetch approval summary for dashboard stats
-  const { data: summaryData } = useVendorApprovalSummary();
-  const summary = summaryData?.data;
+  // const { data: summaryData } = useVendorApprovalSummary();
+  // const summary = summaryData?.data;
 
   const { data, isLoading, isError } = useVendors({
     search: debouncedSearchTerm,
@@ -86,26 +87,26 @@ export function AllVendors() {
     exportVendors();
   };
 
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
-    if (value !== "all") {
-      navigate(`/procurement/vendor-management/status/${value}`);
-    } else {
-      navigate("/procurement/vendor-management");
-    }
-  };
+  // const handleStatusFilterChange = (value: string) => {
+  //   setStatusFilter(value);
+  //   if (value !== "all") {
+  //     navigate(`/procurement/vendor-management/status/${value}`);
+  //   } else {
+  //     navigate("/procurement/vendor-management");
+  //   }
+  // };
 
   if (isError) {
     return <NetworkErrorUI />;
   }
 
-  const statusOptions = [
-    { id: "all", name: "All Vendors" },
-    { id: "draft", name: `Draft (${summary?.draft || 0})` },
-    { id: "pending", name: `Pending (${summary?.pending || 0})` },
-    { id: "approved", name: `Approved (${summary?.approved || 0})` },
-    { id: "rejected", name: `Rejected (${summary?.rejected || 0})` },
-  ];
+  // const statusOptions = [
+  //   { id: "all", name: "All Vendors" },
+  //   { id: "draft", name: `Draft (${summary?.draft || 0})` },
+  //   { id: "pending", name: `Pending (${summary?.pending || 0})` },
+  //   { id: "approved", name: `Approved (${summary?.approved || 0})` },
+  //   { id: "rejected", name: `Rejected (${summary?.rejected || 0})` },
+  // ];
 
   const tableHeadData = [
     "Business Name",
