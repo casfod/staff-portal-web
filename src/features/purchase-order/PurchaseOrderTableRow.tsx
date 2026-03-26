@@ -48,8 +48,7 @@ const PurchaseOrderTableRow = ({
   //       : "Vendor"
   //     : "No Vendor";
 
-  const vendorName =
-    purchaseOrder?.selectedVendor?.businessName ?? "No Selected Vendor";
+  const vendorName = purchaseOrder?.selectedVendor?.businessName ?? "";
 
   // console.log({ purchaseOrder, vendorName });
 
@@ -58,7 +57,11 @@ const PurchaseOrderTableRow = ({
   const rowData = [
     {
       id: "vendor",
-      content: truncateText(vendorName, 20),
+      content: vendorName ? (
+        truncateText(vendorName, 20)
+      ) : (
+        <span className="text-red-800/70">No Selected Vendor</span>
+      ),
     },
     {
       id: "status",
