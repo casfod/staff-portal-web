@@ -27,13 +27,13 @@ const PurchaseOrderTableRow = ({
 
   const isEditable =
     ((currentUser.role === "SUPER-ADMIN" && !purchaseOrder.RFQCode) ||
-      currentUser.procurementRole.canUpdate) &&
+      currentUser?.procurementRole?.canUpdate) &&
     purchaseOrder.status === "rejected" &&
     !purchaseOrder.RFQCode;
 
   const isDeletable =
     (currentUser.role === "SUPER-ADMIN" ||
-      currentUser.procurementRole.canDelete) &&
+      currentUser?.procurementRole?.canDelete) &&
     purchaseOrder.status === "rejected";
 
   const purchaseOrderId = purchaseOrder.id ?? "";
@@ -48,7 +48,11 @@ const PurchaseOrderTableRow = ({
   //       : "Vendor"
   //     : "No Vendor";
 
-  const vendorName = purchaseOrder.selectedVendor.businessName;
+  const vendorName = purchaseOrder?.selectedVendor?.businessName ?? "";
+
+  // console.log({ purchaseOrder, vendorName });
+
+  // const vendorName = "";
 
   const rowData = [
     {
