@@ -96,7 +96,7 @@ export function AllPurchaseOrders() {
 
           <div className="flex items-center gap-3">
             {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser.procurementRole.canCreate) && (
+              currentUser?.procurementRole?.canCreate) && (
               <Button
                 onClick={() => navigate("/procurement/purchase-order/create")}
               >

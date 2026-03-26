@@ -49,7 +49,7 @@ const PurchaseOrderTableRow = ({
   //     : "No Vendor";
 
   const vendorName =
-    purchaseOrder?.selectedVendor?.businessName ?? "Vendor N/A";
+    purchaseOrder?.selectedVendor?.businessName ?? "No Selected Vendor";
 
   // console.log({ purchaseOrder, vendorName });
 
