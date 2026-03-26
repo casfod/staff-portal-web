@@ -81,12 +81,14 @@ const Vendor = () => {
       id: "businessName",
       content: truncateText(vendor?.businessName || "", 40),
     },
-    { id: "vendorCode", content: vendor?.vendorCode },
-    { id: "contactPerson", content: vendor?.contactPerson },
     {
       id: "status",
       content: <StatusBadge status={vendor?.status.toUpperCase() || "N/A"} />,
     },
+    { id: "vendorCode", content: vendor?.vendorCode },
+
+    { id: "contactPerson", content: vendor?.contactPerson },
+
     {
       id: "action",
       content: (
