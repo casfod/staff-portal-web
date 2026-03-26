@@ -110,9 +110,9 @@ export function AllVendors() {
 
   const tableHeadData = [
     "Business Name",
+    "Status",
     "Vendor Code",
     "Contact Person",
-    "Status",
     "Actions",
   ];
 
