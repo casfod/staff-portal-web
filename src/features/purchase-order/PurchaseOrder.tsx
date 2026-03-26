@@ -86,7 +86,7 @@ const PurchaseOrder = () => {
     previewPDF,
   } = usePOPDF(requestData);
 
-  console.log("grnStatus?.exists::", grnStatus?.data);
+  // console.log("grnStatus?.exists::", grnStatus?.data);
 
   // Custom hooks
   const { handleStatusChange } = useStatusUpdate();
@@ -187,7 +187,7 @@ const PurchaseOrder = () => {
     {
       id: "vendor",
       content:
-        requestData?.selectedVendor?.businessName || "No vendor selected",
+        requestData?.selectedVendor?.businessName ?? "No vendor selected",
     },
     {
       id: "status",

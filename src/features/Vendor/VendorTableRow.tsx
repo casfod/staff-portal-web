@@ -29,7 +29,7 @@ const VendorTableRow = ({
     (vendor.status === "draft" || vendor.status === "rejected") &&
     vendor.createdBy?.id === currentUser?.id;
 
-  console.log({ isEditable });
+  // console.log({ isEditable });
 
   const isDeletable =
     (currentUser.role === "SUPER-ADMIN" ||

@@ -26,13 +26,13 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
     const address =
       casfodAddress[poData.casfodAddressId as keyof typeof casfodAddress];
     if (!address) {
-      // Fallback to Borno address if not found
       return casfodAddress.borno;
     }
     return address;
   };
 
   const address = getAddress();
+  const vendor = poData.selectedVendor;
 
   return (
     <div
@@ -69,19 +69,23 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
         <h3 className="font-bold mb-2 text-lg text-gray-700">
           Vendor Information:
         </h3>
-        <p className="text-md text-gray-600">
-          {poData.selectedVendor.businessName}
-          <br />
-          {poData.selectedVendor.contactPerson &&
-            `Attn: ${poData.selectedVendor.contactPerson}`}
-          <br />
-          {poData.selectedVendor.email}
-          <br />
-          {poData.selectedVendor.businessPhoneNumber &&
-            `Tel: ${poData.selectedVendor.businessPhoneNumber}`}
-          <br />
-          {poData.selectedVendor.address}
-        </p>
+        {vendor ? (
+          <p className="text-md text-gray-600">
+            {vendor.businessName ?? "N/A"}
+            <br />
+            {vendor.contactPerson && `Attn: ${vendor.contactPerson}`}
+            <br />
+            {vendor.email}
+            <br />
+            {vendor.businessPhoneNumber && `Tel: ${vendor.businessPhoneNumber}`}
+            <br />
+            {vendor.address}
+          </p>
+        ) : (
+          <p className="text-md text-gray-400 italic">
+            Vendor information unavailable
+          </p>
+        )}
       </div>
 
       {/* Delivery Address */}
@@ -244,8 +248,8 @@ const POPDFTemplate: React.FC<POPDFTemplateProps> = ({
                 )}
               </React.Fragment>
             ))}
-            {/* Grand Total Row */}
 
+            {/* Grand Total Row */}
             <tr className="bg-gray-100 font-bold">
               <td
                 colSpan={6}
