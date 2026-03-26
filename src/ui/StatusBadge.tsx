@@ -28,7 +28,7 @@ const StatusBadge = ({
         statusStyles[status as keyof typeof statusStyles]
       }`}
     >
-      <span className={`${size === "sm" ? "text-[10px]" : ""}`}>
+      <span className={`uppercase ${size === "sm" ? "text-[10px]" : ""}`}>
         {statusText}
       </span>
     </div>
