@@ -1707,3 +1707,62 @@ export interface UseAppraisalStatsType {
     };
   };
 }
+
+// =============================================
+// ADD THESE TO YOUR EXISTING interfaces.ts
+// =============================================
+
+///////////////////////
+// Report
+///////////////////////
+
+export interface ReportStats {
+  totalReports: number;
+  totalApprovedReports: number;
+}
+
+export interface UseReportStatsType {
+  status: number;
+  message: string;
+  amount: number;
+  data: ReportStats;
+}
+
+export interface UseReport {
+  status: number;
+  message: string;
+  data: ReportType;
+}
+
+export interface UseReportType {
+  status: number;
+  message: string;
+  data: {
+    reports: ReportType[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface ReportType {
+  id?: string;
+  reportNumber?: string;
+  activityType: "Workshop" | "Training" | "Sector Meeting" | "Other";
+  reportType:
+    | "Weekly Report"
+    | "Monthly Report"
+    | "Quarterly Report"
+    | "Annual Report";
+  reportTitle: string;
+  project?: Partial<Project> | string | null;
+  reviewedBy?: any;
+  approvedBy?: any;
+  comments?: Comment[];
+  status?: string;
+  createdBy?: Partial<UserType>;
+  createdAt?: string;
+  updatedAt?: string;
+  files?: FileType[];
+  copiedTo?: UserType[];
+}

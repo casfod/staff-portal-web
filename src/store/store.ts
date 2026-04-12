@@ -31,6 +31,7 @@ import paymentVoucherSliceReducer from "./paymentVoucherSlice";
 import leaveReducer from "./leaveSlice";
 import staffStrategyReducer from "./staffStrategySlice";
 import appraisalReducer from "./appraisalSlice";
+import reportReducer from "./reportSlice";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -53,6 +54,7 @@ const rootReducer = combineReducers({
   leave: leaveReducer,
   staffStrategy: staffStrategyReducer,
   appraisal: appraisalReducer,
+  report: reportReducer,
 });
 
 // Create persist config

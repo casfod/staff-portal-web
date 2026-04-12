@@ -90,6 +90,12 @@ import { AllAppraisals } from "./features/appraisal/AllAppraisals.tsx";
 import CreateAppraisal from "./features/appraisal/CreateAppraisal.tsx";
 import Appraisal from "./features/appraisal/Appraisal.tsx";
 import EditAppraisal from "./features/appraisal/EditAppraisal.tsx";
+import { Reports } from "./pages/Reports.tsx";
+import AllReports from "./features/report/AllReports.tsx";
+
+import Report from "./features/report/Report.tsx";
+import CreateReport from "./features/report/CreateReport.tsx";
+import { EditReport } from "./features/report/EditReport.tsx";
 
 const router = createBrowserRouter([
   {
@@ -862,6 +868,42 @@ const router = createBrowserRouter([
           */
         ],
       },
+
+      {
+        path: "reporting",
+        element: <AnimatedRoute key="reporting" element={<Reports />} />,
+        children: [
+          { index: true, element: <Navigate to="all-reports" /> },
+          {
+            path: "all-reports",
+            element: (
+              <AnimatedRoute key="all-reports" element={<AllReports />} />
+            ),
+          },
+          {
+            path: "create-report",
+            element: (
+              <AnimatedRoute key="create-report" element={<CreateReport />} />
+            ),
+          },
+          {
+            path: "report/:requestId",
+            element: (
+              <AnimatedRoute key="report/:requestId" element={<Report />} />
+            ),
+          },
+          {
+            path: "edit-report/:requestId",
+            element: (
+              <AnimatedRoute
+                key="edit-report/:requestId"
+                element={<EditReport />}
+              />
+            ),
+          },
+        ],
+      },
+
       {
         path: "user-management",
         element: (

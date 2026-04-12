@@ -3,15 +3,11 @@ import Navlink from "./Navlink";
 import {
   LayoutDashboard,
   FolderOpen,
-  // FileText,
-  // ShoppingCart,
-  // ReceiptTextIcon,
-  // Wallet,
-  // Plane,
   Users,
   Banknote,
   Settings,
   ListChecks,
+  FileBarChart,
 } from "lucide-react";
 import SpinnerMini from "./SpinnerMini";
 import { useLogout } from "../features/authentication/authHooks/useLogout";
@@ -47,9 +43,7 @@ const Navigation: React.FC = () => {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/projects", label: "Projects", icon: FolderOpen },
 
-    // New All Requests dropdown containing all request types
     {
-      // to: "/requests",
       to: "/concept-notes",
       label: "All Requests",
       icon: ListChecks,
@@ -61,6 +55,13 @@ const Navigation: React.FC = () => {
         { to: "/travel-requests", label: "Travel Requests" },
         { to: "/expense-claims", label: "Expense Claims" },
       ],
+    },
+
+    {
+      to: "/reporting",
+      label: "Reporting",
+      icon: FileBarChart,
+      dropdown: [{ to: "/reporting/all-reports", label: "Reports" }],
     },
 
     {
@@ -126,7 +127,7 @@ const Navigation: React.FC = () => {
         return role === "ADMIN";
 
       case "Admin Settings":
-        return false; // Only SUPER-ADMIN can see Admin Settings
+        return false;
 
       case "Procurement":
         return procurementRole?.canView === true;
@@ -135,8 +136,9 @@ const Navigation: React.FC = () => {
         return financeRole?.canView === true;
 
       case "All Requests":
-        // You might want to add logic here if certain roles shouldn't see certain requests
-        // For now, it returns true for all non-SUPER-ADMIN roles
+        return true;
+
+      case "Reporting":
         return true;
 
       default:
