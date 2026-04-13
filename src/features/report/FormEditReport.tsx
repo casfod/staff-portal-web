@@ -9,12 +9,18 @@ import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
 import { useSaveReport, useSendReport } from "./Hooks/useReport";
 
-const ACTIVITY_TYPES = ["Workshop", "Training", "Sector Meeting", "Other"];
+const ACTIVITY_TYPES = [
+  { id: "Workshop", name: "Workshop" },
+  { id: "Training", name: "Training" },
+  { id: "Sector Meeting", name: "Sector Meeting" },
+  { id: "Other", name: "Other" },
+];
+
 const REPORT_TYPES = [
-  "Weekly Report",
-  "Monthly Report",
-  "Quarterly Report",
-  "Annual Report",
+  { id: "Weekly Report", name: "Weekly Report" },
+  { id: "Monthly Report", name: "Monthly Report" },
+  { id: "Quarterly Report", name: "Quarterly Report" },
+  { id: "Annual Report", name: "Annual Report" },
 ];
 
 interface Props {
@@ -38,10 +44,7 @@ const FormEditReport: React.FC<Props> = ({ report }) => {
   const { data, isLoading } = useReviewers();
   const reviewers = useMemo(() => data?.data ?? [], [data]);
 
-  const handleFormChange = (
-    field: keyof ReportType,
-    value: string | null
-  ) => {
+  const handleFormChange = (field: keyof ReportType, value: string | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -61,41 +64,32 @@ const FormEditReport: React.FC<Props> = ({ report }) => {
         {/* Activity Type */}
         <FormRow label="Activity Type">
           <Select
+            id="activity-type"
             value={formData.activityType || ""}
-            onChange={(e) =>
+            onChange={(value) =>
               handleFormChange(
                 "activityType",
-                e.target.value as ReportType["activityType"]
+                value as ReportType["activityType"]
               )
             }
-          >
-            <option value="">Select Activity Type</option>
-            {ACTIVITY_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </Select>
+            options={ACTIVITY_TYPES}
+            customLabel="Select Activity Type"
+            filterable={false}
+          />
         </FormRow>
 
         {/* Report Type */}
         <FormRow label="Report Type">
           <Select
+            id="report-type"
             value={formData.reportType || ""}
-            onChange={(e) =>
-              handleFormChange(
-                "reportType",
-                e.target.value as ReportType["reportType"]
-              )
+            onChange={(value) =>
+              handleFormChange("reportType", value as ReportType["reportType"])
             }
-          >
-            <option value="">Select Report Type</option>
-            {REPORT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </Select>
+            options={REPORT_TYPES}
+            customLabel="Select Report Type"
+            filterable={false}
+          />
         </FormRow>
       </Row>
 
@@ -113,21 +107,21 @@ const FormEditReport: React.FC<Props> = ({ report }) => {
       {/* Reviewed By */}
       <FormRow label="Reviewed By">
         <Select
+          id="reviewed-by"
           value={
             typeof formData.reviewedBy === "string"
               ? formData.reviewedBy
               : formData.reviewedBy?.id ?? ""
           }
-          onChange={(e) => handleFormChange("reviewedBy", e.target.value)}
+          onChange={(value) => handleFormChange("reviewedBy", value)}
+          options={reviewers.map((reviewer) => ({
+            id: reviewer.id!,
+            name: `${reviewer.first_name} ${reviewer.last_name}`,
+          }))}
+          customLabel="Select Reviewer"
           disabled={isLoading}
-        >
-          <option value="">Select Reviewer</option>
-          {reviewers.map((reviewer) => (
-            <option key={reviewer.id} value={reviewer.id}>
-              {reviewer.first_name} {reviewer.last_name}
-            </option>
-          ))}
-        </Select>
+          filterable={true}
+        />
       </FormRow>
 
       {/* Attach Files */}

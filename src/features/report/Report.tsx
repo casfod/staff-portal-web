@@ -48,6 +48,8 @@ const Report = () => {
     [remoteData, reportFromStore]
   );
 
+  // console.log({ report, requestId, navigate, isLoading });
+
   useEffect(() => {
     if (!requestId || (!isLoading && !report)) {
       navigate("/reporting");
@@ -61,12 +63,18 @@ const Report = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateReportStatus(requestId!);
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateReportStatus(
+    requestId!
+  );
   const { updateReport, isPending: isUpdating } = useUpdateReport(requestId!);
 
-  const { addComment, isPending: isAddingComment } = useAddReportComment(requestId!);
-  const { updateComment, isPending: isUpdatingComment } = useUpdateReportComment(requestId!);
-  const { deleteComment, isPending: isDeletingComment } = useDeleteReportComment(requestId!);
+  const { addComment, isPending: isAddingComment } = useAddReportComment(
+    requestId!
+  );
+  const { updateComment, isPending: isUpdatingComment } =
+    useUpdateReportComment(requestId!);
+  const { deleteComment, isPending: isDeletingComment } =
+    useDeleteReportComment(requestId!);
 
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
@@ -81,7 +89,9 @@ const Report = () => {
     handleStatusChange(status, comment, async (data) => {
       try {
         await updateStatus(data, {
-          onError: (error) => { throw error; },
+          onError: (error) => {
+            throw error;
+          },
         });
       } catch (error) {
         throw error;
@@ -94,9 +104,15 @@ const Report = () => {
     updateReport({ data: formData, files: selectedFiles });
   };
 
-  const handleAddComment = async (text: string) => { await addComment({ text }); };
-  const handleUpdateComment = async (commentId: string, text: string) => { await updateComment({ commentId, text }); };
-  const handleDeleteComment = async (commentId: string) => { await deleteComment(commentId); };
+  const handleAddComment = async (text: string) => {
+    await addComment({ text });
+  };
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    await updateComment({ commentId, text });
+  };
+  const handleDeleteComment = async (commentId: string) => {
+    await deleteComment(commentId);
+  };
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
@@ -110,7 +126,9 @@ const Report = () => {
       value: report?.reportNumber ?? "",
     },
   });
-  const handleDownloadPDF = () => { downloadPdf(pdfContentRef); };
+  const handleDownloadPDF = () => {
+    downloadPdf(pdfContentRef);
+  };
 
   const currentUserId = currentUser.id;
   const userRole = currentUser.role;
@@ -121,39 +139,55 @@ const Report = () => {
   const isApprover = report?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
-  const isCopiedTo = report?.copiedTo?.some((user: any) => user.id === currentUserId);
+  const isCopiedTo = report?.copiedTo?.some(
+    (user: any) => user.id === currentUserId
+  );
 
   const canUploadFiles = isCreator && requestStatus === "approved";
-  const canShareRequest = isCreator || ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
+  const canShareRequest =
+    isCreator ||
+    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
   const canUpdateStatus =
     !isCreator &&
     ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
   const canAddComments =
-    isCreator || isReviewer || isApprover || isCopiedTo || isAdmin ||
+    isCreator ||
+    isReviewer ||
+    isApprover ||
+    isCopiedTo ||
+    isAdmin ||
     (userRole === "REVIEWER" && requestStatus === "pending");
 
   const showAdminApproval =
     !report?.approvedBy &&
     requestStatus === "reviewed" &&
-    (isCreator || (isReviewer && !report?.reviewedBy) || (isApprover && !report?.approvedBy));
+    (isCreator ||
+      (isReviewer && !report?.reviewedBy) ||
+      (isApprover && !report?.approvedBy));
 
   const reportCreatedAt = report?.createdAt ?? "";
 
   const tableHeadData = [
-    { label: "Report", showOnMobile: true, minWidth: "160px" },
+    { label: "Report By", showOnMobile: true, minWidth: "160px" },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Date", showOnMobile: false, showOnTablet: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
     { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
 
   const tableRowData = [
     {
-      id: "reportTitle",
-      content: report?.reportTitle,
+      id: "reportby",
+      content: `${report?.createdBy?.first_name} ${report?.createdBy?.last_name}`,
       showOnMobile: true,
-      showOnTablet: true,
+      minWidth: "160px",
+      mobileLabel: "Report By",
     },
     {
       id: "status",
@@ -222,7 +256,11 @@ const Report = () => {
                           px-3 py-2.5 md:px-4 md:py-3
                           text-left font-medium uppercase tracking-wider
                           ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${header.showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            header.showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
                           text-xs md:text-sm whitespace-nowrap
                         `}
                         style={{ minWidth: header.minWidth }}
@@ -240,23 +278,32 @@ const Report = () => {
                     toggleViewItems={() => {}}
                     className="hidden sm:table-row"
                   >
-                    {tableRowData.map(({ id, content, showOnMobile, showOnTablet }) => (
-                      <TableData
-                        key={`${report?.id}-${id}`}
-                        className={`
+                    {tableRowData.map(
+                      ({ id, content, showOnMobile, showOnTablet }) => (
+                        <TableData
+                          key={`${report?.id}-${id}`}
+                          className={`
                           ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                          ${
+                            showOnTablet
+                              ? "hidden sm:table-cell md:table-cell"
+                              : ""
+                          }
                           px-3 py-2.5 md:px-4 md:py-3
                         `}
-                      >
-                        {content}
-                      </TableData>
-                    ))}
+                        >
+                          {content}
+                        </TableData>
+                      )
+                    )}
                   </TableRowMain>
 
                   {/* Mobile Card */}
                   <tr key={`${report?.id}-mobile`} className="sm:hidden">
-                    <td colSpan={tableHeadData.length} className="p-4 border-b border-gray-200">
+                    <td
+                      colSpan={tableHeadData.length}
+                      className="p-4 border-b border-gray-200"
+                    >
                       <RequestCard
                         request={report as any}
                         totalAmount={0}

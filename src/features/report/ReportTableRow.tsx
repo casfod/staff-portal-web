@@ -50,12 +50,19 @@ const ReportTableRow = ({
   const fullDate = formatToDDMMYYYY(reportCreatedAt);
 
   const rowData = [
+    // {
+    //   id: "reportTitle",
+    //   content: report.reportTitle,
+    //   showOnMobile: true,
+    //   minWidth: "160px",
+    //   mobileLabel: "Report",
+    // },
     {
-      id: "reportTitle",
-      content: report.reportTitle,
+      id: "reportby",
+      content: `${report.createdBy?.first_name} ${report.createdBy?.last_name}`,
       showOnMobile: true,
       minWidth: "160px",
-      mobileLabel: "Report",
+      mobileLabel: "Report By",
     },
     {
       id: "reportType",

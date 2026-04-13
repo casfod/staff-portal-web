@@ -10,7 +10,11 @@ import Spinner from "../../ui/Spinner";
 import { ReportType } from "../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import { setReport } from "../../store/reportSlice";
-import { setSearchTerm, setPage, resetQuery } from "../../store/genericQuerySlice";
+import {
+  setSearchTerm,
+  setPage,
+  resetQuery,
+} from "../../store/genericQuerySlice";
 import { RootState } from "../../store/store";
 import ReportTableRow from "./ReportTableRow";
 import TextHeader from "../../ui/TextHeader";
@@ -27,7 +31,9 @@ const AllReports = () => {
   );
 
   const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>({});
+  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
     return () => {
@@ -42,7 +48,12 @@ const AllReports = () => {
     limit
   );
 
-  const { deleteReport } = useDeleteReport(debouncedSearchTerm, sort, page, limit);
+  const { deleteReport } = useDeleteReport(
+    debouncedSearchTerm,
+    sort,
+    page,
+    limit
+  );
 
   const reports = useMemo(() => data?.data?.reports ?? [], [data]);
   const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
@@ -52,7 +63,9 @@ const AllReports = () => {
   }, []);
 
   const handlePageChange = useCallback(
-    (newPage: number) => { dispatch(setPage(newPage)); },
+    (newPage: number) => {
+      dispatch(setPage(newPage));
+    },
     [dispatch]
   );
 
@@ -77,10 +90,20 @@ const AllReports = () => {
   if (isError) return <NetworkErrorUI />;
 
   const tableHeadData = [
-    { label: "Title", showOnMobile: true, minWidth: "160px" },
-    { label: "Type", showOnMobile: false, showOnTablet: true, minWidth: "140px" },
+    { label: "Report By", showOnMobile: true, minWidth: "160px" },
+    {
+      label: "Type",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "140px",
+    },
     { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Date", showOnMobile: false, showOnTablet: true, minWidth: "100px" },
+    {
+      label: "Date",
+      showOnMobile: false,
+      showOnTablet: true,
+      minWidth: "100px",
+    },
     { label: "Actions", showOnMobile: true, minWidth: "100px" },
   ];
 
@@ -133,7 +156,11 @@ const AllReports = () => {
                       px-3 py-2.5 md:px-4 md:py-3
                       text-left font-medium uppercase tracking-wider
                       ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                      ${header.showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
+                      ${
+                        header.showOnTablet
+                          ? "hidden sm:table-cell md:table-cell"
+                          : ""
+                      }
                       text-xs md:text-sm whitespace-nowrap
                     `}
                     style={{ minWidth: header.minWidth }}
@@ -157,9 +184,13 @@ const AllReports = () => {
                 <tr>
                   <td colSpan={tableHeadData.length} className="py-8">
                     <div className="flex flex-col justify-center items-center text-gray-500">
-                      <div className="text-lg font-semibold mb-2">No reports found</div>
+                      <div className="text-lg font-semibold mb-2">
+                        No reports found
+                      </div>
                       <div className="text-sm">
-                        {searchTerm ? "Try a different search term" : "Create your first report"}
+                        {searchTerm
+                          ? "Try a different search term"
+                          : "Create your first report"}
                       </div>
                     </div>
                   </td>

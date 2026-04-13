@@ -58,10 +58,10 @@ const Navigation: React.FC = () => {
     },
 
     {
-      to: "/reporting",
+      to: "reporting/all-reports",
       label: "Reporting",
       icon: FileBarChart,
-      dropdown: [{ to: "/reporting/all-reports", label: "Reports" }],
+      // dropdown: [{ to: "/reporting/all-reports", label: "Reports" }],
     },
 
     {
