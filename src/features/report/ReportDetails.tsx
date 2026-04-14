@@ -4,6 +4,7 @@ import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
 import DetailContainer from "../../ui/DetailContainer";
 import CopiedTo from "../../ui/CopiedTo";
 import SystemInfo from "../../ui/SystemInfo";
+import { format } from "date-fns";
 
 interface ReportDetailsProps {
   report: ReportType;
@@ -12,11 +13,23 @@ interface ReportDetailsProps {
 export const ReportDetails = ({ report }: ReportDetailsProps) => {
   const { requestId } = useParams();
 
+  const formatDate = (date: Date | string | null | undefined) => {
+    if (!date) return "N/A";
+    try {
+      return format(new Date(date), "dd-MM-yyyy");
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
   const rowData = [
     {
       id: "activityType",
       label: "Activity Type :",
-      content: report.activityType,
+      content:
+        report.activityType === "Other" && report.otherActivitySpecification
+          ? `${report.activityType} - ${report.otherActivitySpecification}`
+          : report.activityType,
     },
     {
       id: "reportType",
@@ -27,6 +40,21 @@ export const ReportDetails = ({ report }: ReportDetailsProps) => {
       id: "reportTitle",
       label: "Report Title :",
       content: report.reportTitle,
+    },
+    {
+      id: "reportingPeriod",
+      label: "Reporting Period :",
+      content: `${formatDate(report.reportingPeriod?.from)} to ${formatDate(
+        report.reportingPeriod?.to
+      )}`,
+    },
+    {
+      id: "project",
+      label: "Project :",
+      content:
+        typeof report.project === "object" && report.project !== null
+          ? (report.project as any).project_title || "N/A"
+          : "N/A",
     },
   ];
 
@@ -53,7 +81,7 @@ export const ReportDetails = ({ report }: ReportDetailsProps) => {
               <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
               </span>
-              <span className="break-words">{data.content}</span>
+              <span className="break-words">{data.content || "N/A"}</span>
             </div>
           ))}
         </div>
@@ -67,7 +95,9 @@ export const ReportDetails = ({ report }: ReportDetailsProps) => {
       )}
 
       {/* Copied To */}
-      {report.copiedTo?.length! > 0 && <CopiedTo to={report.copiedTo!} />}
+      {report.copiedTo && report.copiedTo.length > 0 && (
+        <CopiedTo to={report.copiedTo} />
+      )}
     </DetailContainer>
   );
 };

@@ -126,6 +126,7 @@ export const sendReport = async function (
 
     const simpleFields: (keyof ReportType)[] = [
       "activityType",
+      "otherActivitySpecification",
       "reportType",
       "reportTitle",
       "project",
@@ -137,6 +138,19 @@ export const sendReport = async function (
         formData.append(key, String(data[key]));
       }
     });
+
+    // Add reporting period
+    if (data.reportingPeriod) {
+      if (data.reportingPeriod.from) {
+        formData.append(
+          "reportingPeriod[from]",
+          String(data.reportingPeriod.from)
+        );
+      }
+      if (data.reportingPeriod.to) {
+        formData.append("reportingPeriod[to]", String(data.reportingPeriod.to));
+      }
+    }
 
     files.forEach((file) => {
       formData.append("files", file);
@@ -161,13 +175,34 @@ export const updateReport = async function (
   try {
     const formData = new FormData();
 
-    const simpleFields: (keyof ReportType)[] = ["approvedBy"];
+    const simpleFields: (keyof ReportType)[] = [
+      "activityType",
+      "otherActivitySpecification",
+      "reportType",
+      "reportTitle",
+      "project",
+      "reviewedBy",
+      "approvedBy",
+    ];
 
     simpleFields.forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
         formData.append(key, String(data[key]));
       }
     });
+
+    // Add reporting period
+    if (data.reportingPeriod) {
+      if (data.reportingPeriod.from) {
+        formData.append(
+          "reportingPeriod[from]",
+          String(data.reportingPeriod.from)
+        );
+      }
+      if (data.reportingPeriod.to) {
+        formData.append("reportingPeriod[to]", String(data.reportingPeriod.to));
+      }
+    }
 
     files.forEach((file) => {
       formData.append("files", file);

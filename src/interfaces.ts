@@ -1711,7 +1711,6 @@ export interface UseAppraisalStatsType {
 // =============================================
 // ADD THESE TO YOUR EXISTING interfaces.ts
 // =============================================
-
 ///////////////////////
 // Report
 ///////////////////////
@@ -1745,16 +1744,23 @@ export interface UseReportType {
   };
 }
 
+export interface ReportingPeriod {
+  from: Date | string | null;
+  to: Date | string | null;
+}
 export interface ReportType {
   id?: string;
   reportNumber?: string;
   activityType: "Workshop" | "Training" | "Sector Meeting" | "Other";
+  otherActivitySpecification?: string; // NEW FIELD
   reportType:
     | "Weekly Report"
     | "Monthly Report"
     | "Quarterly Report"
-    | "Annual Report";
+    | "Annual Report"
+    | "Activity report"; // ADDED
   reportTitle: string;
+  reportingPeriod?: ReportingPeriod; // ADDED
   project?: Partial<Project> | string | null;
   reviewedBy?: any;
   approvedBy?: any;
