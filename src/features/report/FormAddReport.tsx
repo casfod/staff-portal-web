@@ -92,38 +92,17 @@ const FormAddReport: React.FC = () => {
   return (
     <form className="space-y-6">
       <Row>
-        {/* Activity Type */}
-        <FormRow label="Activity Type">
-          <Select
-            id="activity-type"
-            value={formData.activityType || ""}
-            onChange={(value) =>
-              handleFormChange(
-                "activityType",
-                value as ReportType["activityType"]
-              )
-            }
-            options={ACTIVITY_TYPES}
-            customLabel="Select Activity Type"
-            filterable={false}
+        {/* Report Title */}
+        <FormRow label="Report Title">
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter report title here"
+            value={formData.reportTitle || ""}
+            onChange={(e) => handleFormChange("reportTitle", e.target.value)}
+            required
           />
         </FormRow>
-
-        {/* Other Activity Specification - Conditional */}
-        {isOtherActivity && (
-          <FormRow label="Please Specify Activity">
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter activity details..."
-              value={formData.otherActivitySpecification || ""}
-              onChange={(e) =>
-                handleFormChange("otherActivitySpecification", e.target.value)
-              }
-              required
-            />
-          </FormRow>
-        )}
 
         {/* Report Type */}
         <FormRow label="Report Type">
@@ -139,34 +118,6 @@ const FormAddReport: React.FC = () => {
           />
         </FormRow>
       </Row>
-
-      {/* Report Title */}
-      <FormRow label="Report Title">
-        <input
-          type="text"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter report title here"
-          value={formData.reportTitle || ""}
-          onChange={(e) => handleFormChange("reportTitle", e.target.value)}
-          required
-        />
-      </FormRow>
-
-      {/* Project Selection */}
-      <FormRow label="Project">
-        <Select
-          id="project"
-          value={getProjectValue()}
-          onChange={(value) => handleFormChange("project", value)}
-          options={projects.map((project: any) => ({
-            id: project.id || project._id,
-            name: project.project_title,
-          }))}
-          customLabel="Select Project"
-          disabled={isLoadingProjects}
-          filterable={true}
-        />
-      </FormRow>
 
       {/* Reporting Period - FIXED: Using the same pattern as purchase request */}
       <Row cols="grid-cols-1 md:grid-cols-4">
@@ -212,6 +163,55 @@ const FormAddReport: React.FC = () => {
           </FormRow>
         )}
       </Row>
+
+      {/* Activity Type */}
+      <FormRow label="Activity Type">
+        <Select
+          id="activity-type"
+          value={formData.activityType || ""}
+          onChange={(value) =>
+            handleFormChange(
+              "activityType",
+              value as ReportType["activityType"]
+            )
+          }
+          options={ACTIVITY_TYPES}
+          customLabel="Select Activity Type"
+          filterable={false}
+        />
+      </FormRow>
+
+      {/* Other Activity Specification - Conditional */}
+      {isOtherActivity && (
+        <FormRow label="Please Specify Activity">
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter activity details..."
+            value={formData.otherActivitySpecification || ""}
+            onChange={(e) =>
+              handleFormChange("otherActivitySpecification", e.target.value)
+            }
+            required
+          />
+        </FormRow>
+      )}
+
+      {/* Project Selection */}
+      <FormRow label="Project">
+        <Select
+          id="project"
+          value={getProjectValue()}
+          onChange={(value) => handleFormChange("project", value)}
+          options={projects.map((project: any) => ({
+            id: project.id || project._id,
+            name: project.project_title,
+          }))}
+          customLabel="Select Project"
+          disabled={isLoadingProjects}
+          filterable={true}
+        />
+      </FormRow>
 
       {/* Reviewed By */}
       <FormRow label="Reviewed By">
