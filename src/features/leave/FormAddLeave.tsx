@@ -25,8 +25,7 @@ const FormAddLeave = () => {
     endDate: undefined,
     reasonForLeave: "",
     contactDuringLeave: "",
-    reviewedById: null,
-    approvedById: null,
+    approvedById: null, // Changed from reviewedById
     leaveCover: {
       nameOfCover: "",
       signature: "",
@@ -176,12 +175,12 @@ const FormAddLeave = () => {
 
     if (!isFormValid) return;
 
-    // Validate reviewer is selected (matching Concept Note)
-    if (!formData.reviewedById) {
-      alert("Please select a reviewer before submitting");
+    // Validate approver is selected
+    if (!formData.approvedById) {
+      // Changed from reviewedById
+      alert("Please select an approver before submitting");
       return;
     }
-
     if (!formData.leaveType) {
       alert("Please select a leave type");
       return;
@@ -259,17 +258,19 @@ const FormAddLeave = () => {
             />
           </FormRow>
 
-          <FormRow label="Reviewer *">
+          <FormRow label="Approver *">
+            {" "}
+            {/* Changed from "Reviewer" */}
             {isLoadingUsers ? (
               <SpinnerMini />
             ) : (
               <Select
                 filterable={true}
                 clearable={true}
-                id="reviewedById"
-                customLabel="Select Reviewer"
-                value={formData.reviewedById || ""}
-                onChange={(value) => handleFormChange("reviewedById", value)}
+                id="approvedById" // Changed from reviewedById
+                customLabel="Select Approver"
+                value={formData.approvedById || ""}
+                onChange={(value) => handleFormChange("approvedById", value)} // Changed
                 options={users.map((user) => ({
                   id: user.id as string,
                   name: `${user.first_name} ${user.last_name} (${user.role})`,
@@ -390,8 +391,8 @@ const FormAddLeave = () => {
         </FormRow>
       </Row> */}
 
-      {/* File upload only when reviewer is selected (matching Concept Note) */}
-      {formData.reviewedById && (
+      {/* File upload only when approver is selected */}
+      {formData.approvedById && ( // Changed from reviewedById
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
@@ -399,23 +400,23 @@ const FormAddLeave = () => {
           multiple={true}
         />
       )}
-
       <div className="flex justify-center w-full gap-4">
-        {/* Save as Draft button - only when no reviewer (matching Concept Note) */}
-        {!formData.reviewedById && (
+        {/* Save as Draft button - only when no approver */}
+        {!formData.approvedById && ( // Changed from reviewedById
           <Button disabled={isSaving} size="medium" onClick={handleSave}>
             {isSaving ? <SpinnerMini /> : "Save as Draft"}
           </Button>
         )}
 
-        {/* Submit for Review button - only when reviewer selected (matching Concept Note) */}
-        {formData.reviewedById && (
+        {/* Submit for Approval button - only when approver selected */}
+        {formData.approvedById && ( // Changed from reviewedById
           <Button
             size="medium"
             disabled={isSending || totalDays > availableBalance}
             onClick={handleSend}
           >
-            {isSending ? <SpinnerMini /> : "Submit for Review"}
+            {isSending ? <SpinnerMini /> : "Submit for Approval"} // Changed
+            text
           </Button>
         )}
       </div>

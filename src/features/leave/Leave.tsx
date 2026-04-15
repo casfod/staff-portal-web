@@ -145,9 +145,8 @@ const Leave = () => {
   const userRole = currentUser.role;
   const requestStatus = request?.status;
 
-  // Permission flags
+  // Permission flags - simplified for single-step approval
   const isCreator = request?.user?.id === currentUserId;
-  const isReviewer = request?.reviewedBy?.id === currentUserId;
   const isApprover = request?.approvedBy?.id === currentUserId;
   const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
 
@@ -158,33 +157,22 @@ const Leave = () => {
 
   // Conditional rendering flags
   const canUploadFiles = isCreator && requestStatus === "approved";
-  const canShareRequest =
-    isCreator ||
-    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
+  const canShareRequest = isCreator || isAdmin;
 
-  // Permission to update status - EXACTLY matching ConceptNote.tsx
+  // Permission to update status - single-step approval
   const canUpdateStatus =
-    !isCreator &&
-    ((requestStatus === "pending" && isReviewer) ||
-      (isAdmin && requestStatus === "reviewed" && isApprover));
+    !isCreator && requestStatus === "pending" && (isApprover || isAdmin);
 
   // Users who can add comments - EXACTLY matching ConceptNote.tsx
-  const canAddComments =
-    isCreator ||
-    isReviewer ||
-    isApprover ||
-    isCopiedTo ||
-    isAdmin ||
-    (userRole === "REVIEWER" && requestStatus === "pending");
+  // Users who can add comments
+  const canAddComments = isCreator || isApprover || isCopiedTo || isAdmin;
 
   // Show admin approval section (for reviewed leave applications)
+  // Show admin approval section - simplified
   const showAdminApproval =
     !request?.approvedBy &&
-    requestStatus === "reviewed" &&
-    (isCreator ||
-      (isReviewer && !request?.reviewedBy) ||
-      (isApprover && !request?.approvedBy));
-
+    requestStatus === "pending" &&
+    (isCreator || (isApprover && !request?.approvedBy));
   // Cast comments to Comment[] type for TypeScript
   const comments = (request?.comments || []) as AppComment[];
 

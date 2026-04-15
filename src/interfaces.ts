@@ -1322,6 +1322,8 @@ export interface LeaveFormData {
   };
 }
 
+// interfaces/index.ts - Update LeaveType interface
+
 export interface LeaveType {
   id?: string;
   leaveNumber?: string;
@@ -1352,14 +1354,15 @@ export interface LeaveType {
   amountAccruedLeave?: number;
 
   // For API responses - full user objects
-  reviewedBy?: UserReference;
+  reviewedBy?: UserReference; // Keep for backward compatibility, but may be null
   approvedBy?: UserReference;
 
   // For form submissions - just IDs
-  reviewedById?: string;
+  reviewedById?: string; // Keep for backward compatibility
   approvedById?: string;
 
-  status: "draft" | "pending" | "reviewed" | "approved" | "rejected";
+  // Simplified status - removed "reviewed"
+  status: "draft" | "pending" | "approved" | "rejected";
 
   comments?: Comment[];
   copiedTo?: UserReference[];

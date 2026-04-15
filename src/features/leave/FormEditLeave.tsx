@@ -32,8 +32,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     endDate: leave.endDate,
     reasonForLeave: leave.reasonForLeave || "",
     contactDuringLeave: leave.contactDuringLeave || "",
-    reviewedById: leave.reviewedBy?.id || null,
-    approvedById: leave.approvedBy?.id || null,
+    approvedById: leave.approvedBy?.id || null, // Changed from reviewedById
     leaveCover: leave.leaveCover || {
       nameOfCover: "",
       signature: "",
@@ -189,22 +188,16 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
     if (!isFormValid) return;
 
-    // Validate based on current status (matching Concept Note)
+    // Simplified validation based on status
     if (leave.status === "draft" || leave.status === "rejected") {
-      if (!formData.reviewedById) {
-        alert("Please select a reviewer before submitting");
-        return;
-      }
-    }
-
-    if (leave.status === "reviewed") {
       if (!formData.approvedById) {
+        // Changed from reviewedById
         alert("Please select an approver before submitting");
         return;
       }
     }
 
-    // Balance validation (additional business logic)
+    // Balance validation
     if (totalDays > availableBalance && leave.status !== "approved") {
       alert(
         `You only have ${availableBalance} days available for this leave type`
@@ -317,7 +310,8 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </FormRow>
           )}
 
-          {leave.status === "reviewed" && (
+          {/* Show approver selection for drafts and rejected */}
+          {(leave.status === "draft" || leave.status === "rejected") && (
             <FormRow label="Approver *">
               {isLoadingUsers ? (
                 <SpinnerMini />
@@ -339,13 +333,13 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
             </FormRow>
           )}
 
-          {/* Show read-only info for other statuses */}
+          {/* Show read-only info for approved/pending statuses */}
           {(leave.status === "approved" || leave.status === "pending") &&
-            leave.reviewedBy && (
+            leave.approvedBy && (
               <div className="space-y-2">
                 <p className="mb-2">
-                  <span className="font-bold mr-1 uppercase">Reviewed By:</span>
-                  {`${leave.reviewedBy.first_name} ${leave.reviewedBy.last_name}`}
+                  <span className="font-bold mr-1 uppercase">Approved By:</span>
+                  {`${leave.approvedBy.first_name} ${leave.approvedBy.last_name}`}
                 </p>
               </div>
             )}
@@ -479,7 +473,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
       {/* File upload based on status and selections - matching Concept Note */}
       {(leave.status === "draft" || leave.status === "rejected") &&
-        formData.reviewedById && (
+        formData.approvedById && (
           <FileUpload
             selectedFiles={selectedFiles}
             setSelectedFiles={setSelectedFiles}
@@ -488,42 +482,35 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           />
         )}
 
-      {leave.status === "reviewed" && formData.approvedById && (
+      {/* {leave.status === "reviewed" && formData.approvedById && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
           accept=".jpg,.png,.pdf,.docx"
           multiple={true}
         />
-      )}
+      )} */}
 
       <div className="flex justify-center w-full gap-4">
-        {/* Save as Draft button - for drafts/rejected without reviewer (matching Concept Note) */}
+        {/* Save as Draft button */}
         {(leave.status === "draft" || leave.status === "rejected") &&
-          !formData.reviewedById && (
+          !formData.approvedById && (
             <Button size="medium" disabled={isSaving} onClick={handleSave}>
               {isSaving ? <SpinnerMini /> : "Update as Draft"}
             </Button>
           )}
 
-        {/* Submit for Review button - for drafts/rejected with reviewer (matching Concept Note) */}
+        {/* Submit for Approval button */}
         {(leave.status === "draft" || leave.status === "rejected") &&
-          formData.reviewedById && (
+          formData.approvedById && (
             <Button
               size="medium"
               disabled={isUpdating || totalDays > availableBalance}
               onClick={handleUpdate}
             >
-              {isUpdating ? <SpinnerMini /> : "Submit for Review"}
+              {isUpdating ? <SpinnerMini /> : "Submit for Approval"}
             </Button>
           )}
-
-        {/* Submit for Approval button - for reviewed with approver (matching Concept Note) */}
-        {leave.status === "reviewed" && formData.approvedById && (
-          <Button size="medium" disabled={isUpdating} onClick={handleUpdate}>
-            {isUpdating ? <SpinnerMini /> : "Submit for Approval"}
-          </Button>
-        )}
       </div>
     </form>
   );

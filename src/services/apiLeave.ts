@@ -131,6 +131,8 @@ export const getLeave = async function (leaveId: string) {
   }
 };
 
+// src/services/apiLeave.ts
+
 export const createLeaveApplication = async function (
   data: LeaveFormData,
   files: File[]
@@ -144,15 +146,18 @@ export const createLeaveApplication = async function (
       formData.append("reasonForLeave", data.reasonForLeave);
     if (data.contactDuringLeave)
       formData.append("contactDuringLeave", data.contactDuringLeave);
-    if (data.reviewedById) formData.append("reviewedBy", data.reviewedById);
+
+    // Backward compatible: support both reviewedById and approvedById
+    if (data.approvedById) {
+      formData.append("approvedBy", data.approvedById);
+    } else if (data.reviewedById) {
+      // For backward compatibility, map reviewedById to approvedBy
+      formData.append("approvedBy", data.reviewedById);
+    }
 
     // Append dates
-    if (data.startDate) {
-      formData.append("startDate", data.startDate);
-    }
-    if (data.endDate) {
-      formData.append("endDate", data.endDate);
-    }
+    if (data.startDate) formData.append("startDate", data.startDate);
+    if (data.endDate) formData.append("endDate", data.endDate);
 
     // Append leave cover if exists
     if (data.leaveCover) {
