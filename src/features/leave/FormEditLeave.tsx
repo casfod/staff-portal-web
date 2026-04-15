@@ -10,7 +10,7 @@ import Button from "../../ui/Button";
 import NetworkErrorUI from "../../ui/NetworkErrorUI";
 import DatePicker from "../../ui/DatePicker";
 import { FileUpload } from "../../ui/FileUpload";
-import { useSaveLeaveDraft, useUpdateLeaveApplication } from "./Hooks/useLeave";
+import { useCreateLeaveApplication, useSaveLeaveDraft } from "./Hooks/useLeave";
 import { useUsers } from "../user/Hooks/useUsers";
 import { localStorageUser } from "../../utils/localStorageUser";
 import { useMyLeaveBalance } from "./Hooks/useLeave";
@@ -32,7 +32,7 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     endDate: leave.endDate,
     reasonForLeave: leave.reasonForLeave || "",
     contactDuringLeave: leave.contactDuringLeave || "",
-    approvedById: leave.approvedBy?.id || null, // Changed from reviewedById
+    approvedById: leave.approvedBy?.id || null,
     leaveCover: leave.leaveCover || {
       nameOfCover: "",
       signature: "",
@@ -40,7 +40,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  // const [showFullBalance, setShowFullBalance] = useState(false);
   const [showFullBalance] = useState(false);
 
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
@@ -53,11 +52,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     () =>
       usersData?.data?.users.filter((user) => user.id !== currentUser.id) ?? [],
     [usersData, currentUser.id]
-  );
-
-  const admins = useMemo(
-    () => users.filter((u) => ["SUPER-ADMIN", "ADMIN"].includes(u.role)),
-    [users]
   );
 
   const leaveBalance = leaveBalanceData?.data;
@@ -165,10 +159,10 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
   } = useSaveLeaveDraft();
 
   const {
-    updateLeaveApplication,
-    isPending: isUpdating,
-    isError: isErrorUpdate,
-  } = useUpdateLeaveApplication(leave.id!);
+    createLeaveApplication,
+    isPending: isSending,
+    isError: isErrorSend,
+  } = useCreateLeaveApplication();
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,29 +170,43 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
 
     if (!isFormValid) return;
 
-    // Clear both reviewer and approver for draft save (matching Concept Note)
     const data = { ...formData, reviewedById: null, approvedById: null };
     saveLeaveDraft(data);
     dispatch(resetLeave());
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     const isFormValid = (e.target as HTMLFormElement).reportValidity();
 
     if (!isFormValid) return;
 
-    // Simplified validation based on status
-    if (leave.status === "draft" || leave.status === "rejected") {
-      if (!formData.approvedById) {
-        // Changed from reviewedById
-        alert("Please select an approver before submitting");
-        return;
-      }
+    if (!formData.approvedById) {
+      alert("Please select an approver before submitting");
+      return;
     }
 
-    // Balance validation
-    if (totalDays > availableBalance && leave.status !== "approved") {
+    if (!formData.leaveType) {
+      alert("Please select a leave type");
+      return;
+    }
+
+    if (!formData.startDate) {
+      alert("Please select a start date");
+      return;
+    }
+
+    if (!formData.endDate) {
+      alert("Please select an end date");
+      return;
+    }
+
+    if (!formData.reasonForLeave) {
+      alert("Please provide a reason for leave");
+      return;
+    }
+
+    if (totalDays > availableBalance) {
       alert(
         `You only have ${availableBalance} days available for this leave type`
       );
@@ -206,11 +214,11 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
     }
 
     const data = { ...formData };
-    updateLeaveApplication({ data, files: selectedFiles });
+    createLeaveApplication({ data, files: selectedFiles });
     dispatch(resetLeave());
   };
 
-  if (isErrorSave || isErrorUpdate) {
+  if (isErrorSave || isErrorSend) {
     return <NetworkErrorUI />;
   }
 
@@ -225,19 +233,8 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
         warningThreshold={0.2}
       />
 
-      {/* Toggle for showing all leave types */}
-      {/* {leaveBalance && (
-        <button
-          type="button"
-          onClick={() => setShowFullBalance(!showFullBalance)}
-          className="text-sm text-blue-600 hover:text-blue-800 transition"
-        >
-          {showFullBalance ? "Show less" : "Show all leave types"}
-        </button>
-      )} */}
-
       <div className="bg-gray-50 space-y-6 border-2 border-gray-200 p-4 rounded-lg">
-        <h1 className="text-lg font-extrabold text-gray-700  text-center">
+        <h1 className="text-lg font-extrabold text-gray-700 text-center">
           <span>Leave Application Form</span>
         </h1>
 
@@ -250,28 +247,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
           </p>
         </Row>
 
-        {/* {isLoadingBalance ? (
-        <div className="flex justify-center py-4">
-          <SpinnerMini />
-        </div>
-      ) : (
-        leaveBalance && (
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-blue-800 mb-2">
-              Current Leave Balance
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-              <div>Annual: {leaveBalance.annualLeave.balance} days</div>
-              <div>Sick: {leaveBalance.sickLeave.balance} days</div>
-              <div>
-                Compassionate: {leaveBalance.compassionateLeave.balance} days
-              </div>
-              <div>Emergency: {leaveBalance.emergencyLeave.balance} days</div>
-            </div>
-          </div>
-        )
-      )} */}
-
         <Row cols="grid-cols-1 md:grid-cols-2">
           <FormRow label="Leave Type *">
             <Select
@@ -283,73 +258,28 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
               onChange={(value) => handleFormChange("leaveType", value)}
               options={leaveTypeOptions}
               required
-              disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
 
-          {/* Conditional selection based on status - matching Concept Note */}
-          {(leave.status === "draft" || leave.status === "rejected") && (
-            <FormRow label="Reviewer *">
-              {isLoadingUsers ? (
-                <SpinnerMini />
-              ) : (
-                <Select
-                  filterable={true}
-                  clearable={true}
-                  id="reviewedById"
-                  customLabel="Select Reviewer"
-                  value={formData.reviewedById || ""}
-                  onChange={(value) => handleFormChange("reviewedById", value)}
-                  options={users.map((user) => ({
-                    id: user.id as string,
-                    name: `${user.first_name} ${user.last_name} (${user.role})`,
-                  }))}
-                  required
-                />
-              )}
-            </FormRow>
-          )}
-
-          {/* Show approver selection for drafts and rejected */}
-          {(leave.status === "draft" || leave.status === "rejected") && (
-            <FormRow label="Approver *">
-              {isLoadingUsers ? (
-                <SpinnerMini />
-              ) : (
-                <Select
-                  filterable={true}
-                  clearable={true}
-                  id="approvedById"
-                  customLabel="Select Approver"
-                  value={formData.approvedById || ""}
-                  onChange={(value) => handleFormChange("approvedById", value)}
-                  options={admins.map((user) => ({
-                    id: user.id as string,
-                    name: `${user.first_name} ${user.last_name} (${user.role})`,
-                  }))}
-                  required
-                />
-              )}
-            </FormRow>
-          )}
-
-          {/* Show read-only info for approved/pending statuses */}
-          {(leave.status === "approved" || leave.status === "pending") &&
-            leave.approvedBy && (
-              <div className="space-y-2">
-                <p className="mb-2">
-                  <span className="font-bold mr-1 uppercase">Approved By:</span>
-                  {`${leave.approvedBy.first_name} ${leave.approvedBy.last_name}`}
-                </p>
-              </div>
+          <FormRow label="Approver *">
+            {isLoadingUsers ? (
+              <SpinnerMini />
+            ) : (
+              <Select
+                filterable={true}
+                clearable={true}
+                id="approvedById"
+                customLabel="Select Approver"
+                value={formData.approvedById || ""}
+                onChange={(value) => handleFormChange("approvedById", value)}
+                options={users.map((user) => ({
+                  id: user.id as string,
+                  name: `${user.first_name} ${user.last_name} (${user.role})`,
+                }))}
+                required
+              />
             )}
-
-          {leave.status === "approved" && leave.approvedBy && (
-            <p className="mb-2">
-              <span className="font-bold mr-1 uppercase">Approved By:</span>
-              {`${leave.approvedBy.first_name} ${leave.approvedBy.last_name}`}
-            </p>
-          )}
+          </FormRow>
         </Row>
 
         <Row cols="grid-cols-1 md:grid-cols-2">
@@ -363,7 +293,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
               }
               variant="secondary"
               placeholder="Select start date"
-              disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
 
@@ -378,9 +307,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
                 placeholder="Select end date"
                 minDate={
                   formData.startDate ? new Date(formData.startDate) : undefined
-                }
-                disabled={
-                  leave.status !== "draft" && leave.status !== "rejected"
                 }
               />
             </FormRow>
@@ -413,7 +339,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
                 handleFormChange("reasonForLeave", e.target.value)
               }
               placeholder="Please provide reason for your leave application"
-              disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
         </Row>
@@ -428,7 +353,6 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
                 handleFormChange("contactDuringLeave", e.target.value)
               }
               placeholder="Phone number or email"
-              disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
 
@@ -441,76 +365,39 @@ const FormEditLeave = ({ leave }: FormEditLeaveProps) => {
                 handleNestedChange("nameOfCover", e.target.value)
               }
               placeholder="Person covering your duties"
-              disabled={leave.status !== "draft" && leave.status !== "rejected"}
             />
           </FormRow>
         </Row>
-
-        {/* <Row cols="grid-cols-1 md:grid-cols-2">
-        <FormRow label="Name of Cover (Optional)">
-          <Input
-            type="text"
-            id="nameOfCover"
-            value={formData.leaveCover?.nameOfCover}
-            onChange={(e) => handleNestedChange("nameOfCover", e.target.value)}
-            placeholder="Person covering your duties"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-
-        <FormRow label="Cover Signature (Optional)">
-          <Input
-            type="text"
-            id="signature"
-            value={formData.leaveCover?.signature}
-            onChange={(e) => handleNestedChange("signature", e.target.value)}
-            placeholder="Signature or acknowledgment"
-            disabled={leave.status !== "draft" && leave.status !== "rejected"}
-          />
-        </FormRow>
-      </Row> */}
       </div>
 
-      {/* File upload based on status and selections - matching Concept Note */}
-      {(leave.status === "draft" || leave.status === "rejected") &&
-        formData.approvedById && (
-          <FileUpload
-            selectedFiles={selectedFiles}
-            setSelectedFiles={setSelectedFiles}
-            accept=".jpg,.png,.pdf,.docx"
-            multiple={true}
-          />
-        )}
-
-      {/* {leave.status === "reviewed" && formData.approvedById && (
+      {/* File upload only when approver is selected */}
+      {formData.approvedById && (
         <FileUpload
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
           accept=".jpg,.png,.pdf,.docx"
           multiple={true}
         />
-      )} */}
+      )}
 
       <div className="flex justify-center w-full gap-4">
-        {/* Save as Draft button */}
-        {(leave.status === "draft" || leave.status === "rejected") &&
-          !formData.approvedById && (
-            <Button size="medium" disabled={isSaving} onClick={handleSave}>
-              {isSaving ? <SpinnerMini /> : "Update as Draft"}
-            </Button>
-          )}
+        {/* Save as Draft button - only when no approver */}
+        {!formData.approvedById && (
+          <Button disabled={isSaving} size="medium" onClick={handleSave}>
+            {isSaving ? <SpinnerMini /> : "Save as Draft"}
+          </Button>
+        )}
 
-        {/* Submit for Approval button */}
-        {(leave.status === "draft" || leave.status === "rejected") &&
-          formData.approvedById && (
-            <Button
-              size="medium"
-              disabled={isUpdating || totalDays > availableBalance}
-              onClick={handleUpdate}
-            >
-              {isUpdating ? <SpinnerMini /> : "Submit for Approval"}
-            </Button>
-          )}
+        {/* Submit for Approval button - only when approver selected */}
+        {formData.approvedById && (
+          <Button
+            size="medium"
+            disabled={isSending || totalDays > availableBalance}
+            onClick={handleSend}
+          >
+            {isSending ? <SpinnerMini /> : "Submit for Approval"}
+          </Button>
+        )}
       </div>
     </form>
   );

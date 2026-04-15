@@ -390,6 +390,7 @@ const Leave = () => {
                         handleFormChange={handleFormChange}
                         admins={admins}
                         isLoadingAmins={isLoadingUsers}
+                        canApprove={true}
                       >
                         <LeaveDetails request={request!} />
                       </RequestDetailLayout>

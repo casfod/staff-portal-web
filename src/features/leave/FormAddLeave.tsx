@@ -415,8 +415,7 @@ const FormAddLeave = () => {
             disabled={isSending || totalDays > availableBalance}
             onClick={handleSend}
           >
-            {isSending ? <SpinnerMini /> : "Submit for Approval"} // Changed
-            text
+            {isSending ? <SpinnerMini /> : "Submit for Approval"}
           </Button>
         )}
       </div>
