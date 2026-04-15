@@ -4,12 +4,13 @@ import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import { ReportType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useReviewers } from "../user/Hooks/useUsers";
+import { useUsers } from "../user/Hooks/useUsers";
 import { useProjects } from "../project/Hooks/useProjects";
 import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
 import { useSaveReport, useSendReport } from "./Hooks/useReport";
 import DatePicker from "../../ui/DatePicker";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 const ACTIVITY_TYPES = [
   { id: "Workshop", name: "Workshop" },
@@ -31,6 +32,8 @@ interface Props {
 }
 
 const FormEditReport: React.FC<Props> = ({ report }) => {
+  const currentUser = localStorageUser();
+
   // Helper to get project ID from various formats
   const getProjectId = (): string | null => {
     if (!report.project) return null;
@@ -53,8 +56,20 @@ const FormEditReport: React.FC<Props> = ({ report }) => {
   const { saveReport, isPending: isSaving } = useSaveReport();
   const { sendReport, isPending: isSending } = useSendReport();
 
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
-  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  const {
+    data,
+    isLoading: isLoadingReviewers,
+    // isError,
+  } = useUsers({ limit: 1000 });
+  const users = useMemo(
+    () =>
+      data?.data?.users.filter((user) => user.id !== currentUser.id) ?? [
+        currentUser,
+      ],
+    [data]
+  );
+
+  const reviewers = useMemo(() => users ?? [], [data]);
 
   const { data: projectsData, isLoading: isLoadingProjects } = useProjects();
   const projects = useMemo(

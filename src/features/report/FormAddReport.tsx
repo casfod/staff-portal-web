@@ -4,12 +4,14 @@ import FormRow from "../../ui/FormRow";
 import Row from "../../ui/Row";
 import { ReportType } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
-import { useReviewers } from "../user/Hooks/useUsers";
+// import { useReviewers } from "../user/Hooks/useUsers";
 import Select from "../../ui/Select";
 import { FileUpload } from "../../ui/FileUpload";
 import { useSaveReport, useSendReport } from "./Hooks/useReport";
 import DatePicker from "../../ui/DatePicker";
 import { useProjects } from "../project/Hooks/useProjects";
+import { localStorageUser } from "../../utils/localStorageUser";
+import { useUsers } from "../user/Hooks/useUsers";
 
 const ACTIVITY_TYPES = [
   { id: "Workshop", name: "Workshop" },
@@ -27,6 +29,8 @@ const REPORT_TYPES = [
 ];
 
 const FormAddReport: React.FC = () => {
+  const currentUser = localStorageUser();
+
   const [formData, setFormData] = useState<Partial<ReportType>>({
     activityType: undefined,
     otherActivitySpecification: "",
@@ -42,8 +46,20 @@ const FormAddReport: React.FC = () => {
   const { saveReport, isPending: isSaving } = useSaveReport();
   const { sendReport, isPending: isSending } = useSendReport();
 
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
-  const reviewers = useMemo(() => reviewersData?.data ?? [], [reviewersData]);
+  const {
+    data,
+    isLoading: isLoadingReviewers,
+    // isError,
+  } = useUsers({ limit: 1000 });
+  const users = useMemo(
+    () =>
+      data?.data?.users.filter((user) => user.id !== currentUser.id) ?? [
+        currentUser,
+      ],
+    [data]
+  );
+
+  const reviewers = useMemo(() => users ?? [], [data]);
 
   const { data: projectsData, isLoading: isLoadingProjects } = useProjects();
   const projects = useMemo(
