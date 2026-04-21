@@ -96,6 +96,10 @@ const Navigation: React.FC = () => {
           label: "Staff Information",
         },
         {
+          to: "/human-resources/signature-settings",
+          label: "Signature Settings",
+        },
+        {
           to: "/human-resources/leave",
           label: "Staff Leave",
         },

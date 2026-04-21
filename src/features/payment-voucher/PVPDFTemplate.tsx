@@ -3,6 +3,7 @@ import logo from "../../assets/logo.webp";
 import { PaymentVoucherType } from "../../interfaces";
 import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
 import { moneyFormat } from "../../utils/moneyFormat";
+import { useMySignature } from "../signature/Hooks/useSignature";
 
 interface PVPDFTemplateProps {
   pdfRef?: any;
@@ -16,6 +17,10 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   pdfRef,
   // orientation = "landscape",
 }) => {
+  // Inside PVPDFTemplate component:
+  const { data: signatureData } = useMySignature();
+  const signatureUrl = signatureData?.data?.imageUrl;
+
   const getDisplayName = (user: any): string => {
     if (!user) return "N/A";
     if (typeof user === "string") return "N/A";
@@ -231,6 +236,16 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
 
       {/* ===== APPROVAL SECTION ===== */}
       <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center">
+        {signatureUrl && (
+          <div className="mt-4 text-center">
+            <img
+              src={signatureUrl}
+              alt="Signature"
+              style={{ maxHeight: "60px", margin: "0 auto" }}
+            />
+            <p className="text-xs text-gray-500 mt-1">Digitally Signed</p>
+          </div>
+        )}
         {approvalSections.map((sec, i) => (
           <div key={i} className="w-full space-y-2.5">
             <p

@@ -96,6 +96,7 @@ import AllReports from "./features/report/AllReports.tsx";
 import Report from "./features/report/Report.tsx";
 import CreateReport from "./features/report/CreateReport.tsx";
 import { EditReport } from "./features/report/EditReport.tsx";
+import SignatureSettings from "./features/signature/SignatureSettings.tsx";
 
 const router = createBrowserRouter([
   {
@@ -688,6 +689,17 @@ const router = createBrowserRouter([
                 ),
               },
             ],
+          },
+
+          // Add to human-resources children or as a standalone route
+          {
+            path: "signature-settings",
+            element: (
+              <AnimatedRoute
+                key="signature-settings"
+                element={<SignatureSettings />}
+              />
+            ),
           },
 
           // NEW LEAVE MANAGEMENT ROUTES
