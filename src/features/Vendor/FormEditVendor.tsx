@@ -11,13 +11,18 @@ import {
 } from "../../interfaces";
 import SpinnerMini from "../../ui/SpinnerMini";
 import Select from "../../ui/Select";
-import { useCreateVendor, useCreateVendorDraft } from "./Hooks/useVendor";
+import {
+  useCreateVendor,
+  useCreateVendorDraft,
+  useUpdateVendor,
+} from "./Hooks/useVendor";
 import { FileUpload } from "../../ui/FileUpload";
 import { businessState, categories, businessTypes } from "./FormAddVendor";
 import { bankNames } from "../../assets/Banks";
 import toast from "react-hot-toast";
 import StatusBadge from "../../ui/StatusBadge";
 import { useAdmins } from "../user/Hooks/useUsers";
+import { localStorageUser } from "../../utils/localStorageUser";
 
 interface FormEditVendorProps {
   vendor: VendorType | null;
@@ -29,6 +34,7 @@ interface VendorUpdateFormData extends UpdateVendorType {
 }
 
 const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
+  const currentUser = localStorageUser();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<VendorUpdateFormData>({
     businessName: "",
@@ -54,6 +60,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
 
   const { createVendor, isPending: isSending } = useCreateVendor();
   const { createVendorDraft, isPending: isSaving } = useCreateVendorDraft();
+  const { updateVendor, isPending: isUpdating } = useUpdateVendor();
 
   // Fetch admins for approver selection
   const { data: adminsData, isLoading: isLoadingAdmins } = useAdmins();
@@ -133,6 +140,22 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
       files: selectedFiles,
     } as CreateVendorType);
   };
+  const handleUpdateVendor = (e: React.FormEvent) => {
+    e.preventDefault();
+    const isFormValid = (e.target as HTMLFormElement).reportValidity();
+    if (!isFormValid) return;
+
+    // Remove approvedBy for draft
+    const { approvedBy, ...draftData } = formData;
+
+    updateVendor({
+      vendorId: vendor?.id ?? "",
+      data: {
+        ...draftData,
+        files: selectedFiles,
+      } as UpdateVendorType,
+    });
+  };
 
   const handleSubmitForApproval = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +170,10 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
     createVendor({ ...formData, files: selectedFiles } as CreateVendorType);
   };
 
-  const canEdit = vendor?.status === "draft" || vendor?.status === "rejected";
+  const canEdit =
+    vendor?.status === "draft" ||
+    vendor?.status === "rejected" ||
+    currentUser.role === "SUPER-ADMIN";
   const canSubmitForApproval = vendor?.status === "draft";
 
   if (!vendor) {
@@ -468,7 +494,7 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
         multiple={true}
       />
 
-      <div className="flex justify-center w-full gap-4 pt-6">
+      <div className="flex flex-wrap justify-center w-full gap-4 pt-6">
         {canEdit && (
           <Button
             type="button"
@@ -477,6 +503,16 @@ const FormEditVendor: React.FC<FormEditVendorProps> = ({ vendor }) => {
             onClick={handleSaveAsDraft}
           >
             {isSaving ? <SpinnerMini /> : "Save as Draft"}
+          </Button>
+        )}
+        {currentUser.role === "SUPER-ADMIN" && (
+          <Button
+            type="button"
+            size="medium"
+            disabled={isUpdating}
+            onClick={handleUpdateVendor}
+          >
+            {isSaving ? <SpinnerMini /> : "Update (SUPER-ADMIN ONLY) "}
           </Button>
         )}
 

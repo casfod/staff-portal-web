@@ -79,8 +79,8 @@ export const uploadSignature = async (
  * Upload signature from data URL (for drawn signatures)
  */
 export const uploadSignatureFromDataUrl = async (
-  dataUrl: string,
-  signatureType: "uploaded" | "drawn" = "drawn"
+  dataUrl: string
+  // signatureType: "uploaded" | "drawn" = "drawn"
 ): Promise<UploadSignatureResponse> => {
   try {
     // Convert data URL to Blob
