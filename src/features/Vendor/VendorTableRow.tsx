@@ -26,8 +26,9 @@ const VendorTableRow = ({
   const currentUser = localStorageUser();
 
   const isEditable =
-    (vendor.status === "draft" || vendor.status === "rejected") &&
-    vendor.createdBy?.id === currentUser?.id;
+    ((vendor.status === "draft" || vendor.status === "rejected") &&
+      vendor.createdBy?.id === currentUser?.id) ||
+    currentUser?.role === "SUPER-ADMIN";
 
   // console.log({ isEditable });
 
