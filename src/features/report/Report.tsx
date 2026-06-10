@@ -147,9 +147,22 @@ const Report = () => {
   const canShareRequest =
     isCreator ||
     ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
+  // const canUpdateStatus =
+  //   !isCreator &&
+  //   ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
+  //     (isAdmin && requestStatus === "reviewed" && isApprover));
+
+  // const canAddComments =
+  //   isCreator ||
+  //   isReviewer ||
+  //   isApprover ||
+  //   isCopiedTo ||
+  //   isAdmin ||
+  //   (userRole === "REVIEWER" && requestStatus === "pending");
+
   const canUpdateStatus =
     !isCreator &&
-    ((userRole === "REVIEWER" && requestStatus === "pending" && isReviewer) ||
+    ((requestStatus === "pending" && isReviewer) ||
       (isAdmin && requestStatus === "reviewed" && isApprover));
 
   const canAddComments =
@@ -158,7 +171,7 @@ const Report = () => {
     isApprover ||
     isCopiedTo ||
     isAdmin ||
-    (userRole === "REVIEWER" && requestStatus === "pending");
+    requestStatus === "pending";
 
   const showAdminApproval =
     !report?.approvedBy &&
