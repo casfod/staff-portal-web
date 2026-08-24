@@ -123,7 +123,7 @@ export const PurchaseOrderDetails = ({ purchaseOrder }: PurchaseOrderDetailsProp
             purchaseOrder.vat
               ? (
                   purchaseOrder.totalAmount -
-                  (purchaseOrder.totalAmount / 100) * purchaseOrder.vat
+                  ((purchaseOrder.totalAmount / 100) * purchaseOrder.vat)
                 ).toLocaleString()
               : purchaseOrder.totalAmount.toLocaleString()
           }`,
