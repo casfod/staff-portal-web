@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { StaffStrategyType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IStaffStrategy } from '../interfaces';
 
 interface StaffStrategyState {
-  staffStrategy: StaffStrategyType | null;
+  staffStrategy: IStaffStrategy | null;
 }
 
 const initialState: StaffStrategyState = {
@@ -10,18 +10,17 @@ const initialState: StaffStrategyState = {
 };
 
 const staffStrategySlice = createSlice({
-  name: "staffStrategy",
+  name: 'staffStrategy',
   initialState,
   reducers: {
-    setStaffStrategy: (state, action: PayloadAction<StaffStrategyType>) => {
+    setStaffStrategy: (state, action: PayloadAction<IStaffStrategy>) => {
       state.staffStrategy = action.payload;
     },
-    clearStaffStrategy: (state) => {
+    clearStaffStrategy: state => {
       state.staffStrategy = null;
     },
   },
 });
 
-export const { setStaffStrategy, clearStaffStrategy } =
-  staffStrategySlice.actions;
+export const { setStaffStrategy, clearStaffStrategy } = staffStrategySlice.actions;
 export default staffStrategySlice.reducer;

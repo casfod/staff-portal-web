@@ -1,175 +1,268 @@
-import { List, Download } from "lucide-react"; // Removed unused imports
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { localStorageUser } from "../../utils/localStorageUser";
-import Button from "../../ui/Button";
-import StatusBadge from "../../ui/StatusBadge";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import TextHeader from "../../ui/TextHeader";
-// import { FileUpload } from "../../ui/FileUpload";
-import { useGoodsReceivedDetail } from "./Hooks/useGoodsReceived";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import Spinner from "../../ui/Spinner";
-import { DataStateContainer } from "../../ui/DataStateContainer";
-import { usePdfDownload } from "../../hooks/usePdfDownload";
-import ActionIcons from "../../ui/ActionIcons";
-import { GRNDetails } from "./GRNDetails";
-import GRNPDFTemplate from "./GRNPDFTemplate";
-import PDFPreviewModal from "../../ui/PDFPreviewModal";
-import { useGRNPDF } from "../../hooks/useGRNPDF";
-import { useAddFilesToGoodsReceived } from "./Hooks/useGoodsReceived";
-import toast from "react-hot-toast";
+import { List, Loader2, CheckCircle, FileUp } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { Button } from '../../components/ui/button';
+import StatusBadge from '../../components/custom/StatusBadge';
+import TextHeader from '../../components/custom/TextHeader';
+import { useGoodsReceivedDetail } from './Hooks/useGoodsReceived';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import Spinner from '../../components/custom/Spinner';
+import { DataStateContainer } from '../../components/custom/DataStateContainer';
+import { usePdfDownload } from '../../hooks/usePdfDownload';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { GRNDetails } from './GRNDetails';
+import GRNPDFTemplate from './GRNPDFTemplate';
+import PDFPreviewModal from '../../components/custom/PDFPreviewModal';
+import RequestCommentsAndActions, { TRequestEntityComments } from '@/components/custom/RequestCommentsAndActions';
+import { useEntityFiles, useFileUpload } from '../../hooks/useFile';
+import toast from 'react-hot-toast';
+import { infoConfig } from '@/config/config-info';
+// Helper to generate consistent PDF filename
+const getPDFFileName = (grnCode: string): string => {
+  // Remove slashes and replace with hyphens for safe filename
+  const sanitizedGrnCode = grnCode.replace(/\//g, '-');
+  return `GRN-${sanitizedGrnCode}.pdf`;
+};
+
+// Helper to check if a file matches our naming pattern
+const isTargetPDFFile = (fileName: string, grnCode: string): boolean => {
+  const sanitizedGrnCode = grnCode.replace(/\//g, '-');
+  return fileName === `GRN-${sanitizedGrnCode}.pdf`;
+};
 
 const GRN = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { grnId } = useParams();
 
-  // Data fetching and reconciliation
-  const {
-    data: remoteData,
-    isLoading,
-    isError,
-  } = useGoodsReceivedDetail(grnId!);
+  // ── Data fetching ──────────────────────────────────────────────────────────
+  const { data: remoteData, isLoading, isError } = useGoodsReceivedDetail(grnId!);
 
-  const goodsReceived = useSelector(
-    (state: RootState) => state.goodsReceived.goodsReceived
-  );
+  const goodsReceived = useSelector((state: RootState) => state.goodsReceived.goodsReceived);
 
-  const requestData = useMemo(
-    () => remoteData?.data || goodsReceived,
-    [remoteData, goodsReceived]
-  );
+  const requestData = useMemo(() => remoteData?.data || goodsReceived, [remoteData, goodsReceived]);
 
   // Redirect logic
   useEffect(() => {
     if (!grnId || (!isLoading && !requestData)) {
-      navigate("/procurement/goods-received");
+      navigate('/procurement/goods-received');
     }
   }, [requestData, grnId, navigate, isLoading]);
 
-  // const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  // ─── PDF upload state ─────────────────────────────────────────────
+  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
+  const [isPdfReady, setIsPdfReady] = useState(false);
+  const generatedPdfFileRef = useRef<File | null>(null);
+  const isGeneratingOrUploadingRef = useRef(false);
+  const [isDeletingOldFiles, setIsDeletingOldFiles] = useState(false);
 
-  // PDF generation logic
+  // ─── Get existing files for this GRN ─────────────────────────────
   const {
-    pdfRef,
-    isGenerating: isGeneratingGRNPDF,
-    showPreview,
-    setShowPreview,
-    generatePDF,
-    previewPDF,
-  } = useGRNPDF(requestData);
+    files: existingFiles,
+    isLoading: isLoadingFiles,
+    deleteFile: deleteExistingFile,
+    refetch: refetchFiles,
+  } = useEntityFiles('GoodsReceived', requestData?.id || '');
 
-  const { addFilesToGoodsReceived, isPending: isUploadingFiles } =
-    useAddFilesToGoodsReceived();
+  // ─── Check if a PDF already exists ───────────────────────────────
+  useEffect(() => {
+    if (requestData?.id && existingFiles.length > 0 && requestData?.grdCode) {
+      const existingPDF = existingFiles.find(file =>
+        isTargetPDFFile(file.name, requestData.grdCode)
+      );
 
-  // PDF download logic
-  const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf, isGenerating: isDownloadingPDF } = usePdfDownload({
-    filename: `GRN-${requestData?.GRDCode || requestData?.id}`,
-    multiPage: true,
-    titleOptions: {
-      text: "CASFOD Goods Received Note",
-    },
+      if (existingPDF) {
+        setUploadedFileIds([existingPDF.id]);
+        setIsPdfReady(true);
+      } else {
+        setUploadedFileIds([]);
+        setIsPdfReady(false);
+      }
+    }
+  }, [existingFiles, requestData]);
+
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  // ── File Upload Hook ──────────────────────────────────────────────────────
+  const { uploadFiles, isUploading: isUploadingPdf } = useFileUpload({
+    associatedModel: 'GoodsReceived',
+    associatedId: requestData?.id,
   });
 
-  const handleDownloadPDF = () => {
-    downloadPdf(pdfContentRef);
-  };
 
-  const handleUploadPDF = async () => {
-    if (!requestData) return;
+  // ── Refs ───────────────────────────────────────────────────────────────────
+  /** Visible page content — used by the "download visible page" action */
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  /** Off-screen dedicated GRN template — used for generate-and-upload */
+  const grnTemplateRef = useRef<HTMLDivElement>(null);
+
+  // ── Unified PDF hook ───────────────────────────────────────────────────────
+  const {
+    downloadPdf,
+    generateFile,
+    previewPdf,
+    isGenerating: isGeneratingPDF,
+  } = usePdfDownload({
+    filename: `GRN-${(requestData?.grdCode ?? '').replace(/\//g, '-')}.pdf`,
+    format: 'a4',
+    orientation: 'portrait',
+    scale: 2,
+    margin: 10,
+    multiPage: true,
+    quality: 1,
+    backgroundColor: '#FFFFFF',
+    footerCode: {
+      label: `${infoConfig.abbriviation} GRN Number`,
+      value: requestData?.grdCode ?? '',
+    },
+    templateRef: grnTemplateRef,
+  });
+
+  const handleDownloadPDF = () => downloadPdf(pdfContentRef);
+
+  // ─── Step 1: Generate & Upload (with cleanup) ───────────────────────────
+  const handleGenerateAndUploadPDF = useCallback(async (): Promise<boolean> => {
+    if (!requestData?.id || !requestData?.grdCode) {
+      toast.error('No GRN found');
+      return false;
+    }
+
+    // Already ready → skip re-upload
+    if (isPdfReady && uploadedFileIds.length > 0) {
+      toast.success('PDF is already generated and uploaded');
+      return true;
+    }
+
+    if (isGeneratingOrUploadingRef.current) {
+      return false;
+    }
+    isGeneratingOrUploadingRef.current = true;
 
     try {
-      const pdfFile = await generatePDF();
+      // 1. Generate PDF using the existing generateFile function
+      const pdfFile = await generateFile();
       if (!pdfFile) {
-        throw new Error("Failed to generate PDF");
+        toast.error('Failed to generate GRN PDF');
+        return false;
       }
 
-      // Upload PDF to GRN files
-      await addFilesToGoodsReceived(
-        {
-          goodsReceivedId: grnId!,
-          files: [pdfFile],
-        },
-        {
-          onSuccess: () => {
-            // toast.success("GRN PDF uploaded successfully");
-          },
-          onError: (error: any) => {
-            console.error("Failed to upload PDF:", error);
-            toast.error(error.message || "Failed to upload GRN PDF");
-          },
-        }
+      // 2. Rename the file with our naming convention
+      const targetFileName = getPDFFileName(requestData.grdCode);
+      const renamedFile = new File([pdfFile], targetFileName, {
+        type: pdfFile.type,
+      });
+      generatedPdfFileRef.current = renamedFile;
+
+      // 3. Delete any existing PDF with the same name
+      const existingPDF = existingFiles.find(file =>
+        isTargetPDFFile(file.name, requestData.grdCode)
       );
+
+      if (existingPDF) {
+        setIsDeletingOldFiles(true);
+        try {
+          await deleteExistingFile(existingPDF.id);
+          toast.success(`Removed old PDF: ${existingPDF.name}`);
+        } catch (deleteError) {
+          console.error('Failed to delete existing PDF:', deleteError);
+          // Continue with upload even if delete fails
+        } finally {
+          setIsDeletingOldFiles(false);
+        }
+      }
+
+      // 4. Upload the new PDF using our upload hook
+      const uploaded = await uploadFiles([renamedFile]);
+      if (!uploaded.length) {
+        toast.error('Failed to upload GRN PDF');
+        return false;
+      }
+
+      const fileIds = uploaded.map(f => f.id);
+      setUploadedFileIds(fileIds);
+      setIsPdfReady(true);
+
+      // 5. Refresh the file list
+      await refetchFiles();
+
+      toast.success(`PDF generated and uploaded: ${targetFileName}`);
+      return true;
     } catch (error) {
-      console.error("PDF upload failed:", error);
-      toast.error("Failed to generate or upload PDF");
+      console.error('Failed to generate/upload PDF:', error);
+      toast.error('Failed to prepare PDF');
+      return false;
+    } finally {
+      isGeneratingOrUploadingRef.current = false;
     }
-  };
+  }, [
+    requestData?.id,
+    requestData?.grdCode,
+    generateFile,
+    uploadFiles,
+    existingFiles,
+    deleteExistingFile,
+    refetchFiles,
+    isPdfReady,
+    uploadedFileIds,
+  ]);
 
   // Helper function to safely get creator ID
   const getCreatorId = (): string => {
-    if (!requestData?.createdBy) return "";
-    if (typeof requestData.createdBy === "string") {
+    if (!requestData?.createdBy) return '';
+    if (typeof requestData.createdBy === 'string') {
       return requestData.createdBy;
     }
-    return requestData.createdBy.id || "";
+    return requestData.createdBy.id || '';
   };
 
   const isCreator = getCreatorId() === currentUser.id;
   const isCompleted = requestData?.isCompleted;
-  const canUploadFiles = isCreator && isCompleted;
+  const canGeneratePDF = isCreator && isCompleted;
 
-  const tableHeadData = [
-    "GRN Code",
-    "Purchase Order",
-    "Status",
-    "Date",
-    "Actions",
-  ];
+  const isBusy = isUploadingPdf || isGeneratingPDF || isDeletingOldFiles;
+
+  const tableHeadData = ['GRN Code', 'Purchase Order', 'Status', 'Date', 'Actions'];
 
   const tableRowData = [
     {
-      id: "grnCode",
-      content: requestData?.GRDCode || "N/A",
+      id: 'grnCode',
+      content: requestData?.grdCode || 'N/A',
     },
     {
-      id: "purchaseOrder",
+      id: 'purchaseOrder',
       content:
-        typeof requestData?.purchaseOrder === "object"
-          ? requestData.purchaseOrder.POCode
-          : "N/A",
+        typeof requestData?.purchaseOrder === 'object' ? requestData.purchaseOrder.poCode : 'N/A',
     },
     {
-      id: "status",
+      id: 'status',
       content: (
         <StatusBadge
-          status={requestData?.isCompleted ? "completed" : "in-progress"}
+          status={requestData?.isCompleted ? 'completed' : 'in-progress'}
           key="status-badge"
         />
       ),
     },
     {
-      id: "createdAt",
-      content: formatToDDMMYYYY(requestData?.createdAt!),
+      id: 'createdAt',
+      content: formatToDDMMYYYY(requestData?.createdAt ?? "N/A"),
     },
     {
-      id: "action",
+      id: 'action',
       content: (
         <ActionIcons
           canShareRequest={isCreator}
           requestId={requestData?.id}
-          isGeneratingPDF={isDownloadingPDF}
+          isGeneratingPDF={isGeneratingPDF}
           onDownloadPDF={handleDownloadPDF}
-          onPreviewPDF={previewPDF}
+          onPreviewPDF={() => previewPdf(setShowPreview, requestData)}
           showTagDropdown={showTagDropdown}
           setShowTagDropdown={setShowTagDropdown}
-          mode="purchase-order" // Changed from "grn" to "purchase-order" or whatever valid mode exists
+          mode="purchase-order"
         />
       ),
     },
@@ -178,19 +271,59 @@ const GRN = () => {
   return (
     <>
       <div className="flex flex-col space-y-3 pb-80">
-        <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-          <div className="flex justify-between items-center">
-            <TextHeader>
-              Goods Received Note - {requestData?.GRDCode}
-            </TextHeader>
-            <Button onClick={() => navigate("/procurement/goods-received")}>
-              <List className="h-4 w-4 mr-1 md:mr-2" />
-              List
-            </Button>
+        <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+          <div className="flex flex-wrap md:flex-row justify-between md:items-center gap-3 md:gap-0">
+            <TextHeader>Goods Received Note - {requestData?.grdCode}</TextHeader>
+            <div className="flex flex-wrap md:flex-row md:items-center gap-3">
+              {/* Generate & Upload PDF */}
+              {canGeneratePDF && (
+                <Button
+                  onClick={handleGenerateAndUploadPDF}
+                  variant="outline"
+                  size="sm"
+                  disabled={isBusy || isPdfReady || isLoadingFiles}
+                >
+                  {isUploadingPdf || isGeneratingPDF || isDeletingOldFiles ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {isDeletingOldFiles ? 'Removing old PDF…' : 'Preparing…'}
+                    </>
+                  ) : isPdfReady ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                      PDF Ready ({uploadedFileIds.length} file)
+                    </>
+                  ) : (
+                    <>
+                      <FileUp className="h-4 w-4 mr-2" />
+                      Generate & Upload
+                    </>
+                  )}
+                </Button>
+              )}
+              <Button onClick={() => navigate('/procurement/goods-received')} variant="outline" size="sm">
+                <List className="h-4 w-4 mr-1 md:mr-2" />
+                List
+              </Button>
+            </div>
           </div>
+
+          {isPdfReady && (
+            <div className="text-sm text-green-600 mt-1 flex items-center gap-1">
+              <CheckCircle className="h-4 w-4" />
+              PDF ready for sharing ({uploadedFileIds.length} file
+              {uploadedFileIds.length !== 1 ? 's' : ''})
+            </div>
+          )}
+
+          {isPdfReady && uploadedFileIds.length > 0 && requestData?.grdCode && (
+            <div className="text-xs text-gray-500 mt-0.5">
+              Filename: {getPDFFileName(requestData.grdCode)}
+            </div>
+          )}
         </div>
 
-        {/* Main Table Section */}
+        {/* ── Main Content ──────────────────────────────────────────────── */}
         <div ref={pdfContentRef}>
           <DataStateContainer
             isLoading={isLoading}
@@ -219,7 +352,7 @@ const GRN = () => {
                   key={requestData?.id}
                   className="h-[40px] max-h-[40px] hover:cursor-pointer hover:bg-[#f2f2f2]"
                 >
-                  {tableRowData.map((data) => (
+                  {tableRowData.map(data => (
                     <td
                       key={data.id}
                       className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
@@ -234,50 +367,8 @@ const GRN = () => {
                     <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
                       <GRNDetails grn={requestData!} />
 
-                      {/* {canUploadFiles && (
-                        <div className="flex flex-col gap-3 mt-3">
-                          <FileUpload
-                            selectedFiles={selectedFiles}
-                            setSelectedFiles={setSelectedFiles}
-                            accept=".jpg,.png,.pdf,.xlsx,.docx"
-                            multiple={true}
-                          />
-                          {selectedFiles.length > 0 && (
-                            <Button
-                              onClick={() => {
-                                addFilesToGoodsReceived({
-                                  goodsReceivedId: grnId!,
-                                  files: selectedFiles,
-                                });
-                              }}
-                              disabled={isUploadingFiles}
-                            >
-                              {isUploadingFiles
-                                ? "Uploading..."
-                                : "Upload Files"}
-                            </Button>
-                          )}
-                        </div>
-                      )} */}
-
-                      <div className="flex justify-center w-full p-4">
-                        {canUploadFiles && (
-                          <Button
-                            variant="primary"
-                            size="small"
-                            onClick={handleUploadPDF}
-                            disabled={isUploadingFiles || isGeneratingGRNPDF}
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            {isUploadingFiles
-                              ? "Generating..."
-                              : "Generate PDF"}
-                          </Button>
-                        )}
-                      </div>
-
                       <div className="mt-4 tracking-wide">
-                        <RequestCommentsAndActions request={requestData} />
+                        <RequestCommentsAndActions request={requestData as TRequestEntityComments} />
                       </div>
                     </div>
                   </td>
@@ -286,31 +377,28 @@ const GRN = () => {
             </table>
           </DataStateContainer>
         </div>
-      </div>
 
-      {/* Hidden PDF Template for generation */}
-      <div
-        ref={pdfRef}
-        style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
-      >
-        {requestData && (
-          <GRNPDFTemplate
-            isGenerating={isGeneratingGRNPDF}
-            grnData={requestData}
-          />
-        )}
-      </div>
+        {/* ── Off-screen PDF template (for generate & upload) ───────────── */}
+        <div
+          ref={grnTemplateRef}
+          style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}
+        >
+          {requestData && (
+            <GRNPDFTemplate isGenerating={isGeneratingPDF} grnData={requestData} />
+          )}
+        </div>
 
-      {/* PDF Preview Modal */}
-      <PDFPreviewModal
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-        onDownload={handleDownloadPDF}
-        isGenerating={isGeneratingGRNPDF}
-        title={`Goods Received Note Preview - ${requestData?.GRDCode}`}
-      >
-        {requestData && <GRNPDFTemplate grnData={requestData} />}
-      </PDFPreviewModal>
+        {/* ── Preview Modal ─────────────────────────────────────────────── */}
+        <PDFPreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          onDownload={handleDownloadPDF}
+          isGenerating={isGeneratingPDF}
+          title={`GRN Preview - ${requestData?.grdCode}`}
+        >
+          {requestData && <GRNPDFTemplate grnData={requestData} />}
+        </PDFPreviewModal>
+      </div>
     </>
   );
 };

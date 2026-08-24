@@ -1,21 +1,17 @@
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+// import {
+//   IPurchaseRequest,
+//   UsePurChaseRequest,
+//   useIPurchaseRequest,
+//   UsePurchaseStatsType,
+// } from "../../../interfaces";
+import { AxiosError, AxiosResponse } from 'axios';
+import { useState } from 'react';
+
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import {
-  PurChaseRequestType,
-  UsePurChaseRequest,
-  usePurChaseRequestType,
-  UsePurchaseStatsType,
-} from "../../../interfaces";
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
-import { copyTo as copyToApi } from "../../../services/apiPurchaseRequest";
-import {
+  copyTo as copyToApi,
   getAllPurchaseRequest,
-  getPurChaseRequest,
+  getPurchaseRequest,
   getPurchaseRequestStats,
   sendPurchaseRequests as sendPurchaseRequestsApi,
   savePurchaseRequests as savePurchaseRequestsApi,
@@ -25,10 +21,18 @@ import {
   updateComment as updateCommentApi,
   deleteComment as deleteCommentApi,
   deletePurchaseRequest as deletePurchaseRequestAPI,
-} from "../../../services/apiPurchaseRequest";
+} from '../../../services/apiPurchaseRequest';
 
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import {
+  IPurchaseRequest,
+  IPurchaseRequestSingleResponse,
+  IPurchaseRequestsListResponse,
+  IPurchaseRequestStatsResponse,
+} from '../../../interfaces';
+import { useDispatch } from 'react-redux';
+import { setPurchaseRequest } from '@/store/purchaseRequestSlice';
 
 interface ErrorResponse {
   message: string;
@@ -39,15 +43,12 @@ interface HookError extends AxiosError {
 }
 
 export function useAllPurchaseRequests(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<usePurChaseRequestType, Error> // Add options parameter
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IPurchaseRequestsListResponse, Error> // Add options parameter
 ) {
-  return useQuery<usePurChaseRequestType, Error>({
-    queryKey: ["all-purchase-requests", search, sort, page, limit],
-    queryFn: () => getAllPurchaseRequest({ search, sort, page, limit }),
+  return useQuery<IPurchaseRequestsListResponse, Error>({
+    queryKey: ['all-purchase-requests', queryParams],
+    queryFn: () => getAllPurchaseRequest(queryParams),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
@@ -62,28 +63,28 @@ export function useCopy(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyToApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message); // Log error directly here
+        console.error('Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Copy Error:", error);
+      console.error('Copy Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -92,18 +93,18 @@ export function useCopy(requestId: string) {
 }
 
 export function usePurchaseRequest(id: string) {
-  return useQuery<UsePurChaseRequest, Error>({
-    queryKey: ["purchase-request", id],
-    queryFn: () => getPurChaseRequest(id),
+  return useQuery<IPurchaseRequestSingleResponse, Error>({
+    queryKey: ['purchase-request', id],
+    queryFn: () => getPurchaseRequest(id),
     staleTime: 0,
   });
 }
 
-export function usePurchaseStats(
-  options?: UseQueryOptions<UsePurchaseStatsType, Error> // Add options parameter
+export function usePurchaseRequestStats(
+  options?: UseQueryOptions<IPurchaseRequestStatsResponse, Error> // Add options parameter
 ) {
-  return useQuery<UsePurchaseStatsType, Error>({
-    queryKey: ["purchase-requests-stats"],
+  return useQuery<IPurchaseRequestStatsResponse, Error>({
+    queryKey: ['purchase-requests-stats'],
     queryFn: () => getPurchaseRequestStats(),
     // staleTime: 0,
     staleTime: 5 * 60 * 1000, // 5 minutes before data becomes stale
@@ -122,16 +123,15 @@ export function useSavePurchaseRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PurChaseRequestType>) =>
-      savePurchaseRequestsApi(data),
+    mutationFn: (data: Partial<IPurchaseRequest>) => savePurchaseRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("PurchaseRequest saved successfully");
+        toast.success('PurchaseRequest saved successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-purchase-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-purchase-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -141,10 +141,10 @@ export function useSavePurchaseRequest() {
 
     onError: (err: HookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Purchase Request save Error:", err.response?.data.message);
+      console.error('Purchase Request save Error:', err.response?.data.message);
     },
   });
 
@@ -160,21 +160,15 @@ export function useSendPurchaseRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<PurChaseRequestType>;
-      files: File[];
-    }) => sendPurchaseRequestsApi(data, files),
+    mutationFn: ({ data }: { data: Partial<IPurchaseRequest> }) => sendPurchaseRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("PurchaseRequest sent successfully");
+        toast.success('PurchaseRequest sent successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-purchase-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-purchase-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -184,101 +178,51 @@ export function useSendPurchaseRequest() {
 
     onError: (err: HookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Purchase Request send Error:", err.response?.data.message);
+      console.error('Purchase Request send Error:', err.response?.data.message);
     },
   });
 
   return { sendPurchaseRequest, isPending, isError };
 }
 
-// export function useUpdatePurChaseRequest(requestId: string) {
-//   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-//   const queryClient = useQueryClient();
-
-//   const {
-//     mutate: updatePurchaseRequest,
-//     isPending,
-//     isError,
-//   } = useMutation({
-//     mutationFn: ({
-//       data,
-//       files,
-//     }: {
-//       data: Partial<PurChaseRequestType>;
-//       files: File[];
-//     }) => updatePurchaseRequestApi(requestId, data, files),
-
-//     onSuccess: (data) => {
-//       if (data.status === 200) {
-//         toast.success("Purchase Request updated successfully");
-
-//         //Invalidate
-//         queryClient.invalidateQueries({
-//           queryKey: ["purchase-request", requestId],
-//         });
-//       } else if (data.status !== 200) {
-//         toast.error("Purchase Request update not successful");
-//         setErrorMessage(data.message);
-//         console.error("Login Error:", data.message); // Log error directly here
-//       }
-//     },
-
-//     onError: (err: HookError) => {
-//       toast.error("Error updating Purchase Request");
-//       const error = err.response?.data.message || "An error occurred";
-
-//       console.error("PurchaseRequest Error:", error);
-//       setErrorMessage(error); // Set the error message to display
-//     },
-//   });
-
-//   return { updatePurchaseRequest, isPending, isError, errorMessage };
-// }
-
-// In your PRHook.ts file, update the useUpdatePurChaseRequest mutation
-
-export function useUpdatePurChaseRequest(requestId: string) {
+export function useUpdatePurchaseRequest(requestId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
   const {
     mutate: updatePurchaseRequest,
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<PurChaseRequestType>;
-      files: File[];
-    }) => updatePurchaseRequestApi(requestId, data, files),
+    mutationFn: ({ data }: { data: Partial<IPurchaseRequest> }) =>
+      updatePurchaseRequestApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Purchase Request updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Purchase Request updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
+        dispatch(setPurchaseRequest(data.data));
+        queryClient.invalidateQueries({ queryKey: ['all-purchase-requests'] });
       } else if (data.status !== 200) {
-        toast.error("Purchase Request update not successful");
+        toast.error('Purchase Request update not successful');
         setErrorMessage(data.message);
-        console.error("Update Error:", data.message);
+        console.error('Update Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating Purchase Request");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error updating Purchase Request');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("PurchaseRequest Error:", error);
+      console.error('PurchaseRequest Error:', error);
       setErrorMessage(error);
     },
   });
@@ -298,30 +242,30 @@ export function useUpdateStatus(requestId: string) {
     mutationFn: (data: {
       status: string;
       comment: string;
-      financeReviewStatus?: "pending" | "approved" | "rejected";
-      procurementReviewStatus?: "pending" | "approved" | "rejected";
+      financeReviewStatus?: 'pending' | 'approved' | 'rejected';
+      procurementReviewStatus?: 'pending' | 'approved' | 'rejected';
     }) => updateStatusApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Status update not successful");
+        toast.error('Status update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating Status");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error updating Status');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Status update Error:", error);
+      console.error('Status update Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -340,25 +284,25 @@ export function useAddComment(requestId: string) {
   } = useMutation({
     mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
       } else if (data.status !== 201) {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Add Comment Error:", error);
+      toast.error('Error adding comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Add Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -378,25 +322,25 @@ export function useUpdateComment(requestId: string) {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateCommentApi(requestId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Comment Error:", error);
+      toast.error('Error updating comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -415,25 +359,25 @@ export function useDeleteComment(requestId: string) {
   } = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request", requestId],
+          queryKey: ['purchase-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Delete Comment Error:", error);
+      toast.error('Error deleting comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Delete Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -441,12 +385,7 @@ export function useDeleteComment(requestId: string) {
   return { deleteComment, isPending, isError, errorMessage };
 }
 
-export function useDeletePurchaseRequest(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
+export function useDeletePurchaseRequest(queryParams: Record<string, string | number | undefined>) {
   const queryClient = useQueryClient();
 
   const {
@@ -459,20 +398,19 @@ export function useDeletePurchaseRequest(
       await deletePurchaseRequestAPI(userID);
     },
     onSuccess: () => {
-      toast.success("Purchase Request deleted");
+      toast.success('Purchase Request deleted');
 
       queryClient.invalidateQueries({
-        queryKey: ["all-purchase-requests", search, sort, page, limit],
+        queryKey: ['all-purchase-requests', queryParams],
       });
     },
 
-    onError: (error) => {
-      toast.error("Error deleting Purchase Request");
+    onError: error => {
+      toast.error('Error deleting Purchase Request');
 
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Purchase Request.";
-      console.error("Delete Purchase Request Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deleting the Purchase Request.';
+      console.error('Delete Purchase Request Error:', errorMessage);
     },
   });
 

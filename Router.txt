@@ -1,0 +1,1062 @@
+import { lazy, Suspense } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+import AuthGuard from "./features/authentication/AuthGuard";
+import  Layout from "./ui/Layout";
+import PageNotFound from "./pages/PageNotFound";
+
+// Loading fallback component - moved to separate file to avoid Fast Refresh warning
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
+
+// Helper component for route elements with Suspense
+const RouteElement = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<PageLoader />}>{children}</Suspense>
+);
+
+// Lazy load pages
+const Login = lazy(() => import("./features/authentication/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+/*
+const Projects = lazy(() => import("./pages/Projects"));
+const ConceptNotes = lazy(() => import("./pages/ConceptNotes"));
+const PurchaseRequests = lazy(() => import("./pages/PurchaseRequests"));
+const AdvanceRequests = lazy(() => import("./pages/AdvanceRequests"));
+const TravelRequests = lazy(() => import("./pages/TravelRequests"));
+const UserManagement = lazy(() => import("./pages/UserManagement"));
+const PaymentRequests = lazy(() => import("./pages/PaymentRequests"));
+const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
+const Procurement = lazy(() => import("./pages/Procurement"));
+const Finance = lazy(() => import("./pages/Finance"));
+const HumanResources = lazy(() => import("./pages/HumanResources"));
+const Reports = lazy(() => import("./pages/Reports"));
+const HRAdminPanel = lazy(() => import("./pages/HRAdminPanel"));
+const VendorManagement = lazy(() => import("./pages/VendorManagement"));
+const RFQManagement = lazy(() => import("./pages/RFQManagement"));
+const POManagement = lazy(() => import("./pages/POManagement"));
+const GRNManagement = lazy(() => import("./pages/GRNManagement"));
+const PaymentVoucherManagement = lazy(() =>
+  import("./pages/PaymentVoucherManagement")
+);
+const StaffInformation = lazy(() => import("./pages/StaffInformation"));
+const LeaveManagement = lazy(() => import("./pages/LeaveManagement"));
+const StaffStrategyManagement = lazy(() =>
+  import("./pages/StaffStrategyManagement")
+);
+const AppraisalManagement = lazy(() => import("./pages/AppraisalManagement"));
+
+// Lazy load features - Projects
+const AllProjects = lazy(() => import("./features/project/AllProjects"));
+const Project = lazy(() => import("./features/project/Project"));
+const CreateProject = lazy(() => import("./features/project/CreateProject"));
+const EditProject = lazy(() => import("./features/project/EditProject"));
+
+// Lazy load features - Concept Notes
+const AllConceptNotes = lazy(() =>
+  import("./features/concept-note/AllConceptNotes")
+);
+const CreateConceptNote = lazy(() =>
+  import("./features/concept-note/CreateConceptNote")
+);
+const ConceptNote = lazy(() => import("./features/concept-note/ConceptNote"));
+const EditConceptNote = lazy(() =>
+  import("./features/concept-note/EditConceptNote")
+);
+
+// Lazy load features - Purchase Requests
+const AllPurchaseRequests = lazy(() =>
+  import("./features/purchase-request/AllPurchaseRequests")
+);
+const CreatePurchaseRequest = lazy(() =>
+  import("./features/purchase-request/CreatePurchaseRequest")
+);
+const PurchaseRequest = lazy(() =>
+  import("./features/purchase-request/PurchaseRequest")
+);
+const EditPurchaseRequest = lazy(() =>
+  import("./features/purchase-request/EditRequest")
+);
+
+// Lazy load features - Advance Requests
+const AllAdvanceRequests = lazy(() =>
+  import("./features/advance-request/AllAdvanceRequests")
+);
+const CreateAdvanceRequest = lazy(() =>
+  import("./features/advance-request/CreateAdvanceRequest")
+);
+const AdvanceRequest = lazy(() =>
+  import("./features/advance-request/AdvanceRequest")
+);
+const EditAdvanceRequest = lazy(() =>
+  import("./features/advance-request/EditAdvanceRequest")
+);
+
+// Lazy load features - Payment Requests
+const AllPaymentRequests = lazy(() =>
+  import("./features/payment-request/AllPaymentRequests")
+);
+const CreatePaymentRequest = lazy(() =>
+  import("./features/payment-request/CreatePaymentRequest")
+);
+const PaymentRequest = lazy(() =>
+  import("./features/payment-request/PaymentRequest")
+);
+const EditPaymentRequest = lazy(() =>
+  import("./features/payment-request/EditPaymentRequest")
+);
+
+// Lazy load features - Travel Requests
+const AllTravelRequests = lazy(() =>
+  import("./features/travel-request/AllTravelRequests")
+);
+const CreateTravelRequest = lazy(() =>
+  import("./features/travel-request/CreateTravelRequest")
+);
+const TravelRequest = lazy(() =>
+  import("./features/travel-request/TravelRequest")
+);
+const EditTravelRequest = lazy(() =>
+  import("./features/travel-request/EditTravelRequest")
+);
+
+// Lazy load features - Expense Claims
+const AllExpenseClaims = lazy(() =>
+  import("./features/expense-claim/AllExpenseCliams")
+);
+const CreateExpenseClaim = lazy(() =>
+  import("./features/expense-claim/CreateExpenseClaim")
+);
+const ExpenseClaim = lazy(() =>
+  import("./features/expense-claim/ExpenseClaim")
+);
+const EditExpenseClaim = lazy(() =>
+  import("./features/expense-claim/EditExpenseClaim")
+);
+
+// Lazy load features - Vendor
+const AllVendors = lazy(() => import("./features/Vendor/AllVendors"));
+const CreateVendor = lazy(() => import("./features/Vendor/CreateVendor"));
+const Vendor = lazy(() => import("./features/Vendor/Vendor"));
+const EditVendor = lazy(() => import("./features/Vendor/EditVendor"));
+
+// Lazy load features - RFQ
+const AllRFQs = lazy(() => import("./features/rfq/AllRFQs"));
+const CreateRFQ = lazy(() => import("./features/rfq/CreateRFQ"));
+const RFQ = lazy(() => import("./features/rfq/RFQ"));
+const EditRFQ = lazy(() => import("./features/rfq/EditRFQ"));
+
+// Lazy load features - Purchase Order
+const AllPurchaseOrders = lazy(() =>
+  import("./features/purchase-order/AllPurchaseOrders")
+);
+const CreatePurchaseOrder = lazy(() =>
+  import("./features/purchase-order/CreatePurchaseOrder")
+);
+const CreatePurchaseOrderFromRFQ = lazy(() =>
+  import("./features/purchase-order/CreatePurchaseOrderFromRFQ")
+);
+const PurchaseOrder = lazy(() =>
+  import("./features/purchase-order/PurchaseOrder")
+);
+const EditPurchaseOrder = lazy(() =>
+  import("./features/purchase-order/EditPurchaseOrder")
+);
+
+// Lazy load features - GRN
+const AllGRN = lazy(() => import("./features/goods-recieved/AllGRN"));
+const GRN = lazy(() => import("./features/goods-recieved/GRN"));
+
+// Lazy load features - Payment Voucher
+const AllPaymentVouchers = lazy(() =>
+  import("./features/payment-voucher/AllPaymentVouchers")
+);
+const CreatePaymentVoucher = lazy(() =>
+  import("./features/payment-voucher/CreatePaymentVoucher")
+);
+const PaymentVoucher = lazy(() =>
+  import("./features/payment-voucher/PaymentVoucher")
+);
+const EditPaymentVoucher = lazy(() =>
+  import("./features/payment-voucher/EditPaymentVoucher")
+);
+
+// Lazy load features - HR
+const StaffInformationView = lazy(() =>
+  import("./features/employment-info/StaffInformationView")
+);
+const EditStaffInformation = lazy(() =>
+  import("./features/employment-info/EditStaffInformation")
+);
+const HRAdminPanelView = lazy(() =>
+  import("./features/employment-info/HRAdminPanelView")
+);
+
+// Lazy load features - Leave
+const AllLeaves = lazy(() => import("./features/leave/AllLeaves"));
+const CreateLeave = lazy(() => import("./features/leave/CreateLeave"));
+const Leave = lazy(() => import("./features/leave/Leave"));
+const EditLeave = lazy(() => import("./features/leave/EditLeave"));
+
+// Lazy load features - Staff Strategy
+const AllStaffStrategies = lazy(() =>
+  import("./features/staff-strategy/AllStaffStrategies")
+);
+const CreateStaffStrategy = lazy(() =>
+  import("./features/staff-strategy/CreateStaffStrategy")
+);
+const StaffStrategy = lazy(() =>
+  import("./features/staff-strategy/StaffStrategy")
+);
+const EditStaffStrategy = lazy(() =>
+  import("./features/staff-strategy/EditStaffStrategy")
+);
+
+// Lazy load features - Appraisal
+const AllAppraisals = lazy(() => import("./features/appraisal/AllAppraisals"));
+const CreateAppraisal = lazy(() =>
+  import("./features/appraisal/CreateAppraisal")
+);
+const Appraisal = lazy(() => import("./features/appraisal/Appraisal"));
+const EditAppraisal = lazy(() => import("./features/appraisal/EditAppraisal"));
+
+// Lazy load features - Report
+const AllReports = lazy(() => import("./features/report/AllReports"));
+const CreateReport = lazy(() => import("./features/report/CreateReport"));
+const Report = lazy(() => import("./features/report/Report"));
+const EditReport = lazy(() => import("./features/report/EditReport"));
+*/
+// Lazy load features - Auth
+const ForgotPasswordForm = lazy(() =>
+  import("./features/authentication/ForgotPasswordForm")
+);
+const ResetPasswordForm = lazy(() =>
+  import("./features/authentication/ResetPasswordForm")
+);
+
+const router = createBrowserRouter([
+  {
+    element: (
+      <AuthGuard>
+        <Layout />
+      </AuthGuard>
+    ),
+    children: [
+      { path: "/", element: <Navigate to="dashboard" /> },
+      {
+        path: "dashboard",
+        element: (
+          <RouteElement>
+            <Dashboard />
+          </RouteElement>
+        ),
+      },
+      /*
+      {
+        path: "projects",
+        element: (
+          <RouteElement>
+            <Projects />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-projects" /> },
+          {
+            path: "all-projects",
+            element: (
+              <RouteElement>
+                <AllProjects />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-project",
+            element: (
+              <RouteElement>
+                <CreateProject />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "project/:projectId",
+            element: (
+              <RouteElement>
+                <Project />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-project/:projectId",
+            element: (
+              <RouteElement>
+                <EditProject />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "concept-notes",
+        element: (
+          <RouteElement>
+            <ConceptNotes />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="concept-notes" /> },
+          {
+            path: "concept-notes",
+            element: (
+              <RouteElement>
+                <AllConceptNotes />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-concept-note",
+            element: (
+              <RouteElement>
+                <CreateConceptNote />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <ConceptNote />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-concept-note/:requestId",
+            element: (
+              <RouteElement>
+                <EditConceptNote />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "purchase-requests",
+        element: (
+          <RouteElement>
+            <PurchaseRequests />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-request" /> },
+          {
+            path: "all-request",
+            element: (
+              <RouteElement>
+                <AllPurchaseRequests />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-purchase-request",
+            element: (
+              <RouteElement>
+                <CreatePurchaseRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <PurchaseRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <RouteElement>
+                <EditPurchaseRequest />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "advance-requests",
+        element: (
+          <RouteElement>
+            <AdvanceRequests />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-advance-request" /> },
+          {
+            path: "all-advance-request",
+            element: (
+              <RouteElement>
+                <AllAdvanceRequests />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-advance-request",
+            element: (
+              <RouteElement>
+                <CreateAdvanceRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <AdvanceRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <RouteElement>
+                <EditAdvanceRequest />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "payment-requests",
+        element: (
+          <RouteElement>
+            <PaymentRequests />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-payment-request" /> },
+          {
+            path: "all-payment-request",
+            element: (
+              <RouteElement>
+                <AllPaymentRequests />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-payment-request",
+            element: (
+              <RouteElement>
+                <CreatePaymentRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <PaymentRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <RouteElement>
+                <EditPaymentRequest />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "travel-requests",
+        element: (
+          <RouteElement>
+            <TravelRequests />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-travel-request" /> },
+          {
+            path: "all-travel-request",
+            element: (
+              <RouteElement>
+                <AllTravelRequests />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-travel-request",
+            element: (
+              <RouteElement>
+                <CreateTravelRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <TravelRequest />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <RouteElement>
+                <EditTravelRequest />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "expense-claims",
+        element: (
+          <RouteElement>
+            <ExpenseClaims />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-expense-claim" /> },
+          {
+            path: "all-expense-claim",
+            element: (
+              <RouteElement>
+                <AllExpenseClaims />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-expense-claim",
+            element: (
+              <RouteElement>
+                <CreateExpenseClaim />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "request/:requestId",
+            element: (
+              <RouteElement>
+                <ExpenseClaim />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-request/:requestId",
+            element: (
+              <RouteElement>
+                <EditExpenseClaim />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "procurement",
+        element: (
+          <RouteElement>
+            <Procurement />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="vendor-management" /> },
+          {
+            path: "vendor-management",
+            element: (
+              <RouteElement>
+                <VendorManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="vendors" /> },
+              {
+                path: "create-vendor",
+                element: (
+                  <RouteElement>
+                    <CreateVendor />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "vendors",
+                element: (
+                  <RouteElement>
+                    <AllVendors />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "vendor/:vendorId",
+                element: (
+                  <RouteElement>
+                    <Vendor />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit-vendor/:vendorId",
+                element: (
+                  <RouteElement>
+                    <EditVendor />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "rfq",
+            element: (
+              <RouteElement>
+                <RFQManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="rfqs" /> },
+              {
+                path: ":rfqId",
+                element: (
+                  <RouteElement>
+                    <RFQ />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "rfqs",
+                element: (
+                  <RouteElement>
+                    <AllRFQs />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create-rfq",
+                element: (
+                  <RouteElement>
+                    <CreateRFQ />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit-rfq/:rfqId",
+                element: (
+                  <RouteElement>
+                    <EditRFQ />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "purchase-order",
+            element: (
+              <RouteElement>
+                <POManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="purchase-orders" /> },
+              {
+                path: ":purchaseOrderId",
+                element: (
+                  <RouteElement>
+                    <PurchaseOrder />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "purchase-orders",
+                element: (
+                  <RouteElement>
+                    <AllPurchaseOrders />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <RouteElement>
+                    <CreatePurchaseOrder />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create/:rfqId",
+                element: (
+                  <RouteElement>
+                    <CreatePurchaseOrderFromRFQ />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit/:purchaseOrderId",
+                element: (
+                  <RouteElement>
+                    <EditPurchaseOrder />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "goods-received",
+            element: (
+              <RouteElement>
+                <GRNManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="all-goods-received" /> },
+              {
+                path: ":grnId",
+                element: (
+                  <RouteElement>
+                    <GRN />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "all-goods-received",
+                element: (
+                  <RouteElement>
+                    <AllGRN />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "finance",
+        element: (
+          <RouteElement>
+            <Finance />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="payment-voucher" /> },
+          {
+            path: "payment-voucher",
+            element: (
+              <RouteElement>
+                <PaymentVoucherManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="payment-vouchers" /> },
+              {
+                path: "payment-vouchers",
+                element: (
+                  <RouteElement>
+                    <AllPaymentVouchers />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "payment-vouchers/create-payment-voucher",
+                element: (
+                  <RouteElement>
+                    <CreatePaymentVoucher />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "payment-vouchers/voucher/:voucherId",
+                element: (
+                  <RouteElement>
+                    <PaymentVoucher />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "payment-vouchers/edit-voucher/:voucherId",
+                element: (
+                  <RouteElement>
+                    <EditPaymentVoucher />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "human-resources",
+        element: (
+          <RouteElement>
+            <HumanResources />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="staff-information" /> },
+          {
+            path: "staff-information",
+            element: (
+              <RouteElement>
+                <StaffInformation />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="view" /> },
+              {
+                path: "view",
+                element: (
+                  <RouteElement>
+                    <StaffInformationView />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: ":userId/view",
+                element: (
+                  <RouteElement>
+                    <StaffInformationView />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: ":userId/edit",
+                element: (
+                  <RouteElement>
+                    <EditStaffInformation />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "leave",
+            element: (
+              <RouteElement>
+                <LeaveManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <RouteElement>
+                    <AllLeaves />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <RouteElement>
+                    <CreateLeave />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: ":leaveId",
+                element: (
+                  <RouteElement>
+                    <Leave />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit/:leaveId",
+                element: (
+                  <RouteElement>
+                    <EditLeave />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "staff-strategy",
+            element: (
+              <RouteElement>
+                <StaffStrategyManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <RouteElement>
+                    <AllStaffStrategies />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <RouteElement>
+                    <CreateStaffStrategy />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: ":requestId",
+                element: (
+                  <RouteElement>
+                    <StaffStrategy />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit/:requestId",
+                element: (
+                  <RouteElement>
+                    <EditStaffStrategy />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+          {
+            path: "appraisals",
+            element: (
+              <RouteElement>
+                <AppraisalManagement />
+              </RouteElement>
+            ),
+            children: [
+              { index: true, element: <Navigate to="all" /> },
+              {
+                path: "all",
+                element: (
+                  <RouteElement>
+                    <AllAppraisals />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "create",
+                element: (
+                  <RouteElement>
+                    <CreateAppraisal />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: ":appraisalId",
+                element: (
+                  <RouteElement>
+                    <Appraisal />
+                  </RouteElement>
+                ),
+              },
+              {
+                path: "edit/:appraisalId",
+                element: (
+                  <RouteElement>
+                    <EditAppraisal />
+                  </RouteElement>
+                ),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "reporting",
+        element: (
+          <RouteElement>
+            <Reports />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-reports" /> },
+          {
+            path: "all-reports",
+            element: (
+              <RouteElement>
+                <AllReports />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "create-report",
+            element: (
+              <RouteElement>
+                <CreateReport />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "report/:requestId",
+            element: (
+              <RouteElement>
+                <Report />
+              </RouteElement>
+            ),
+          },
+          {
+            path: "edit-report/:requestId",
+            element: (
+              <RouteElement>
+                <EditReport />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: "user-management",
+        element: (
+          <RouteElement>
+            <UserManagement />
+          </RouteElement>
+        ),
+      },
+      {
+        path: "admin",
+        element: (
+          <RouteElement>
+            <HRAdminPanel />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="HRAdmin-panel-view" /> },
+          {
+            path: "HRAdmin-panel-view",
+            element: (
+              <RouteElement>
+                <HRAdminPanelView />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      */
+    ],
+  },
+  {
+    path: "login",
+    element: (
+      <RouteElement>
+        <Login />
+      </RouteElement>
+    ),
+  },
+  {
+    path: "forgot-password",
+    element: (
+      <RouteElement>
+        <ForgotPasswordForm />
+      </RouteElement>
+    ),
+  },
+  {
+    path: "reset-password/:token",
+    element: (
+      <RouteElement>
+        <ResetPasswordForm />
+      </RouteElement>
+    ),
+  },
+  { path: "*", element: <PageNotFound /> },
+]);
+
+export default router;

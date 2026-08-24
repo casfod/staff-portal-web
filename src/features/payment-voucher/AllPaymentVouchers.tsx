@@ -1,204 +1,175 @@
-// components/payment-vouchers/AllPaymentVouchers.tsx
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDebounce } from "use-debounce";
-import { BiSearch } from "react-icons/bi";
-import { GoXCircle } from "react-icons/go";
+// features/payment-voucher/AllPaymentVouchers.tsx
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { PaymentVoucherType } from "../../interfaces";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSearchTerm,
-  setPage,
-  resetQuery,
-} from "../../store/genericQuerySlice";
-import { RootState } from "../../store/store";
-import { setPaymentVoucher } from "../../store/paymentVoucherSlice";
+import { ListPage } from '../../components/custom/ListPage';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { useAllPaymentVouchers, useDeletePaymentVoucher } from './Hooks/usePaymentVoucher';
+import PaymentVoucherTableRow from './PaymentVoucherTableRow';
+import { setPaymentVoucher } from '../../store/paymentVoucherSlice';
+import { IPaymentVoucher, IFilterConfig } from '../../interfaces';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { localStorageUser } from '../../utils/localStorageUser';
 
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { Pagination } from "../../ui/Pagination";
-import Spinner from "../../ui/Spinner";
-import PaymentVoucherTableRow from "./PaymentVoucherTableRow";
-import TextHeader from "../../ui/TextHeader";
-import Button from "../../ui/Button";
-import useDeleteRequest from "../../hooks/useDeleteRequest";
-import {
-  useAllPaymentVouchers,
-  useDeletePaymentVoucher,
-} from "./Hooks/usePaymentVoucher";
+// Define filter configurations for Payment Vouchers
+const paymentVoucherFilterConfigs: IFilterConfig[] = [
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'select',
+    options: [
+      { value: 'pending', label: 'Pending' },
+      { value: 'reviewed', label: 'Reviewed' },
+      { value: 'approved', label: 'Approved' },
+      { value: 'rejected', label: 'Rejected' },
+      { value: 'paid', label: 'Paid' },
+    ],
+    placeholder: 'Filter by status...',
+  },
+  {
+    key: 'pvNumber',
+    label: 'Voucher Number',
+    type: 'text',
+    placeholder: 'Search by voucher number...',
+  },
+  {
+    key: 'payTo',
+    label: 'Pay To',
+    type: 'text',
+    placeholder: 'Filter by recipient...',
+  },
+  {
+    key: 'accountCode',
+    label: 'Account Code',
+    type: 'text',
+    placeholder: 'Filter by account code...',
+  },
+  {
+    key: 'dateFrom',
+    label: 'Date From',
+    type: 'date',
+  },
+  {
+    key: 'dateTo',
+    label: 'Date To',
+    type: 'date',
+  },
+];
 
 const AllPaymentVouchers = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const currentUser = localStorageUser();
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
-  useEffect(() => {
-    return () => {
-      dispatch(resetQuery());
-    };
-  }, [dispatch]);
-
-  // Update the hook calls to match purchase request pattern
-  const { data, isLoading, isError } = useAllPaymentVouchers(
-    debouncedSearchTerm,
-    sort,
+  // Use the filtered list hook
+  const {
+    searchTerm,
+    handleSearchChange,
     page,
-    limit
-  );
-
-  const { deletePaymentVoucher } = useDeletePaymentVoucher(
-    debouncedSearchTerm,
-    sort,
-    page,
-    limit
-  );
-
-  const paymentVouchers = useMemo(
-    () => data?.data?.paymentVouchers ?? [],
-    [data]
-  );
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
-
-  const toggleViewItems = useCallback((voucherId: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [voucherId]: !prev[voucherId],
-    }));
-  }, []);
-
-  const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
-  };
-
-  const handleAction = (voucher: PaymentVoucherType) => {
-    dispatch(setPaymentVoucher(voucher));
-    navigate(`/finance/payment-voucher/payment-vouchers/voucher/${voucher.id}`);
-  };
-
-  const handleEdit = (voucher: PaymentVoucherType) => {
-    dispatch(setPaymentVoucher(voucher));
-    navigate(
-      `/finance/payment-voucher/payment-vouchers/edit-voucher/${voucher.id}`
-    );
-  };
-
-  const handleDelete = useDeleteRequest(deletePaymentVoucher, {
-    entityName: "Payment Voucher",
+    handlePageChange,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: paymentVoucherFilterConfigs,
+    defaultFilters: {},
   });
 
-  console.log(paymentVouchers);
+  const { data, isLoading, isError } = useAllPaymentVouchers(queryParams);
+  const { deletePaymentVoucher } = useDeletePaymentVoucher();
 
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
+  const paymentVouchers = useMemo(() => data?.data ?? [], [data]);
+  const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
+
+  const handleAction = useCallback(
+    (voucher: IPaymentVoucher) => {
+      dispatch(setPaymentVoucher(voucher));
+      navigate(`/finance/payment-voucher/${voucher.id}`);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleEdit = useCallback(
+    (voucher: IPaymentVoucher) => {
+      dispatch(setPaymentVoucher(voucher));
+      navigate(`/finance/payment-voucher/edit-voucher/${voucher.id}`);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleDelete = useDeleteRequest(deletePaymentVoucher, {
+    entityName: 'Payment Voucher',
+  });
+
+  // Check if user can create PV
+  const canCreate = currentUser.role === 'SUPER-ADMIN' || currentUser?.financeRole?.canCreate;
 
   const tableHeadData = [
-    "Voucher",
-    "Status",
-    "Pay To",
-    "Amount",
-    "Date",
-    "Actions",
+    { label: 'Voucher', showOnMobile: true, minWidth: '150px' },
+    { label: 'Status', showOnMobile: true, minWidth: '100px' },
+    { label: 'Pay To', showOnMobile: true, minWidth: '150px' },
+    { label: 'Amount', showOnMobile: true, minWidth: '120px' },
+    { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '120px' },
+    { label: 'Actions', showOnMobile: true, minWidth: '100px' },
   ];
 
+  // Create the FilterToolbar as a component to pass to ListPage
+  const filterToolbar = (
+    <FilterToolbar
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      filters={filters}
+      onFilterChange={setFilter}
+      filterConfigs={filterConfigs}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
+      searchPlaceholder="Search payment vouchers..."
+    />
+  );
+
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        <div className="flex justify-between items-center">
-          <TextHeader>Payment Vouchers</TextHeader>
-
-          <Button
-            onClick={() =>
-              navigate(
-                "/finance/payment-voucher/payment-vouchers/create-payment-voucher"
-              )
-            }
-          >
-            <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            Add
-          </Button>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-            <span className="p-2 text-gray-400">
-              <BiSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search"
-            />
-            <span
-              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-              onClick={() => dispatch(setSearchTerm(""))}
-            >
-              <GoXCircle />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="max-w-full bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              paymentVouchers.map((voucher) => (
-                <PaymentVoucherTableRow
-                  key={voucher.id}
-                  voucher={voucher}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {(paymentVouchers.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <ListPage
+      title="Payment Vouchers"
+      data={paymentVouchers}
+      headers={tableHeadData}
+      isLoading={isLoading}
+      isError={isError}
+      currentPage={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      renderRow={voucher => (
+        <PaymentVoucherTableRow
+          key={voucher.id}
+          voucher={voucher}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleAction={handleAction}
+          tableHeadData={tableHeadData}
         />
       )}
-    </div>
+      onAdd={
+        canCreate
+          ? () => navigate('/finance/payment-voucher/create')
+          : undefined
+      }
+      addButtonLabel="Create Voucher"
+      emptyMessage={
+        hasActiveFilters ? 'No payment vouchers match your filters' : 'No payment vouchers found'
+      }
+      emptySubMessage={
+        hasActiveFilters
+          ? 'Try adjusting your filters or search terms'
+          : 'Create your first payment voucher'
+      }
+      searchComponent={filterToolbar}
+    />
   );
 };
 

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { uploadFile, getFileList, deleteFile } from "../services/apiFileUpload";
+import { useState, useEffect } from 'react';
+import { uploadFile, getFileList, deleteFile } from '../services/apiFileUpload';
 
 interface FileItem {
   _id: string;
@@ -23,18 +23,18 @@ export default function UploadFiles() {
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Please select a file first");
+      setError('Please select a file first');
       return;
     }
 
     setIsLoading(true);
     try {
       const uploadedFile = await uploadFile(file);
-      setFiles((prev) => [uploadedFile, ...prev]);
+      setFiles(prev => [uploadedFile, ...prev]);
       setFile(null);
     } catch (err) {
-      setError("Failed to upload file. Please try again.");
-      console.error("Upload error:", err);
+      setError('Failed to upload file. Please try again.');
+      console.error('Upload error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -48,11 +48,11 @@ export default function UploadFiles() {
         setFiles(fileList);
       } else {
         setFiles([]); // fallback to empty array if bad data received
-        console.error("Unexpected fileList format:", fileList);
+        console.error('Unexpected fileList format:', fileList);
       }
     } catch (err) {
-      setError("Failed to fetch files. Please try again.");
-      console.error("Fetch error:", err);
+      setError('Failed to fetch files. Please try again.');
+      console.error('Fetch error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -62,10 +62,10 @@ export default function UploadFiles() {
     setIsLoading(true);
     try {
       await deleteFile(id);
-      setFiles((prev) => prev.filter((file) => file._id !== id));
+      setFiles(prev => prev.filter(file => file._id !== id));
     } catch (err) {
-      setError("Failed to delete file. Please try again.");
-      console.error("Delete error:", err);
+      setError('Failed to delete file. Please try again.');
+      console.error('Delete error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ export default function UploadFiles() {
           disabled={isLoading || !file}
           className="bg-blue-500 text-white px-4 py-2 rounded ml-2 disabled:bg-blue-300"
         >
-          {isLoading ? "Uploading..." : "Upload"}
+          {isLoading ? 'Uploading...' : 'Upload'}
         </button>
       </div>
 
@@ -109,16 +109,16 @@ export default function UploadFiles() {
         <p>No files uploaded yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {mainFiles.map((file) => (
+          {mainFiles.map(file => (
             <div key={file._id} className="border p-2 rounded shadow-sm">
               <a href={file.url} target="_blank" rel="noopener noreferrer">
                 <img
                   src={file.url}
                   alt={file.name}
                   className="h-40 w-full object-contain mx-auto bg-gray-100"
-                  onError={(e) => {
+                  onError={e => {
                     (e.target as HTMLImageElement).src =
-                      "https://via.placeholder.com/150?text=File+Preview";
+                      'https://via.placeholder.com/150?text=File+Preview';
                   }}
                 />
               </a>

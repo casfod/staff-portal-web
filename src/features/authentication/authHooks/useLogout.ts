@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import { logout as logOutApi } from "../../../services/apiAuth";
-import { localStorageUser } from "../../../utils/localStorageUser";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import { logout as logOutApi } from '../../../services/apiAuth';
+import { localStorageUser } from '../../../utils/localStorageUser';
 
 export function useLogout() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export function useLogout() {
     mutationFn: logOutApi,
     onSuccess: () => {
       // Clear sessionStorage
-      localStorage.removeItem("currentLocalUser");
+      localStorage.removeItem('currentLocalUser');
       localStorage.clear();
 
       // Clear cookies
@@ -21,7 +21,7 @@ export function useLogout() {
       // Clear React Query cache
       queryClient.clear();
       // Redirect to the auth (login) page
-      navigate("/login", { replace: true });
+      navigate('/login', { replace: true });
     },
   });
 

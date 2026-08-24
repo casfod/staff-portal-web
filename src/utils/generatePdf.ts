@@ -1,12 +1,12 @@
 // generatePdf.ts - Unified version with footerCode support and File return mode
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export type PdfOptions = {
   title?: string;
   filename?: string;
-  format?: "a4" | "a3" | "letter" | "legal";
-  orientation?: "portrait" | "landscape";
+  format?: 'a4' | 'a3' | 'letter' | 'legal';
+  orientation?: 'portrait' | 'landscape';
   scale?: number;
   margin?: number;
   quality?: number;
@@ -14,14 +14,14 @@ export type PdfOptions = {
   letterRendering?: boolean;
   enableLinks?: boolean;
   pagebreak?: {
-    mode?: "css";
+    mode?: 'css';
     avoid?: string[];
   };
   multiPage?: boolean;
   titleOptions?: {
     text?: string;
     fontSize?: number;
-    fontStyle?: "normal" | "bold" | "italic" | "bolditalic";
+    fontStyle?: 'normal' | 'bold' | 'italic' | 'bolditalic';
     color?: string;
     marginBottom?: number;
   };
@@ -51,25 +51,25 @@ export type PdfOptions = {
 };
 
 const defaultOptions: PdfOptions = {
-  filename: "document.pdf",
-  format: "a4",
-  orientation: "portrait",
+  filename: 'document.pdf',
+  format: 'a4',
+  orientation: 'portrait',
   scale: 2,
   margin: 10,
   quality: 1,
-  backgroundColor: "#FFFFFF",
+  backgroundColor: '#FFFFFF',
   letterRendering: true,
   enableLinks: true,
   pagebreak: {
-    mode: "css",
-    avoid: [".pdf-avoid-break"],
+    mode: 'css',
+    avoid: ['.pdf-avoid-break'],
   },
   multiPage: false,
   titleOptions: {
-    text: "",
+    text: '',
     fontSize: 16,
-    fontStyle: "bold",
-    color: "#000000",
+    fontStyle: 'bold',
+    color: '#000000',
     marginBottom: 5,
   },
   save: true,
@@ -84,9 +84,7 @@ const getPdfDimensions = (format: string, orientation: string) => {
   };
 
   const [width, height] = pageSizes[format] || pageSizes.a4;
-  return orientation === "landscape"
-    ? { width: height, height: width }
-    : { width, height };
+  return orientation === 'landscape' ? { width: height, height: width } : { width, height };
 };
 
 /**
@@ -100,15 +98,15 @@ const renderFooter = (
   margin: number,
   currentPage: number,
   totalPages: number,
-  footerOptions?: PdfOptions["footerOptions"],
-  footerCode?: PdfOptions["footerCode"]
+  footerOptions?: PdfOptions['footerOptions'],
+  footerCode?: PdfOptions['footerCode']
 ) => {
   // Resolve which footer to render — footerOptions wins if both provided
   if (footerOptions) {
     const footer = footerOptions;
     pdf.setFontSize(footer.fontSize || 9);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(footer.color || "#666666");
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(footer.color || '#666666');
 
     if (footer.lineColor) {
       pdf.setDrawColor(footer.lineColor);
@@ -121,9 +119,7 @@ const renderFooter = (
 
     if (footer.right) {
       const rightText =
-        typeof footer.right === "function"
-          ? footer.right(currentPage, totalPages)
-          : footer.right;
+        typeof footer.right === 'function' ? footer.right(currentPage, totalPages) : footer.right;
       const textWidth = pdf.getTextWidth(rightText);
       pdf.text(rightText, pdfWidth - margin - textWidth, pdfHeight - 5);
     }
@@ -136,14 +132,14 @@ const renderFooter = (
   }
 
   if (footerCode) {
-    const label = footerCode.label || "Code";
+    const label = footerCode.label || 'Code';
     const leftText = `${label}: ${footerCode.value}`;
     const rightText = `Page ${currentPage} of ${totalPages}`;
 
     pdf.setFontSize(9);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor("#666666");
-    pdf.setDrawColor("#E0E0E0");
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor('#666666');
+    pdf.setDrawColor('#E0E0E0');
     pdf.line(margin, pdfHeight - 7, pdfWidth - margin, pdfHeight - 7);
 
     pdf.text(leftText, margin, pdfHeight - 4);
@@ -178,15 +174,15 @@ export async function generatePdf(
   };
 
   const {
-    filename = "document.pdf",
-    format = "a4",
-    orientation = "portrait",
+    filename = 'document.pdf',
+    format = 'a4',
+    orientation = 'portrait',
     scale = 2,
     margin = 5,
     quality = 1,
-    backgroundColor = "#FFFFFF",
+    backgroundColor = '#FFFFFF',
     enableLinks = true,
-    pagebreak = { mode: "css", avoid: [".pdf-avoid-break"] },
+    pagebreak = { mode: 'css', avoid: ['.pdf-avoid-break'] },
     multiPage = false,
     titleOptions,
     footerOptions,
@@ -195,7 +191,7 @@ export async function generatePdf(
     save,
   } = merged;
 
-  const compression = (merged as any).compression ?? "FAST";
+  const compression = (merged as any).compression ?? 'FAST';
 
   const hasFooter = !!(footerOptions || footerCode);
   // Reserve space at the bottom for the footer line
@@ -203,7 +199,7 @@ export async function generatePdf(
 
   try {
     const originalClasses = element.className;
-    element.classList.add("pdf-container");
+    element.classList.add('pdf-container');
 
     const canvas = await html2canvas(element, {
       scale: scale * quality,
@@ -212,16 +208,16 @@ export async function generatePdf(
       backgroundColor,
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
-      onclone: (clonedDoc) => {
+      onclone: clonedDoc => {
         if (enableLinks) {
-          clonedDoc.querySelectorAll("a").forEach((link) => {
-            link.style.color = "inherit";
-            link.style.textDecoration = "underline";
+          clonedDoc.querySelectorAll('a').forEach(link => {
+            link.style.color = 'inherit';
+            link.style.textDecoration = 'underline';
           });
         }
-        pagebreak?.avoid?.forEach((selector) => {
-          clonedDoc.querySelectorAll(selector).forEach((el) => {
-            (el as HTMLElement).style.pageBreakInside = "avoid";
+        pagebreak?.avoid?.forEach(selector => {
+          clonedDoc.querySelectorAll(selector).forEach(el => {
+            (el as HTMLElement).style.pageBreakInside = 'avoid';
           });
         });
       },
@@ -231,15 +227,12 @@ export async function generatePdf(
 
     const pdf = new jsPDF({
       orientation,
-      unit: "mm",
+      unit: 'mm',
       format,
       compress: true,
     });
 
-    const { width: pdfWidth, height: pdfHeight } = getPdfDimensions(
-      format,
-      orientation
-    );
+    const { width: pdfWidth, height: pdfHeight } = getPdfDimensions(format, orientation);
     const contentWidth = pdfWidth - margin * 2;
     const contentHeight = pdfHeight - margin * 2 - footerReservedMm;
 
@@ -252,8 +245,8 @@ export async function generatePdf(
       const {
         text,
         fontSize = 16,
-        fontStyle = "bold",
-        color = "#000000",
+        fontStyle = 'bold',
+        color = '#000000',
         marginBottom = 5,
       } = titleOptions;
 
@@ -263,7 +256,7 @@ export async function generatePdf(
       }
 
       pdf.setFontSize(fontSize);
-      pdf.setFont("helvetica", fontStyle as any);
+      pdf.setFont('helvetica', fontStyle as any);
       pdf.setTextColor(color);
 
       const titleWidth = pdf.getTextWidth(text);
@@ -277,8 +270,7 @@ export async function generatePdf(
       addTitle(0);
 
       const availableContentHeight = contentHeight - titleHeight;
-      const pageContentHeightPx =
-        (availableContentHeight * canvas.width) / imgWidth;
+      const pageContentHeightPx = (availableContentHeight * canvas.width) / imgWidth;
       const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
       for (let i = 0; i < totalPages; i++) {
@@ -291,12 +283,12 @@ export async function generatePdf(
         const remainingHeight = canvas.height - startY;
         const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
 
-        const pageCanvas = document.createElement("canvas");
+        const pageCanvas = document.createElement('canvas');
         pageCanvas.width = canvas.width;
         pageCanvas.height = pageImgHeightPx;
 
-        const ctx = pageCanvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context not available");
+        const ctx = pageCanvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas context not available');
 
         ctx.drawImage(
           canvas,
@@ -314,8 +306,8 @@ export async function generatePdf(
         const adjustedMarginTop = margin + (i === 0 ? titleHeight : 0);
 
         pdf.addImage(
-          pageCanvas.toDataURL("image/jpeg", quality),
-          "JPEG",
+          pageCanvas.toDataURL('image/jpeg', quality),
+          'JPEG',
           margin,
           adjustedMarginTop,
           imgWidth,
@@ -341,14 +333,11 @@ export async function generatePdf(
 
       const availableContentHeight = contentHeight - titleHeight;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const scaleFactor = Math.min(
-        contentWidth / imgWidth,
-        availableContentHeight / imgHeight
-      );
+      const scaleFactor = Math.min(contentWidth / imgWidth, availableContentHeight / imgHeight);
 
       pdf.addImage(
-        canvas.toDataURL("image/jpeg", quality),
-        "JPEG",
+        canvas.toDataURL('image/jpeg', quality),
+        'JPEG',
         margin,
         margin + titleHeight,
         imgWidth * scaleFactor,
@@ -357,29 +346,20 @@ export async function generatePdf(
         compression
       );
 
-      renderFooter(
-        pdf,
-        pdfWidth,
-        pdfHeight,
-        margin,
-        1,
-        1,
-        footerOptions,
-        footerCode
-      );
+      renderFooter(pdf, pdfWidth, pdfHeight, margin, 1, 1, footerOptions, footerCode);
     }
 
     // ── Output ────────────────────────────────────────────────────────────────
     if (returnFile) {
-      const blob = pdf.output("blob");
-      return new File([blob], filename, { type: "application/pdf" });
+      const blob = pdf.output('blob');
+      return new File([blob], filename, { type: 'application/pdf' });
     }
 
     if (save !== false) {
       pdf.save(filename);
     }
   } catch (error) {
-    console.error("PDF generation failed:", error);
+    console.error('PDF generation failed:', error);
     throw error;
   }
 }

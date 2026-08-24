@@ -1,103 +1,148 @@
-// lib/query-client.ts
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientConfig } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient({
+// Default configuration for QueryClient
+const defaultConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 3,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       refetchOnWindowFocus: false,
-      refetchOnMount: true,
       refetchOnReconnect: true,
+      refetchOnMount: true,
+      retry: 1,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      retry: 1,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
   },
-});
-
-// Query key factory functions
-export const queryKeys = {
-  // Auth
-  currentUser: ["auth", "current-user"] as const,
-
-  // User
-  userProfile: ["user", "profile"] as const,
-  userStats: ["user", "stats"] as const,
-  userPreferences: ["user", "preferences"] as const,
-  userById: (id: string) => ["users", id] as const,
-  allUsers: (params?: any) => ["users", "all", params] as const,
-
-  // FundMe
-  campaigns: (filters?: any) => ["fundme", "campaigns", filters] as const,
-  campaign: (id: string) => ["fundme", "campaign", id] as const,
-  campaignByShareCode: (shareCode: string) =>
-    ["fundme", "campaign", "share", shareCode] as const,
-  featuredCampaigns: (limit?: number) =>
-    ["fundme", "campaigns", "featured", limit] as const,
-  trendingCampaigns: (options?: any) =>
-    ["fundme", "campaigns", "trending", options] as const,
-  userCampaigns: (filters?: any) =>
-    ["fundme", "user", "campaigns", filters] as const,
-  userDonations: (filters?: any) =>
-    ["fundme", "user", "donations", filters] as const,
-  campaignDonations: (campaignId: string, page?: number) =>
-    ["fundme", "campaign", campaignId, "donations", page] as const,
-  campaignAnalytics: (campaignId: string, period?: string) =>
-    ["fundme", "campaign", campaignId, "analytics", period] as const,
-  fundMeCategories: ["fundme", "categories"] as const,
-  fundMeWithdrawals: (campaignId: string) =>
-    ["fundme", "campaign", campaignId, "withdrawals"] as const,
-  campaignVotes: (campaignId: string) =>
-    ["fundme", "campaign", campaignId, "votes"] as const,
-
-  // Groups
-  userGroups: (params?: any) => ["groups", "user", params] as const,
-  group: (id: string) => ["groups", id] as const,
-  groupMembers: (groupId: string) => ["groups", groupId, "members"] as const,
-  groupStats: (groupId: string) => ["groups", groupId, "stats"] as const,
-  groupCycleData: (groupId: string) =>
-    ["groups", groupId, "cycle-data"] as const,
-  featuredGroups: ["groups", "featured"] as const,
-  groupCategories: ["groups", "categories"] as const,
-
-  // Wallet
-  userWallets: ["wallets"] as const,
-  userWallet: (walletType: string, currency?: string) =>
-    ["wallets", walletType, currency] as const,
-  totalBalance: (currency?: string) =>
-    ["wallets", "total-balance", currency] as const,
-  walletStats: (walletType: string, currency?: string) =>
-    ["wallets", walletType, "stats", currency] as const,
-  walletTransactions: (walletType: string, page?: number) =>
-    ["wallets", walletType, "transactions", page] as const,
-
-  // Voting
-  pendingVotes: (params?: any) => ["voting", "pending", params] as const,
-  userVotes: (params?: any) => ["voting", "user", params] as const,
-  userVoteStats: ["voting", "user", "stats"] as const,
-  vote: (id: string) => ["voting", id] as const,
-  voteRecords: (voteId: string, params?: any) =>
-    ["voting", voteId, "records", params] as const,
-  entityVotes: (entityType: string, entityId: string, filters?: any) =>
-    ["voting", "entities", entityType, entityId, "votes", filters] as const,
-
-  // Admin
-  adminDashboard: (currency?: string) =>
-    ["admin", "dashboard", currency] as const,
-  adminUsers: (params?: any) => ["admin", "users", params] as const,
-  adminGroups: (params?: any) => ["admin", "groups", params] as const,
-  adminCampaigns: (params?: any) => ["admin", "campaigns", params] as const,
-  adminWithdrawals: (params?: any) => ["admin", "withdrawals", params] as const,
-  systemStats: (currency?: string) =>
-    ["admin", "system-stats", currency] as const,
-
-  // Notifications
-  notifications: (page?: number) => ["notifications", page] as const,
-  unreadCount: ["notifications", "unread-count"] as const,
 };
 
-// Helper function for optimized query options
-export const getOptimizedQueryOptions = (_queryKey: readonly unknown[]) => ({
-  retry: 1,
-  refetchOnWindowFocus: false,
-  staleTime: 1000 * 60 * 5, // 5 minutes default
-});
+// Create a singleton QueryClient instance
+export const queryClient = new QueryClient(defaultConfig);
+
+// Utility to reset all queries (useful for logout)
+export const resetAllQueries = async () => {
+  await queryClient.resetQueries();
+};
+
+// Utility to clear all queries (useful for logout)
+export const clearAllQueries = () => {
+  queryClient.clear();
+};
+
+// Utility to invalidate queries by key prefix
+export const invalidateQueries = async (queryKey: unknown[]) => {
+  await queryClient.invalidateQueries({ queryKey });
+};
+
+// Utility to refetch queries by key prefix
+export const refetchQueries = async (queryKey: unknown[]) => {
+  await queryClient.refetchQueries({ queryKey });
+};
+
+// Utility to get query data
+export const getQueryData = <TData = unknown>(queryKey: unknown[]): TData | undefined => {
+  return queryClient.getQueryData<TData>(queryKey);
+};
+
+// Utility to set query data
+export const setQueryData = <TData = unknown>(
+  queryKey: unknown[],
+  data: TData | ((oldData: TData | undefined) => TData)
+) => {
+  return queryClient.setQueryData<TData>(queryKey, data);
+};
+
+// Utility to remove queries
+export const removeQueries = (queryKey: unknown[]) => {
+  queryClient.removeQueries({ queryKey });
+};
+
+// Utility to prefetch data
+export const prefetchQuery = async <TData = unknown>({
+  queryKey,
+  queryFn,
+  staleTime,
+}: {
+  queryKey: unknown[];
+  queryFn: () => Promise<TData>;
+  staleTime?: number;
+}) => {
+  return await queryClient.prefetchQuery({
+    queryKey,
+    queryFn,
+    staleTime,
+  });
+};
+
+// Utility to fetch query (returns data or throws)
+export const fetchQuery = async <TData = unknown>({
+  queryKey,
+  queryFn,
+  staleTime,
+}: {
+  queryKey: unknown[];
+  queryFn: () => Promise<TData>;
+  staleTime?: number;
+}): Promise<TData> => {
+  return await queryClient.fetchQuery({
+    queryKey,
+    queryFn,
+    staleTime,
+  });
+};
+
+// Utility to ensure query data is available (cached)
+export const ensureQueryData = async <TData = unknown>({
+  queryKey,
+  queryFn,
+  staleTime,
+}: {
+  queryKey: unknown[];
+  queryFn: () => Promise<TData>;
+  staleTime?: number;
+}): Promise<TData> => {
+  return await queryClient.ensureQueryData({
+    queryKey,
+    queryFn,
+    staleTime,
+  });
+};
+
+// Utility to cancel ongoing queries
+export const cancelQueries = async (queryKey: unknown[]) => {
+  await queryClient.cancelQueries({ queryKey });
+};
+
+// Utility to get query state
+export const getQueryState = (queryKey: unknown[]) => {
+  return queryClient.getQueryState(queryKey);
+};
+
+// Utility for optimistic updates
+export const optimisticUpdate = <TData>({
+  queryKey,
+  updater,
+  rollback,
+}: {
+  queryKey: unknown[];
+  updater: (oldData: TData | undefined) => TData;
+  rollback?: () => void;
+}) => {
+  const previousData = queryClient.getQueryData<TData>(queryKey);
+
+  queryClient.setQueryData<TData>(queryKey, updater);
+
+  return () => {
+    if (rollback) {
+      rollback();
+    } else {
+      queryClient.setQueryData<TData>(queryKey, previousData);
+    }
+  };
+};
+
+// Export default as well
+export default queryClient;

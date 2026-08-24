@@ -2,11 +2,11 @@
 // reportSlice.ts  (src/store/reportSlice.ts)
 // Mirrors advanceRequestSlice — add to your Redux store
 // ============================================================
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ReportType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IReport } from '../interfaces';
 
 interface ReportState {
-  report: ReportType | null;
+  report: IReport | null;
 }
 
 const initialState: ReportState = {
@@ -14,13 +14,13 @@ const initialState: ReportState = {
 };
 
 const reportSlice = createSlice({
-  name: "report",
+  name: 'report',
   initialState,
   reducers: {
-    setReport: (state, action: PayloadAction<ReportType>) => {
+    setReport: (state, action: PayloadAction<IReport>) => {
       state.report = action.payload;
     },
-    clearReport: (state) => {
+    clearReport: state => {
       state.report = null;
     },
   },

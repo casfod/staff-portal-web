@@ -1,9 +1,9 @@
 // src/store/leaveSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LeaveType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ILeave } from '../interfaces';
 
 interface LeaveState {
-  leave: LeaveType | null;
+  leave: ILeave | null;
 }
 
 const initialState: LeaveState = {
@@ -11,13 +11,13 @@ const initialState: LeaveState = {
 };
 
 const leaveSlice = createSlice({
-  name: "leave",
+  name: 'leave',
   initialState,
   reducers: {
-    setLeave: (state, action: PayloadAction<LeaveType>) => {
+    setLeave: (state, action: PayloadAction<ILeave>) => {
       state.leave = action.payload;
     },
-    resetLeave: (state) => {
+    resetLeave: state => {
       state.leave = null;
     },
   },

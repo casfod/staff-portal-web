@@ -1,19 +1,14 @@
 // hooks/PVHook.ts - Fixed version with all missing hooks
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import {
-  PaymentVoucherType,
-  UsePaymentVoucher,
-  usePaymentVoucherType,
-  UsePaymentVoucherStatsType,
-} from "../../../interfaces.ts";
+  IPaymentVoucher,
+  IPaymentVouchersListResponse,
+  IPaymentVoucherStatsResponse,
+  IHookError,
+  IPaymentVoucherSingleResponse,
+} from '../../../interfaces.ts';
 import {
   getAllPaymentVouchers,
   getPaymentVoucher,
@@ -25,54 +20,39 @@ import {
   updatePaymentVoucher as updatePaymentVoucherApi,
   updateStatus as updateStatusApi,
   addFilesTosPaymentVoucher,
-} from "../../../services/apiPaymentVoucher.ts";
-import { useState } from "react";
-
-interface ErrorResponse {
-  message: string;
-}
-
-interface ApiError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+} from '../../../services/apiPaymentVoucher.ts';
+import { useState } from 'react';
 
 // Query keys - Following the same pattern as useGoodsReceived.ts
 // Ensure query keys match the purchase request pattern
 export const paymentVoucherKeys = {
-  all: ["payment-vouchers"] as const,
-  lists: () => [...paymentVoucherKeys.all, "list"] as const,
-  list: (filters: {
-    search?: string;
-    sort?: string;
-    page?: number;
-    limit?: number;
-  }) => [...paymentVoucherKeys.lists(), filters] as const,
-  details: () => [...paymentVoucherKeys.all, "detail"] as const,
+  all: ['payment-vouchers'] as const,
+  lists: () => [...paymentVoucherKeys.all, 'list'] as const,
+  list: (filters: { search?: string; sort?: string; page?: number; limit?: number }) =>
+    [...paymentVoucherKeys.lists(), filters] as const,
+  details: () => [...paymentVoucherKeys.all, 'detail'] as const,
   detail: (id: string) => [...paymentVoucherKeys.details(), id] as const,
-  stats: () => [...paymentVoucherKeys.all, "stats"] as const,
+  stats: () => [...paymentVoucherKeys.all, 'stats'] as const,
 };
 // Hooks - Following the same pattern as useGoodsReceived.ts
 
 // Replace the current useAllPaymentVouchers hook to match purchase request pattern
 export const useAllPaymentVouchers = (
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<usePaymentVoucherType, Error>
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IPaymentVouchersListResponse, Error>
 ) => {
   return useQuery({
-    queryKey: paymentVoucherKeys.list({ search, sort, page, limit }),
-    queryFn: () => getAllPaymentVouchers({ search, sort, page, limit }),
+    queryKey: paymentVoucherKeys.list(queryParams),
+    queryFn: () => getAllPaymentVouchers(queryParams),
     staleTime: 2 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     ...options,
   });
 };
 
 export const usePaymentVoucherDetail = (
   voucherId: string,
-  options?: UseQueryOptions<UsePaymentVoucher, Error>
+  options?: UseQueryOptions<IPaymentVoucherSingleResponse, Error>
 ) => {
   return useQuery({
     queryKey: paymentVoucherKeys.detail(voucherId),
@@ -84,7 +64,7 @@ export const usePaymentVoucherDetail = (
 };
 
 export const usePaymentVoucherStats = (
-  options?: UseQueryOptions<UsePaymentVoucherStatsType, Error>
+  options?: UseQueryOptions<IPaymentVoucherStatsResponse, Error>
 ) => {
   return useQuery({
     queryKey: paymentVoucherKeys.stats(),
@@ -101,27 +81,25 @@ export const useSavePaymentVoucher = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<PaymentVoucherType>) =>
-      savePaymentVouchersApi(data),
+    mutationFn: (data: Partial<IPaymentVoucher>) => savePaymentVouchersApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Payment Voucher saved successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Payment Voucher saved successfully');
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
         setErrorMessage(null);
 
         navigate(-1);
       } else {
-        const errorMsg = data.message || "Failed to save Payment Voucher";
+        const errorMsg = data.message || 'Failed to save Payment Voucher';
         toast.error(errorMsg);
         setErrorMessage(errorMsg);
       }
     },
 
-    onError: (err: ApiError) => {
+    onError: (err: IHookError) => {
       const errorMsg =
-        err.response?.data?.message ||
-        "An error occurred while saving Payment Voucher";
+        err.response?.data?.message || 'An error occurred while saving Payment Voucher';
       toast.error(errorMsg);
       setErrorMessage(errorMsg);
     },
@@ -142,31 +120,24 @@ export const useSendPaymentVoucher = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<PaymentVoucherType>;
-      files: File[];
-    }) => sendPaymentVouchersApi(data, files),
+    mutationFn: ({ data }: { data: Partial<IPaymentVoucher> }) => sendPaymentVouchersApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Payment Voucher sent successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Payment Voucher sent successfully');
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
         setErrorMessage(null);
         navigate(-1);
       } else {
-        const errorMsg = data.message || "Failed to send Payment Voucher";
+        const errorMsg = data.message || 'Failed to send Payment Voucher';
         toast.error(errorMsg);
         setErrorMessage(errorMsg);
       }
     },
 
-    onError: (err: ApiError) => {
+    onError: (err: IHookError) => {
       const errorMsg =
-        err.response?.data?.message ||
-        "An error occurred while sending Payment Voucher";
+        err.response?.data?.message || 'An error occurred while sending Payment Voucher';
       toast.error(errorMsg);
       setErrorMessage(errorMsg);
     },
@@ -180,36 +151,28 @@ export const useSendPaymentVoucher = () => {
   };
 };
 
-export const useUpdatePaymentVoucher = () => {
+export const useUpdatePaymentVoucher = (voucherId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({
-      voucherId,
-      data,
-      files = [],
-    }: {
-      voucherId: string;
-      data: Partial<PaymentVoucherType>;
-      files?: File[];
-    }) => updatePaymentVoucherApi(voucherId, data, files),
+    mutationFn: ({ data }: { data: Partial<IPaymentVoucher> }) =>
+      updatePaymentVoucherApi(voucherId, data),
 
-    onSuccess: (data, variables) => {
-      if (data.status === 200) {
-        toast.success("Payment Voucher updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Payment Voucher updated successfully');
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
         queryClient.invalidateQueries({
-          queryKey: paymentVoucherKeys.detail(variables.voucherId),
+          queryKey: paymentVoucherKeys.detail(voucherId),
         });
       } else {
-        toast.error(data.message || "Failed to update Payment Voucher");
+        toast.error(data.message || 'Failed to update Payment Voucher');
       }
     },
 
-    onError: (err: ApiError) => {
+    onError: (err: IHookError) => {
       toast.error(
-        err.response?.data?.message ||
-          "An error occurred while updating Payment Voucher"
+        err.response?.data?.message || 'An error occurred while updating Payment Voucher'
       );
     },
   });
@@ -234,21 +197,19 @@ export const useUpdatePaymentVoucherStatus = () => {
     }) => updateStatusApi(voucherId, data),
 
     onSuccess: (data, variables) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
         queryClient.invalidateQueries({
           queryKey: paymentVoucherKeys.detail(variables.voucherId),
         });
         queryClient.invalidateQueries({ queryKey: paymentVoucherKeys.lists() });
       } else {
-        toast.error(data.message || "Failed to update status");
+        toast.error(data.message || 'Failed to update status');
       }
     },
 
-    onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while updating status"
-      );
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'An error occurred while updating status');
     },
   });
 
@@ -263,29 +224,22 @@ export const useCopyPaymentVoucher = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({
-      voucherId,
-      data,
-    }: {
-      voucherId: string;
-      data: { userIds: string[] };
-    }) => copyToApi(voucherId, data),
+    mutationFn: ({ voucherId, data }: { voucherId: string; data: { recipients: string[] } }) =>
+      copyToApi(voucherId, data),
 
     onSuccess: (data, variables) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
         queryClient.invalidateQueries({
           queryKey: paymentVoucherKeys.detail(variables.voucherId),
         });
       } else {
-        toast.error(data.message || "Copy not successful");
+        toast.error(data.message || 'Copy not successful');
       }
     },
 
-    onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while copying"
-      );
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'An error occurred while copying');
     },
   });
 
@@ -308,21 +262,20 @@ export const useDeletePaymentVoucher = (
   const mutation = useMutation({
     mutationFn: (voucherId: string) => deletePaymentVoucherAPI(voucherId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Payment Voucher deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Payment Voucher deleted successfully');
         queryClient.invalidateQueries({
           queryKey: paymentVoucherKeys.list({ search, sort, page, limit }),
         });
       } else {
-        toast.error(data.message || "Failed to delete Payment Voucher");
+        toast.error(data.message || 'Failed to delete Payment Voucher');
       }
     },
 
-    onError: (err: ApiError) => {
+    onError: (err: IHookError) => {
       toast.error(
-        err.response?.data?.message ||
-          "An error occurred while deleting Payment Voucher"
+        err.response?.data?.message || 'An error occurred while deleting Payment Voucher'
       );
     },
   });
@@ -338,29 +291,22 @@ export const useAddFilesToPaymentVoucher = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({
-      paymentVoucherId,
-      files = [],
-    }: {
-      paymentVoucherId: string;
-      files: File[];
-    }) => addFilesTosPaymentVoucher(paymentVoucherId, files),
+    mutationFn: ({ paymentVoucherId }: { paymentVoucherId: string }) =>
+      addFilesTosPaymentVoucher(paymentVoucherId),
 
     onSuccess: (data, variables) => {
-      if (data.status === 200) {
-        toast.success("Files added to Payment Voucher successfully");
+      if (data.statusCode === 200) {
+        toast.success('Files added to Payment Voucher successfully');
         queryClient.invalidateQueries({
           queryKey: paymentVoucherKeys.detail(variables.paymentVoucherId),
         });
       } else {
-        toast.error(data.message || "Failed to add files");
+        toast.error(data.message || 'Failed to add files');
       }
     },
 
-    onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while adding files"
-      );
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'An error occurred while adding files');
     },
   });
 
@@ -377,8 +323,7 @@ export const usePaymentVoucher = (id: string) => {
 };
 
 export const useUpdateStatus = (voucherId: string) => {
-  const { updatePaymentVoucherStatus, isPending, isError } =
-    useUpdatePaymentVoucherStatus();
+  const { updatePaymentVoucherStatus, isPending, isError } = useUpdatePaymentVoucherStatus();
 
   const updateStatus = (data: { status: string; comment: string }) => {
     return updatePaymentVoucherStatus({ voucherId, data });
@@ -394,34 +339,12 @@ export const useUpdateStatus = (voucherId: string) => {
 export const useCopy = (voucherId: string) => {
   const { copyPaymentVoucher, isPending, isError } = useCopyPaymentVoucher();
 
-  const copyto = (data: { userIds: string[] }) => {
+  const copyto = (data: { recipients: string[] }) => {
     return copyPaymentVoucher({ voucherId, data });
   };
 
   return {
     copyto,
-    isPending,
-    isError,
-  };
-};
-
-// Legacy hook for specific component usage - FIXED: Removed duplicate function
-export const useUpdatePaymentVoucherLegacy = (voucherId: string) => {
-  const { updatePaymentVoucher, isPending, isError } =
-    useUpdatePaymentVoucher();
-
-  const updatePaymentVoucherLegacy = ({
-    data,
-    files,
-  }: {
-    data: Partial<PaymentVoucherType>;
-    files: File[];
-  }) => {
-    return updatePaymentVoucher({ voucherId, data, files });
-  };
-
-  return {
-    updatePaymentVoucher: updatePaymentVoucherLegacy,
     isPending,
     isError,
   };

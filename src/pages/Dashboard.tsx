@@ -1,235 +1,251 @@
-import { useMemo } from "react";
-// import { useNavigate } from "react-router-dom";
-import NetworkErrorUI from "../ui/NetworkErrorUI";
-import SpinnerMini from "../ui/SpinnerMini";
-import TextHeader from "../ui/TextHeader";
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import NetworkErrorUI from '../components/custom/NetworkErrorUI';
+import TextHeader from '../components/custom/TextHeader';
+import StatCard from '../components/custom/StatCard';
+import { DashboardCharts } from '../components/custom/DashboardCharts';
+import { statCardConfigs } from '../config/navigation';
+
 // Import all your hooks
-import { usePurchaseStats } from "../features/purchase-request/Hooks/PRHook";
-import { useProjectStats } from "../features/project/Hooks/useProjectStats";
-import type {
-  AdvanceRequestStats,
-  ConceptNoteStats,
-  ExpenseClaimStats,
-  PaymentRequestStats,
-  ProjectStats,
-  PurchaseRequestStats,
-  TravelRequestStats,
-} from "../interfaces";
-import { useConceptNotesStats } from "../features/concept-note/Hooks/useConceptNotes";
-import { useAdvanceRequestStats } from "../features/advance-request/Hooks/useAdvanceRequest";
-import { usePaymentRequestStats } from "../features/payment-request/Hooks/usePaymentRequests";
-import { useTravelRequestStats } from "../features/travel-request/Hooks/useTravelRequests";
-import { useExpenseClaimStats } from "../features/expense-claim/Hooks/useExpenseClaims";
+import { usePurchaseRequestStats } from '../features/purchase-request/Hooks/PRHook';
+import { useProjectStats } from '../features/project/Hooks/useProjects';
+import { useConceptNotesStats } from '../features/concept-note/Hooks/useConceptNotes';
+import { useAdvanceRequestStats } from '../features/advance-request/Hooks/useAdvanceRequest';
+import { usePaymentRequestStats } from '../features/payment-request/Hooks/usePaymentRequests';
+import { useTravelRequestStats } from '../features/travel-request/Hooks/useTravelRequests';
+import { useExpenseClaimStats } from '../features/expense-claim/Hooks/useExpenseClaims';
+import { motion } from 'framer-motion';
 
-export function Dashboard() {
-  // Combine all stats hooks into a single object for better organization
-  const statsQueries = {
-    purchaseRequest: usePurchaseStats(),
-    project: useProjectStats(),
-    conceptNote: useConceptNotesStats(),
-    paymentRequest: usePaymentRequestStats(),
-    advanceRequest: useAdvanceRequestStats(),
-    travelRequest: useTravelRequestStats(),
-    expenseClaim: useExpenseClaimStats(),
-  };
+// Define proper types for each stat
+interface ProjectStatData {
+  totalProjects: number;
+}
 
-  // Check for any errors
-  const hasError = Object.values(statsQueries).some((query) => query.isError);
+interface RequestStatData {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
 
-  // Memoize all stats data with proper typing
-  const statsData = useMemo(
+type StatsData = {
+  project: ProjectStatData;
+  purchaseRequest: RequestStatData;
+  conceptNote: RequestStatData;
+  paymentRequest: RequestStatData;
+  advanceRequest: RequestStatData;
+  travelRequest: RequestStatData;
+  expenseClaim: RequestStatData;
+};
+
+export default function Dashboard() {
+  const navigate = useNavigate();
+
+  // Use individual hooks with proper types
+  const projectStats = useProjectStats();
+  const purchaseRequestStats = usePurchaseRequestStats();
+  const conceptNoteStats = useConceptNotesStats();
+  const paymentRequestStats = usePaymentRequestStats();
+  const advanceRequestStats = useAdvanceRequestStats();
+  const travelRequestStats = useTravelRequestStats();
+  const expenseClaimStats = useExpenseClaimStats();
+
+  // Create stats queries object
+  const statsQueries = useMemo(
     () => ({
-      purchaseRequest:
-        (statsQueries.purchaseRequest.data?.data as PurchaseRequestStats) ??
-        null,
-      project: (statsQueries.project.data?.data as ProjectStats) ?? null,
-      conceptNote:
-        (statsQueries.conceptNote.data?.data as ConceptNoteStats) ?? null,
-      paymentRequest:
-        (statsQueries.paymentRequest.data?.data as PaymentRequestStats) ?? null,
-      advanceRequest:
-        (statsQueries.advanceRequest.data?.data as AdvanceRequestStats) ?? null,
-      travelRequest:
-        (statsQueries.travelRequest.data?.data as TravelRequestStats) ?? null,
-      expenseClaim:
-        (statsQueries.expenseClaim.data?.data as ExpenseClaimStats) ?? null,
+      project: projectStats,
+      purchaseRequest: purchaseRequestStats,
+      conceptNote: conceptNoteStats,
+      paymentRequest: paymentRequestStats,
+      advanceRequest: advanceRequestStats,
+      travelRequest: travelRequestStats,
+      expenseClaim: expenseClaimStats,
     }),
     [
-      statsQueries.purchaseRequest.data,
-      statsQueries.project.data,
-      statsQueries.conceptNote.data,
-      statsQueries.paymentRequest.data,
-      statsQueries.advanceRequest.data,
-      statsQueries.travelRequest.data,
-      statsQueries.expenseClaim.data,
+      projectStats,
+      purchaseRequestStats,
+      conceptNoteStats,
+      paymentRequestStats,
+      advanceRequestStats,
+      travelRequestStats,
+      expenseClaimStats,
     ]
   );
 
-  console.log(statsData.conceptNote);
-
-  // Helper component to render stats values
-  const renderStatValue = (value: number | undefined, isLoading: boolean) => {
-    if (isLoading) return <SpinnerMini />;
-    if (value === undefined || value === null) return "-"; // Show dash when no data
-    return value;
-  };
-
-  // Stats configuration
-  const stats = useMemo(
-    () => [
-      {
-        name: "Projects",
-        total: renderStatValue(
-          statsData.project?.totalProjects,
-          statsQueries.project.isLoading
-        ),
-        approved: null, // Projects might not have approved count
-        to: "/projects",
-      },
-      {
-        name: "Purchase Requests",
-        total: renderStatValue(
-          statsData.purchaseRequest?.totalRequests,
-          statsQueries.purchaseRequest.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.purchaseRequest?.totalApprovedRequests,
-          statsQueries.purchaseRequest.isLoading
-        ),
-        to: "/purchase-requests",
-      },
-      {
-        name: "Concept Notes",
-        total: renderStatValue(
-          statsData.conceptNote?.totalRequests,
-          statsQueries.conceptNote.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.conceptNote?.totalApprovedRequests,
-          statsQueries.conceptNote.isLoading
-        ),
-        to: "/concept-notes",
-      },
-      {
-        name: "Payment Requests",
-        total: renderStatValue(
-          statsData.paymentRequest?.totalRequests,
-          statsQueries.paymentRequest.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.paymentRequest?.totalApprovedRequests,
-          statsQueries.paymentRequest.isLoading
-        ),
-        to: "/payment-requests",
-      },
-      {
-        name: "Advance Requests",
-        total: renderStatValue(
-          statsData.advanceRequest?.totalRequests,
-          statsQueries.advanceRequest.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.advanceRequest?.totalApprovedRequests,
-          statsQueries.advanceRequest.isLoading
-        ),
-        to: "/advance-requests",
-      },
-      {
-        name: "Travel Requests",
-        total: renderStatValue(
-          statsData.travelRequest?.totalRequests,
-          statsQueries.travelRequest.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.travelRequest?.totalApprovedRequests,
-          statsQueries.travelRequest.isLoading
-        ),
-        to: "/travel-requests",
-      },
-      {
-        name: "Expense Claims",
-        total: renderStatValue(
-          statsData.expenseClaim?.totalRequests,
-          statsQueries.expenseClaim.isLoading
-        ),
-        approved: renderStatValue(
-          statsData.expenseClaim?.totalApprovedRequests,
-          statsQueries.expenseClaim.isLoading
-        ),
-        to: "/expense-claims",
-      },
-    ],
-    [statsData, statsQueries]
+  // Check for any errors
+  const hasError = useMemo(
+    () => Object.values(statsQueries).some(query => query.isError),
+    [statsQueries]
   );
+
+  // Memoize all stats data
+  const statsData = useMemo<StatsData>(
+    () => ({
+      project: {
+        totalProjects: projectStats?.data?.data.totalProjects || 0,
+      },
+      purchaseRequest: {
+        totalRequests: purchaseRequestStats.data?.data.totalRequests || 0,
+        totalApprovedRequests: purchaseRequestStats.data?.data.totalApprovedRequests || 0,
+      },
+      conceptNote: {
+        totalRequests: conceptNoteStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: conceptNoteStats.data?.data.totalApprovedRequests || 0,
+      },
+      paymentRequest: {
+        totalRequests: paymentRequestStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: paymentRequestStats.data?.data?.totalApprovedRequests || 0,
+      },
+      advanceRequest: {
+        totalRequests: advanceRequestStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: advanceRequestStats.data?.data?.totalApprovedRequests || 0,
+      },
+      travelRequest: {
+        totalRequests: travelRequestStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: travelRequestStats.data?.data?.totalApprovedRequests || 0,
+      },
+      expenseClaim: {
+        totalRequests: expenseClaimStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: expenseClaimStats.data?.data?.totalApprovedRequests || 0,
+      },
+    }),
+    [
+      projectStats.data,
+      purchaseRequestStats.data,
+      conceptNoteStats.data,
+      paymentRequestStats.data,
+      advanceRequestStats.data,
+      travelRequestStats.data,
+      expenseClaimStats.data,
+    ]
+  );
+
+  // Prepare data for charts
+  // Each item's `color` is pulled from statCardConfigs.chartColor, so chart
+  // colors always stay in sync with the matching StatCard icon color.
+  const chartData = useMemo(() => {
+    const colorByKey = statCardConfigs.reduce<Record<string, string>>((acc, config) => {
+      acc[config.key] = config.chartColor;
+      return acc;
+    }, {});
+
+    const items = [
+      {
+        name: 'Projects',
+        key: 'project',
+        total: statsData.project.totalProjects,
+        approved: 0,
+        color: colorByKey.project,
+      },
+      {
+        name: 'Purchase Req',
+        key: 'purchaseRequest',
+        total: statsData.purchaseRequest.totalRequests,
+        approved: statsData.purchaseRequest.totalApprovedRequests,
+        color: colorByKey.purchaseRequest,
+      },
+      {
+        name: 'Concept Notes',
+        key: 'conceptNote',
+        total: statsData.conceptNote.totalRequests,
+        approved: statsData.conceptNote.totalApprovedRequests,
+        color: colorByKey.conceptNote,
+      },
+      {
+        name: 'Payment Req',
+        key: 'paymentRequest',
+        total: statsData.paymentRequest.totalRequests,
+        approved: statsData.paymentRequest.totalApprovedRequests,
+        color: colorByKey.paymentRequest,
+      },
+      {
+        name: 'Advance Req',
+        key: 'advanceRequest',
+        total: statsData.advanceRequest.totalRequests,
+        approved: statsData.advanceRequest.totalApprovedRequests,
+        color: colorByKey.advanceRequest,
+      },
+      {
+        name: 'Travel Req',
+        key: 'travelRequest',
+        total: statsData.travelRequest.totalRequests,
+        approved: statsData.travelRequest.totalApprovedRequests,
+        color: colorByKey.travelRequest,
+      },
+      {
+        name: 'Expense Claims',
+        key: 'expenseClaim',
+        total: statsData.expenseClaim.totalRequests,
+        approved: statsData.expenseClaim.totalApprovedRequests,
+        color: colorByKey.expenseClaim,
+      },
+    ];
+    return items.filter(item => item.total > 0 || item.approved > 0);
+  }, [statsData]);
 
   if (hasError) {
     return <NetworkErrorUI />;
   }
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        <div className="flex justify-between items-center">
-          <TextHeader>Dashboard</TextHeader>
-        </div>
-      </div>
-
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-        style={{ fontFamily: "Sora", letterSpacing: "1px" }}
+    <div className="flex flex-col space-y-3 sm:space-y-4 pb-80 px-1 sm:px-0">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 border-b border-gray-200/50"
       >
-        {stats.map((stat) => {
-          // For debugging - remove in production
-          // console.log(stat);
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5">
+          <TextHeader>Dashboard</TextHeader>
+          <div className="text-xs sm:text-sm text-gray-500">
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        {statCardConfigs.map((config, index) => {
+          const stats = statsData[config.key as keyof StatsData];
+          const query = statsQueries[config.key as keyof typeof statsQueries];
+          const isLoading = query?.isLoading || false;
+
+          // Determine the correct values
+          const total = 'totalProjects' in stats ? stats.totalProjects : stats.totalRequests;
+
+          const approved =
+            'totalApprovedRequests' in stats ? stats.totalApprovedRequests : undefined;
 
           return (
-            <div
-              key={stat.name}
-              className="bg-white rounded-lg shadow-md p-6 hover:cursor-pointer hover:shadow-lg transition-shadow"
-              // onClick={(e) => {
-              //   // Check if mobile navigation is open
-              //   const mobileNav = document.querySelector('.min-h-screen.w-fit.bg-white.absolute');
-              //   if (!mobileNav) {
-              //     navigate(stat.to);
-              //   }
-              // }}
-              // onKeyDown={(e) => {
-              //   // Add keyboard accessibility
-              //   if (e.key === 'Enter' || e.key === ' ') {
-              //     const mobileNav = document.querySelector('.min-h-screen.w-fit.bg-white.absolute');
-              //     if (!mobileNav) {
-              //       navigate(stat.to);
-              //     }
-              //   }
-              // }}
-              // role="button"
-              tabIndex={0}
+            <motion.div
+              key={config.key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <h3 className="text-sm lg:text-base 2xl:text-lg font-medium   mb-2">
-                {stat.name}
-              </h3>
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-xs 2xl:text-sm   font-semibold">Total</p>
-                  <p className="text-xl 2xl:text-2xl font-semibold  ">
-                    {stat.total}
-                  </p>
-                </div>
-                {stat.approved !== null && (
-                  <div>
-                    <p className="text-xs 2xl:text-sm   font-semibold">
-                      Approved
-                    </p>
-                    <p className="text-xl 2xl:text-2xl font-semibold text-green-600">
-                      {stat.approved}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+              <StatCard
+                name={config.name}
+                total={total || 0}
+                approved={approved}
+                icon={config.icon}
+                color={config.color}
+                bgColor={config.bgColor}
+                borderColor={config.borderColor}
+                to={config.to}
+                hasApproved={config.hasApproved}
+                isLoading={isLoading}
+                onClick={() => navigate(config.to)}
+              />
+            </motion.div>
           );
         })}
       </div>
+
+      {/* Charts Section */}
+      {chartData.length > 0 && <DashboardCharts data={chartData} />}
     </div>
   );
 }

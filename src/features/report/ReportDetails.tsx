@@ -1,103 +1,98 @@
-import { ReportType } from "../../interfaces";
-import { useParams } from "react-router-dom";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import DetailContainer from "../../ui/DetailContainer";
-import CopiedTo from "../../ui/CopiedTo";
-import SystemInfo from "../../ui/SystemInfo";
-import { format } from "date-fns";
+// features/report/ReportDetails.tsx
+import { IReport } from '../../interfaces';
+import { useParams } from 'react-router-dom';
+import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
+import DetailContainer from '../../components/custom/DetailContainer';
+import CopiedTo from '../../components/custom/CopiedTo';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 
 interface ReportDetailsProps {
-  report: ReportType;
+  report: IReport;
 }
 
 export const ReportDetails = ({ report }: ReportDetailsProps) => {
   const { requestId } = useParams();
 
-  const formatDate = (date: Date | string | null | undefined) => {
-    if (!date) return "N/A";
-    try {
-      return format(new Date(date), "dd-MM-yyyy");
-    } catch {
-      return "Invalid Date";
-    }
-  };
-
   const rowData = [
     {
-      id: "activityType",
-      label: "Activity Type :",
+      id: 'activityType',
+      label: 'Activity Type :',
       content:
-        report.activityType === "Other" && report.otherActivitySpecification
+        report.activityType === 'Other' && report.otherActivitySpecification
           ? `${report.activityType} - ${report.otherActivitySpecification}`
-          : report.activityType,
+          : report.activityType || 'N/A',
     },
     {
-      id: "reportType",
-      label: "Report Type :",
-      content: report.reportType,
+      id: 'reportType',
+      label: 'Report Type :',
+      content: report.reportType || 'N/A',
     },
     {
-      id: "reportTitle",
-      label: "Report Title :",
-      content: report.reportTitle,
+      id: 'reportTitle',
+      label: 'Report Title :',
+      content: report.reportTitle || 'N/A',
     },
     {
-      id: "reportingPeriod",
-      label: "Reporting Period :",
-      content: `${formatDate(report.reportingPeriod?.from)} to ${formatDate(
-        report.reportingPeriod?.to
-      )}`,
+      id: 'reportingPeriod',
+      label: 'Reporting Period :',
+      content: report.reportingPeriod
+        ? `${formatToDDMMYYYY(report.reportingPeriod.from)} - ${formatToDDMMYYYY(
+            report.reportingPeriod.to
+          )}`
+        : 'N/A',
     },
     {
-      id: "project",
-      label: "Project :",
+      id: 'project',
+      label: 'Project :',
       content:
-        typeof report.project === "object" && report.project !== null
-          ? (report.project as any).project_title || "N/A"
-          : "N/A",
+        typeof report.project === 'object' && report.project !== null
+          ? (report.project.projectTitle || 'N/A')
+          : 'N/A',
     },
   ];
+
+  // Determine if user can manage files (creator or admin)
+  const canManageFiles = true; // You can add proper permission logic here
 
   return (
     <DetailContainer>
       {/* Report Number Header */}
       {report?.reportNumber && (
-        <h1 className="text-center text-lg font-extrabold p-4 md:p-6">
+        <h1 className="text-center sm:text-lg font-extrabold pb-3 md:p-6">
           {report.reportNumber}
         </h1>
       )}
 
       <div
-        className={`grid grid-cols-1 gap-4 md:gap-6 ${
-          !requestId ? "text-sm" : "text-sm md:text-base"
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 ${
+          !requestId ? 'text-sm' : 'text-sm md:text-base'
         } mb-6 border-b border-gray-300 pb-6`}
       >
         <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
-          {rowData.map((data) => (
+          {rowData.map(data => (
             <div
               key={data.id}
-              className="w-full md:w-fit border-b-2 md:border-b-0 flex flex-col md:flex-row gap-1 pb-2 md:pb-0"
+              className="w-full md:w-fit border-b-2 md:border-b-0 text-xs sm:text-sm flex flex-col md:flex-row gap-1 pb-2 md:pb-0"
             >
-              <span className="text-sm font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
+              <span className="font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
                 {data.label}
               </span>
-              <span className="break-words">{data.content || "N/A"}</span>
+              <span className="break-words">{data.content}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <SystemInfo request={report} />
-
-      {/* File Attachments */}
-      {report.files && report.files.length > 0 && (
-        <FileAttachmentContainer files={report.files} />
-      )}
+      {/* File Attachments Section */}
+      <FileAttachmentContainer
+        modelName="Report"
+        id={report.id}
+        status={report.status}
+        canManage={canManageFiles}
+      />
 
       {/* Copied To */}
-      {report.copiedTo && report.copiedTo.length > 0 && (
-        <CopiedTo to={report.copiedTo} />
-      )}
+      {report.copiedTo && report.copiedTo.length > 0 && <CopiedTo to={report.copiedTo} />}
     </DetailContainer>
   );
 };

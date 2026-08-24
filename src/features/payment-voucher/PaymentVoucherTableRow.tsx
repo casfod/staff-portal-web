@@ -1,92 +1,122 @@
-// components/payment-vouchers/PaymentVoucherTableRow.tsx
-import { PaymentVoucherType } from "../../interfaces";
-import { localStorageUser } from "../../utils/localStorageUser";
-import StatusBadge from "../../ui/StatusBadge";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { moneyFormat } from "../../utils/moneyFormat";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import { PaymentVoucherDetails } from "./PaymentVoucherDetails";
-import ActionIcons from "../../ui/ActionIcons";
-import TableRowMain from "../../ui/TableRowMain";
-import TableData from "../../ui/TableData";
+// features/payment-voucher/PaymentVoucherTableRow.tsx
+import { IPaymentVoucher, TableHeaderConfig } from '../../interfaces';
+import { localStorageUser } from '../../utils/localStorageUser';
+import StatusBadge from '../../components/custom/StatusBadge';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import { PaymentVoucherDetails } from './PaymentVoucherDetails';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { BaseTableRow } from '../../components/custom/BaseTableRow';
+import PaymentVoucherCard from './PaymentVoucherCard';
+
+interface PaymentVoucherTableRowProps {
+  voucher: IPaymentVoucher;
+  handleEdit: (voucher: IPaymentVoucher) => void;
+  handleDelete: (id: string) => void;
+  handleAction: (voucher: IPaymentVoucher) => void;
+  tableHeadData?: TableHeaderConfig[];
+}
 
 const PaymentVoucherTableRow = ({
   voucher,
-  visibleItems,
-  toggleViewItems,
   handleEdit,
   handleDelete,
   handleAction,
-}: {
-  voucher: PaymentVoucherType;
-  visibleItems: { [key: string]: boolean };
-  toggleViewItems: (id: string) => void;
-  handleEdit: (voucher: PaymentVoucherType) => void;
-  handleDelete: (id: string) => void;
-  handleAction: (voucher: PaymentVoucherType) => void;
-}) => {
+}: PaymentVoucherTableRowProps) => {
   const currentUser = localStorageUser();
 
-  const voucherId = voucher.id ?? "";
-  const voucherStatus = voucher.status ?? "pending";
-  const voucherCreatedAt = voucher.createdAt ?? "";
+  const voucherId = voucher.id ?? '';
+  const voucherStatus = voucher.status ?? 'pending';
   const createdById = voucher.createdBy?.id;
 
-  const isVisible = !!visibleItems[voucherId];
-
   const isEditable =
-    (voucherStatus === "draft" || voucherStatus === "rejected") &&
-    createdById === currentUser?.id;
+    (voucherStatus === 'draft' || voucherStatus === 'rejected') && createdById === currentUser?.id;
 
+  const isDeletable =
+    (voucherStatus === 'draft' || voucherStatus === 'rejected') && createdById === currentUser?.id;
+
+  // Define row data for the table
   const rowData = [
-    { id: "pvNumber", content: voucher.pvNumber },
-    { id: "status", content: <StatusBadge status={voucher.status!} /> },
-    { id: "payTo", content: voucher.payTo },
-    { id: "amount", content: moneyFormat(voucher.netAmount, "NGN") },
-    { id: "date", content: formatToDDMMYYYY(voucherCreatedAt) },
     {
-      id: "actions",
+      id: 'pvNumber',
+      content: voucher.pvNumber,
+      showOnMobile: true,
+    },
+    {
+      id: 'status',
+      content: <StatusBadge status={voucher.status!} />,
+      showOnMobile: true,
+    },
+    {
+      id: 'payTo',
+      content: voucher.payTo,
+      showOnMobile: true,
+    },
+    {
+      id: 'amount',
+      content: moneyFormat(voucher.netAmount, 'NGN'),
+      showOnMobile: true,
+    },
+    {
+      id: 'date',
+      content: formatToDDMMYYYY(voucher.createdAt),
+      showOnMobile: false,
+      showOnTablet: true,
+    },
+    {
+      id: 'actions',
       content: (
         <ActionIcons
           isEditable={isEditable}
+          isDeletable={isDeletable}
           requestId={voucherId}
-          visibleItems={visibleItems}
-          onToggleView={toggleViewItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={() => handleEdit(voucher)}
+          onDelete={() => handleDelete(voucherId)}
           request={voucher}
+          variant="list"
         />
       ),
+      showOnMobile: true,
     },
   ];
 
-  return (
+  // Expanded content when row is expanded
+  const expandedContent = (
     <>
-      <TableRowMain
-        key={voucherId}
-        requestId={voucherId}
-        toggleViewItems={toggleViewItems}
-      >
-        {rowData.map(({ id, content }) => (
-          <TableData key={`${voucherId}-${id}`}>{content}</TableData>
-        ))}
-      </TableRowMain>
-
-      {isVisible && (
-        <tr key={`${voucherId}-details`} className="max-w-full rounded-lg">
-          <td
-            colSpan={6}
-            className={`w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm`}
-          >
-            <PaymentVoucherDetails voucher={voucher} />
-            <RequestCommentsAndActions
-              request={voucher}
-              handleAction={handleAction}
-            />
-          </td>
-        </tr>
-      )}
+      <PaymentVoucherDetails voucher={voucher} />
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <RequestCommentsAndActions request={voucher} handleAction={handleAction} />
+      </div>
     </>
+  );
+
+  // Mobile card for small screens
+  const mobileCard = (
+    <PaymentVoucherCard
+      paymentVoucher={voucher}
+      actionIconsProps={{
+        isEditable,
+        isDeletable,
+        requestId: voucherId,
+        onEdit: () => handleEdit(voucher),
+        onDelete: () => handleDelete(voucherId),
+        request: voucher,
+        variant: 'list',
+      }}
+      context="list"
+      className="sm:hidden"
+    />
+  );
+
+  return (
+    <BaseTableRow
+      id={voucherId}
+      rowData={rowData}
+      expandedContent={expandedContent}
+      mobileCard={mobileCard}
+      isExpandable={true}
+    />
   );
 };
 

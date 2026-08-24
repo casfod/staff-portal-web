@@ -1,4 +1,4 @@
-import { localStorageUser, getUserToken } from "./localStorageUser";
+import { localStorageUser, getUserToken } from './localStorageUser';
 
 const currentUser = localStorageUser();
 

@@ -1,9 +1,9 @@
 // hooks/useRFQPDF.ts - FIXED VERSION with footer
-import { useState, useRef } from "react";
-import toast from "react-hot-toast";
-import { generatePdf } from "../utils/generatePdf";
-import { RFQType } from "../interfaces";
-import { addPdfFooter } from "../utils/pdfFooterUtils";
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { generatePdf } from '../utils/generatePdf';
+import { IRFQ } from '../interfaces';
+import { addPdfFooter } from '../utils/pdfFooterUtils';
 
 interface UseRFQPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -15,31 +15,31 @@ interface UseRFQPDFReturn {
   downloadPDF: () => Promise<void>;
 }
 
-export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
+export const useRFQPDF = (rfqData: IRFQ | null): UseRFQPDFReturn => {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const generatePDF = async (): Promise<File | null> => {
-    if (!rfqData || !rfqData.RFQTitle) {
-      toast.error("RFQ data is incomplete");
+    if (!rfqData || !rfqData.rfqTitle) {
+      toast.error('RFQ data is incomplete');
       return null;
     }
 
     if (!pdfRef.current) {
-      toast.error("PDF template not found");
+      toast.error('PDF template not found');
       return null;
     }
 
     setIsGenerating(true);
 
     try {
-      const filename = `${rfqData.RFQCode || "RFQ"}.pdf`;
+      const filename = `${rfqData.rfqCode || 'RFQ'}.pdf`;
       const pdf = await generatePdfViaCanvas(pdfRef.current, filename, rfqData);
       return pdf;
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF");
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF');
       return null;
     } finally {
       setIsGenerating(false);
@@ -50,25 +50,25 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
   const generatePdfViaCanvas = async (
     element: HTMLElement,
     filename: string,
-    rfqData: RFQType
+    rfqData: IRFQ
   ): Promise<File | null> => {
-    const { jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
+    const { jsPDF } = await import('jspdf');
+    const html2canvas = (await import('html2canvas')).default;
 
     // Generate canvas from element
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: '#ffffff',
       logging: false,
     });
 
     // Create PDF with multi-page support
     const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
       compress: true,
     });
 
@@ -79,8 +79,7 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
 
     const imgWidth = contentWidth;
     const availableContentHeight = pdfHeight - margin * 2;
-    const pageContentHeightPx =
-      (availableContentHeight * canvas.width) / imgWidth;
+    const pageContentHeightPx = (availableContentHeight * canvas.width) / imgWidth;
     const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
     // Process each page
@@ -95,12 +94,12 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
       const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
 
       // Create a temporary canvas for this page's content
-      const pageCanvas = document.createElement("canvas");
+      const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = pageImgHeightPx;
 
-      const ctx = pageCanvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas context not available");
+      const ctx = pageCanvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context not available');
 
       ctx.drawImage(
         canvas,
@@ -114,72 +113,72 @@ export const useRFQPDF = (rfqData: RFQType | null): UseRFQPDFReturn => {
         pageImgHeightPx
       );
 
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
+      const pageImgData = pageCanvas.toDataURL('image/jpeg', 1.0);
 
       pdf.addImage(
         pageImgData,
-        "JPEG",
+        'JPEG',
         margin,
         margin,
         imgWidth,
         pageImgHeight,
         undefined,
-        "FAST",
+        'FAST',
         0
       );
 
       // ADD FOOTER WITH RFQ CODE AND PAGE NUMBER
-      addPdfFooter(pdf, rfqData.RFQCode, "RFQ Code", i + 1, totalPages, margin);
+      addPdfFooter(pdf, rfqData.rfqCode, 'RFQ Code', i + 1, totalPages, margin);
     }
 
-    const pdfBlob = pdf.output("blob");
-    return new File([pdfBlob], filename, { type: "application/pdf" });
+    const pdfBlob = pdf.output('blob');
+    return new File([pdfBlob], filename, { type: 'application/pdf' });
   };
 
   // Direct download using generatePdf utility
   const downloadPDF = async (): Promise<void> => {
     if (!rfqData || !pdfRef.current) {
-      toast.error("No RFQ data available");
+      toast.error('No RFQ data available');
       return;
     }
 
     try {
-      const filename = `${rfqData.RFQCode || "RFQ"}.pdf`;
+      const filename = `${rfqData.rfqCode || 'RFQ'}.pdf`;
       await generatePdf(pdfRef.current, {
         filename,
-        format: "a4",
-        orientation: "portrait",
+        format: 'a4',
+        orientation: 'portrait',
         scale: 2,
         margin: 10,
         multiPage: true,
         quality: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: '#FFFFFF',
         titleOptions: {
           fontSize: 16,
-          fontStyle: "bold",
-          color: "#000000",
+          fontStyle: 'bold',
+          color: '#000000',
           marginBottom: 10,
         },
         footerOptions: {
-          left: `RFQ Code: ${rfqData.RFQCode || "N/A"}`,
+          left: `RFQ Code: ${rfqData.rfqCode || 'N/A'}`,
           right: (currentPage: number, totalPages: number) =>
             `Page ${currentPage} of ${totalPages}`,
           fontSize: 9,
-          color: "#666666",
-          lineColor: "#E0E0E0",
+          color: '#666666',
+          lineColor: '#E0E0E0',
         },
         save: true,
       });
-      toast.success("PDF downloaded successfully");
+      toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error("PDF download failed:", error);
-      toast.error("Failed to download PDF");
+      console.error('PDF download failed:', error);
+      toast.error('Failed to download PDF');
     }
   };
 
   const previewPDF = () => {
     if (!rfqData) {
-      toast.error("No RFQ data available");
+      toast.error('No RFQ data available');
       return;
     }
     setShowPreview(true);

@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RFQType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IRFQ } from '../interfaces';
 
 interface RFQState {
-  rfq: RFQType | null;
+  rfq: IRFQ | null;
 }
 
 const initialState: RFQState = {
@@ -10,16 +10,16 @@ const initialState: RFQState = {
 };
 
 const rfqSlice = createSlice({
-  name: "rfq",
+  name: 'rfq',
   initialState,
   reducers: {
-    setRFQ: (state, action: PayloadAction<RFQType>) => {
+    setRFQ: (state, action: PayloadAction<IRFQ>) => {
       state.rfq = action.payload;
     },
-    clearRFQ: (state) => {
+    clearRFQ: state => {
       state.rfq = null;
     },
-    updateRFQ: (state, action: PayloadAction<Partial<RFQType>>) => {
+    updateRFQ: (state, action: PayloadAction<Partial<IRFQ>>) => {
       if (state.rfq) {
         state.rfq = { ...state.rfq, ...action.payload };
       }

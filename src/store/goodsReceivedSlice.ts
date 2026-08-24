@@ -1,9 +1,9 @@
 // store/goodsReceivedSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GoodsReceivedType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IGoodsReceived } from '../interfaces';
 
 interface GoodsReceivedState {
-  goodsReceived: GoodsReceivedType | null;
+  goodsReceived: IGoodsReceived | null;
 }
 
 const initialState: GoodsReceivedState = {
@@ -11,18 +11,17 @@ const initialState: GoodsReceivedState = {
 };
 
 const goodsReceivedSlice = createSlice({
-  name: "goodsReceived",
+  name: 'goodsReceived',
   initialState,
   reducers: {
-    setGoodsReceived: (state, action: PayloadAction<GoodsReceivedType>) => {
+    setGoodsReceived: (state, action: PayloadAction<IGoodsReceived>) => {
       state.goodsReceived = action.payload;
     },
-    clearGoodsReceived: (state) => {
+    clearGoodsReceived: state => {
       state.goodsReceived = null;
     },
   },
 });
 
-export const { setGoodsReceived, clearGoodsReceived } =
-  goodsReceivedSlice.actions;
+export const { setGoodsReceived, clearGoodsReceived } = goodsReceivedSlice.actions;
 export default goodsReceivedSlice.reducer;

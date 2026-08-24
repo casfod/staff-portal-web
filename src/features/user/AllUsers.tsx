@@ -1,253 +1,212 @@
-import Swal from "sweetalert2";
+// AllUsers.tsx - Updated with new UserTableRow
+import { useCallback, useMemo } from 'react';
+import Swal from 'sweetalert2';
+import { Plus, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { useUsers, useDeactivateUser, useExportUsersToExcel } from './Hooks/useUsers';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { USER_TABLE_HEADERS } from '../../config/user.config';
 
-import { BiSearch } from "react-icons/bi";
-import { GoXCircle } from "react-icons/go";
-import { useDebounce } from "use-debounce";
-import { RiArrowUpDownLine } from "react-icons/ri";
-import {
-  useDeleteUser,
-  useExportUsersToExcel,
-  useUsers,
-} from "./Hooks/useUsers";
-import { localStorageUser } from "../../utils/localStorageUser";
-import Modal from "../../ui/Modal";
-import { Download, Plus } from "lucide-react";
-import Spinner from "../../ui/Spinner";
-import { Pagination } from "../../ui/Pagination";
-import AddUserForm from "./AddUserForm";
-import UserCard from "./UserCard";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import {
-  setSearchTerm,
-  setSort,
-  setPage,
-  resetQuery,
-} from "../../store/genericQuerySlice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
-import UsersTableRow from "./UsersTableRow";
-import { useNavigate } from "react-router-dom";
-import { UserType } from "../../interfaces";
-import { setUser } from "../../store/userSlice";
-import SpinnerMini from "../../ui/SpinnerMini";
+// Radix UI Components
+import { Button } from '../../components/ui/button';
+import { Loader2 } from 'lucide-react';
 
-export function AllUsers() {
-  const currentUser = localStorageUser();
-  const dispatch = useDispatch();
+// Custom Components
+import Modal from '../../components/ui/modal';
+import TextHeader from '../../components/custom/TextHeader';
+import { Pagination } from '../../components/custom/Pagination';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import AddUserForm from './AddUserForm';
+import UserCard from './UserCard';
+import UserTableRow from './UsersTableRow';
+import { cn } from '../../lib/utils';
+import { IUser, IFilterConfig } from '../../interfaces';
+
+// Matches the role enum and isActive flag on User.model.ts. "position" is a
+// large fixed enum (~50 values) on the model — left as free text here rather
+// than a 50-item select; swap to `type: 'select'` with the POSITIONS list if
+// you'd rather constrain it.
+// NOTE: the backend getUsers() service (not uploaded here) needs matching
+// filterableFields — role/isActive as exact matches, position as regex —
+// for these to actually constrain results, same as the workflow services.
+const userFilterConfigs: IFilterConfig[] = [
+  {
+    key: 'role',
+    label: 'Role',
+    type: 'select',
+    options: [
+      { value: 'SUPER-ADMIN', label: 'Super Admin' },
+      { value: 'ADMIN', label: 'Admin' },
+      { value: 'REVIEWER', label: 'Reviewer' },
+      { value: 'STAFF', label: 'Staff' },
+    ],
+    placeholder: 'All roles',
+  },
+  {
+    key: 'isActive',
+    label: 'Status',
+    type: 'select',
+    options: [
+      { value: 'true', label: 'Active' },
+      { value: 'false', label: 'Inactive' },
+    ],
+    placeholder: 'All',
+  },
+  { key: 'position', label: 'Position', type: 'text', placeholder: 'Any' },
+];
+
+export default function AllUsers() {
   const navigate = useNavigate();
+  const currentUser = localStorageUser();
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-
-  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
-  useEffect(() => {
-    return () => {
-      dispatch(resetQuery());
-    };
-  }, [dispatch]);
-
-  const { data, isLoading, isError } = useUsers({
-    search: debouncedSearchTerm,
-    sort,
+  const {
+    searchTerm,
+    handleSearchChange,
+    // sort,
+    // handleSortChange,
     page,
+    handlePageChange,
     limit,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: userFilterConfigs,
+    defaultFilters: {},
   });
 
-  // Use the new export hook
+  const { data, isLoading, isError } = useUsers(queryParams);
+  const { deactivateUser } = useDeactivateUser();
   const { exportUsers, isExporting } = useExportUsersToExcel();
+  const isSuperAdmin = currentUser?.role === 'SUPER-ADMIN';
 
-  const { deleteUser } = useDeleteUser();
-  // Add null checks for `data` and `data.data`
-  const users = useMemo(() => data?.data?.users ?? [], [data]);
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
+  const users = useMemo(() => data?.data ?? [], [data?.data]);
+  const totalPages = useMemo(() => data?.pagination?.pages ?? 1, [data?.pagination]);
 
-  const toggleViewItems = useCallback((requestId: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [requestId]: !prev[requestId],
-    }));
-  }, []);
-
-  const handleEdit = (staffInfo: UserType) => {
-    // Navigate to the edit route with the user's ID
-    navigate(`/human-resources/staff-information/${staffInfo?.id}/edit`);
-  };
-
-  const handleAction = useCallback(
-    (staffInfo: UserType) => {
-      dispatch(setUser(staffInfo));
-      navigate(`/advance-requests/request/${staffInfo.id}`);
+  const handleEdit = useCallback(
+    (user: IUser) => {
+      navigate(`/human-resources/staff-information/${user.id}/edit`);
     },
-    [dispatch, navigate]
+    [navigate]
   );
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatch(setSort(e.target.value));
-  };
+  const handleDelete = useCallback(
+    (id: string) => {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to deactive this user?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Yes, deactive',
+      }).then(result => {
+        if (result.isConfirmed) {
+          deactivateUser(id);
+        }
+      });
+    },
+    [deactivateUser]
+  );
 
-  const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
-  };
-
-  const handleExportExcel = () => {
+  const handleExport = useCallback(() => {
     exportUsers();
-  };
+  }, [exportUsers]);
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this User?",
-      showCancelButton: true,
-      confirmButtonColor: "#1373B0",
-      cancelButtonColor: "#DC3340",
-      confirmButtonText: "Yes, delete it!",
-      customClass: { popup: "custom-style" },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteUser(id, {
-          onError: (error) => {
-            Swal.fire("Error!", error.message, "error");
-          },
-        });
-      }
-    });
-  };
-
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
-
-  // const tableHeadData = ["Name", "Email", "Role", "Status"];
-
-  const tableHeadData = [
-    { label: "Name", showOnMobile: true, minWidth: "120px" },
-    { label: "Email", showOnMobile: true, minWidth: "100px" },
-    { label: "Role", showOnMobile: true, minWidth: "100px" },
-    {
-      label: "Status",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "100px",
-    }, // Hidden on mobile, shown on tablet+
-    { label: "Actions", showOnMobile: true, minWidth: "100px" },
-  ];
+  if (isError) return <NetworkErrorUI />;
 
   return (
-    <div className="flex flex-col space-y-3 pt-6">
-      {/* Header and Add User Button */}
-      <div className="flex justify-between items-center">
-        <TextHeader> User Management</TextHeader>
-
-        <div className="space-x-2">
-          {(currentUser.role === "SUPER-ADMIN" ||
-            currentUser.procurementRole?.canView) && (
-            <Button onClick={handleExportExcel} disabled={isExporting}>
-              {isExporting ? (
-                <>
-                  <SpinnerMini width={4} height={4} />
-                  Exporting...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-1 md:mr-2" />
-                  Export Excel
-                </>
-              )}
-            </Button>
-          )}
-
-          {currentUser.role === "SUPER-ADMIN" && (
-            <Modal>
-              <Modal.Open open="addUser">
-                <Button>
-                  <Plus className="h-4 w-4 mr-1 md:mr-2" />
-                  Add User
-                </Button>
-              </Modal.Open>
-            </Modal>
-          )}
-        </div>
-      </div>
-
-      {/* Search Bar and Sort Dropdown */}
-      <div className="flex flex-wrap gap-2 items-center space-x-4">
-        <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-          <span className="p-2 text-gray-400">
-            <BiSearch className="w-5 h-5" />
-          </span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-            className="w-full h-full px-2   placeholder-gray-400 placeholder:tracking-widest rounded-lg focus:outline-none focus:ring-0 mr-7"
-            placeholder="Search"
-          />
-          <span
-            className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-            onClick={() => dispatch(setSearchTerm(""))}
-          >
-            <GoXCircle />
-          </span>
-        </div>
-
-        {/* Sort Dropdown */}
-        <div className="relative inline-block">
-          <select
-            value={sort}
-            onChange={handleSortChange}
-            className="px-4 pr-8 h-9 border-2 border-gray-300 rounded-lg shadow-sm   appearance-none bg-white"
-          >
-            {/* Placeholder Option */}
-            <option value="" disabled selected className="text-gray-400">
-              Sort
-            </option>
-
-            {/* Sort Options */}
-            <option value="email:asc">Email (A-Z)</option>
-            <option value="email:desc">Email (Z-A)</option>
-            <option value="role:asc">Role (A-Z)</option>
-            <option value="role:desc">Role (Z-A)</option>
-            <option value="first_name:asc">Name (A-Z)</option>
-            <option value="first_name:desc">Name (Z-A)</option>
-          </select>
-
-          {/* Icon */}
-          <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
-            <RiArrowUpDownLine className="h-5 w-5" />
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 pb-2 space-y-6 border-b">
+        <div className="flex flex-col md:flex-row gap-2 justify-between md:items-center">
+          <TextHeader>User Management</TextHeader>
+          <div className="flex items-center gap-2">
+            {isSuperAdmin && (
+              <Button variant="primary" size="sm" onClick={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Excel
+                  </>
+                )}
+              </Button>
+            )}
+            {isSuperAdmin && (
+              <Modal>
+                <Modal.Open open="addUser">
+                  <Button size="sm" variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add User
+                  </Button>
+                </Modal.Open>
+              </Modal>
+            )}
           </div>
         </div>
+
+        {/* Search & Filter */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[280px]">
+            <FilterToolbar
+              searchValue={searchTerm}
+              onSearchChange={handleSearchChange}
+              filters={filters}
+              onFilterChange={setFilter}
+              filterConfigs={filterConfigs}
+              activeFilterCount={activeFilterCount}
+              onClearFilters={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+              searchPlaceholder="Search users..."
+            />
+          </div>
+        </div>
+
+        {/* Sort stays separate from the filter popover — it's ordering, not
+            a constraint on the result set — and keeps its existing
+            "field:direction" format since that's what getUsers expects. */}
+        {/* <select
+          value={sort}
+          onChange={(e) => handleSortChange(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+        >
+          <option value="">Sort</option>
+          <option value="firstName:asc">Name (A-Z)</option>
+          <option value="firstName:desc">Name (Z-A)</option>
+          <option value="email:asc">Email (A-Z)</option>
+          <option value="email:desc">Email (Z-A)</option>
+          <option value="role:asc">Role (A-Z)</option>
+          <option value="role:desc">Role (Z-A)</option>
+        </select> */}
       </div>
 
-      {/* User Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-auto">
-        <div className=" md:min-w-full">
-          <table className="w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 hidden sm:table-header-group">
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 hidden md:table-header-group">
               <tr>
-                {tableHeadData.map((header, index) => (
+                {USER_TABLE_HEADERS.map((header, index) => (
                   <th
                     key={index}
-                    className={`
-                      px-3 py-2.5 md:px-4 md:py-3 
-                      text-left font-medium uppercase 
-                      tracking-wider
-                      ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                      ${
-                        header.showOnTablet
-                          ? "hidden sm:table-cell md:table-cell"
-                          : ""
-                      }
-                      text-xs md:text-sm
-                      whitespace-nowrap
-                    `}
+                    className={cn(
+                      'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+                      !header.showOnMobile && 'hidden md:table-cell',
+                      'showOnTablet' in header &&
+                        header.showOnTablet &&
+                        'hidden sm:table-cell md:table-cell'
+                    )}
                     style={{ minWidth: header.minWidth }}
                   >
                     {header.label}
@@ -259,39 +218,33 @@ export function AllUsers() {
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={tableHeadData.length} className="py-8">
+                  <td colSpan={USER_TABLE_HEADERS.length} className="py-12">
                     <div className="flex justify-center items-center">
-                      <Spinner />
+                      <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                     </div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={tableHeadData.length} className="py-8">
-                    <div className="flex flex-col justify-center items-center text-gray-500">
-                      <div className="text-lg font-semibold mb-2">
-                        No requests found
-                      </div>
-                      <div className="text-sm">
-                        {searchTerm
-                          ? "Try a different search term"
-                          : "Create your first advance request"}
-                      </div>
-                    </div>
+                  <td
+                    colSpan={USER_TABLE_HEADERS.length}
+                    className="py-12 text-center text-gray-500"
+                  >
+                    <p className="font-medium">No users found</p>
+                    <p className="text-sm mt-1">
+                      {hasActiveFilters
+                        ? 'Try adjusting your filters or search'
+                        : 'Start by adding a new user'}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                users.map((staffInfo) => (
-                  <UsersTableRow
-                    key={staffInfo.id}
-                    staffInfo={staffInfo}
-                    visibleItems={visibleItems}
-                    toggleViewItems={toggleViewItems}
-                    handleEdit={handleEdit}
-                    handleDelete={handleDelete}
-                    handleAction={handleAction}
-                    tableHeadData={tableHeadData}
-                    currentUserRole={currentUser.role} // Pass headers for responsive rendering
+                users.map(user => (
+                  <UserTableRow
+                    key={user.id}
+                    user={user!}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
                   />
                 ))
               )}
@@ -302,11 +255,7 @@ export function AllUsers() {
 
       {/* Pagination */}
       {(users.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
       )}
 
       {/* Modals */}
@@ -314,8 +263,15 @@ export function AllUsers() {
         <Modal.Window name="addUser">
           <AddUserForm />
         </Modal.Window>
-        {users.map((user) => (
-          <Modal.Window key={user.id} name={`userCog-${user.id}`}>
+        {users.map(user => (
+          <Modal.Window
+            noBorder
+            clean
+            customPadding=" sm:p-6"
+            showCloseButton={false}
+            key={user.id}
+            name={`userCog-${user.id}`}
+          >
             <UserCard user={user} />
           </Modal.Window>
         ))}

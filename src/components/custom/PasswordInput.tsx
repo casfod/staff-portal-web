@@ -1,0 +1,50 @@
+import ShowPasswordIcon from './ShowPasswordIcon';
+import { Input } from '@/components/ui/input';
+const PasswordInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  showPassword,
+  onTogglePassword,
+  errorMessage,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showPassword: boolean;
+  onTogglePassword: () => void;
+  errorMessage?: string;
+}) => (
+  <div>
+    <label htmlFor={id} className="block mb-1 font-bold text-sm  ">
+      {label}
+    </label>
+    <div className="relative w-full">
+      <Input
+        className="w-full h-8 md:h-10 px-4 placeholder:text-sm rounded-md border focus:border-primary focus:outline-none shadow-sm  "
+        id={id}
+        type={showPassword ? 'text' : 'password'}
+        placeholder={`Enter your ${label.toLowerCase()}`}
+        value={value}
+        onChange={onChange}
+        required
+      />
+      <span
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+        onClick={onTogglePassword}
+        aria-label={showPassword ? 'Hide password' : 'Show password'}
+      >
+        <ShowPasswordIcon showPassword={showPassword} />
+      </span>
+      {errorMessage && (
+        <span className="absolute left-0 top-7 transform translate-y-1/2 cursor-pointer">
+          <span className="text-red-500 text-xs font-semibold">{errorMessage}</span>
+        </span>
+      )}
+    </div>
+  </div>
+);
+
+export default PasswordInput;

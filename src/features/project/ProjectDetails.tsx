@@ -1,172 +1,215 @@
-import { moneyFormat } from "../../utils/moneyFormat";
-import { Project } from "../../interfaces";
-import { useParams } from "react-router-dom";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import { Dot } from "lucide-react";
-import DetailContainer from "../../ui/DetailContainer";
+// ProjectDetails.tsx - Optimized with Milestones
+import { moneyFormat } from '../../utils/moneyFormat';
+import { IProject } from '../../interfaces';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { Dot, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import DetailContainer from '../../components/custom/DetailContainer';
+import { Badge } from '../../components/ui/badge';
 
 interface RequestDetailsProps {
-  request: Project;
+  request: IProject;
 }
 
-const tableHeadData = ["Sector", "Percentage"];
-
-const SectorsTable = ({ sectors }: { sectors: Project["sectors"] }) => (
-  <table className=" min-w-full divide-y divide-gray-200 rounded-md mb-4">
-    <thead>
-      <tr>
-        {tableHeadData.map((data, index) => (
-          <th
-            key={index}
-            className="px-6 py-2 bg-gray-50 text-left text-sm font-medium   uppercase tracking-wider"
-          >
-            {data}
+const SectorsTable = ({ sectors }: { sectors: IProject['sectors'] }) => (
+  <div className="overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200 rounded-md mb-4">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Sector
           </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody className="bg-white divide-y divide-gray-200 ">
-      {sectors!.map((sector, index) => {
-        const rowData = [
-          { id: "name", content: sector.name },
-          { id: "percentage", content: sector.percentage },
-        ];
-
-        return (
-          <tr key={index!}>
-            {rowData.map((data) => (
-              <td
-                key={data.id}
-                className="px-6 py-4 text-sm  break-words max-w-xs"
-              >
-                {data.content}
-              </td>
-            ))}
+          <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Percentage
+          </th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {sectors!.map((sector, index) => (
+          <tr key={index}>
+            <td className="px-6 py-4 text-sm">{sector.name}</td>
+            <td className="px-6 py-4 text-sm">
+              <Badge variant="secondary" className="font-medium">
+                {sector.percentage}%
+              </Badge>
+            </td>
           </tr>
-        );
-      })}
-    </tbody>
-  </table>
+        ))}
+      </tbody>
+    </table>
+  </div>
 );
 
-export const ProjectDetails = ({ request }: RequestDetailsProps) => {
-  const { projectId } = useParams();
+// Milestones Component
+const MilestonesList = ({ milestones }: { milestones: IProject['milestones'] }) => {
+  if (!milestones || milestones.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No milestones have been added to this project.
+      </div>
+    );
+  }
 
-  // Create the data object with all fields
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'active':
+        return <Clock className="h-5 w-5 text-blue-500" />;
+      default:
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'success';
+      case 'active':
+        return 'default';
+      default:
+        return 'secondary';
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {milestones.map((milestone, index) => (
+        <div
+          key={index}
+          className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
+        >
+          <div className="flex-shrink-0 mt-1">{getStatusIcon(milestone.status || 'pending')}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h4 className="text-sm font-semibold text-gray-900">{milestone.title}</h4>
+              <Badge variant={getStatusBadgeVariant(milestone.status || 'pending')}>
+                {milestone.status || 'pending'}
+              </Badge>
+            </div>
+            {milestone.description && (
+              <p className="mt-1 text-sm text-gray-600">{milestone.description}</p>
+            )}
+            <div className="mt-2 text-xs text-gray-400">Milestone #{index + 1}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const ProjectDetails = ({ request }: RequestDetailsProps) => {
   const projectData = [
+    { id: 'projectCode', label: 'Project Code', content: request.projectCode },
+    { id: 'projectTitle', label: 'Project Name', content: request.projectTitle },
+    { id: 'donor', label: 'Donor', content: request.donor, isBlock: true },
     {
-      id: "project_code",
-      label: "Project Code",
-      content: request.project_code,
-    },
-    {
-      id: "project_title",
-      label: "Project Name",
-      content: request.project_title,
-    },
-    {
-      id: "donor",
-      label: "Donor",
-      content: request.donor,
+      id: 'project_objectives',
+      label: 'Objectives',
+      content: request.projectObjectives,
       isBlock: true,
     },
     {
-      id: "project_objectives",
-      label: "Objectives",
-      content: request.project_objectives,
+      id: 'target_beneficiaries',
+      label: 'Target Beneficiaries',
+      content: request.targetBeneficiaries.join(', '),
       isBlock: true,
     },
     {
-      id: "target_beneficiaries",
-      label: "Target Beneficiaries",
-      content: request.target_beneficiaries.join(", "),
+      id: 'project_locations',
+      label: 'Project Locations',
+      content: request.projectLocations.join(', '),
       isBlock: true,
     },
     {
-      id: "project_locations",
-      label: "Project Locations",
-      content: request.project_locations.join(", "),
+      id: 'Budget',
+      label: 'Budget',
+      content: moneyFormat(Number(request.projectBudget), 'USD'),
       isBlock: true,
     },
     {
-      id: "Budget",
-      label: "Budget",
-      content: moneyFormat(Number(request.project_budget), "USD"),
-      isBlock: true,
-    },
-    {
-      id: "account_code",
-      label: "Account Codes",
-      content: request?.account_code.map((account, index) => (
-        <ul key={index}>
-          {" "}
-          <li className="inline-flex items-center">
-            {" "}
-            <span className="mb-auto ">
-              <Dot />
-            </span>{" "}
-            {account.name}
-          </li>
-        </ul>
+      id: 'accountCode',
+      label: 'Account Codes',
+      content: request?.accountCodes.map((account, index) => (
+        <div key={index} className="flex items-center">
+          <Dot className="h-4 w-4 flex-shrink-0" />
+          <span>{account.name}</span>
+        </div>
       )),
       isBlock: true,
     },
-
     {
-      id: "project_partners",
-      label: "Partners",
-      content: request.project_partners.join(", "),
+      id: 'project_partners',
+      label: 'Partners',
+      content: request.projectPartners.join(', '),
       isBlock: true,
     },
-
     {
-      id: "implementation_period",
-      label: "Implementation Period",
+      id: 'implementation_period',
+      label: 'Implementation Period',
       content: `${formatToDDMMYYYY(
-        request.implementation_period.from
-      )} - ${formatToDDMMYYYY(request.implementation_period.to)}`,
+        request.implementationPeriod.from
+      )} - ${formatToDDMMYYYY(request.implementationPeriod.to)}`,
       isBlock: true,
     },
-
     {
-      id: "project_summary",
-      label: "Project Summary",
-      content: request.project_summary,
+      id: 'project_summary',
+      label: 'Project Summary',
+      content: request.projectSummary,
       isBlock: true,
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      content: (
+        <Badge
+          variant={
+            request.status === 'completed'
+              ? 'success'
+              : request.status === 'cancelled'
+                ? 'destructive'
+                : 'default'
+          }
+          className="capitalize"
+        >
+          {request.status || 'Ongoing'}
+        </Badge>
+      ),
+      isBlock: false,
     },
   ];
 
   return (
     <DetailContainer>
-      {/* Project Details Section */}
-      <div
-        className={`flex flex-col gap-3 w-full   ${
-          !projectId ? "text-sm" : "text-sm md:text-base"
-        } mb-3 break-words`}
-      >
-        {projectData.map((item) => (
-          <div
-            key={item.id}
-            className={item.isBlock ? "whitespace-pre-line" : ""}
-          >
+      <div className="flex flex-col gap-3 w-full text-sm mb-3 break-words">
+        {projectData.map(item => (
+          <div key={item.id} className={item.isBlock ? 'whitespace-pre-line' : ''}>
             <h2 className="text-sm font-bold uppercase mb-1">{item.label}:</h2>
-            <p>{item.content}</p>
+            <div>{item.content}</div>
           </div>
         ))}
       </div>
 
-      {/* Sectors Section Header */}
       <h2 className="text-center text-base md:text-lg font-semibold tracking-widest my-4">
         SECTORS
       </h2>
 
       <SectorsTable sectors={request.sectors} />
 
-      {/* File Attachments Section */}
-      {request.files && request.files.length > 0 && (
-        <FileAttachmentContainer files={request.files} />
-      )}
+      <h2 className="text-center text-base md:text-lg font-semibold tracking-widest my-4">
+        MILESTONES
+      </h2>
+
+      <MilestonesList milestones={request.milestones} />
+
+      {/* ✅ FIXED: Use modelName instead of model */}
+      <FileAttachmentContainer
+        modelName="Project"
+        id={request.id}
+        status={request.status}
+        canManage={localStorageUser()?.role === 'SUPER-ADMIN'}
+      />
     </DetailContainer>
   );
 };

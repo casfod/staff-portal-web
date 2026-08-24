@@ -1,93 +1,18 @@
-// services/apiPaymentVoucher.ts
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiPaymentVoucher.ts
 import {
-  PaymentVoucherType,
-  UsePaymentVoucher,
-  usePaymentVoucherType,
-  UsePaymentVoucherStatsType,
-  PaymentVoucherFormData,
-} from "../interfaces.ts";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    console.log(err.response?.data);
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IPaymentVoucher,
+  IPaymentVouchersListResponse,
+  IPaymentVoucherSingleResponse,
+  IPaymentVoucherStatsResponse,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams, StatusUpdateData, CopyToData } from './apiClient';
 
 // API Functions
 
-// Update getAllPaymentVouchers to match purchase request parameter structure
-export const getAllPaymentVouchers = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllPaymentVouchers = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<usePaymentVoucherType>(
-      `/payment-vouchers`,
+    const response = await apiClient.get<IPaymentVouchersListResponse>(
+      `/finance/payment-vouchers`,
       {
         params: queryParams,
       }
@@ -100,10 +25,10 @@ export const getAllPaymentVouchers = async function (queryParams: {
 
 export const getPaymentVoucher = async function (voucherId: string) {
   try {
-    const response = await axiosInstance.get<UsePaymentVoucher>(
-      `/payment-vouchers/${voucherId}`
+    const response = await apiClient.get<IPaymentVoucherSingleResponse>(
+      `/finance/payment-vouchers/${voucherId}`
     );
-    console.log("API Response:", response.data);
+    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -112,8 +37,8 @@ export const getPaymentVoucher = async function (voucherId: string) {
 
 export const getPaymentVoucherStats = async function () {
   try {
-    const response = await axiosInstance.get<UsePaymentVoucherStatsType>(
-      `/payment-vouchers/stats`
+    const response = await apiClient.get<IPaymentVoucherStatsResponse>(
+      `/finance/payment-vouchers/stats`
     );
     return response.data;
   } catch (err) {
@@ -121,13 +46,10 @@ export const getPaymentVoucherStats = async function () {
   }
 };
 
-// Add proper error handling and response structure to match purchase request
-export const savePaymentVouchers = async function (
-  data: Partial<PaymentVoucherFormData>
-) {
+export const savePaymentVouchers = async function (data: Partial<IPaymentVoucher>) {
   try {
-    const response = await axiosInstance.post<PaymentVoucherFormData>(
-      `/payment-vouchers/save`,
+    const response = await apiClient.post<IPaymentVoucherSingleResponse>(
+      `/finance/payment-vouchers/save`,
       data
     );
     return response.data;
@@ -136,60 +58,11 @@ export const savePaymentVouchers = async function (
   }
 };
 
-export const sendPaymentVouchers = async function (
-  data: Partial<PaymentVoucherType>,
-  files: File[]
-) {
+export const sendPaymentVouchers = async function (data: Partial<IPaymentVoucher>) {
   try {
-    console.log("PaymentVoucherType:", data);
-
-    const formData = new FormData();
-
-    // Append standard fields
-    const simpleFields: (keyof PaymentVoucherFormData)[] = [
-      "payingStation",
-      "payTo",
-      "being",
-      "amountInWords",
-      "accountCode",
-      "projectCode",
-      "pvDate",
-      "grossAmount",
-      "vat",
-      "wht",
-      "devLevy",
-      "otherDeductions",
-      "netAmount",
-      "chartOfAccountCategories",
-      "organisationalChartOfAccount",
-      "chartOfAccountCode",
-      "project",
-      "note",
-      "reviewedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append status if it exists
-    if (data.status) {
-      formData.append("status", data.status);
-    }
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<PaymentVoucherType>(
-      `/payment-vouchers/save-and-send`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.post<IPaymentVoucherSingleResponse>(
+      `/finance/payment-vouchers`,
+      data
     );
     return response.data;
   } catch (err) {
@@ -197,13 +70,10 @@ export const sendPaymentVouchers = async function (
   }
 };
 
-export const copyTo = async function (
-  voucherId: string,
-  data: { userIds: string[] }
-) {
+export const copyTo = async function (voucherId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.patch<Partial<PaymentVoucherType>>(
-      `/payment-vouchers/copy/${voucherId}`,
+    const response = await apiClient.post<Partial<IPaymentVoucher>>(
+      `/finance/payment-vouchers/${voucherId}/copy`,
       data
     );
     return response.data;
@@ -214,32 +84,12 @@ export const copyTo = async function (
 
 export const updatePaymentVoucher = async function (
   voucherId: string,
-  data: Partial<PaymentVoucherType>,
-  files: File[]
+  data: Partial<IPaymentVoucher>
 ) {
   try {
-    const formData = new FormData();
-
-    // Append standard fields
-    const simpleFields: (keyof PaymentVoucherType)[] = ["approvedBy"];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<Partial<PaymentVoucherType>>(
-      `/payment-vouchers/${voucherId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.patch<Partial<IPaymentVoucher>>(
+      `/finance/payment-vouchers/${voucherId}`,
+      data
     );
     return response.data;
   } catch (err) {
@@ -247,13 +97,10 @@ export const updatePaymentVoucher = async function (
   }
 };
 
-export const updateStatus = async function (
-  voucherId: string,
-  data: { status: string; comment: string }
-) {
+export const updateStatus = async function (voucherId: string, data: StatusUpdateData) {
   try {
-    const response = await axiosInstance.patch<Partial<PaymentVoucherType>>(
-      `/payment-vouchers/update-status/${voucherId}`,
+    const response = await apiClient.patch<Partial<IPaymentVoucher>>(
+      `/finance/payment-vouchers/${voucherId}/status`,
       data
     );
     return response.data;
@@ -264,8 +111,8 @@ export const updateStatus = async function (
 
 export const deletePaymentVoucher = async function (voucherID: string) {
   try {
-    const response = await axiosInstance.delete<PaymentVoucherType>(
-      `/payment-vouchers/${voucherID}`
+    const response = await apiClient.delete<IPaymentVoucher>(
+      `/finance/payment-vouchers/${voucherID}`
     );
     return response.data;
   } catch (err) {
@@ -274,23 +121,11 @@ export const deletePaymentVoucher = async function (voucherID: string) {
 };
 
 export const addFilesTosPaymentVoucher = async function (
-  paymentVoucherId: string,
-  files: File[] = []
-): Promise<UsePaymentVoucher> {
+  paymentVoucherId: string
+): Promise<IPaymentVoucherSingleResponse> {
   try {
-    const formData = new FormData();
-
-    // Append files
-    files.forEach((file) => formData.append("files", file));
-
-    const response = await axiosInstance.post<UsePaymentVoucher>(
-      `/payment-vouchers/${paymentVoucherId}/files`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+    const response = await apiClient.post<IPaymentVoucherSingleResponse>(
+      `/finance/payment-vouchers/${paymentVoucherId}/files`
     );
     return response.data;
   } catch (err) {

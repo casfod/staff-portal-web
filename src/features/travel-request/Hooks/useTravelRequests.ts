@@ -1,15 +1,10 @@
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import {
-  TravelRequestType,
-  UseTravelRequest,
-  useTravelRequestType,
-  UseTravelStatsType,
-} from "../../../interfaces";
+  ITravelRequest,
+  ITravelRequestSingleResponse,
+  ITravelRequestsListResponse,
+  ITravelRequestStatsResponse,
+} from '../../../interfaces';
 import {
   getAllTravelRequest,
   getTravelRequest,
@@ -23,11 +18,11 @@ import {
   updateComment as updateCommentApi,
   deleteComment as deleteCommentApi,
   deleteTravelRequest as deleteTravelRequestAPI,
-} from "../../../services/apiTravelRequest";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
+} from '../../../services/apiTravelRequest';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AxiosError, AxiosResponse } from 'axios';
+import { useState } from 'react';
 
 interface ErrorResponse {
   message: string;
@@ -38,25 +33,22 @@ interface HookError extends AxiosError {
 }
 
 export function useAllTravelRequests(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<useTravelRequestType, Error> // Add options parameter
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<ITravelRequestsListResponse, Error> // Add options parameter
 ) {
-  return useQuery<useTravelRequestType, Error>({
-    queryKey: ["all-travel-requests", search, sort, page, limit],
-    queryFn: () => getAllTravelRequest({ search, sort, page, limit }),
+  return useQuery<ITravelRequestsListResponse, Error>({
+    queryKey: ['all-travel-requests', queryParams],
+    queryFn: () => getAllTravelRequest(queryParams),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
 }
 
 export function useTravelRequestStats(
-  options?: UseQueryOptions<UseTravelStatsType, Error> // Add options parameter
+  options?: UseQueryOptions<ITravelRequestStatsResponse, Error> // Add options parameter
 ) {
-  return useQuery<UseTravelStatsType, Error>({
-    queryKey: ["travel-requests-stats"],
+  return useQuery<ITravelRequestStatsResponse, Error>({
+    queryKey: ['travel-requests-stats'],
     queryFn: () => getTravelRequestStats(),
     staleTime: 0,
     ...options, // Spread the options to include onError
@@ -64,8 +56,8 @@ export function useTravelRequestStats(
 }
 
 export function useTravelRequest(id: string) {
-  return useQuery<UseTravelRequest, Error>({
-    queryKey: ["travel-request", id],
+  return useQuery<ITravelRequestSingleResponse, Error>({
+    queryKey: ['travel-request', id],
     queryFn: () => getTravelRequest(id),
     staleTime: 0,
   });
@@ -80,16 +72,15 @@ export function useSaveTravelRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<TravelRequestType>) =>
-      saveTravelRequestsApi(data),
+    mutationFn: (data: Partial<ITravelRequest>) => saveTravelRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("TravelRequest saved successfully");
+        toast.success('TravelRequest saved successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-travel-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-travel-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -99,10 +90,10 @@ export function useSaveTravelRequest() {
 
     onError: (err: HookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Travel Request save Error:", err.response?.data.message);
+      console.error('Travel Request save Error:', err.response?.data.message);
     },
   });
 
@@ -118,21 +109,15 @@ export function useSendTravelRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<TravelRequestType>;
-      files: File[];
-    }) => sendTravelRequestsApi(data, files),
+    mutationFn: ({ data }: { data: Partial<ITravelRequest> }) => sendTravelRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("TravelRequest sent successfully");
+        toast.success('TravelRequest sent successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-travel-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-travel-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -142,10 +127,10 @@ export function useSendTravelRequest() {
 
     onError: (err: HookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Travel Request send Error:", err.response?.data.message);
+      console.error('Travel Request send Error:', err.response?.data.message);
     },
   });
 
@@ -161,29 +146,28 @@ export function useUpdateStatus(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
-      updateStatusApi(requestId, data),
+    mutationFn: (data: { status: string; comment: string }) => updateStatusApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Status update not successful");
+        toast.error('Status update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating Status");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error updating Status');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Status update Error:", error);
+      console.error('Status update Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -200,34 +184,29 @@ export function useUpdateTravelRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<TravelRequestType>;
-      files: File[];
-    }) => updateTravelRequestApi(requestId, data, files),
+    mutationFn: ({ data }: { data: Record<string, unknown> }) =>
+      updateTravelRequestApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Travel Request updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Travel Request updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Travel Request update not successful");
+        toast.error('Travel Request update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating Travel Request");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error updating Travel Request');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("TravelRequest Error:", error);
+      console.error('TravelRequest Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -244,28 +223,28 @@ export function useCopy(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyToApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message); // Log error directly here
+        console.error('Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Copy Error:", error);
+      console.error('Copy Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -284,25 +263,25 @@ export function useAddComment(requestId: string) {
   } = useMutation({
     mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 201) {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Add Comment Error:", error);
+      toast.error('Error adding comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Add Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -322,25 +301,25 @@ export function useUpdateComment(requestId: string) {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateCommentApi(requestId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Comment Error:", error);
+      toast.error('Error updating comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -359,25 +338,25 @@ export function useDeleteComment(requestId: string) {
   } = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["travel-request", requestId],
+          queryKey: ['travel-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
     onError: (err: HookError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Delete Comment Error:", error);
+      toast.error('Error deleting comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Delete Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -385,12 +364,7 @@ export function useDeleteComment(requestId: string) {
   return { deleteComment, isPending, isError, errorMessage };
 }
 
-export function useDeleteTravelRequest(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
+export function useDeleteTravelRequest(queryParams: Record<string, string | number | undefined>) {
   const queryClient = useQueryClient();
 
   const {
@@ -403,20 +377,19 @@ export function useDeleteTravelRequest(
       await deleteTravelRequestAPI(userID);
     },
     onSuccess: () => {
-      toast.success("Travel Request deleted");
+      toast.success('Travel Request deleted');
 
       queryClient.invalidateQueries({
-        queryKey: ["all-travel-requests", search, sort, page, limit],
+        queryKey: ['all-travel-requests', queryParams],
       });
     },
 
-    onError: (error) => {
-      toast.error("Error deleting Travel Request");
+    onError: error => {
+      toast.error('Error deleting Travel Request');
 
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Travel Request.";
-      console.error("Delete Travel Request Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deleting the Travel Request.';
+      console.error('Delete Travel Request Error:', errorMessage);
     },
   });
 

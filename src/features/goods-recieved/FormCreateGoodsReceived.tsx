@@ -1,55 +1,52 @@
 // FormCreateGoodsReceived.tsx - Fixed version
-import React, { useState } from "react";
+import React, { useState } from 'react';
 // import { useNavigate } from "react-router-dom";
-import Input from "../../ui/Input";
-import Button from "../../ui/Button";
-import Row from "../../ui/Row";
-import { PurchaseOrderType, GoodsReceivedType } from "../../interfaces";
-import SpinnerMini from "../../ui/SpinnerMini";
-import {
-  useCreateGoodsReceived,
-  useUpdateGoodsReceived,
-} from "./Hooks/useGoodsReceived";
-import { Package, Edit, Lock } from "lucide-react";
-import toast from "react-hot-toast";
+import { Input } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
+import Row from '../../components/custom/Row';
+import { IPurchaseOrder, IGoodsReceived, IPOItemGroup } from '../../interfaces';
+import SpinnerMini from '../../components/custom/SpinnerMini';
+import { useCreateGoodsReceived, useUpdateGoodsReceived } from './Hooks/useGoodsReceived';
+import { Package, Edit, Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface FormCreateGoodsReceivedProps {
-  purchaseOrder: PurchaseOrderType;
-  existingGoodsReceived?: GoodsReceivedType;
+  purchaseOrder: IPurchaseOrder;
+  existingGoodsReceived?: IGoodsReceived;
   onSuccess?: () => void;
   onCancel?: () => void;
-  mode?: "create" | "edit";
+  mode?: 'create' | 'edit';
 }
 
 const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
   purchaseOrder,
   existingGoodsReceived,
-  onSuccess,
+  // onSuccess,
   onCancel,
-  mode = "create",
+  mode = 'create',
 }) => {
   // const navigate = useNavigate();
 
-  // Helper function to get item name from itemid
-  const getItemName = (itemid: string): string => {
-    const item = purchaseOrder.itemGroups.find(
-      (poItem) => poItem._id === itemid
-    );
-    return item?.itemName || "Unknown Item";
+  console.log('purchaseOrder:', purchaseOrder);
+
+  // Helper function to get item name from itemId
+  const getItemName = (itemId: string): string => {
+    const item = purchaseOrder.itemGroups.find(poItem => poItem._id === itemId);
+    return item?.itemName || 'Unknown Item';
   };
 
   // Helper function to safely get item ID
-  const getItemId = (item: any): string => {
-    return item._id || item.id || "";
+  const getitemId = (item: IPOItemGroup): string => {
+    return item._id || '';
   };
 
-  // Initialize GRNitems based on mode
-  const [GRNitems, setGRNitems] = useState(() => {
-    if (mode === "edit" && existingGoodsReceived) {
+  // Initialize grnItems based on mode
+  const [grnItems, setgrnItems] = useState(() => {
+    if (mode === 'edit' && existingGoodsReceived) {
       // Prefill with existing data
-      return existingGoodsReceived.GRNitems.map((item) => ({
-        itemid: item.itemid,
-        itemName: getItemName(item.itemid),
+      return existingGoodsReceived.grnItems.map(item => ({
+        itemId: item.itemId,
+        itemName: getItemName(item.itemId),
         numberOrdered: item.numberOrdered,
         numberReceived: item.numberReceived,
         difference: item.difference,
@@ -57,8 +54,8 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
       }));
     } else {
       // Create mode - initialize from purchase order
-      return purchaseOrder.itemGroups.map((item) => ({
-        itemid: getItemId(item), // Use helper function to ensure string
+      return purchaseOrder.itemGroups.map(item => ({
+        itemId: getitemId(item), // Use helper function to ensure string
         itemName: item.itemName,
         numberOrdered: item.quantity * item.frequency,
         numberReceived: 0,
@@ -68,26 +65,20 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
     }
   });
 
-  const { createGoodsReceived, isPending: isCreating } =
-    useCreateGoodsReceived();
-  const { updateGoodsReceived, isPending: isUpdating } =
-    useUpdateGoodsReceived();
+  const { createGoodsReceived, isPending: isCreating } = useCreateGoodsReceived();
+  const { updateGoodsReceived, isPending: isUpdating } = useUpdateGoodsReceived();
 
-  const handleItemChange = (
-    index: number,
-    field: keyof (typeof GRNitems)[0],
-    value: number
-  ) => {
-    const updatedItems = [...GRNitems];
+  const handleItemChange = (index: number, field: keyof (typeof grnItems)[0], value: number) => {
+    const updatedItems = [...grnItems];
     const item = updatedItems[index];
 
     // If item is fully received, prevent changes
-    if (item.isFullyReceived && field === "numberReceived") {
-      toast.error("Cannot modify fully received items");
+    if (item.isFullyReceived && field === 'numberReceived') {
+      toast.error('Cannot modify fully received items');
       return;
     }
 
-    if (field === "numberReceived") {
+    if (field === 'numberReceived') {
       const numberReceived = Math.min(value, item.numberOrdered);
       updatedItems[index] = {
         ...item,
@@ -97,32 +88,32 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
       };
     }
 
-    setGRNitems(updatedItems);
+    setgrnItems(updatedItems);
   };
 
-  const getItemStatus = (item: (typeof GRNitems)[0]) => {
+  const getItemStatus = (item: (typeof grnItems)[0]) => {
     if (item.isFullyReceived) {
       return {
-        status: "Fully Received",
-        class: "bg-green-100 text-green-700 border border-green-200",
+        status: 'Fully Received',
+        class: 'bg-green-100 text-green-700 border border-green-200',
         icon: <Lock className="h-3 w-3 mr-1" />,
       };
     } else if (item.numberReceived === 0) {
       return {
-        status: "Not Received",
-        class: "bg-gray-100 text-gray-700 border border-gray-200",
+        status: 'Not Received',
+        class: 'bg-gray-100 text-gray-700 border border-gray-200',
         icon: null,
       };
     } else if (item.numberReceived > item.numberOrdered) {
       return {
-        status: "Over Received",
-        class: "bg-orange-100 text-orange-700 border border-orange-200",
+        status: 'Over Received',
+        class: 'bg-orange-100 text-orange-700 border border-orange-200',
         icon: null,
       };
     } else {
       return {
-        status: "Partially Received",
-        class: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+        status: 'Partially Received',
+        class: 'bg-yellow-100 text-yellow-700 border border-yellow-200',
         icon: null,
       };
     }
@@ -132,81 +123,48 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
     e.preventDefault();
 
     // Validate that at least one item has received quantity or we're editing
-    const hasReceivedItems = GRNitems.some((item) => item.numberReceived > 0);
-    if (!hasReceivedItems && mode === "create") {
-      toast.error("Please enter received quantities for at least one item");
+    const hasReceivedItems = grnItems.some(item => item.numberReceived > 0);
+    if (!hasReceivedItems && mode === 'create') {
+      toast.error('Please enter received quantities for at least one item');
       return;
     }
 
     // Validate that received quantities don't exceed ordered quantities
-    const hasInvalidQuantities = GRNitems.some(
-      (item) => item.numberReceived > item.numberOrdered
-    );
+    const hasInvalidQuantities = grnItems.some(item => item.numberReceived > item.numberOrdered);
     if (hasInvalidQuantities) {
-      toast.error("Received quantity cannot exceed ordered quantity");
+      toast.error('Received quantity cannot exceed ordered quantity');
       return;
     }
 
-    // Filter out any items with undefined itemid (shouldn't happen with our helper function)
-    const validGRNitems = GRNitems.filter(
-      (item) => item.itemid && item.itemid.trim() !== ""
-    );
+    console.log('grnItems:', grnItems);
+    // Filter out any items with undefined itemId (shouldn't happen with our helper function)
+    const validgrnItems = grnItems.filter(item => item.itemId && item.itemId.trim() !== '');
 
-    if (validGRNitems.length === 0) {
-      toast.error("No valid items found to process");
+    if (validgrnItems.length === 0) {
+      toast.error('No valid items found to process');
       return;
     }
 
     const submitData = {
       purchaseOrder: purchaseOrder.id!,
-      GRNitems: validGRNitems.map((item) => ({
-        itemid: item.itemid,
+      grnItems: validgrnItems.map(item => ({
+        itemId: item.itemId,
         numberOrdered: item.numberOrdered,
         numberReceived: item.numberReceived,
       })),
     };
 
-    if (mode === "edit" && existingGoodsReceived) {
+    if (mode === 'edit' && existingGoodsReceived) {
       // Update existing Goods Received
-      updateGoodsReceived(
-        {
-          goodsReceivedId: existingGoodsReceived.id,
-          data: submitData,
-        },
-        {
-          onSuccess: (data: any) => {
-            if (data.status === 200) {
-              // toast.success("Goods Received Note updated successfully");
-              onSuccess?.();
-            }
-          },
-          onError: (error: any) => {
-            toast.error(
-              error.message || "Failed to update Goods Received Note"
-            );
-          },
-        }
-      );
+      updateGoodsReceived({
+        goodsReceivedId: existingGoodsReceived.id,
+        data: submitData,
+      });
     } else {
       // Create new Goods Received - FIXED: Pass as object with data property
-      createGoodsReceived(
-        {
-          data: submitData,
-        },
-        {
-          onSuccess: (data: any) => {
-            if (data.status === 201) {
-              // toast.success("Goods Received Note created successfully");
-              onSuccess?.();
-            }
-          },
-          onError: (error: any) => {
-            toast.error(
-              error.message || "Failed to create Goods Received Note"
-            );
-          },
-        }
-      );
+      createGoodsReceived({
+        data: submitData,
+      });
     }
   };
 
@@ -218,7 +176,7 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-50 rounded-lg">
-              {mode === "edit" ? (
+              {mode === 'edit' ? (
                 <Edit className="h-5 w-5 text-blue-600" />
               ) : (
                 <Package className="h-5 w-5 text-blue-600" />
@@ -226,22 +184,18 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                {mode === "edit" ? "Edit" : "Create"} Goods Received Note
+                {mode === 'edit' ? 'Edit' : 'Create'} Goods Received Note
               </h2>
               <p className="text-sm text-gray-500">
-                {mode === "edit"
-                  ? "Update received quantities for items"
-                  : "Record received items from purchase order"}
+                {mode === 'edit'
+                  ? 'Update received quantities for items'
+                  : 'Record received items from purchase order'}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">
-              {purchaseOrder.POCode}
-            </p>
-            <p className="text-sm text-gray-500">
-              {purchaseOrder.selectedVendor?.businessName}
-            </p>
+            <p className="text-sm font-medium text-gray-900">{purchaseOrder.poCode}</p>
+            <p className="text-sm text-gray-500">{purchaseOrder.selectedVendor?.businessName}</p>
           </div>
         </div>
       </div>
@@ -250,9 +204,7 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
         <div className="space-y-6">
           {/* Items Table */}
           <div>
-            <h3 className="text-md font-medium text-gray-900 mb-4">
-              Received Items
-            </h3>
+            <h3 className="text-md font-medium text-gray-900 mb-4">Received Items</h3>
             <div className="overflow-hidden border border-gray-200 rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -275,13 +227,10 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {GRNitems.map((item, index) => {
+                  {grnItems.map((item, index) => {
                     const statusInfo = getItemStatus(item);
                     return (
-                      <tr
-                        key={item.itemid}
-                        className={item.isFullyReceived ? "bg-green-50" : ""}
-                      >
+                      <tr key={item.itemId} className={item.isFullyReceived ? 'bg-green-50' : ''}>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                           {item.itemName}
                         </td>
@@ -292,10 +241,10 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
                           <Input
                             type="number"
                             value={item.numberReceived}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleItemChange(
                                 index,
-                                "numberReceived",
+                                'numberReceived',
                                 parseInt(e.target.value) || 0
                               )
                             }
@@ -304,8 +253,8 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
                             max={item.numberOrdered}
                             className={`w-20 text-center ${
                               item.isFullyReceived
-                                ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                                : ""
+                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                                : ''
                             }`}
                           />
                         </td>
@@ -313,10 +262,10 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               item.difference === 0
-                                ? "bg-green-100 text-green-800"
+                                ? 'bg-green-100 text-green-800'
                                 : item.difference > 0
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
                             }`}
                           >
                             {item.difference}
@@ -343,18 +292,18 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-gray-500">Total Items</p>
-                <p className="font-medium text-gray-900">{GRNitems.length}</p>
+                <p className="font-medium text-gray-900">{grnItems.length}</p>
               </div>
               <div>
                 <p className="text-gray-500">Fully Received</p>
                 <p className="font-medium text-green-600">
-                  {GRNitems.filter((item) => item.isFullyReceived).length}
+                  {grnItems.filter(item => item.isFullyReceived).length}
                 </p>
               </div>
               <div>
                 <p className="text-gray-500">Pending Items</p>
                 <p className="font-medium text-yellow-600">
-                  {GRNitems.filter((item) => !item.isFullyReceived).length}
+                  {grnItems.filter(item => !item.isFullyReceived).length}
                 </p>
               </div>
             </div>
@@ -362,22 +311,11 @@ const FormCreateGoodsReceived: React.FC<FormCreateGoodsReceivedProps> = ({
 
           {/* Form Actions */}
           <Row>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <SpinnerMini />
-              ) : mode === "edit" ? (
-                "Update GRN"
-              ) : (
-                "Create GRN"
-              )}
+              {isSubmitting ? <SpinnerMini /> : mode === 'edit' ? 'Update GRN' : 'Create GRN'}
             </Button>
           </Row>
         </div>

@@ -1,19 +1,19 @@
 // Redux Slice: modalSlice.js
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  openName: "",
+  openName: '',
 };
 
 const modalSlice = createSlice({
-  name: "modal",
+  name: 'modal',
   initialState,
   reducers: {
     openModal: (state, action) => {
       state.openName = action.payload;
     },
-    closeModal: (state) => {
-      state.openName = "";
+    closeModal: state => {
+      state.openName = '';
     },
   },
 });

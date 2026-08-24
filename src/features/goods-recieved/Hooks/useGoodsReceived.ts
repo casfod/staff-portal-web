@@ -1,13 +1,8 @@
 // useGoodsReceived.ts - Updated with file upload
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 // import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { AxiosError, AxiosResponse } from "axios";
+import toast from 'react-hot-toast';
+import { AxiosError, AxiosResponse } from 'axios';
 import {
   getAllGoodsReceived,
   getGoodsReceived,
@@ -17,13 +12,14 @@ import {
   deleteGoodsReceived,
   checkGRNExists,
   addFilesToGoodsReceived,
-} from "../../../services/apiGoodsReceived";
+} from '../../../services/apiGoodsReceived';
 import {
-  CreateGoodsReceivedType,
-  GoodsReceivedType,
-  UseGoodsReceived,
-  UseGoodsReceivedType,
-} from "../../../interfaces";
+  IGoodsReceived,
+  IGoodsReceivedSingleResponse,
+  IGoodsReceivedListResponse,
+  ICreateGoodsReceivedPayload,
+} from '../../../interfaces';
+import { useNavigate } from 'react-router-dom';
 
 interface ErrorResponse {
   message: string;
@@ -35,15 +31,15 @@ interface ApiError extends AxiosError {
 
 // Query keys
 export const goodsReceivedKeys = {
-  all: ["goods-received"] as const,
-  lists: () => [...goodsReceivedKeys.all, "list"] as const,
+  all: ['goods-received'] as const,
+  lists: () => [...goodsReceivedKeys.all, 'list'] as const,
   list: (filters: any) => [...goodsReceivedKeys.lists(), filters] as const,
-  details: () => [...goodsReceivedKeys.all, "detail"] as const,
+  details: () => [...goodsReceivedKeys.all, 'detail'] as const,
   detail: (id: string) => [...goodsReceivedKeys.details(), id] as const,
   byPurchaseOrder: (purchaseOrderId: string) =>
-    [...goodsReceivedKeys.all, "purchase-order", purchaseOrderId] as const,
+    [...goodsReceivedKeys.all, 'purchase-order', purchaseOrderId] as const,
   exists: (purchaseOrderId: string) =>
-    [...goodsReceivedKeys.all, "exists", purchaseOrderId] as const,
+    [...goodsReceivedKeys.all, 'exists', purchaseOrderId] as const,
 };
 
 // Hooks
@@ -54,20 +50,20 @@ export const useGoodsReceived = (
     page?: number;
     limit?: number;
   },
-  options?: UseQueryOptions<UseGoodsReceivedType, Error>
+  options?: UseQueryOptions<IGoodsReceivedListResponse, Error>
 ) => {
   return useQuery({
     queryKey: goodsReceivedKeys.list(queryParams),
     queryFn: () => getAllGoodsReceived(queryParams),
     staleTime: 2 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     ...options,
   });
 };
 
 export const useGoodsReceivedByPurchaseOrder = (
   purchaseOrderId: string,
-  options?: UseQueryOptions<UseGoodsReceivedType, Error>
+  options?: UseQueryOptions<IGoodsReceivedListResponse, Error>
 ) => {
   return useQuery({
     queryKey: goodsReceivedKeys.byPurchaseOrder(purchaseOrderId),
@@ -80,7 +76,7 @@ export const useGoodsReceivedByPurchaseOrder = (
 
 export const useGoodsReceivedDetail = (
   goodsReceivedId: string,
-  options?: UseQueryOptions<UseGoodsReceived, Error>
+  options?: UseQueryOptions<IGoodsReceivedSingleResponse, Error>
 ) => {
   return useQuery({
     queryKey: goodsReceivedKeys.detail(goodsReceivedId),
@@ -97,7 +93,7 @@ export const useCheckGRNExists = (
     {
       status: number;
       message: string;
-      data: { exists: boolean; grn: GoodsReceivedType; isCompleted: boolean };
+      data: { exists: boolean; grn: IGoodsReceived; isCompleted: boolean };
     },
     Error
   >
@@ -113,38 +109,31 @@ export const useCheckGRNExists = (
 
 export const useCreateGoodsReceived = () => {
   const queryClient = useQueryClient();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: ({
-      data,
-      files = [],
-    }: {
-      data: CreateGoodsReceivedType;
-      files?: File[];
-    }) => createGoodsReceived(data, files),
+    mutationFn: ({ data }: { data: ICreateGoodsReceivedPayload }) => createGoodsReceived(data),
 
     onSuccess: (data, variables) => {
-      if (data.status.toString() === "201") {
-        toast.success("Goods Received Note created successfully");
+      if (data.statusCode === 201) {
+        toast.success('Goods Received Note created successfully');
         queryClient.invalidateQueries({ queryKey: goodsReceivedKeys.lists() });
         queryClient.invalidateQueries({
-          queryKey: goodsReceivedKeys.byPurchaseOrder(
-            variables.data.purchaseOrder
-          ),
+          queryKey: goodsReceivedKeys.byPurchaseOrder(variables.data.purchaseOrder),
         });
         queryClient.invalidateQueries({
           queryKey: goodsReceivedKeys.exists(variables.data.purchaseOrder),
         });
+
+        navigate(`/procurement/goods-received`);
       } else {
-        toast.error(data.message || "Failed to create Goods Received Note");
+        toast.error(data.message || 'Failed to create Goods Received Note');
       }
     },
 
     onError: (err: ApiError) => {
       toast.error(
-        err.response?.data?.message ||
-          "An error occurred while creating Goods Received Note"
+        err.response?.data?.message || 'An error occurred while creating Goods Received Note'
       );
     },
   });
@@ -166,32 +155,31 @@ export const useUpdateGoodsReceived = () => {
       files = [],
     }: {
       goodsReceivedId: string;
-      data: Partial<CreateGoodsReceivedType>;
+      data: Partial<ICreateGoodsReceivedPayload>;
       files?: File[];
     }) => updateGoodsReceived(goodsReceivedId, data, files),
 
     onSuccess: (data, variables) => {
-      if (data.status.toString() === "200") {
-        toast.success("Goods Received Note updated successfully");
+      if (data.statusCode.toString() === '200') {
+        toast.success('Goods Received Note updated successfully');
         queryClient.invalidateQueries({ queryKey: goodsReceivedKeys.lists() });
         queryClient.invalidateQueries({
           queryKey: goodsReceivedKeys.detail(variables.goodsReceivedId),
         });
         // Invalidate exists query if we have purchaseOrder info
-        if (data.data && typeof data.data.purchaseOrder === "object") {
+        if (data.data && typeof data.data.purchaseOrder === 'object') {
           queryClient.invalidateQueries({
             queryKey: goodsReceivedKeys.exists(data.data.purchaseOrder.id),
           });
         }
       } else {
-        toast.error(data.message || "Failed to update Goods Received Note");
+        toast.error(data.message || 'Failed to update Goods Received Note');
       }
     },
 
     onError: (err: ApiError) => {
       toast.error(
-        err.response?.data?.message ||
-          "An error occurred while updating Goods Received Note"
+        err.response?.data?.message || 'An error occurred while updating Goods Received Note'
       );
     },
   });
@@ -208,29 +196,22 @@ export const useAddFilesToGoodsReceived = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({
-      goodsReceivedId,
-      files = [],
-    }: {
-      goodsReceivedId: string;
-      files: File[];
-    }) => addFilesToGoodsReceived(goodsReceivedId, files),
+    mutationFn: ({ goodsReceivedId, files = [] }: { goodsReceivedId: string; files: File[] }) =>
+      addFilesToGoodsReceived(goodsReceivedId, files),
 
     onSuccess: (data, variables) => {
-      if (data.status.toString() === "200") {
-        toast.success("Files added to Goods Received Note successfully");
+      if (data.statusCode.toString() === '200') {
+        toast.success('Files added to Goods Received Note successfully');
         queryClient.invalidateQueries({
           queryKey: goodsReceivedKeys.detail(variables.goodsReceivedId),
         });
       } else {
-        toast.error(data.message || "Failed to add files");
+        toast.error(data.message || 'Failed to add files');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while adding files"
-      );
+      toast.error(err.response?.data?.message || 'An error occurred while adding files');
     },
   });
 
@@ -282,22 +263,20 @@ export const useDeleteGoodsReceived = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (goodsReceivedId: string) =>
-      deleteGoodsReceived(goodsReceivedId),
+    mutationFn: (goodsReceivedId: string) => deleteGoodsReceived(goodsReceivedId),
 
-    onSuccess: (data) => {
-      if (data.status.toString() === "200") {
-        toast.success("Goods Received Note deleted successfully");
+    onSuccess: data => {
+      if (data.status.toString() === '200') {
+        toast.success('Goods Received Note deleted successfully');
         queryClient.invalidateQueries({ queryKey: goodsReceivedKeys.lists() });
       } else {
-        toast.error(data.message || "Failed to delete Goods Received Note");
+        toast.error(data.message || 'Failed to delete Goods Received Note');
       }
     },
 
     onError: (err: ApiError) => {
       toast.error(
-        err.response?.data?.message ||
-          "An error occurred while deleting Goods Received Note"
+        err.response?.data?.message || 'An error occurred while deleting Goods Received Note'
       );
     },
   });

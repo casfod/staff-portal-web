@@ -1,5 +1,5 @@
 // Redux Slice: navigationSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface NavigationStateType {
   isMobileOpen: boolean;
@@ -12,7 +12,7 @@ const initialState: NavigationStateType = {
 };
 
 const navigationSlice = createSlice({
-  name: "navigation",
+  name: 'navigation',
   initialState,
   reducers: {
     setIsMobileOpen: (state, action: PayloadAction<boolean>) => {
@@ -21,18 +21,14 @@ const navigationSlice = createSlice({
     setIsDesktopOpen: (state, action: PayloadAction<boolean>) => {
       state.isDesktopOpen = action.payload;
     },
-    toggleDesktop: (state) => {
+    toggleDesktop: state => {
       state.isDesktopOpen = !state.isDesktopOpen;
     },
     resetNavigation: () => initialState,
   },
 });
 
-export const {
-  setIsMobileOpen,
-  setIsDesktopOpen,
-  toggleDesktop,
-  resetNavigation,
-} = navigationSlice.actions;
+export const { setIsMobileOpen, setIsDesktopOpen, toggleDesktop, resetNavigation } =
+  navigationSlice.actions;
 
 export default navigationSlice.reducer;

@@ -1,109 +1,40 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiPurchaseRequest.ts
 import {
-  PurChaseRequestType,
-  UsePurChaseRequest,
-  usePurChaseRequestType,
-  UsePurchaseStatsType,
-} from "../interfaces.ts";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      // console.log("Token attached to request:", token);
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    console.log(err.response?.data);
-
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IPurchaseRequest,
+  IPurchaseRequestsListResponse,
+  IPurchaseRequestSingleResponse,
+  IPurchaseRequestStatsResponse,
+} from '../interfaces';
+import apiClient, {
+  handleError,
+  QueryParams,
+  StatusUpdateData,
+  CommentData,
+  CopyToData,
+} from './apiClient';
 
 // API Functions
 
-export const getAllPurchaseRequest = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllPurchaseRequest = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<usePurChaseRequestType>(
-      `/purchase-requests`,
+    const response = await apiClient.get<IPurchaseRequestsListResponse>(
+      `procurement/purchase-requests`,
       {
         params: queryParams,
       }
     );
-    console.log("API Response:", response.data); // Debugging line
+    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getPurChaseRequest = async function (requestId: string) {
+export const getPurchaseRequest = async function (requestId: string) {
   try {
-    const response = await axiosInstance.get<UsePurChaseRequest>(
-      `/purchase-requests/${requestId}`
+    const response = await apiClient.get<IPurchaseRequestSingleResponse>(
+      `procurement/purchase-requests/${requestId}`
     );
-    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -112,8 +43,8 @@ export const getPurChaseRequest = async function (requestId: string) {
 
 export const getPurchaseRequestStats = async function () {
   try {
-    const response = await axiosInstance.get<UsePurchaseStatsType>(
-      `/purchase-requests/stats`
+    const response = await apiClient.get<IPurchaseRequestStatsResponse>(
+      `procurement/purchase-requests/stats`
     );
     return response.data;
   } catch (err) {
@@ -121,12 +52,10 @@ export const getPurchaseRequestStats = async function () {
   }
 };
 
-export const savePurchaseRequests = async function (
-  data: Partial<PurChaseRequestType>
-) {
+export const savePurchaseRequests = async function (data: Partial<IPurchaseRequest>) {
   try {
-    const response = await axiosInstance.post<PurChaseRequestType>(
-      `/purchase-requests/save`,
+    const response = await apiClient.post<IPurchaseRequest>(
+      `procurement/purchase-requests/draft`,
       data
     );
     return response.data;
@@ -135,62 +64,19 @@ export const savePurchaseRequests = async function (
   }
 };
 
-export const sendPurchaseRequests = async function (
-  data: Partial<PurChaseRequestType>,
-  files: File[]
-) {
+export const sendPurchaseRequests = async function (data: Partial<IPurchaseRequest>) {
   try {
-    const formData = new FormData();
-
-    formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    formData.append("periodOfActivity", JSON.stringify(data.periodOfActivity));
-
-    // Append standard fields
-    const simpleFields: (keyof PurChaseRequestType)[] = [
-      "project",
-      "accountCode",
-      "expenseChargedTo",
-      "department",
-      "suggestedSupplier",
-      "address",
-      "finalDeliveryPoint",
-      "city",
-      "activityDescription",
-      "financeReviewBy",
-      "procurementReviewBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<PurChaseRequestType>(
-      `/purchase-requests/save-and-send`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    const response = await apiClient.post<IPurchaseRequest>(`procurement/purchase-requests`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
+export const copyTo = async function (requestId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(
-      `/purchase-requests/copy/${requestId}`,
+    const response = await apiClient.post<Partial<IPurchaseRequest>>(
+      `procurement/purchase-requests/${requestId}/copy`,
       data
     );
     return response.data;
@@ -199,57 +85,14 @@ export const copyTo = async function (
   }
 };
 
+// ✅ FIXED: Correct URL and HTTP method
 export const updatePurchaseRequest = async function (
   requestId: string,
-  data: Partial<PurChaseRequestType>,
-  files: File[]
+  data: Partial<IPurchaseRequest>
 ) {
   try {
-    const formData = new FormData();
-
-    // Append standard fields
-    const simpleFields: (keyof PurChaseRequestType)[] = [
-      "approvedBy",
-      "financeReviewStatus",
-      "procurementReviewStatus",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<Partial<PurChaseRequestType>>(
-      `/purchase-requests/${requestId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const updateStatus = async function (
-  requestId: string,
-  data: {
-    status: string;
-    comment: string;
-    financeReviewStatus?: "pending" | "approved" | "rejected";
-    procurementReviewStatus?: "pending" | "approved" | "rejected";
-  }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<PurChaseRequestType>>(
-      `/purchase-requests/update-status/${requestId}`,
+    const response = await apiClient.patch<Partial<IPurchaseRequest>>(
+      `procurement/purchase-requests/${requestId}`,
       data
     );
     return response.data;
@@ -258,13 +101,29 @@ export const updateStatus = async function (
   }
 };
 
-export const addComment = async function (
+// ✅ FIXED: Correct URL
+export const updateStatus = async function (
   requestId: string,
-  data: { text: string }
+  data: StatusUpdateData & {
+    financeReviewStatus?: 'pending' | 'approved' | 'rejected';
+    procurementReviewStatus?: 'pending' | 'approved' | 'rejected';
+  }
 ) {
   try {
-    const response = await axiosInstance.post(
-      `/purchase-requests/${requestId}/comments`,
+    const response = await apiClient.patch<Partial<IPurchaseRequest>>(
+      `procurement/purchase-requests/${requestId}/status`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const addComment = async function (requestId: string, data: CommentData) {
+  try {
+    const response = await apiClient.post(
+      `procurement/purchase-requests/${requestId}/comments`,
       data
     );
     return response.data;
@@ -276,11 +135,11 @@ export const addComment = async function (
 export const updateComment = async function (
   requestId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/purchase-requests/${requestId}/comments/${commentId}`,
+    const response = await apiClient.patch(
+      `procurement/purchase-requests/${requestId}/comments/${commentId}`,
       data
     );
     return response.data;
@@ -289,13 +148,10 @@ export const updateComment = async function (
   }
 };
 
-export const deleteComment = async function (
-  requestId: string,
-  commentId: string
-) {
+export const deleteComment = async function (requestId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/purchase-requests/${requestId}/comments/${commentId}`
+    const response = await apiClient.delete(
+      `procurement/purchase-requests/${requestId}/comments/${commentId}`
     );
     return response.data;
   } catch (err) {
@@ -303,12 +159,10 @@ export const deleteComment = async function (
   }
 };
 
-export const deletePurchaseRequest = async function (
-  purchaseRequestID: string
-) {
+export const deletePurchaseRequest = async function (purchaseRequestID: string) {
   try {
-    const response = await axiosInstance.delete<PurChaseRequestType>(
-      `/purchase-requests/${purchaseRequestID}`
+    const response = await apiClient.delete<IPurchaseRequest>(
+      `procurement/purchase-requests/${purchaseRequestID}`
     );
     return response.data;
   } catch (err) {

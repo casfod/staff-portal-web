@@ -1,35 +1,35 @@
 // hooks/usePVPDF.ts
-import { useState, useRef } from "react";
-import toast from "react-hot-toast";
-import { generatePdf } from "../utils/generatePdf";
-import { PaymentVoucherType } from "../interfaces";
-import { addPdfFooter } from "../utils/pdfFooterUtils";
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { generatePdf } from '../utils/generatePdf';
+import { IPaymentVoucher } from '../interfaces';
+import { addPdfFooter } from '../utils/pdfFooterUtils';
 
 interface UsePVPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
   isGenerating: boolean;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
-  generatePDF: (orientation?: "portrait" | "landscape") => Promise<File | null>;
-  previewPDF: (orientation?: "portrait" | "landscape") => void;
-  downloadPDF: (orientation?: "portrait" | "landscape") => Promise<void>;
+  generatePDF: (orientation?: 'portrait' | 'landscape') => Promise<File | null>;
+  previewPDF: (orientation?: 'portrait' | 'landscape') => void;
+  downloadPDF: (orientation?: 'portrait' | 'landscape') => Promise<void>;
 }
 
-export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
+export const usePVPDF = (pvData: IPaymentVoucher | null): UsePVPDFReturn => {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const generatePDF = async (
-    orientation: "portrait" | "landscape" = "landscape"
+    orientation: 'portrait' | 'landscape' = 'landscape'
   ): Promise<File | null> => {
     if (!pvData || !pvData.pvNumber) {
-      toast.error("Payment Voucher data is incomplete");
+      toast.error('Payment Voucher data is incomplete');
       return null;
     }
 
     if (!pdfRef.current) {
-      toast.error("PDF template not found");
+      toast.error('PDF template not found');
       return null;
     }
 
@@ -37,21 +37,16 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
 
     try {
       const sanitizeFilename = (filename: string) => {
-        return filename.replace(/\//g, "-");
+        return filename.replace(/\//g, '-');
       };
 
       const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
 
-      const pdf = await generatePdfViaCanvas(
-        pdfRef.current,
-        filename,
-        pvData,
-        orientation
-      );
+      const pdf = await generatePdfViaCanvas(pdfRef.current, filename, pvData, orientation);
       return pdf;
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF");
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF');
       return null;
     } finally {
       setIsGenerating(false);
@@ -61,24 +56,24 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
   const generatePdfViaCanvas = async (
     element: HTMLElement,
     filename: string,
-    pvData: PaymentVoucherType,
-    orientation: "portrait" | "landscape" = "landscape"
+    pvData: IPaymentVoucher,
+    orientation: 'portrait' | 'landscape' = 'landscape'
   ): Promise<File | null> => {
-    const { jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
+    const { jsPDF } = await import('jspdf');
+    const html2canvas = (await import('html2canvas')).default;
 
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: '#ffffff',
       logging: false,
     });
 
     const pdf = new jsPDF({
       orientation: orientation,
-      unit: "mm",
-      format: "a4",
+      unit: 'mm',
+      format: 'a4',
       compress: true,
     });
 
@@ -97,22 +92,21 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
     if (!needsMultiplePages) {
       // SINGLE PAGE
       pdf.addImage(
-        canvas.toDataURL("image/jpeg", 1.0),
-        "JPEG",
+        canvas.toDataURL('image/jpeg', 1.0),
+        'JPEG',
         margin,
         margin,
         imgWidth,
         imgHeight,
         undefined,
-        "FAST"
+        'FAST'
       );
 
       // ADD FOOTER FOR SINGLE PAGE
-      addPdfFooter(pdf, pvData.pvNumber, "PV Number", 1, 1, margin);
+      addPdfFooter(pdf, pvData.pvNumber, 'PV Number', 1, 1, margin);
     } else {
       // MULTI-PAGE
-      const pageContentHeightPx =
-        (availableContentHeight * canvas.width) / imgWidth;
+      const pageContentHeightPx = (availableContentHeight * canvas.width) / imgWidth;
       const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
       for (let i = 0; i < totalPages; i++) {
@@ -130,12 +124,12 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
 
         const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
 
-        const pageCanvas = document.createElement("canvas");
+        const pageCanvas = document.createElement('canvas');
         pageCanvas.width = canvas.width;
         pageCanvas.height = pageImgHeightPx;
 
-        const ctx = pageCanvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context not available");
+        const ctx = pageCanvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas context not available');
 
         ctx.drawImage(
           canvas,
@@ -149,88 +143,81 @@ export const usePVPDF = (pvData: PaymentVoucherType | null): UsePVPDFReturn => {
           pageImgHeightPx
         );
 
-        const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
+        const pageImgData = pageCanvas.toDataURL('image/jpeg', 1.0);
 
         pdf.addImage(
           pageImgData,
-          "JPEG",
+          'JPEG',
           margin,
           margin,
           imgWidth,
           pageImgHeight,
           undefined,
-          "FAST"
+          'FAST'
         );
 
         // ADD FOOTER WITH PV NUMBER AND PAGE NUMBER
-        addPdfFooter(
-          pdf,
-          pvData.pvNumber,
-          "PV Number",
-          i + 1,
-          totalPages,
-          margin
-        );
+        addPdfFooter(pdf, pvData.pvNumber, 'PV Number', i + 1, totalPages, margin);
       }
     }
 
-    const pdfBlob = pdf.output("blob");
-    return new File([pdfBlob], filename, { type: "application/pdf" });
+    const pdfBlob = pdf.output('blob');
+    return new File([pdfBlob], filename, { type: 'application/pdf' });
   };
 
   const downloadPDF = async (
-    orientation: "portrait" | "landscape" = "landscape"
+    orientation: 'portrait' | 'landscape' = 'landscape'
   ): Promise<void> => {
     if (!pvData || !pdfRef.current) {
-      toast.error("No Payment Voucher data available");
+      toast.error('No Payment Voucher data available');
       return;
     }
 
     try {
       const sanitizeFilename = (filename: string) => {
-        return filename.replace(/\//g, "-");
+        return filename.replace(/\//g, '-');
       };
 
       const filename = `PV-${sanitizeFilename(pvData.pvNumber)}.pdf`;
 
       await generatePdf(pdfRef.current, {
         filename,
-        format: "a4",
+        format: 'a4',
         orientation: orientation,
         scale: 2,
         margin: 10,
         multiPage: true,
         quality: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: '#FFFFFF',
         titleOptions: {
-          text: `Payment Voucher - ${pvData.pvNumber || ""}`,
+          text: `Payment Voucher - ${pvData.pvNumber || ''}`,
           fontSize: 16,
-          fontStyle: "bold",
-          color: "#000000",
+          fontStyle: 'bold',
+          color: '#000000',
           marginBottom: 10,
         },
         footerOptions: {
-          left: `PV Number: ${pvData.pvNumber || "N/A"}`,
+          left: `PV Number: ${pvData.pvNumber || 'N/A'}`,
           right: (currentPage: number, totalPages: number) =>
             `Page ${currentPage} of ${totalPages}`,
           fontSize: 9,
-          color: "#666666",
-          lineColor: "#E0E0E0",
+          color: '#666666',
+          lineColor: '#E0E0E0',
         },
         save: true,
       });
-      toast.success("PDF downloaded successfully");
+      toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error("PDF download failed:", error);
-      toast.error("Failed to download PDF");
+      console.error('PDF download failed:', error);
+      toast.error('Failed to download PDF');
     }
   };
 
-  const previewPDF = (orientation: "portrait" | "landscape" = "landscape") => {
+  const previewPDF = (orientation: 'portrait' | 'landscape' = 'landscape') => {
     console.log(orientation);
 
     if (!pvData) {
-      toast.error("No Payment Voucher data available");
+      toast.error('No Payment Voucher data available');
       return;
     }
     setShowPreview(true);

@@ -1,142 +1,148 @@
-import { FormEvent, useState } from "react";
-import ShowPasswordIcon from "../../ui/ShowPasswordIcon";
-import SpinnerMini from "../../ui/SpinnerMini";
-
-import { NavLink, useParams } from "react-router-dom";
-import { useResetPassword } from "./authHooks/useResetPassword";
-import { PasswordResetTypes } from "../../interfaces";
-import logo from "../../assets/logo.webp";
+import { FormEvent, useState } from 'react';
+import { NavLink, useParams } from 'react-router-dom';
+import { Lock, ArrowLeft, KeyRound } from 'lucide-react';
+import { useResetPassword } from './authHooks/useResetPassword';
+import { IPasswordReset } from '../../interfaces';
+import { infoConfig } from '../../config/config-info';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import ShowPasswordIcon from '../../components/custom/ShowPasswordIcon';
 
 const ResetPasswordForm: React.FC = () => {
-  const [formData, setFormData] = useState<PasswordResetTypes>({
-    password: "",
-    passwordConfirm: "",
+  const [formData, setFormData] = useState<Partial<IPasswordReset>>({
+    password: '',
+    passwordConfirm: '',
   });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { token } = useParams<{ token: string }>();
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value.trim() }));
+    setFormData(prev => ({ ...prev, [id]: value.trim() }));
   };
+
   const { resetPassword, isPending } = useResetPassword(token!);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     resetPassword({
-      password: formData.passwordConfirm,
+      password: formData.password,
       passwordConfirm: formData.passwordConfirm,
     });
   };
+
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  const handleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  // Password validation
+  const passwordMatch = formData.password === formData.passwordConfirm;
+  const passwordLength = formData.password!.length >= 8;
+
   return (
-    <div
-      className="h-screen flex flex-col items-center justify-center 
-      bg-gradient-to-br  from-blue-500 to-primary overflow-y-scroll 
-    font-roboto tracking-wide px-3 md:px-8 pt-16"
-    >
-      <div className="w-full md:w-[450px] bg-white  flex flex-col items-center justify-center p-4 md:p-6  shadow-xl rounded-md ">
-        <div className="flex items-center justify-center mb-4">
-          <img className="w-[190px] h-auto" src={logo} alt="Casfod logo" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-brand-700 to-brand-950 px-4 py-8">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 md:p-8">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            className="w-76 h-auto"
+            src={infoConfig.bigLogoUrl}
+            alt={`${infoConfig.name} logo`}
+          />
         </div>
-        <h2
-          className="text-lg md:text-2xl font-bold md:font-extrabold text-center text-primary mb-4"
-          style={{ fontFamily: "Lato", letterSpacing: "3.5px" }}
-        >
-          CASFOD POSSIBILITY HUB
-        </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center gap-4  md:gap-6 
-          w-full max-w-md  
-         backdrop-blur-lg  mx-4 md:mx-0"
-        >
-          {" "}
-          <div className="flex flex-col w-full gap-4">
-            {" "}
-            <div>
-              {" "}
-              <label htmlFor="password" className="block mb-1 font-bold  ">
-                {" "}
-                Password{" "}
-              </label>{" "}
-              <div className="relative w-full">
-                {" "}
-                <input
-                  className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
-                  focus:border-[#052859] focus:outline-none shadow-lg 
-                   "
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />{" "}
-                <span
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={handleShowPassword}
-                >
-                  {" "}
-                  <ShowPasswordIcon showPassword={showPassword} />{" "}
-                </span>{" "}
-              </div>{" "}
-            </div>{" "}
-            <div>
-              {" "}
-              <label
-                htmlFor="passwordConfirm"
-                className="block mb-1 font-bold  "
-              >
-                {" "}
-                Confirm Password{" "}
-              </label>{" "}
-              <div className="relative w-full">
-                {" "}
-                <input
-                  className="w-full h-8 md:h-10 font-semibold placeholder:font-semibold px-4 rounded-md border 
-                  focus:border-[#052859] focus:outline-none shadow-lg 
-                   "
-                  id="passwordConfirm"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={formData.passwordConfirm}
-                  onChange={handleInputChange}
-                  required
-                />{" "}
-                <span
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={handleShowPassword}
-                >
-                  {" "}
-                  <ShowPasswordIcon showPassword={showPassword} />{" "}
-                </span>{" "}
-              </div>{" "}
-            </div>{" "}
-          </div>{" "}
-          <button
+
+        {/* Title */}
+        {/* <h1 className="text-xl md:text-2xl font-extrabold text-center text-brand-800 uppercase tracking-widest font-jaro mb-2">
+          {infoConfig.name}
+        </h1> */}
+        <p className="text-center text-gray-600 text-sm mb-6">Create a new password</p>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="relative">
+            <Input
+              id="password"
+              label="New Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter new password"
+              value={formData.password}
+              onChange={handleInputChange}
+              leftIcon={<Lock className="w-4 h-4" />}
+              required
+              error={
+                formData.password && !passwordLength
+                  ? 'Password must be at least 8 characters'
+                  : undefined
+              }
+              helper="Minimum 8 characters"
+            />
+            <button
+              type="button"
+              onClick={handleShowPassword}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              <ShowPasswordIcon showPassword={showPassword} />
+            </button>
+          </div>
+
+          <div className="relative">
+            <Input
+              id="passwordConfirm"
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Confirm your password"
+              value={formData.passwordConfirm}
+              onChange={handleInputChange}
+              leftIcon={<KeyRound className="w-4 h-4" />}
+              required
+              error={
+                formData.passwordConfirm && !passwordMatch ? 'Passwords do not match' : undefined
+              }
+            />
+            <button
+              type="button"
+              onClick={handleShowConfirmPassword}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              <ShowPasswordIcon showPassword={showConfirmPassword} />
+            </button>
+          </div>
+
+          <Button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-primary hover:bg-opacity-95"
-            disabled={isPending}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isPending}
+            disabled={!passwordMatch || !passwordLength || !formData.password}
+            leftIcon={<KeyRound className="w-4 h-4" />}
           >
-            {" "}
-            {isPending ? <SpinnerMini /> : "Reset password"}{" "}
-          </button>{" "}
-        </form>{" "}
-      </div>{" "}
-      <div className="flex justify-center md:w-[450px] text-sm  text-gray-50 font-semibold text-end mt-3 ">
-        <p>
-          Want to login?{" "}
-          <span className="underline">
-            <NavLink to={"/login"}>Click here.</NavLink>{" "}
-          </span>
-        </p>
+            Reset Password
+          </Button>
+        </form>
+
+        {/* Links */}
+        <div className="mt-6 text-center">
+          <NavLink
+            to="/login"
+            className="inline-flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Login
+          </NavLink>
+        </div>
       </div>
-      <p className="inline-flex items-center gap-1 text-sm md:text-base text-gray-50 font-semibold text-center mt-8 ">
-        <span>&copy; 2025 Casfod Possibility Hub. All rights reserved.</span>
+
+      {/* Footer */}
+      <p className="mt-8 text-sm text-white/80 font-medium text-center">
+        &copy; {infoConfig.date} {infoConfig.name}. All rights reserved.
       </p>
     </div>
   );

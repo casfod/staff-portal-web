@@ -1,5 +1,5 @@
-import { Outlet } from "react-router-dom";
-import { MaintenanceBanner } from "../ui/MaintenanceBanner";
+import { Outlet } from 'react-router-dom';
+import { MaintenanceBanner } from '../components/custom/MaintenanceBanner';
 
 const RFQManagement = () => {
   const isUnderMaintenance = false;

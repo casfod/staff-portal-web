@@ -12,11 +12,11 @@ export const addPdfFooter = (
 
   // Set footer style
   pdf.setFontSize(9);
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(100, 100, 100); // Gray color
 
   // Left side: Code (RFQ, PO, GRN, PV)
-  const codeText = `${codeLabel}: ${code || "N/A"}`;
+  const codeText = `${codeLabel}: ${code || 'N/A'}`;
   pdf.text(codeText, margin, pdfHeight - 5);
 
   // Right side: Page number
@@ -30,17 +30,17 @@ export const addPdfFooter = (
 };
 
 // Helper to get code label based on document type
-export const getCodeLabel = (docType: "rfq" | "po" | "grn" | "pv"): string => {
+export const getCodeLabel = (docType: 'rfq' | 'po' | 'grn' | 'pv'): string => {
   switch (docType) {
-    case "rfq":
-      return "RFQ Code";
-    case "po":
-      return "PO Code";
-    case "grn":
-      return "GRN Code";
-    case "pv":
-      return "PV Number";
+    case 'rfq':
+      return 'RFQ Code';
+    case 'po':
+      return 'PO Code';
+    case 'grn':
+      return 'GRN Code';
+    case 'pv':
+      return 'PV Number';
     default:
-      return "Code";
+      return 'Code';
   }
 };

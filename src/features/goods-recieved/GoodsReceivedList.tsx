@@ -1,15 +1,15 @@
 // GoodsReceivedList.tsx
-import React from "react";
-import { GoodsReceivedType } from "../../interfaces";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { Package, Eye, Edit } from "lucide-react";
-import Button from "../../ui/Button";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { IGoodsReceived } from '../../interfaces';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { Package, Eye, Edit } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface GoodsReceivedListProps {
-  goodsReceivedNotes: GoodsReceivedType[];
+  goodsReceivedNotes: IGoodsReceived[];
   purchaseOrderId: string;
-  onEditGRN?: (grn: GoodsReceivedType) => void; // Add edit callback
+  onEditGRN?: (grn: IGoodsReceived) => void; // Add edit callback
 }
 
 const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
@@ -23,30 +23,29 @@ const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
     navigate(`/procurement/goods-received/${grnId}`);
   };
 
-  const calculateTotalReceived = (grn: GoodsReceivedType) => {
-    return grn.GRNitems.reduce((sum, item) => sum + item.numberReceived, 0);
+  const calculateTotalReceived = (grn: IGoodsReceived) => {
+    return grn.grnItems.reduce((sum, item) => sum + item.numberReceived, 0);
   };
 
-  const calculateTotalOrdered = (grn: GoodsReceivedType) => {
-    return grn.GRNitems.reduce((sum, item) => sum + item.numberOrdered, 0);
+  const calculateTotalOrdered = (grn: IGoodsReceived) => {
+    return grn.grnItems.reduce((sum, item) => sum + item.numberOrdered, 0);
   };
 
-  const getOverallStatus = (grn: GoodsReceivedType) => {
+  const getOverallStatus = (grn: IGoodsReceived) => {
     const totalOrdered = calculateTotalOrdered(grn);
     const totalReceived = calculateTotalReceived(grn);
 
-    if (totalReceived === 0)
-      return { status: "Not Received", class: "bg-gray-100 text-gray-700" };
+    if (totalReceived === 0) return { status: 'Not Received', class: 'bg-gray-100 text-gray-700' };
     if (totalReceived === totalOrdered)
-      return { status: "Fully Received", class: "bg-green-100 text-green-700" };
+      return { status: 'Fully Received', class: 'bg-green-100 text-green-700' };
     if (totalReceived > totalOrdered)
       return {
-        status: "Over Received",
-        class: "bg-orange-100 text-orange-700",
+        status: 'Over Received',
+        class: 'bg-orange-100 text-orange-700',
       };
     return {
-      status: "Partially Received",
-      class: "bg-yellow-100 text-yellow-700",
+      status: 'Partially Received',
+      class: 'bg-yellow-100 text-yellow-700',
     };
   };
 
@@ -60,22 +59,16 @@ const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
       </div>
 
       <div className="divide-y">
-        {goodsReceivedNotes.map((grn) => {
+        {goodsReceivedNotes.map(grn => {
           const overallStatus = getOverallStatus(grn);
           return (
             <div key={grn.id} className="p-4 hover:bg-gray-50">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-700">
-                      {grn.GRDCode}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {formatToDDMMYYYY(grn.createdAt)}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${overallStatus.class}`}
-                    >
+                    <span className="font-semibold text-gray-700">{grn.grdCode}</span>
+                    <span className="text-sm text-gray-500">{formatToDDMMYYYY(grn.createdAt)}</span>
+                    <span className={`px-2 py-1 rounded text-xs ${overallStatus.class}`}>
                       {overallStatus.status}
                     </span>
                   </div>
@@ -83,15 +76,11 @@ const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">Items:</span>
-                      <span className="ml-2 font-medium">
-                        {grn.GRNitems.length}
-                      </span>
+                      <span className="ml-2 font-medium">{grn.grnItems.length}</span>
                     </div>
                     <div>
                       <span className="text-gray-600">Ordered:</span>
-                      <span className="ml-2 font-medium">
-                        {calculateTotalOrdered(grn)}
-                      </span>
+                      <span className="ml-2 font-medium">{calculateTotalOrdered(grn)}</span>
                     </div>
                     <div>
                       <span className="text-gray-600">Received:</span>
@@ -102,8 +91,7 @@ const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
                     <div>
                       <span className="text-gray-600">Balance:</span>
                       <span className="ml-2 font-medium">
-                        {calculateTotalOrdered(grn) -
-                          calculateTotalReceived(grn)}
+                        {calculateTotalOrdered(grn) - calculateTotalReceived(grn)}
                       </span>
                     </div>
                   </div>
@@ -111,20 +99,12 @@ const GoodsReceivedList: React.FC<GoodsReceivedListProps> = ({
 
                 <div className="flex gap-2">
                   {onEditGRN && grn.isCompleted !== true && (
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => onEditGRN(grn)}
-                    >
+                    <Button variant="primary" size="sm" onClick={() => onEditGRN(grn)}>
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                   )}
-                  <Button
-                    variant="primary"
-                    size="small"
-                    onClick={() => handleViewGRN(grn.id)}
-                  >
+                  <Button variant="primary" size="sm" onClick={() => handleViewGRN(grn.id)}>
                     <Eye className="h-4 w-4 mr-1" />
                     View
                   </Button>

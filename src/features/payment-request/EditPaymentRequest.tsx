@@ -1,11 +1,11 @@
-import { List } from "lucide-react";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useNavigate, useParams } from "react-router-dom";
-import FormEditPaymentRequest from "./FormEditPaymentRequest";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
+import { List } from 'lucide-react';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { useNavigate, useParams } from 'react-router-dom';
+import PaymentRequestForm from './PaymentRequestForm';
+import { Button } from '../../components/ui/button';
+import TextHeader from '../../components/custom/TextHeader';
 
 const EditPaymentRequest = () => {
   const navigate = useNavigate();
@@ -14,13 +14,11 @@ const EditPaymentRequest = () => {
 
   // Access the purchaseRequest state from Redux
 
-  const paymentRequest = useSelector(
-    (state: RootState) => state.paymentRequest.paymentRequest
-  );
+  const paymentRequest = useSelector((state: RootState) => state.paymentRequest.paymentRequest);
 
   useEffect(() => {
     if (!param || !paymentRequest) {
-      navigate("/purchase-requests");
+      navigate('/purchase-requests');
     }
   }, [paymentRequest, param, navigate]);
 
@@ -31,7 +29,7 @@ const EditPaymentRequest = () => {
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Update Payment Request</TextHeader>
 
@@ -46,7 +44,7 @@ const EditPaymentRequest = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-4 md:py-6 lg:py-10 px-2 md:px-6 lg:px-12 w-full rounded-lg">
-          <FormEditPaymentRequest paymentRequest={paymentRequest!} />
+          <PaymentRequestForm mode="edit" initialData={paymentRequest!} />
         </div>
       </div>
     </div>

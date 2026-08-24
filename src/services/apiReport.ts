@@ -1,82 +1,21 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiReport.ts
 import {
-  ReportType,
-  UseReport,
-  UseReportType,
-  UseReportStatsType,
-} from "../interfaces.ts";
+  IReport,
+  IReportsListResponse,
+  IReportSingleResponse,
+  IReportStatsResponse,
+} from '../interfaces';
+import apiClient, {
+  handleError,
+  QueryParams,
+  StatusUpdateData,
+  CommentData,
+  CopyToData,
+} from './apiClient';
 
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) return Promise.reject(error);
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    console.log(err.response?.data);
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
-
-// API Functions
-
-export const getAllReports = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllReports = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<UseReportType>(`/reports`, {
+    const response = await apiClient.get<IReportsListResponse>(`hr/reports`, {
       params: queryParams,
     });
     return response.data;
@@ -87,7 +26,7 @@ export const getAllReports = async function (queryParams: {
 
 export const getReport = async function (reportId: string) {
   try {
-    const response = await axiosInstance.get<UseReport>(`/reports/${reportId}`);
+    const response = await apiClient.get<IReportSingleResponse>(`hr/reports/${reportId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -96,71 +35,25 @@ export const getReport = async function (reportId: string) {
 
 export const getReportStats = async function () {
   try {
-    const response = await axiosInstance.get<UseReportStatsType>(
-      `/reports/stats`
-    );
+    const response = await apiClient.get<IReportStatsResponse>(`hr/reports/stats`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const saveReport = async function (data: Partial<ReportType>) {
+export const saveReport = async function (data: Partial<IReport>) {
   try {
-    const response = await axiosInstance.post<ReportType>(
-      `/reports/save`,
-      data
-    );
+    const response = await apiClient.post<IReport>(`hr/reports/draft`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const sendReport = async function (
-  data: Partial<ReportType>,
-  files: File[]
-) {
+export const sendReport = async function (data: Partial<IReport>) {
   try {
-    const formData = new FormData();
-
-    const simpleFields: (keyof ReportType)[] = [
-      "activityType",
-      "otherActivitySpecification",
-      "reportType",
-      "reportTitle",
-      "project",
-      "reviewedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Add reporting period
-    if (data.reportingPeriod) {
-      if (data.reportingPeriod.from) {
-        formData.append(
-          "reportingPeriod[from]",
-          String(data.reportingPeriod.from)
-        );
-      }
-      if (data.reportingPeriod.to) {
-        formData.append("reportingPeriod[to]", String(data.reportingPeriod.to));
-      }
-    }
-
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<ReportType>(
-      `/reports/save-and-send`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    const response = await apiClient.post<IReport>(`hr/reports`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -169,63 +62,20 @@ export const sendReport = async function (
 
 export const updateReport = async function (
   reportId: string,
-  data: Partial<ReportType>,
-  files: File[]
+  data: Partial<IReport>,
 ) {
   try {
-    const formData = new FormData();
-
-    const simpleFields: (keyof ReportType)[] = [
-      "activityType",
-      "otherActivitySpecification",
-      "reportType",
-      "reportTitle",
-      "project",
-      "reviewedBy",
-      "approvedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Add reporting period
-    if (data.reportingPeriod) {
-      if (data.reportingPeriod.from) {
-        formData.append(
-          "reportingPeriod[from]",
-          String(data.reportingPeriod.from)
-        );
-      }
-      if (data.reportingPeriod.to) {
-        formData.append("reportingPeriod[to]", String(data.reportingPeriod.to));
-      }
-    }
-
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<Partial<ReportType>>(
-      `/reports/${reportId}`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    const response = await apiClient.patch<Partial<IReport>>(`hr/reports/${reportId}`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const updateReportStatus = async function (
-  reportId: string,
-  data: { status: string; comment: string }
-) {
+export const updateReportStatus = async function (reportId: string, data: StatusUpdateData) {
   try {
-    const response = await axiosInstance.patch<Partial<ReportType>>(
-      `/reports/update-status/${reportId}`,
+    const response = await apiClient.patch<Partial<IReport>>(
+      `hr/reports/${reportId}/status`,
       data
     );
     return response.data;
@@ -234,30 +84,18 @@ export const updateReportStatus = async function (
   }
 };
 
-export const copyReportTo = async function (
-  reportId: string,
-  data: { userIds: string[] }
-) {
+export const copyReportTo = async function (reportId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.patch<Partial<ReportType>>(
-      `/reports/copy/${reportId}`,
-      data
-    );
+    const response = await apiClient.post<Partial<IReport>>(`hr/reports/${reportId}/copy`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const addReportComment = async function (
-  reportId: string,
-  data: { text: string }
-) {
+export const addReportComment = async function (reportId: string, data: CommentData) {
   try {
-    const response = await axiosInstance.post(
-      `/reports/${reportId}/comments`,
-      data
-    );
+    const response = await apiClient.post(`hr/reports/${reportId}/comments`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -267,27 +105,19 @@ export const addReportComment = async function (
 export const updateReportComment = async function (
   reportId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/reports/${reportId}/comments/${commentId}`,
-      data
-    );
+    const response = await apiClient.patch(`hr/reports/${reportId}/comments/${commentId}`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const deleteReportComment = async function (
-  reportId: string,
-  commentId: string
-) {
+export const deleteReportComment = async function (reportId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/reports/${reportId}/comments/${commentId}`
-    );
+    const response = await apiClient.delete(`hr/reports/${reportId}/comments/${commentId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -296,9 +126,7 @@ export const deleteReportComment = async function (
 
 export const deleteReport = async function (reportId: string) {
   try {
-    const response = await axiosInstance.delete<ReportType>(
-      `/reports/${reportId}`
-    );
+    const response = await apiClient.delete<IReport>(`hr/reports/${reportId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

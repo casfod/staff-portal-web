@@ -1,75 +1,16 @@
 // src/services/apiAppraisal.ts
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser";
-import { baseUrl } from "./baseUrl";
-import { AppraisalType, UseAppraisalType, UseAppraisal } from "../interfaces";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+import {
+  IAppraisalStatsResponse,
+  IAppraisalsListResponse,
+  IAppraisalSingleResponse,
+  IAppraisal,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams, CommentData, CopyToData } from './apiClient';
 
 // ========== GET STATS ==========
 export const getAppraisalStats = async function () {
   try {
-    const response = await axiosInstance.get(`/appraisals/stats`);
+    const response = await apiClient.get<IAppraisalStatsResponse>(`/hr/appraisals/stats`);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -77,16 +18,14 @@ export const getAppraisalStats = async function () {
 };
 
 // ========== GET ALL ==========
-export const getAllAppraisals = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-  status?: string;
-  period?: string;
-}) {
+export const getAllAppraisals = async function (
+  queryParams: QueryParams & {
+    status?: string;
+    period?: string;
+  }
+) {
   try {
-    const response = await axiosInstance.get<UseAppraisalType>(`/appraisals`, {
+    const response = await apiClient.get<IAppraisalsListResponse>(`/hr/appraisals`, {
       params: queryParams,
     });
     return response.data;
@@ -98,52 +37,38 @@ export const getAllAppraisals = async function (queryParams: {
 // ========== GET BY ID ==========
 export const getAppraisal = async function (appraisalId: string) {
   try {
-    const response = await axiosInstance.get<UseAppraisal>(
-      `/appraisals/${appraisalId}`
-    );
+    const response = await apiClient.get<IAppraisalSingleResponse>(`/hr/appraisals/${appraisalId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-// ========== SAVE DRAFT ==========
-export const saveAppraisalDraft = async function (
-  data: Partial<AppraisalType>
-) {
+// ✅ FIXED: Match backend route /hr/appraisals/draft
+export const saveAppraisalDraft = async function (data: Partial<IAppraisal>) {
   try {
-    console.log({ data });
-
-    const response = await axiosInstance.post<UseAppraisalType>(
-      `/appraisals/save`,
-      data
-    );
+    const response = await apiClient.post<IAppraisalSingleResponse>(`/hr/appraisals/draft`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-// ========== CREATE AND SUBMIT ==========
-export const createAndSubmitAppraisal = async function (
-  data: Partial<AppraisalType>
-) {
+// ✅ FIXED: Match backend route /hr/appraisals (POST creates and submits)
+export const createAndSubmitAppraisal = async function (data: Partial<IAppraisal>) {
   try {
-    const response = await axiosInstance.post<UseAppraisalType>(
-      `/appraisals/create-and-submit`,
-      data
-    );
+    const response = await apiClient.post<IAppraisalSingleResponse>(`/hr/appraisals`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-// ========== SUBMIT EXISTING DRAFT ==========
+// ✅ FIXED: Match backend route /hr/appraisals/:id/submit
 export const submitExistingAppraisal = async function (appraisalId: string) {
   try {
-    const response = await axiosInstance.post<UseAppraisalType>(
-      `/appraisals/${appraisalId}/submit`,
+    const response = await apiClient.patch<IAppraisalSingleResponse>(
+      `/hr/appraisals/${appraisalId}/submit`,
       {}
     );
     return response.data;
@@ -155,11 +80,26 @@ export const submitExistingAppraisal = async function (appraisalId: string) {
 // ========== UPDATE STATUS (Approve/Reject) ==========
 export const updateAppraisalStatus = async function (
   appraisalId: string,
-  data: { status: "approved" | "rejected"; comment?: string }
+  data: { status: 'approved' | 'rejected'; comment?: string }
 ) {
   try {
-    const response = await axiosInstance.patch(
-      `/appraisals/${appraisalId}/status`,
+    const response = await apiClient.patch(`/hr/appraisals/${appraisalId}/status`, data);
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// ✅ FIXED: Use PATCH instead of PUT to match backend
+export const updateAppraisal = async function (
+  appraisalId: string,
+  data: Partial<IAppraisal>,
+) {
+  try {
+
+    console.log({updateAppraisal:data})
+    const response = await apiClient.patch<IAppraisalSingleResponse>(
+      `/hr/appraisals/${appraisalId}`,
       data
     );
     return response.data;
@@ -168,88 +108,11 @@ export const updateAppraisalStatus = async function (
   }
 };
 
-// ========== UPDATE ==========
-export const updateAppraisal = async function (
-  appraisalId: string,
-  data: Partial<AppraisalType>,
-  files: File[] = []
-) {
+// ✅ FIXED: Match backend route /hr/appraisals/:id/copy
+export const copyAppraisal = async function (requestId: string, data: CopyToData) {
   try {
-    const formData = new FormData();
-
-    // Handle objectives as JSON
-    if (data.objectives) {
-      formData.append("objectives", JSON.stringify(data.objectives));
-    }
-
-    // Handle performanceAreas as JSON
-    if (data.performanceAreas) {
-      formData.append(
-        "performanceAreas",
-        JSON.stringify(data.performanceAreas)
-      );
-    }
-
-    // Handle safeguarding as JSON
-    if (data.safeguarding) {
-      formData.append("safeguarding", JSON.stringify(data.safeguarding));
-    }
-
-    // Handle signatures as JSON
-    if (data.signatures) {
-      formData.append("signatures", JSON.stringify(data.signatures));
-    }
-
-    // Append simple fields
-    const simpleFields: (keyof AppraisalType)[] = [
-      "staffId",
-      "staffName",
-      "position",
-      "department",
-      "lengthOfTimeInPosition",
-      "appraisalPeriod",
-      "dateOfAppraisal",
-      "supervisorId",
-      "supervisorName",
-      "lengthOfTimeSupervised",
-      "supervisorComments",
-      "overallRating",
-      "futureGoals",
-      "comment",
-      "staffStrategy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<UseAppraisalType>(
-      `/appraisals/${appraisalId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<UseAppraisalType>>(
-      `/appraisals/copy/${requestId}`,
+    const response = await apiClient.post<Partial<IAppraisal>>(
+      `/hr/appraisals/${requestId}/copy`,
       data
     );
     return response.data;
@@ -261,13 +124,16 @@ export const copyTo = async function (
 // ========== UPDATE OBJECTIVES ==========
 export const updateAppraisalObjectives = async function (
   appraisalId: string,
-  objectives: any[]
+  objectives: Array<{
+    objective: string;
+    employeeRating?: { rating: string; achievements: string };
+    supervisorRating?: string;
+  }>
 ) {
   try {
-    const response = await axiosInstance.patch(
-      `/appraisals/${appraisalId}/objectives`,
-      { objectives }
-    );
+    const response = await apiClient.patch(`/hr/appraisals/${appraisalId}/objectives`, {
+      objectives,
+    });
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -277,14 +143,14 @@ export const updateAppraisalObjectives = async function (
 // ========== SIGN APPRAISAL ==========
 export const signAppraisal = async function (
   appraisalId: string,
-  signatureType: "staff" | "supervisor",
+  signatureType: 'staff' | 'supervisor',
   comments?: string
 ) {
   try {
-    const response = await axiosInstance.patch(
-      `/appraisals/${appraisalId}/sign`,
-      { signatureType, comments }
-    );
+    const response = await apiClient.patch(`/hr/appraisals/${appraisalId}/sign`, {
+      signatureType,
+      comments,
+    });
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -292,15 +158,9 @@ export const signAppraisal = async function (
 };
 
 // ========== COMMENTS ==========
-export const addComment = async function (
-  appraisalId: string,
-  data: { text: string }
-) {
+export const addComment = async function (appraisalId: string, data: CommentData) {
   try {
-    const response = await axiosInstance.post(
-      `/appraisals/${appraisalId}/comments`,
-      data
-    );
+    const response = await apiClient.post(`/hr/appraisals/${appraisalId}/comments`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -310,11 +170,11 @@ export const addComment = async function (
 export const updateComment = async function (
   appraisalId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/appraisals/${appraisalId}/comments/${commentId}`,
+    const response = await apiClient.patch(
+      `/hr/appraisals/${appraisalId}/comments/${commentId}`,
       data
     );
     return response.data;
@@ -323,14 +183,9 @@ export const updateComment = async function (
   }
 };
 
-export const deleteComment = async function (
-  appraisalId: string,
-  commentId: string
-) {
+export const deleteComment = async function (appraisalId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/appraisals/${appraisalId}/comments/${commentId}`
-    );
+    const response = await apiClient.delete(`/hr/appraisals/${appraisalId}/comments/${commentId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -340,7 +195,7 @@ export const deleteComment = async function (
 // ========== DELETE ==========
 export const deleteAppraisal = async function (appraisalId: string) {
   try {
-    const response = await axiosInstance.delete(`/appraisals/${appraisalId}`);
+    const response = await apiClient.delete(`/hr/appraisals/${appraisalId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

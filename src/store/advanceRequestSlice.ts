@@ -1,10 +1,10 @@
 // Redux Slice: advanceRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AdvanceRequestType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IAdvanceRequest } from '../interfaces';
 
 // Define the initial state with proper typing
 interface AdvanceRequestStateType {
-  advanceRequest: AdvanceRequestType | null;
+  advanceRequest: IAdvanceRequest | null;
 }
 
 const initialState: AdvanceRequestStateType = {
@@ -13,26 +13,22 @@ const initialState: AdvanceRequestStateType = {
 
 // Create the slice
 const advanceRequestSlice = createSlice({
-  name: "advanceRequest",
+  name: 'advanceRequest',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setAdvanceRequest: (
-      state,
-      action: PayloadAction<AdvanceRequestType | null>
-    ) => {
+    setAdvanceRequest: (state, action: PayloadAction<IAdvanceRequest | null>) => {
       state.advanceRequest = action.payload;
     },
     // Add a reset action to clear the state
-    resetAdvanceRequest: (state) => {
+    resetAdvanceRequest: state => {
       state.advanceRequest = null;
     },
   },
 });
 
 // Export the actions
-export const { setAdvanceRequest, resetAdvanceRequest } =
-  advanceRequestSlice.actions;
+export const { setAdvanceRequest, resetAdvanceRequest } = advanceRequestSlice.actions;
 
 // Export the reducer
 export default advanceRequestSlice.reducer;

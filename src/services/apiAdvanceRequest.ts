@@ -1,97 +1,28 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiAdvanceRequest.ts
 import {
-  AdvanceRequestType,
-  UseAdvanceRequest,
-  UseAdvanceRequestType,
-  UseAdvanceStatsType,
-} from "../interfaces.ts";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      // console.log("Token attached to request:", token);
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    console.log(err.response?.data);
-
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IAdvanceRequest,
+  IAdvanceRequestsListResponse,
+  IAdvanceRequestSingleResponse,
+  IAdvanceRequestStatsResponse,
+} from '../interfaces.ts';
+import apiClient, {
+  handleError,
+  QueryParams,
+  StatusUpdateData,
+  CommentData,
+  CopyToData,
+} from './apiClient';
 
 // API Functions
 
-export const getAllAdvanceRequest = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllAdvanceRequest = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<UseAdvanceRequestType>(
-      `/advance-requests`,
+    const response = await apiClient.get<IAdvanceRequestsListResponse>(
+      `/finance/advance-requests`,
       {
         params: queryParams,
       }
     );
-    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -100,10 +31,9 @@ export const getAllAdvanceRequest = async function (queryParams: {
 
 export const getAdvanceRequest = async function (requestId: string) {
   try {
-    const response = await axiosInstance.get<UseAdvanceRequest>(
-      `/advance-requests/${requestId}`
+    const response = await apiClient.get<IAdvanceRequestSingleResponse>(
+      `/finance/advance-requests/${requestId}`
     );
-    console.log("API Response:", response.data); // Debugging line
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -112,8 +42,8 @@ export const getAdvanceRequest = async function (requestId: string) {
 
 export const getAdvanceRequestStats = async function () {
   try {
-    const response = await axiosInstance.get<UseAdvanceStatsType>(
-      `/advance-requests/stats`
+    const response = await apiClient.get<IAdvanceRequestStatsResponse>(
+      `/finance/advance-requests/stats`
     );
     return response.data;
   } catch (err) {
@@ -121,12 +51,10 @@ export const getAdvanceRequestStats = async function () {
   }
 };
 
-export const saveAdvanceRequests = async function (
-  data: Partial<AdvanceRequestType>
-) {
+export const saveAdvanceRequests = async function (data: Partial<IAdvanceRequest>) {
   try {
-    const response = await axiosInstance.post<AdvanceRequestType>(
-      `/advance-requests/save`,
+    const response = await apiClient.post<IAdvanceRequestSingleResponse>(
+      `/finance/advance-requests/draft`,
       data
     );
     return response.data;
@@ -135,50 +63,11 @@ export const saveAdvanceRequests = async function (
   }
 };
 
-export const sendAdvanceRequests = async function (
-  data: Partial<AdvanceRequestType>,
-  files: File[]
-) {
+export const sendAdvanceRequests = async function (data: Partial<IAdvanceRequest>) {
   try {
-    const formData = new FormData();
-
-    formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    formData.append("periodOfActivity", JSON.stringify(data.periodOfActivity));
-
-    // Append standard fields
-    const simpleFields: (keyof AdvanceRequestType)[] = [
-      "project",
-      "accountCode",
-      "expenseChargedTo",
-      "department",
-      "suggestedSupplier",
-      "address",
-      "finalDeliveryPoint",
-      "city",
-      "accountNumber",
-      "accountName",
-      "bankName",
-      "activityDescription",
-      "reviewedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<AdvanceRequestType>(
-      `/advance-requests/save-and-send`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.post<IAdvanceRequestSingleResponse>(
+      `/finance/advance-requests`,
+      data
     );
     return response.data;
   } catch (err) {
@@ -188,45 +77,11 @@ export const sendAdvanceRequests = async function (
 
 export const updateAdvanceRequest = async function (
   requestId: string,
-  data: Partial<AdvanceRequestType>,
-  files: File[]
+  data: Partial<IAdvanceRequest>
 ) {
   try {
-    const formData = new FormData();
-
-    const simpleFields: (keyof AdvanceRequestType)[] = ["approvedBy"];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<Partial<AdvanceRequestType>>(
-      `/advance-requests/${requestId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const updateStatus = async function (
-  requestId: string,
-  data: { status: string; comment: string }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<AdvanceRequestType>>(
-      `/advance-requests/update-status/${requestId}`,
+    const response = await apiClient.patch<IAdvanceRequestSingleResponse>(
+      `/finance/advance-requests/${requestId}`,
       data
     );
     return response.data;
@@ -235,13 +90,10 @@ export const updateStatus = async function (
   }
 };
 
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
+export const updateStatus = async function (requestId: string, data: StatusUpdateData) {
   try {
-    const response = await axiosInstance.patch<Partial<AdvanceRequestType>>(
-      `/advance-requests/copy/${requestId}`,
+    const response = await apiClient.patch<Partial<IAdvanceRequest>>(
+      `/finance/advance-requests/${requestId}/status`,
       data
     );
     return response.data;
@@ -250,16 +102,21 @@ export const copyTo = async function (
   }
 };
 
-// Comment API functions
-export const addComment = async function (
-  requestId: string,
-  data: { text: string }
-) {
+export const copyTo = async function (requestId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.post(
-      `/advance-requests/${requestId}/comments`,
+    const response = await apiClient.post<Partial<IAdvanceRequest>>(
+      `/finance/advance-requests/${requestId}/copy`,
       data
     );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const addComment = async function (requestId: string, data: CommentData) {
+  try {
+    const response = await apiClient.post(`/finance/advance-requests/${requestId}/comments`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -269,11 +126,11 @@ export const addComment = async function (
 export const updateComment = async function (
   requestId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/advance-requests/${requestId}/comments/${commentId}`,
+    const response = await apiClient.put(
+      `/finance/advance-requests/${requestId}/comments/${commentId}`,
       data
     );
     return response.data;
@@ -282,13 +139,10 @@ export const updateComment = async function (
   }
 };
 
-export const deleteComment = async function (
-  requestId: string,
-  commentId: string
-) {
+export const deleteComment = async function (requestId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/advance-requests/${requestId}/comments/${commentId}`
+    const response = await apiClient.delete(
+      `/finance/advance-requests/${requestId}/comments/${commentId}`
     );
     return response.data;
   } catch (err) {
@@ -298,8 +152,8 @@ export const deleteComment = async function (
 
 export const deleteAdvanceRequest = async function (advanceRequestID: string) {
   try {
-    const response = await axiosInstance.delete<AdvanceRequestType>(
-      `/advance-requests/${advanceRequestID}`
+    const response = await apiClient.delete<IAdvanceRequest>(
+      `/finance/advance-requests/${advanceRequestID}`
     );
     return response.data;
   } catch (err) {

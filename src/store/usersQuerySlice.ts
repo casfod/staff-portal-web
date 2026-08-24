@@ -1,18 +1,14 @@
 // userSlice.ts
-import { createSlice } from "@reduxjs/toolkit";
-import genericQuerySlice, { QueryState } from "./genericQuerySlice";
+import { createSlice } from '@reduxjs/toolkit';
+import genericQuerySlice, { GenericQueryState } from './genericQuerySlice';
 
-interface UserState extends QueryState {
-  // Add user-specific state here if needed
-}
-
-const initialState: UserState = {
+const initialState: GenericQueryState = {
   ...genericQuerySlice.prototype(),
   // Add user-specific initial state here
 };
 
 const userSlice = createSlice({
-  name: "usersQuery",
+  name: 'usersQuery',
   initialState,
   reducers: {
     ...genericQuerySlice.prototype,

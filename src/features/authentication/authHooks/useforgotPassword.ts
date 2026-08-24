@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import { forgotPassword as forgotPasswordApi } from "../../../services/apiAuth.ts";
+import { useMutation } from '@tanstack/react-query';
+import { forgotPassword as forgotPasswordApi } from '../../../services/apiAuth.ts';
 // import { AxiosError } from "axios";
-import { toast } from "react-hot-toast";
-import { PasswordForgotTypes } from "../../../interfaces.ts";
+import { toast } from 'react-hot-toast';
+import { IPasswordForgot } from '../../../interfaces.ts';
 
 export function useForgotPassword() {
   const {
@@ -10,20 +10,20 @@ export function useForgotPassword() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ email }: PasswordForgotTypes) => forgotPasswordApi(email),
+    mutationFn: ({ email }: IPasswordForgot) => forgotPasswordApi(email),
 
-    onSuccess: (data) => {
-      if (data.status === "success") {
-        toast.success("Successful! please check your mail.");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Successful! please check your mail.');
       } else {
         toast.error(`${data.message}`);
-        console.error("Forgot Password Error:", data.message);
+        console.error('Forgot Password Error:', data.message);
       }
     },
 
-    onError: (err) => {
-      toast.error("Network or server error");
-      console.log("ERROR", err);
+    onError: err => {
+      toast.error('Network or server error');
+      console.log('ERROR', err);
     },
   });
 

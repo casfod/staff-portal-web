@@ -1,121 +1,147 @@
-import React from "react";
-import logo from "../../assets/logo.webp";
-import { PaymentVoucherType } from "../../interfaces";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { moneyFormat } from "../../utils/moneyFormat";
+// PVPDFTemplate.tsx - Fixed with signature support
+import React, { RefObject } from 'react';
+import logo from '../../assets/logo.webp';
+import { IPaymentVoucher, IUser } from '../../interfaces';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import { infoConfig } from '@/config/config-info';
 
 interface PVPDFTemplateProps {
-  pdfRef?: any;
+  pdfRef?: RefObject<HTMLDivElement | null> | null;
   isGenerating?: boolean;
-  pvData: PaymentVoucherType;
-  orientation?: "portrait" | "landscape";
+  pvData: IPaymentVoucher;
+  orientation?: 'portrait' | 'landscape';
 }
 
 const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   pvData,
   pdfRef,
-  // orientation = "landscape",
 }) => {
-  const getDisplayName = (user: any): string => {
-    if (!user) return "N/A";
-    if (typeof user === "string") return "N/A";
-    return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A";
+  const getDisplayName = (user: Partial<IUser>): string => {
+    if (!user) return 'N/A';
+    if (typeof user === 'string') return 'N/A';
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A';
   };
 
-  const getPosition = (user: any): string => {
-    if (!user) return "N/A";
-    if (typeof user === "string") return "N/A";
-    return user.position || user.role || "N/A";
+  const getPosition = (user: Partial<IUser>): string => {
+    if (!user) return 'N/A';
+    if (typeof user === 'string') return 'N/A';
+    return user.position || user.role || 'N/A';
+  };
+
+  // Helper to render signature if available
+  const renderSignature = (user: Partial<IUser>) => {
+    if (!user) return null;
+    
+    // Check if user has a signature URL
+    const signatureUrl = user?.signature?.url;
+    
+    if (signatureUrl) {
+      return (
+        <div className="mt-1">
+          <img 
+            src={signatureUrl} 
+            alt="Signature" 
+            className="max-h-10 max-w-28 object-contain mx-auto"
+            style={{ maxWidth: '100px' }}
+          />
+          <p className="text-[10px] text-gray-500 mt-0.5">Signature</p>
+        </div>
+      );
+    }
+    
+    // Fallback: empty line for handwritten signature
+    return (
+      <>
+        <div className="w-full h-6 border-t border-gray-300 pt-2"></div>
+        <p className="text-[10px] text-gray-500">Signature</p>
+      </>
+    );
   };
 
   const totalDeductions =
-    (pvData.vat || 0) +
-    (pvData.wht || 0) +
-    (pvData.devLevy || 0) +
-    (pvData.otherDeductions || 0);
+    (pvData.vat || 0) + (pvData.wht || 0) + (pvData.devLevy || 0) + (pvData.otherDeductions || 0);
 
   // A4 landscape dimensions
   const containerStyle = {
-    fontFamily: "Arial, sans-serif",
-    width: "297mm",
-    margin: "0 auto",
-    // fontSize: "12px",
-    lineHeight: "1.15",
-    color: "#111827",
-    backgroundColor: "#ffffff",
-    display: "flex",
-    flexDirection: "column" as const,
-    // justifyContent: "space-between",
-    padding: "5mm",
-    boxSizing: "border-box" as const,
+    fontFamily: 'Arial, sans-serif',
+    width: '297mm',
+    margin: '0 auto',
+    lineHeight: '1.15',
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    padding: '5mm',
+    boxSizing: 'border-box' as const,
   };
 
   const paymentInfoSections = [
     {
-      title: "Payment Details",
+      title: 'Payment Details',
       fields: [
-        { label: "Paying Station", value: pvData.payingStation },
-        { label: "Pay To", value: pvData.payTo },
-        { label: "Account Code", value: pvData.accountCode },
-        { label: "Chart Of Acc. Code", value: pvData.chartOfAccountCode },
+        { label: 'Paying Station', value: pvData.payingStation },
+        { label: 'Pay To', value: pvData.payTo },
+        { label: 'Account Code', value: pvData.accountCode },
+        { label: 'Chart Of Acc. Code', value: pvData.chartOfAccountCode },
       ],
     },
     {
-      title: "Project & Chart Details",
+      title: 'Project & Chart Details',
       fields: [
-        { label: "Project", value: pvData.project },
+        { label: 'Project', value: pvData.project },
         {
-          label: "Organisational Chart of Acc.",
+          label: 'Organisational Chart of Acc.',
           value: pvData.organisationalChartOfAccount,
         },
-        { label: "Category", value: pvData.chartOfAccountCategories },
+        { label: 'Category', value: pvData.chartOfAccountCategories },
       ],
     },
   ];
 
   const financialItems = [
-    { label: "Gross Amount", value: pvData.grossAmount },
-    { label: "VAT", value: pvData.vat, show: pvData.vat > 0 },
-    { label: "WHT", value: pvData.wht, show: pvData.wht > 0 },
+    { label: 'Gross Amount', value: pvData.grossAmount },
+    { label: 'VAT', value: pvData.vat, show: pvData.vat > 0 },
+    { label: 'WHT', value: pvData.wht, show: pvData.wht > 0 },
     {
-      label: "Development Levy",
+      label: 'Development Levy',
       value: pvData.devLevy,
       show: pvData.devLevy > 0,
     },
     {
-      label: "Other Deductions",
+      label: 'Other Deductions',
       value: pvData.otherDeductions,
       show: pvData.otherDeductions > 0,
     },
     {
-      label: "Total Deductions",
+      label: 'Total Deductions',
       value: totalDeductions,
       show: totalDeductions > 0,
-      className: "w-fit font-semibold border-t-2 text-red-900 border-gray-300",
+      className: 'w-fit font-semibold border-t-2 text-red-900 border-gray-300',
     },
     {
-      label: "NET AMOUNT PAYABLE",
+      label: 'NET AMOUNT PAYABLE',
       value: pvData.netAmount,
       show: true,
-      className: "font-bold text-teal-900 rounded",
+      className: 'font-bold text-teal-900 rounded',
     },
   ];
 
   const approvalSections = [
     {
-      title: "Prepared By",
+      title: 'Prepared By',
       user: pvData.createdBy,
       date: pvData.createdAt,
       showDate: true,
     },
     {
-      title: "Reviewed By",
+      title: 'Reviewed By',
       user: pvData.reviewedBy,
       date: null,
       showDate: false,
     },
     {
-      title: "Approved By",
+      title: 'Approved By',
       user: pvData.approvedBy,
       date: null,
       showDate: false,
@@ -123,36 +149,36 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
   ];
 
   const additionalSections = [
-    { label: "Amount in Words", value: pvData.amountInWords },
-    { label: "Description", value: pvData.being },
-    { label: "Additional Notes", value: pvData.note, show: !!pvData.note },
+    { label: 'Amount in Words', value: pvData.amountInWords },
+    { label: 'Description', value: pvData.being },
+    { label: 'Additional Notes', value: pvData.note, show: !!pvData.note },
   ];
 
   return (
-    <div className="items-center" ref={pdfRef} style={containerStyle}>
+    <div
+      className="items-center"
+      ref={pdfRef as React.LegacyRef<HTMLDivElement>}
+      style={containerStyle}
+    >
       {/* ===== HEADER ===== */}
       <div className="bg-gray-50 w-full border-b py-2 mb-4">
         <div className="w-full flex justify-between items-start">
-          <img src={logo} alt="CASFOD Logo" className="w-48 h-auto" />
+          <img src={logo} alt={`${infoConfig.abbriviation} Logo`} className="w-48 h-auto" />
 
           <div className="text-right">
-            <h2 className="text-sm font-semibold text-blue-800">
-              {pvData.pvNumber}
-            </h2>
-            <p className="text-sm text-gray-600">
-              {formatToDDMMYYYY(pvData.pvDate!)}
-            </p>
+            <h2 className="text-sm font-semibold text-blue-800">{pvData.pvNumber}</h2>
+            <p className="text-sm text-gray-600">{formatToDDMMYYYY(pvData.pvDate!)}</p>
             <span
               className={`inline-block mt-1 px-2 py-0.5 text-[14px] rounded-full ${
-                pvData.status === "approved"
-                  ? "bg-green-100 text-green-800"
-                  : pvData.status === "pending"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : pvData.status === "rejected"
-                  ? "bg-red-100 text-red-800"
-                  : pvData.status === "paid"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-gray-100 text-gray-800"
+                pvData.status === 'approved'
+                  ? 'bg-green-100 text-green-800'
+                  : pvData.status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : pvData.status === 'rejected'
+                      ? 'bg-red-100 text-red-800'
+                      : pvData.status === 'paid'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
               }`}
             >
               {pvData.status?.toUpperCase()}
@@ -162,7 +188,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       </div>
 
       <h1 className="text-center text-base font-semibold text-gray-900 uppercase tracking-wide mb-4">
-        CASFOD PAYMENT VOUCHER
+        ${infoConfig.abbriviation}PAYMENT VOUCHER
       </h1>
 
       {/* ===== MAIN CONTENT ===== */}
@@ -173,11 +199,11 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <div key={j} className="flex gap-1">
                 <span
                   className="font-semibold text-[14px] uppercase whitespace-nowrap"
-                  style={{ whiteSpace: "nowrap" }}
+                  style={{ whiteSpace: 'nowrap' }}
                 >
                   {field.label}:
                 </span>
-                <span className="text-[14px]">{field.value || "—"}</span>
+                <span className="text-[14px]">{field.value || '—'}</span>
               </div>
             ))}
           </div>
@@ -192,12 +218,12 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
               <div key={i} className="flex gap-1">
                 <span
                   className="font-semibold text-[14px] uppercase whitespace-nowrap"
-                  style={{ whiteSpace: "nowrap" }}
+                  style={{ whiteSpace: 'nowrap' }}
                 >
                   {section.label}:
                 </span>
                 <p className="text-[14px] leading-snug flex-1 break-words">
-                  {section.value || "—"}
+                  {section.value || '—'}
                 </p>
               </div>
             )
@@ -205,7 +231,7 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
       </div>
 
       {/* ===== FINANCIAL SUMMARY ===== */}
-      <div className="w-full mt-2 border-t  border-gray-300 pt-4 mb-4">
+      <div className="w-full mt-2 border-t border-gray-300 pt-4 mb-4">
         <h3 className="text-center font-semibold text-gray-900 mb-4 uppercase whitespace-nowrap">
           Financial Summary
         </h3>
@@ -216,45 +242,39 @@ const PVPDFTemplate: React.FC<PVPDFTemplateProps> = ({
                 <div key={i} className="grid grid-cols-2 gap-8 text-[14px]">
                   <span
                     className="text-right font-bold whitespace-nowrap"
-                    style={{ whiteSpace: "nowrap" }}
+                    style={{ whiteSpace: 'nowrap' }}
                   >
                     {item.label}
                   </span>
-                  <span className={item.className}>
-                    {moneyFormat(item.value, "NGN")}
-                  </span>
+                  <span className={item.className}>{moneyFormat(item.value, 'NGN')}</span>
                 </div>
               )
           )}
         </div>
       </div>
 
-      {/* ===== APPROVAL SECTION ===== */}
+      {/* ===== APPROVAL SECTION WITH SIGNATURES ===== */}
       <div className="w-full mt-3 grid grid-cols-3 gap-2 text-center">
         {approvalSections.map((sec, i) => (
           <div key={i} className="w-full space-y-2.5">
             <p
               className="text-[14px] font-semibold uppercase whitespace-nowrap"
-              style={{ whiteSpace: "nowrap" }}
+              style={{ whiteSpace: 'nowrap' }}
             >
               {sec.title}
             </p>
-            <p className="text-[14px] font-semibold">
-              {getDisplayName(sec.user)}
-            </p>
-            <p className="text-[11px] text-gray-600">{getPosition(sec.user)}</p>
-            <div className="w-full h-6 border-t border-gray-300 pt-2"></div>
-            <p className="text-[11px] text-gray-500">Signature</p>
+            <p className="text-[14px] font-semibold">{getDisplayName(sec.user!)}</p>
+            <p className="text-[11px] text-gray-600">{getPosition(sec.user!)}</p>
+            {renderSignature(sec.user!)}
           </div>
         ))}
       </div>
 
       {/* ===== FOOTER ===== */}
       <div className="w-full text-center text-[12px] text-gray-500 mt-3 border-t border-gray-300 pt-4">
-        <p>Unique Care and Support Foundation • finance@casfod.org</p>
+        <p>{infoConfig.name} • finance@casfod.org</p>
         <p className="text-[11px] text-gray-400">
-          Generated on {new Date().toLocaleDateString()} at{" "}
-          {new Date().toLocaleTimeString()}
+          Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
         </p>
       </div>
     </div>

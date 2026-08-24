@@ -1,10 +1,10 @@
 // Redux Slice: purchaseRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ConceptNoteType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IConceptNote } from '../interfaces';
 
 // Define the initial state with proper typing
 interface projectStateType {
-  conceptNote: ConceptNoteType | null;
+  conceptNote: IConceptNote | null;
 }
 
 const initialState: projectStateType = {
@@ -13,15 +13,15 @@ const initialState: projectStateType = {
 
 // Create the slice
 const conceptNoteSlice = createSlice({
-  name: "conceptNote",
+  name: 'conceptNote',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setConceptNote: (state, action: PayloadAction<ConceptNoteType | null>) => {
+    setConceptNote: (state, action: PayloadAction<IConceptNote | null>) => {
       state.conceptNote = action.payload;
     },
     // Add a reset action to clear the state
-    resetConceptNote: (state) => {
+    resetConceptNote: state => {
       state.conceptNote = null;
     },
   },

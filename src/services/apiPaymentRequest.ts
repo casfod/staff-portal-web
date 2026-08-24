@@ -1,97 +1,29 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiPaymentRequest.ts
 import {
-  PaymentRequestType,
-  UsePaymentRequest,
-  usePaymentRequestType,
-  UsePaymentStatsType,
-} from "../interfaces.ts";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      // console.log("Token attached to request:", token);
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    console.log(err.response?.data);
-
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IPaymentRequest,
+  IPaymentRequestsListResponse,
+  IPaymentRequestSingleResponse,
+  IPaymentRequestStatsResponse,
+} from '../interfaces';
+import apiClient, {
+  handleError,
+  QueryParams,
+  StatusUpdateData,
+  CommentData,
+  CopyToData,
+} from './apiClient';
 
 // API Functions
 
-export const getAllPaymentRequest = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllPaymentRequest = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<usePaymentRequestType>(
-      `/payment-requests`,
+    const response = await apiClient.get<IPaymentRequestsListResponse>(
+      `/finance/payment-requests`,
       {
         params: queryParams,
       }
     );
-    console.log("API Response:", response.data); // Debugging line
+    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -100,10 +32,10 @@ export const getAllPaymentRequest = async function (queryParams: {
 
 export const getPaymentRequest = async function (requestId: string) {
   try {
-    const response = await axiosInstance.get<UsePaymentRequest>(
-      `/payment-requests/${requestId}`
+    const response = await apiClient.get<IPaymentRequestSingleResponse>(
+      `/finance/payment-requests/${requestId}`
     );
-    console.log("API Response:", response.data); // Debugging line
+    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -112,8 +44,8 @@ export const getPaymentRequest = async function (requestId: string) {
 
 export const getPaymentRequestStats = async function () {
   try {
-    const response = await axiosInstance.get<UsePaymentStatsType>(
-      `/payment-requests/stats`
+    const response = await apiClient.get<IPaymentRequestStatsResponse>(
+      `/finance/payment-requests/stats`
     );
     return response.data;
   } catch (err) {
@@ -121,12 +53,10 @@ export const getPaymentRequestStats = async function () {
   }
 };
 
-export const savePaymentRequests = async function (
-  data: Partial<PaymentRequestType>
-) {
+export const savePaymentRequests = async function (data: Partial<IPaymentRequest>) {
   try {
-    const response = await axiosInstance.post<PaymentRequestType>(
-      `/payment-requests/save`,
+    const response = await apiClient.post<IPaymentRequestSingleResponse>(
+      `/finance/payment-requests/draft`,
       data
     );
     return response.data;
@@ -135,44 +65,11 @@ export const savePaymentRequests = async function (
   }
 };
 
-export const sendPaymentRequests = async function (
-  data: Partial<PaymentRequestType>,
-  files: File[]
-) {
+export const sendPaymentRequests = async function (data: Partial<IPaymentRequest>) {
   try {
-    const formData = new FormData();
-
-    // Append standard fields
-    const simpleFields: (keyof PaymentRequestType)[] = [
-      "purposeOfExpense",
-      "amountInWords",
-      "amountInFigure",
-      "grantCode",
-      "dateOfExpense",
-      "specialInstruction",
-      "accountNumber",
-      "accountName",
-      "bankName",
-      "reviewedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<PaymentRequestType>(
-      `/payment-requests/save-and-send`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.post<IPaymentRequestSingleResponse>(
+      `/finance/payment-requests`,
+      data
     );
     return response.data;
   } catch (err) {
@@ -180,13 +77,10 @@ export const sendPaymentRequests = async function (
   }
 };
 
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
+export const copyTo = async function (requestId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.patch<Partial<PaymentRequestType>>(
-      `/payment-requests/copy/${requestId}`,
+    const response = await apiClient.post<Partial<IPaymentRequest>>(
+      `/finance/payment-requests/${requestId}/copy`,
       data
     );
     return response.data;
@@ -197,46 +91,11 @@ export const copyTo = async function (
 
 export const updatePaymentRequest = async function (
   requestId: string,
-  data: Partial<PaymentRequestType>,
-  files: File[]
+  data: Partial<IPaymentRequest>
 ) {
   try {
-    const formData = new FormData();
-
-    // Append standard fields
-    const simpleFields: (keyof PaymentRequestType)[] = ["approvedBy"];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<Partial<PaymentRequestType>>(
-      `/payment-requests/${requestId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-export const updateStatus = async function (
-  requestId: string,
-  data: { status: string; comment: string }
-) {
-  try {
-    const response = await axiosInstance.patch<Partial<PaymentRequestType>>(
-      `/payment-requests/update-status/${requestId}`,
+    const response = await apiClient.patch<Partial<IPaymentRequest>>(
+      `/finance/payment-requests/${requestId}`,
       data
     );
     return response.data;
@@ -245,16 +104,21 @@ export const updateStatus = async function (
   }
 };
 
-// Comment API functions
-export const addComment = async function (
-  requestId: string,
-  data: { text: string }
-) {
+export const updateStatus = async function (requestId: string, data: StatusUpdateData) {
   try {
-    const response = await axiosInstance.post(
-      `/payment-requests/${requestId}/comments`,
+    const response = await apiClient.patch<Partial<IPaymentRequest>>(
+      `/finance/payment-requests/${requestId}/status`,
       data
     );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const addComment = async function (requestId: string, data: CommentData) {
+  try {
+    const response = await apiClient.post(`/finance/payment-requests/${requestId}/comments`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -264,11 +128,11 @@ export const addComment = async function (
 export const updateComment = async function (
   requestId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/payment-requests/${requestId}/comments/${commentId}`,
+    const response = await apiClient.put(
+      `/finance/payment-requests/${requestId}/comments/${commentId}`,
       data
     );
     return response.data;
@@ -277,13 +141,10 @@ export const updateComment = async function (
   }
 };
 
-export const deleteComment = async function (
-  requestId: string,
-  commentId: string
-) {
+export const deleteComment = async function (requestId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/payment-requests/${requestId}/comments/${commentId}`
+    const response = await apiClient.delete(
+      `/finance/payment-requests/${requestId}/comments/${commentId}`
     );
     return response.data;
   } catch (err) {
@@ -293,8 +154,8 @@ export const deleteComment = async function (
 
 export const deletePaymentRequest = async function (paymentRequestID: string) {
   try {
-    const response = await axiosInstance.delete<PaymentRequestType>(
-      `/payment-requests/${paymentRequestID}`
+    const response = await apiClient.delete<IPaymentRequestSingleResponse>(
+      `/finance/payment-requests/${paymentRequestID}`
     );
     return response.data;
   } catch (err) {

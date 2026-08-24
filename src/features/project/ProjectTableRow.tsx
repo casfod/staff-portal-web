@@ -1,93 +1,120 @@
-import { Project } from "../../interfaces";
-import { localStorageUser } from "../../utils/localStorageUser";
+// ProjectTableRow.tsx - Refactored with BaseTableRow
+import { IProject, TableHeaderConfig } from '../../interfaces';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import { truncateText } from '../../utils/truncateText';
 
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-// import { ConceptNoteDetails } from "./ConceptNoteDetails";
-import TableRowMain from "../../ui/TableRowMain";
-import ActionIcons from "../../ui/ActionIcons";
-import TableData from "../../ui/TableData";
-import { moneyFormat } from "../../utils/moneyFormat";
-import { ProjectDetails } from "./ProjectDetails";
-import { truncateText } from "../../utils/truncateText";
+// Custom Components
+import { BaseTableRow } from '../../components/custom/BaseTableRow';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { ProjectDetails } from './ProjectDetails';
+import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import ProjectCard from './ProjectCard';
+
+interface ProjectTableRowProps {
+  project: IProject;
+  handleEdit: (project: IProject) => void;
+  handleAction: (project: IProject) => void;
+  handleDelete?: (id: string) => void;
+  tableHeadData?: TableHeaderConfig[];
+}
 
 const ProjectTableRow = ({
-  request,
-  visibleItems,
-  toggleViewItems,
+  project,
   handleEdit,
-  handleDelete,
   handleAction,
-}: {
-  request: Project;
-  visibleItems: { [key: string]: boolean };
-  toggleViewItems: (id: string) => void;
-  handleEdit: (request: Project) => void;
-  handleDelete?: (id: string) => void;
-  handleAction: (request: Project) => void;
-}) => {
+  handleDelete,
+}: ProjectTableRowProps) => {
   const currentUser = localStorageUser();
-
-  const isEditable = currentUser.role === "SUPER-ADMIN";
-
-  const requestId = request.id ?? "";
-  // const requestStatus = request.status ?? "pending";
-  const requestCreatedAt = request.createdAt ?? "";
-  // const requestedById = request.preparedBy?.id;
-
-  const isVisible = !!visibleItems[requestId];
+  const isEditable = currentUser.role === 'SUPER-ADMIN';
+  const requestId = project.id ?? '';
+  const requestCreatedAt = project.createdAt ?? '';
 
   const rowData = [
-    // { id: "project_title", content: request.project_title },
-    { id: "project_code", content: truncateText(request.project_code, 40) },
     {
-      id: "project_budget",
-      content: moneyFormat(Number(request.project_budget), "USD"),
+      id: 'name',
+      content: truncateText(project.projectCode, 40),
+      showOnMobile: true,
     },
-    { id: "date", content: formatToDDMMYYYY(requestCreatedAt) },
     {
-      id: "actions",
+      id: 'status',
+      content: (
+        <span
+          className={`capitalize text-xs px-2 py-1 rounded-full ${
+            project.status === 'completed'
+              ? 'bg-green-100 text-green-800'
+              : project.status === 'cancelled'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-blue-100 text-blue-800'
+          }`}
+        >
+          {project.status || 'ongoing'}
+        </span>
+      ),
+      showOnMobile: true,
+    },
+    {
+      id: 'budget',
+      content: moneyFormat(Number(project.projectBudget), 'USD'),
+      showOnMobile: true,
+    },
+    {
+      id: 'date',
+      content: formatToDDMMYYYY(requestCreatedAt),
+      showOnMobile: false,
+      showOnTablet: true,
+    },
+    {
+      id: 'actions',
       content: (
         <ActionIcons
           isEditable={isEditable}
           requestId={requestId}
-          visibleItems={visibleItems}
-          onToggleView={toggleViewItems}
-          onEdit={handleEdit}
+          onEdit={() => handleEdit(project)}
           onDelete={handleDelete}
-          request={request}
+          request={project}
         />
       ),
+      showOnMobile: true,
     },
   ];
 
-  return (
+  const expandedContent = (
     <>
-      <TableRowMain
-        key={requestId}
-        requestId={requestId}
-        toggleViewItems={toggleViewItems}
-      >
-        {rowData.map(({ id, content }) => (
-          <TableData key={`${requestId}-${id}`}>{content}</TableData>
-        ))}
-      </TableRowMain>
-
-      {isVisible && (
-        <tr key={`${requestId}-details`} className="max-w-full rounded-lg">
-          <td
-            colSpan={6}
-            className={`w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm`}
-          >
-            <ProjectDetails request={request} />
-            <RequestCommentsAndActions
-              request={request}
-              handleAction={handleAction}
-            />
-          </td>
-        </tr>
-      )}
+      <ProjectDetails request={project} />
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <RequestCommentsAndActions request={project} handleAction={handleAction} />
+      </div>
     </>
+  );
+
+  // Mobile card for small screens
+  const mobileCard = (
+    <ProjectCard
+      project={project}
+      requestId={requestId} // ← Add this if needed
+      actionIconsProps={{
+        isEditable,
+        requestId,
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+        request: project, // ← Make sure request is passed
+        variant: 'list',
+      }}
+      context="list"
+      className="sm:hidden"
+    />
+  );
+
+  return (
+    <BaseTableRow
+      id={requestId}
+      rowData={rowData}
+      expandedContent={expandedContent}
+      mobileCard={mobileCard}
+      isExpandable={true}
+    />
   );
 };
 

@@ -1,11 +1,11 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { List } from "lucide-react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useEffect } from "react";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
-import FormEditExpenseClaim from "./FormEditExpenseClaim";
+import { useNavigate, useParams } from 'react-router-dom';
+import { List } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { useEffect } from 'react';
+import { Button } from '../../components/ui/button';
+import TextHeader from '../../components/custom/TextHeader';
+import ExpenseClaimForm from './ExpenseClaimForm';
 
 const EditExpenseClaim = () => {
   const navigate = useNavigate();
@@ -14,13 +14,11 @@ const EditExpenseClaim = () => {
 
   // Access the purchaseRequest state from Redux
 
-  const expenseClaim = useSelector(
-    (state: RootState) => state.expenseClaim.expenseClaim
-  );
+  const expenseClaim = useSelector((state: RootState) => state.expenseClaim.expenseClaim);
 
   useEffect(() => {
     if (!param || !expenseClaim) {
-      navigate("/expense-claims");
+      navigate('/expense-claims');
     }
   }, [expenseClaim, param, navigate]);
 
@@ -31,7 +29,7 @@ const EditExpenseClaim = () => {
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Update Expense Claim</TextHeader>
 
@@ -46,7 +44,7 @@ const EditExpenseClaim = () => {
 
       <div className="border w-full rounded-lg">
         <div className="bg-white bg-opacity-90 py-4 md:py-6 lg:py-10 px-2 md:px-6 lg:px-12 w-full rounded-lg">
-          <FormEditExpenseClaim expenseClaim={expenseClaim} />
+          <ExpenseClaimForm mode="edit" initialData={expenseClaim} />
         </div>
       </div>
     </div>

@@ -1,10 +1,5 @@
 // src/features/employment-info/Hooks/useEmploymentInfo.ts
-import {
-  useQuery,
-  UseQueryOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, UseQueryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getMyEmploymentInfo,
   updateMyEmploymentInfo,
@@ -14,34 +9,25 @@ import {
   toggleUserEmploymentInfoUpdate,
   superAdminUpdateUserEmploymentInfo,
   superAdminGetUserEmploymentInfo,
-} from "../../../services/apiEmploymentInfo";
+} from '../../../services/apiEmploymentInfo';
 import {
-  UseEmploymentInfoType,
-  UseEmploymentInfoStatusType,
-  UseSystemSettingsResponse, // Fixed import name
-  EmploymentInfoType,
-} from "../../../interfaces";
-import { AxiosError, AxiosResponse } from "axios";
-import toast from "react-hot-toast";
-import { useState } from "react";
-
-interface ErrorResponse {
-  message: string;
-}
-
-interface HookError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+  IHookError,
+  IEmploymentInfo,
+  IEmploymentInfoResponse,
+  ISystemSettingsResponse, // Fixed import name
+} from '../../../interfaces';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 // ============== QUERY HOOKS ==============
 
 // Get current user's employment info
 export function useMyEmploymentInfo(
   enabled: boolean = true,
-  options?: UseQueryOptions<UseEmploymentInfoType, Error>
+  options?: UseQueryOptions<IEmploymentInfoResponse, Error>
 ) {
-  return useQuery<UseEmploymentInfoType, Error>({
-    queryKey: ["my-employment-info"],
+  return useQuery<IEmploymentInfoResponse, Error>({
+    queryKey: ['my-employment-info'],
     queryFn: () => getMyEmploymentInfo(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
@@ -52,10 +38,10 @@ export function useMyEmploymentInfo(
 
 // Get all users employment info status (Admin only)
 export function useAllEmploymentInfoStatus(
-  options?: UseQueryOptions<UseEmploymentInfoStatusType, Error>
+  options?: UseQueryOptions<IEmploymentInfoResponse, Error>
 ) {
-  return useQuery<UseEmploymentInfoStatusType, Error>({
-    queryKey: ["employment-info-status"],
+  return useQuery<IEmploymentInfoResponse, Error>({
+    queryKey: ['employment-info-status'],
     queryFn: () => getAllEmploymentInfoStatus(),
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1,
@@ -65,10 +51,10 @@ export function useAllEmploymentInfoStatus(
 
 // Get global settings (Admin only)
 export function useGlobalSettings(
-  options?: UseQueryOptions<UseSystemSettingsResponse, Error> // Fixed type
+  options?: UseQueryOptions<ISystemSettingsResponse, Error> // Fixed type
 ) {
-  return useQuery<UseSystemSettingsResponse, Error>({
-    queryKey: ["global-settings"],
+  return useQuery<ISystemSettingsResponse, Error>({
+    queryKey: ['global-settings'],
     queryFn: () => getGlobalSettings(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
@@ -88,25 +74,24 @@ export function useUpdateMyEmploymentInfo() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<EmploymentInfoType>) =>
-      updateMyEmploymentInfo(data),
+    mutationFn: (data: Partial<IEmploymentInfo>) => updateMyEmploymentInfo(data),
 
-    onSuccess: (data) => {
-      if (data?.status === 200 || data?.status === 201) {
-        queryClient.invalidateQueries({ queryKey: ["my-employment-info"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-        toast.success("Employment information updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200 || data?.status === 201) {
+        queryClient.invalidateQueries({ queryKey: ['my-employment-info'] });
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        toast.success('Employment information updated successfully');
         setErrorMessage(null);
       } else {
-        toast.error(data?.message || "Failed to update employment information");
+        toast.error(data?.message || 'Failed to update employment information');
       }
     },
 
-    onError: (err: HookError) => {
-      const error = err.response?.data?.message || "An error occurred";
+    onError: (err: IHookError) => {
+      const error = err.response?.data?.message || 'An error occurred';
       toast.error(error);
       setErrorMessage(error);
-      console.error("Update Employment Info Error:", error);
+      console.error('Update Employment Info Error:', error);
     },
   });
 
@@ -124,24 +109,24 @@ export function useToggleGlobalUpdate() {
   } = useMutation({
     mutationFn: (enabled: boolean) => toggleGlobalEmploymentInfoUpdate(enabled),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        queryClient.invalidateQueries({ queryKey: ["global-settings"] });
-        queryClient.invalidateQueries({ queryKey: ["employment-info-status"] });
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        queryClient.invalidateQueries({ queryKey: ['global-settings'] });
+        queryClient.invalidateQueries({ queryKey: ['employment-info-status'] });
         toast.success(
           `Employment info updates ${
-            data.data?.globalEmploymentInfoLock ? "disabled" : "enabled"
+            data.data?.globalEmploymentInfoLock ? 'disabled' : 'enabled'
           } globally`
         );
       } else {
-        toast.error(data?.message || "Failed to update global settings");
+        toast.error(data?.message || 'Failed to update global settings');
       }
     },
 
-    onError: (err: HookError) => {
-      const error = err.response?.data?.message || "An error occurred";
+    onError: (err: IHookError) => {
+      const error = err.response?.data?.message || 'An error occurred';
       toast.error(error);
-      console.error("Toggle Global Update Error:", error);
+      console.error('Toggle Global Update Error:', error);
     },
   });
 
@@ -160,20 +145,20 @@ export function useToggleUserUpdate() {
     mutationFn: ({ userId, enabled }: { userId: string; enabled: boolean }) =>
       toggleUserEmploymentInfoUpdate(userId, enabled),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        queryClient.invalidateQueries({ queryKey: ["employment-info-status"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-        toast.success(data?.message || "User permission updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        queryClient.invalidateQueries({ queryKey: ['employment-info-status'] });
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        toast.success(data?.message || 'User permission updated successfully');
       } else {
-        toast.error(data?.message || "Failed to update user settings");
+        toast.error(data?.message || 'Failed to update user settings');
       }
     },
 
-    onError: (err: HookError) => {
-      const error = err.response?.data?.message || "An error occurred";
+    onError: (err: IHookError) => {
+      const error = err.response?.data?.message || 'An error occurred';
       toast.error(error);
-      console.error("Toggle User Update Error:", error);
+      console.error('Toggle User Update Error:', error);
     },
   });
 
@@ -190,28 +175,23 @@ export function useSuperAdminUpdateEmploymentInfo() {
     isError,
     error,
   } = useMutation({
-    mutationFn: ({
-      userId,
-      data,
-    }: {
-      userId: string;
-      data: Partial<EmploymentInfoType>;
-    }) => superAdminUpdateUserEmploymentInfo(userId, data),
+    mutationFn: ({ userId, data }: { userId: string; data: Partial<IEmploymentInfo> }) =>
+      superAdminUpdateUserEmploymentInfo(userId, data),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-        queryClient.invalidateQueries({ queryKey: ["user"] });
-        toast.success("Employment information updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        toast.success('Employment information updated successfully');
       } else {
-        toast.error(data?.message || "Failed to update employment information");
+        toast.error(data?.message || 'Failed to update employment information');
       }
     },
 
-    onError: (err: HookError) => {
-      const error = err.response?.data?.message || "An error occurred";
+    onError: (err: IHookError) => {
+      const error = err.response?.data?.message || 'An error occurred';
       toast.error(error);
-      console.error("Super Admin Update Error:", error);
+      console.error('Super Admin Update Error:', error);
     },
   });
 
@@ -220,10 +200,10 @@ export function useSuperAdminUpdateEmploymentInfo() {
 
 export function useUserEmploymentInfo(
   userId: string,
-  options?: UseQueryOptions<UseEmploymentInfoType, Error>
+  options?: UseQueryOptions<IEmploymentInfo, Error>
 ) {
-  return useQuery<UseEmploymentInfoType, Error>({
-    queryKey: ["user-employment-info", userId],
+  return useQuery<IEmploymentInfo, Error>({
+    queryKey: ['user-employment-info', userId],
     queryFn: () => superAdminGetUserEmploymentInfo(userId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,

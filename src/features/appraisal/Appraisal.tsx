@@ -1,417 +1,250 @@
 // src/features/appraisal/Appraisal.tsx
-import { List } from "lucide-react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { localStorageUser } from "../../utils/localStorageUser";
-import Button from "../../ui/Button";
-import StatusBadge from "../../ui/StatusBadge";
-import { AppraisalDetails } from "./AppraisalDetails";
-import TextHeader from "../../ui/TextHeader";
-import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import Spinner from "../../ui/Spinner";
-import { DataStateContainer } from "../../ui/DataStateContainer";
-import ActionIcons from "../../ui/ActionIcons";
+import { List } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { localStorageUser } from '../../utils/localStorageUser';
+
+// Components
+import TextHeader from '../../components/custom/TextHeader';
+import { Button } from '../../components/ui/button';
+import StatusBadge from '../../components/custom/StatusBadge';
+import ActionIcons from '../../components/custom/ActionIcons';
+import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
+import Spinner from '../../components/custom/Spinner';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import { DataStateContainer } from '../../components/custom/DataStateContainer';
+import AppraisalCard from './AppraisalCard';
+import { AppraisalDetails } from './AppraisalDetails';
+
+// Hooks
 import {
   useAppraisal,
-  useAddComment,
-  useDeleteComment,
-  useUpdateComment,
+  // useCopy,
   useUpdateAppraisalStatus,
-  useCopy,
-} from "./Hooks/useAppraisal";
-import { Comment as AppComment, UserType } from "../../interfaces";
-import TableRowMain from "../../ui/TableRowMain";
-import TableData from "../../ui/TableData";
-import RequestCard from "../../ui/RequestCard";
-import RequestDetailLayout from "../../ui/RequestDetailLayout";
-import { usePdfDownload } from "../../hooks/usePdfDownload";
-import { capitalizeFirstLetter } from "../../utils/capitalizeFirstLetter";
+} from './Hooks/useAppraisal';
+import { usePdfDownload } from '../../hooks/usePdfDownload';
+import { useRequestPermissions } from '../../hooks/useRequestPermissions';
+import { truncateText } from '../../utils/truncateText';
+import { infoConfig } from '@/config/config-info';
 
 const Appraisal = () => {
   const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { appraisalId } = useParams();
 
+  // State
+  const [status, setStatus] = useState('');
+  const [comment, setComment] = useState('');
+
   // Data fetching
-  const {
-    data: remoteData,
-    isLoading,
-    isError,
-    refetch,
-  } = useAppraisal(appraisalId!);
+  const { data: remoteData, isLoading, isError } = useAppraisal(appraisalId!);
+  const appraisalFromStore = useSelector((state: RootState) => state.appraisal?.appraisal);
 
-  const appraisal = useSelector(
-    (state: RootState) => state.appraisal?.appraisal
-  );
-
-  const request = useMemo(
-    () => remoteData?.data || appraisal,
-    [remoteData, appraisal]
-  );
+  const request = useMemo(() => remoteData?.data || appraisalFromStore, [remoteData, appraisalFromStore]);
 
   // Redirect logic
   useEffect(() => {
     if (!appraisalId || (!isLoading && !request)) {
-      navigate("/human-resources/appraisals");
+      navigate('/human-resources/appraisals');
     }
   }, [request, appraisalId, navigate, isLoading]);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  // Status update hook
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateAppraisalStatus(appraisalId!);
+  // Permissions
+  const permissions = useRequestPermissions({
+    request,
+    currentUser,
+    isTwoStep: false,
+  });
 
-  const [status, setStatus] = useState("");
-  const [comment, setComment] = useState("");
-  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  // Additional permission flags specific to Appraisal
+  const isStaff = request?.createdBy?.id === currentUser?.id;
+  const isSupervisor =
+    typeof request?.supervisorId === 'object' && (request.supervisorId as { id?: string })?.id === currentUser?.id;
 
-  // Custom hooks
-  const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } =
-    useUpdateAppraisalStatus(appraisalId!);
+  const canEditStaffSections =
+    isStaff && (request?.status === 'draft' || request?.status === 'pending');
+  const canEditSupervisorSections = isSupervisor && request?.status === 'pending';
 
-  const { copyto, isPending: isCopying } = useCopy(appraisalId!);
+  // Check if user can approve (must be the assigned approver and appraisal is pending)
+  const canApprove = request?.status === 'pending' && request?.approvedBy?.id === currentUser?.id;
 
-  // Comment hooks
-  const { addComment, isPending: isAddingComment } = useAddComment(
-    appraisalId!
-  );
-  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
-    appraisalId!
-  );
-  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
-    appraisalId!
-  );
-
-  //PDF logic
+  // PDF
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `CASFOD-Appraisal-${request?.appraisalCode || request?.id}`,
+    filename: `${infoConfig.abbriviation}-Appraisal-${request?.appraisalCode || request?.id}`,
     multiPage: true,
-    // FIX: titleOptions should be an object with 'text' property, not just a string
     titleOptions: {
-      text: `CASFOD Appraisal: ${capitalizeFirstLetter(request?.status ?? "")}`,
-
-      fontSize: 16,
-      fontStyle: "bold",
-      color: "#000000",
-      marginBottom: 10,
+      text: `${infoConfig.abbriviation} Appraisal : ${request?.appraisalCode || ''}`,
     },
-
     footerCode: {
-      label: "CASFOD Appraisal",
-      value: request?.appraisalCode ?? "",
+      label: `${infoConfig.abbriviation} Appraisal`,
+      value: request?.appraisalCode ?? '',
     },
   });
+
   const handleDownloadPDF = () => {
     downloadPdf(pdfContentRef);
   };
 
-  // Handle status change with confirmation dialog
-  const onStatusChangeHandler = () => {
-    handleStatusChange(status, comment, async () => {
-      try {
-        await updateStatus(
-          { status, comment } as {
-            status: "approved" | "rejected";
-            comment?: string;
-          },
-          {
-            onError: (error) => {
-              throw error;
-            },
-          }
-        );
-      } catch (error) {
-        throw error;
+
+  const handleStatusChange = () => {
+    if (!status) return;
+
+    updateStatus(
+      { status: status as 'approved' | 'rejected', comment },
+      {
+        onSuccess: () => {
+          setStatus('');
+          setComment('');
+        },
       }
-    });
+    );
   };
 
-  // Comment handlers
-  const handleAddComment = async (text: string) => {
-    await addComment({ text });
-  };
+  const tableHeadData = ['Staff Name', 'Status', 'Appraisal Code', 'Date', 'Actions'];
 
-  const handleUpdateComment = async (commentId: string, text: string) => {
-    await updateComment({ commentId, text });
-  };
-
-  const handleDeleteComment = async (commentId: string) => {
-    await deleteComment(commentId);
-  };
-
-  // User references and permission logic
-  const currentUserId = currentUser?.id;
-  const userRole = currentUser?.role;
-  const requestStatus = request?.status;
-
-  // Permission flags
-  const isStaff = request?.staffId?.id === currentUserId;
-  const isSupervisor = request?.supervisorId?.id === currentUserId;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole || "");
-
-  // Permission to update status
-  const canUpdateStatus =
-    requestStatus === "pending" && (isSupervisor || isAdmin);
-
-  // Permission to share/copy request
-  const canShareRequest = isStaff || isSupervisor || isAdmin;
-
-  // Users who can add comments
-  const canAddComments = isStaff || isSupervisor || isAdmin;
-
-  // Permission to edit different sections with correct status mapping
-  const canEditStaffSections =
-    isStaff && (requestStatus === "draft" || requestStatus === "pending");
-  const canEditSupervisorSections = isSupervisor && requestStatus === "pending";
-
-  const comments = (request?.comments || []) as AppComment[];
-
-  const requestCreatedAt = request?.createdAt ?? "";
-  const fullDate = formatToDDMMYYYY(requestCreatedAt);
-  const createdBy: UserType | null = request?.createdBy;
-
-  const tableHeadData = [
-    { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
-    { label: "Status", showOnMobile: true, minWidth: "100px" },
-
-    {
-      label: "Appraisal Code",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "120px",
-    },
-
-    // {
-    //   label: "Period",
-    //   showOnMobile: false,
-    //   showOnTablet: true,
-    //   minWidth: "120px",
-    // },
-    {
-      label: "Date",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "100px",
-    },
-    { label: "Actions", showOnMobile: true, minWidth: "100px" },
-  ];
-
-  const tableRowData = [
-    {
-      id: "name",
-      content:
-        request?.staffName ||
-        `${createdBy?.first_name || ""} ${createdBy?.last_name || ""}`.trim() ||
-        "N/A",
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-    {
-      id: "status",
-      content: <StatusBadge status={request?.status!} />,
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-    {
-      id: "code",
-      content: request?.appraisalCode || "N/A",
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    // {
-    //   id: "period",
-    //   content: request?.appraisalPeriod || "N/A",
-    //   showOnMobile: false,
-    //   showOnTablet: true,
-    // },
-
-    {
-      id: "date",
-      content: fullDate,
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    {
-      id: "actions",
-      content: (
-        <ActionIcons
-          copyTo={copyto}
-          isCopying={isCopying}
-          canShareRequest={canShareRequest}
-          requestId={request?.id}
-          isGeneratingPDF={isGenerating}
-          onDownloadPDF={handleDownloadPDF}
-          showTagDropdown={showTagDropdown}
-          setShowTagDropdown={setShowTagDropdown}
-          hideInspect={true}
-        />
-      ),
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-  ];
+  if (isError) return <NetworkErrorUI />;
 
   return (
-    <div className="flex flex-col space-y-3 pb-20">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+    <div className="flex flex-col space-y-3 pb-80">
+      {/* Header */}
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
-          <TextHeader>Appraisal - {request?.appraisalCode}</TextHeader>
-          <Button onClick={() => navigate("/human-resources/appraisals")}>
+          <TextHeader>Appraisal</TextHeader>
+          <Button variant="outline" size="sm" onClick={() => navigate('/human-resources/appraisals')}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>
         </div>
       </div>
 
-      {/* Main Content Section */}
-      <div>
-        <DataStateContainer
-          isLoading={isLoading}
-          isError={isError}
-          data={request}
-          errorComponent={<NetworkErrorUI />}
-          loadingComponent={<Spinner />}
-          emptyComponent={<div>No data available</div>}
-        >
-          <div className="overflow-x-auto">
-            <div className="md:min-w-full">
-              <table className="w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 hidden sm:table-header-group">
-                  <tr>
-                    {tableHeadData.map((header, index) => (
-                      <th
-                        key={index}
-                        className={`
-                          px-3 py-2.5 md:px-4 md:py-3 
-                          text-left font-medium uppercase 
-                          tracking-wider
-                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            header.showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          text-xs md:text-sm
-                          whitespace-nowrap
-                        `}
-                        style={{ minWidth: header.minWidth }}
-                      >
-                        {header.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {/* Desktop/Tablet Row */}
-                  <TableRowMain
-                    key={request?.id}
-                    requestId={request?.id || ""}
-                    toggleViewItems={() => {}}
-                    className="hidden sm:table-row"
-                  >
-                    {tableRowData.map(
-                      ({ id, content, showOnMobile, showOnTablet }) => (
-                        <TableData
-                          key={`${request?.id}-${id}`}
-                          className={`
-                          ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          px-3 py-2.5 md:px-4 md:py-3
-                        `}
-                        >
-                          {content}
-                        </TableData>
-                      )
-                    )}
-                  </TableRowMain>
-
-                  {/* Mobile Card View */}
-                  <tr key={`${request?.id}-mobile`} className="sm:hidden">
-                    <td
-                      colSpan={tableHeadData.length}
-                      className="p-4 border-b border-gray-200"
+      {/* Main Content */}
+      <DataStateContainer
+        isLoading={isLoading}
+        isError={isError}
+        data={request}
+        errorComponent={<NetworkErrorUI />}
+        loadingComponent={<Spinner />}
+        emptyComponent={<div>No appraisal data available.</div>}
+      >
+        {/* Main Table Section */}
+        <div ref={pdfContentRef}>
+          <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr className="hidden sm:table-row">
+                  {tableHeadData.map((title, index) => (
+                    <th
+                      key={index}
+                      className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
                     >
-                      <RequestCard
-                        request={request!}
-                        totalAmount={0}
-                        requestId={request?.id || ""}
-                        identifier={request?.appraisalCode}
-                        dateValue={requestCreatedAt}
+                      {title}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody className="bg-white divide-y divide-gray-200">
+                {/* Desktop Row */}
+                <tr className="hidden sm:table-row" key={request?.id}>
+                  <td className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider">
+                    {truncateText(
+                      `${request?.createdBy?.firstName || ''} ${request?.createdBy?.lastName || ''}`.trim() || 'N/A',
+                      30
+                    )}
+                  </td>
+                  <td className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider">
+                    <StatusBadge status={request?.status ?? 'unknown'} />
+                  </td>
+                  <td className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider">
+                    {request?.appraisalCode || 'N/A'}
+                  </td>
+                  <td className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider">
+                    {formatToDDMMYYYY(request?.createdAt ?? new Date().toISOString())}
+                  </td>
+                  <td className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider">
+                    <ActionIcons
+                      requestId={request?.id}
+                      isGeneratingPDF={isGenerating}
+                      onDownloadPDF={handleDownloadPDF}
+                      hideInspect={true}
+                    />
+                  </td>
+                </tr>
+
+                {/* Mobile Card View */}
+                <tr className="sm:hidden">
+                  <td colSpan={tableHeadData.length} className="p-4 border-b border-gray-200">
+                    {request && (
+                      <AppraisalCard
+                        appraisal={request}
+                        requestId={request.id}
                         actionIconsProps={{
-                          copyTo: copyto,
-                          isCopying,
-                          canShareRequest,
                           isGeneratingPDF: isGenerating,
                           onDownloadPDF: handleDownloadPDF,
-                          showTagDropdown,
-                          setShowTagDropdown,
                           hideInspect: true,
                         }}
                         context="detail"
-                        showActions={true}
-                        showStatus={true}
-                        showIdentifier={true}
-                        showDate={true}
-                        className="sm:hidden"
                       />
-                    </td>
-                  </tr>
+                    )}
+                  </td>
+                </tr>
 
-                  {/* Details Section */}
-                  <tr>
-                    <td colSpan={tableHeadData.length}>
-                      <RequestDetailLayout
-                        request={request}
-                        requestStatus={request?.status || ""}
-                        // Status update props
-                        canUpdateStatus={canUpdateStatus}
-                        status={status}
-                        setStatus={setStatus}
-                        comment={comment}
-                        setComment={setComment}
-                        isUpdatingStatus={isUpdatingStatus}
-                        handleStatusChange={onStatusChangeHandler}
-                        // Comment props
-                        comments={comments}
-                        canAddComments={canAddComments}
-                        handleAddComment={handleAddComment}
-                        handleUpdateComment={handleUpdateComment}
-                        handleDeleteComment={handleDeleteComment}
-                        isAddingComment={isAddingComment}
-                        isUpdatingComment={isUpdatingComment}
-                        isDeletingComment={isDeletingComment}
-                      >
-                        <div ref={pdfContentRef}>
-                          <AppraisalDetails
-                            request={request!}
-                            canEditStaffSections={canEditStaffSections}
-                            canEditSupervisorSections={
-                              canEditSupervisorSections
-                            }
-                            isStaff={isStaff}
-                            isSupervisor={isSupervisor}
-                            isAdmin={isAdmin}
+                {/* Details Section */}
+                <tr>
+                  <td colSpan={tableHeadData.length}>
+                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                      {request && (
+                        <AppraisalDetails
+                          request={request}
+                          canEditStaffSections={canEditStaffSections}
+                          canEditSupervisorSections={canEditSupervisorSections}
+                          isStaff={isStaff}
+                          isSupervisor={isSupervisor}
+                          isAdmin={permissions.isAdmin}
+                        />
+                      )}
+
+                      {/* Comments Section */}
+                      {request && permissions.canAddComments && (
+                        <div className="mt-6 border-t border-gray-200 pt-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Comments</h4>
+                          {/* Add comment form and comment list would go here */}
+                          {/* You can render the comment section from RequestDetailLayout or create a custom component */}
+                        </div>
+                      )}
+
+                      {/* Status Update Form for Approver */}
+                      {canApprove && (
+                        <div className="mt-4">
+                          <StatusUpdateForm
+                            requestStatus={request?.status}
+                            status={status}
+                            setStatus={setStatus}
+                            comment={comment}
+                            setComment={setComment}
+                            isUpdatingStatus={isUpdatingStatus}
+                            handleStatusChange={handleStatusChange}
+                            statusOptions={[
+                              { value: 'approved', label: 'Approve Appraisal' },
+                              { value: 'rejected', label: 'Reject Appraisal' },
+                            ]}
                           />
                         </div>
-                      </RequestDetailLayout>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </DataStateContainer>
-      </div>
+        </div>
+      </DataStateContainer>
     </div>
   );
 };

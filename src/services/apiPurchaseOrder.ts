@@ -1,90 +1,20 @@
-// apiPurchaseOrder.ts
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser";
-import { baseUrl } from "./baseUrl";
+// src/services/apiPurchaseOrder.ts
 import {
-  CreatePurchaseOrderType,
-  UpdatePurchaseOrderType,
-  UsePurchaseOrder,
-  UsePurchaseOrderType,
-} from "../interfaces";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IPurchaseOrdersListResponse,
+  ICreatePurchaseOrderPayload,
+  IPurchaseOrderSingleResponse,
+  IItemGroup,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams } from './apiClient';
 
 // API Functions
 
-export const getAllPurchaseOrders = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}): Promise<UsePurchaseOrderType> {
+export const getAllPurchaseOrders = async function (
+  queryParams: QueryParams
+): Promise<IPurchaseOrdersListResponse> {
   try {
-    const response = await axiosInstance.get<UsePurchaseOrderType>(
-      `/purchase-orders`,
+    const response = await apiClient.get<IPurchaseOrdersListResponse>(
+      `/procurement/purchase-orders`,
       {
         params: queryParams,
       }
@@ -97,10 +27,10 @@ export const getAllPurchaseOrders = async function (queryParams: {
 
 export const getPurchaseOrder = async function (
   purchaseOrderId: string
-): Promise<UsePurchaseOrder> {
+): Promise<IPurchaseOrderSingleResponse> {
   try {
-    const response = await axiosInstance.get<UsePurchaseOrder>(
-      `/purchase-orders/${purchaseOrderId}`
+    const response = await apiClient.get<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/${purchaseOrderId}`
     );
     return response.data;
   } catch (err) {
@@ -112,40 +42,20 @@ export const createPurchaseOrderFromRFQ = async function (
   rfqId: string,
   vendorId: string,
   data: {
-    itemGroups: any[];
+    itemGroups: IItemGroup[];
     approvedBy?: string;
     deliveryDate?: string;
     poDate?: string;
     casfodAddressId: string;
-    VAT: number;
-  },
-  files: File[] = []
-): Promise<UsePurchaseOrder> {
-  console.log("createPurchaseOrderFromRFQ:::::>", data);
-
+    vat: number;
+    rfqTitle?: string;
+  }
+): Promise<IPurchaseOrderSingleResponse> {
+  console.log('Creating purchase order from RFQ with data:', data);
   try {
-    const formData = new FormData();
-
-    // Append JSON and scalar fields
-    formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    formData.append("casfodAddressId", data.casfodAddressId);
-    formData.append("VAT", data.VAT.toString());
-
-    if (data.approvedBy) formData.append("approvedBy", data.approvedBy);
-    if (data.deliveryDate) formData.append("deliveryDate", data.deliveryDate);
-    if (data.poDate) formData.append("poDate", data.poDate);
-
-    // Append files
-    files.forEach((file) => formData.append("files", file));
-
-    const response = await axiosInstance.post<UsePurchaseOrder>(
-      `/purchase-orders/create-from-rfq/${rfqId}/${vendorId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+    const response = await apiClient.post<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/rfq/${rfqId}/vendor/${vendorId}`,
+      data
     );
 
     return response.data;
@@ -155,47 +65,13 @@ export const createPurchaseOrderFromRFQ = async function (
 };
 
 export const createIndependentPurchaseOrder = async function (
-  data: CreatePurchaseOrderType,
-  files: File[] = []
-): Promise<UsePurchaseOrder> {
-  console.log("CreatePurchaseOrderType:", data);
-
+  data: ICreatePurchaseOrderPayload
+): Promise<IPurchaseOrderSingleResponse> {
+  console.log('Creating independent purchase order with data:', data);
   try {
-    const formData = new FormData();
-
-    // Append scalar fields
-    formData.append("RFQTitle", data.RFQTitle);
-    formData.append("casfodAddressId", data.casfodAddressId);
-    formData.append("selectedVendor", data.selectedVendor);
-    formData.append("VAT", data.VAT.toString());
-
-    if (data.approvedBy) formData.append("approvedBy", String(data.approvedBy));
-    if (data.poDate) formData.append("poDate", data.poDate);
-    if (data.deliveryDate) formData.append("deliveryDate", data.deliveryDate);
-
-    // Append item groups as JSON
-    if (data.itemGroups && Array.isArray(data.itemGroups)) {
-      formData.append("itemGroups", JSON.stringify(data.itemGroups));
-    }
-
-    // Append copiedTo as multiple values
-    if (data.copiedTo && Array.isArray(data.copiedTo)) {
-      data.copiedTo.forEach((vendorId) => {
-        formData.append("copiedTo", vendorId);
-      });
-    }
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UsePurchaseOrder>(
-      `/purchase-orders/create`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.post<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders`,
+      data
     );
 
     return response.data;
@@ -206,53 +82,41 @@ export const createIndependentPurchaseOrder = async function (
 
 export const updatePurchaseOrder = async function (
   purchaseOrderId: string,
-  data: UpdatePurchaseOrderType,
+  data: ICreatePurchaseOrderPayload,
   files: File[] = []
-): Promise<UsePurchaseOrder> {
+): Promise<IPurchaseOrderSingleResponse> {
   try {
     const formData = new FormData();
 
-    // Append updated scalar fields if present
-    if (data.RFQTitle !== undefined) formData.append("RFQTitle", data.RFQTitle);
-    if (data.VAT !== undefined) formData.append("VAT", data.VAT.toString());
-    if (data.status !== undefined) formData.append("status", data.status);
-    if (data.casfodAddressId !== undefined)
-      formData.append("casfodAddressId", data.casfodAddressId);
-    if (data.selectedVendor !== undefined)
-      formData.append("selectedVendor", String(data.selectedVendor));
-    if (data.approvedBy !== undefined)
-      formData.append("approvedBy", String(data.approvedBy));
-    if (data.poDate !== undefined) formData.append("poDate", data.poDate);
-    if (data.deliveryDate !== undefined)
-      formData.append("deliveryDate", data.deliveryDate);
+    // The backend expects these field names in FormData
+    if (data.rfqTitle !== undefined) formData.append('rfqTitle', data.rfqTitle);
+    if (data.vat !== undefined) formData.append('vat', data.vat.toString());
+    if (data.casfodAddressId !== undefined) formData.append('casfodAddressId', data.casfodAddressId);
+    if (data.selectedVendor !== undefined) {
+      formData.append('selectedVendor', data.selectedVendor);
+    }
+    if (data.poDate !== undefined) formData.append('poDate', data.poDate);
+    if (data.deliveryDate !== undefined) formData.append('deliveryDate', data.deliveryDate);
 
-    // Append item groups as JSON if present
     if (data.itemGroups && Array.isArray(data.itemGroups)) {
-      formData.append("itemGroups", JSON.stringify(data.itemGroups));
+      formData.append('itemGroups', JSON.stringify(data.itemGroups));
     }
 
-    // Append copiedTo as multiple values if present
     if (data.copiedTo && Array.isArray(data.copiedTo)) {
-      data.copiedTo.forEach((vendorId) => {
-        formData.append("copiedTo", vendorId);
+      data.copiedTo.forEach(vendorId => {
+        formData.append('copiedTo', vendorId);
       });
     }
 
-    // Append comment if present
-    if (data.comment) {
-      formData.append("comment", data.comment);
-    }
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
+    files.forEach(file => {
+      formData.append('files', file);
     });
 
-    const response = await axiosInstance.put<UsePurchaseOrder>(
-      `/purchase-orders/${purchaseOrderId}`,
+    const response = await apiClient.patch<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/${purchaseOrderId}`,
       formData,
       {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
 
@@ -262,30 +126,21 @@ export const updatePurchaseOrder = async function (
   }
 };
 
+// FIX: previously sent the signed PO PDF as multipart FormData on this same
+// call. The PDF is now uploaded separately, first, via useFileUpload()/
+// apiFile.ts's uploadFiles() (associatedModel: 'PurchaseOrders',
+// associatedId: purchaseOrderId) — this call only needs to reference the
+// resulting file IDs, so it's a plain JSON PATCH instead of multipart.
 export const updatePurchaseOrderStatus = async function (
   purchaseOrderId: string,
   status: string,
   comment?: string,
-  pdfFile?: File
-): Promise<UsePurchaseOrder> {
+  fileIds: string[] = []
+): Promise<IPurchaseOrderSingleResponse> {
   try {
-    const formData = new FormData();
-    formData.append("status", status);
-
-    if (comment) {
-      formData.append("comment", comment);
-    }
-
-    if (pdfFile) {
-      formData.append("pdfFile", pdfFile);
-    }
-
-    const response = await axiosInstance.patch<UsePurchaseOrder>(
-      `/purchase-orders/update-status/${purchaseOrderId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.patch<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/${purchaseOrderId}/status`,
+      { status, comment, fileIds }
     );
 
     return response.data;
@@ -294,14 +149,40 @@ export const updatePurchaseOrderStatus = async function (
   }
 };
 
+export const sendPurchaseOrderToVendor = async function (
+  purchaseOrderId: string,
+  vendorId: string,
+  fileIds: string[] = []
+): Promise<IPurchaseOrderSingleResponse> {
+  console.log('Sending purchase order to vendor with data:', {
+    purchaseOrderId,
+    vendorId,
+    fileIds,
+  });
+
+  try {
+    if (!vendorId) {
+      throw new Error('vendorId is required');
+    }
+
+    const response = await apiClient.post<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/${purchaseOrderId}/send-to-vendor`,
+      { vendorId, fileIds }
+    );
+    return response.data;
+  } catch (err) {
+    console.error('Error in sendPurchaseOrderToVendor:', err);
+    return handleError(err);
+  }
+};
 export const deletePurchaseOrder = async function (
   purchaseOrderId: string
 ): Promise<{ status: string; message: string }> {
   try {
-    const response = await axiosInstance.delete<{
+    const response = await apiClient.delete<{
       status: string;
       message: string;
-    }>(`/purchase-orders/${purchaseOrderId}`);
+    }>(`/procurement/purchase-orders/${purchaseOrderId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

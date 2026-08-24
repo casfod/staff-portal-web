@@ -1,81 +1,15 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser";
-import { baseUrl } from "./baseUrl";
+// src/services/apiStaffStrategy.ts
 import {
-  StaffStrategyType,
-  UseStaffStrategy,
-  UseStaffStrategyType,
-} from "../interfaces";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IStaffStrategy,
+  IStaffStrategiesListResponse,
+  IStaffStrategySingleResponse,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams, CommentData, CopyToData } from './apiClient';
 
 // ========== GET STATS ==========
 export const getStaffStrategyStats = async function () {
   try {
-    const response = await axiosInstance.get(`/staff-strategy/stats`);
+    const response = await apiClient.get(`/hr/staff-strategy/stats`);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -83,19 +17,11 @@ export const getStaffStrategyStats = async function () {
 };
 
 // ========== GET ALL ==========
-export const getAllStaffStrategies = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getAllStaffStrategies = async function (queryParams: QueryParams) {
   try {
-    const response = await axiosInstance.get<UseStaffStrategyType>(
-      `/staff-strategy`,
-      {
-        params: queryParams,
-      }
-    );
+    const response = await apiClient.get<IStaffStrategiesListResponse>(`/hr/staff-strategy`, {
+      params: queryParams,
+    });
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -105,8 +31,8 @@ export const getAllStaffStrategies = async function (queryParams: {
 // ========== GET BY ID ==========
 export const getStaffStrategy = async function (requestId: string) {
   try {
-    const response = await axiosInstance.get<UseStaffStrategy>(
-      `/staff-strategy/${requestId}`
+    const response = await apiClient.get<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy/${requestId}`
     );
     return response.data;
   } catch (err) {
@@ -115,64 +41,10 @@ export const getStaffStrategy = async function (requestId: string) {
 };
 
 // ========== CREATE AND SUBMIT ==========
-export const createStaffStrategy = async function (
-  data: Partial<StaffStrategyType>,
-  files: File[]
-) {
+export const createStaffStrategy = async function (data: Partial<IStaffStrategy>) {
   try {
-    const formData = new FormData();
-
-    // Append accountabilityAreas as JSON
-    if (data.accountabilityAreas) {
-      formData.append(
-        "accountabilityAreas",
-        JSON.stringify(data.accountabilityAreas)
-      );
-    }
-
-    // Append standard fields
-    const simpleFields: (keyof StaffStrategyType)[] = [
-      "staffName",
-      "staffId",
-      "jobTitle",
-      "department",
-      "supervisor",
-      "supervisorId",
-      "period",
-      "approvedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UseStaffStrategyType>(
-      `/staff-strategy`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-
-// ========== SAVE DRAFT ==========
-export const saveStaffStrategyDraft = async function (
-  data: Partial<StaffStrategyType>
-) {
-  try {
-    const response = await axiosInstance.post<UseStaffStrategyType>(
-      `/staff-strategy/save`,
+    const response = await apiClient.post<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy`,
       data
     );
     return response.data;
@@ -181,24 +53,33 @@ export const saveStaffStrategyDraft = async function (
   }
 };
 
-// ========== SUBMIT DRAFT ==========
-export const submitStaffStrategyDraft = async function (
-  strategyId: string,
-  files: File[] = []
-) {
+// ✅ FIXED: Match backend route /hr/staff-strategy/draft
+export const saveStaffStrategyDraft = async function (data: Partial<IStaffStrategy>) {
+  try {
+    const response = await apiClient.post<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy/draft`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// ✅ FIXED: Match backend route /hr/staff-strategy/:id/submit
+export const submitStaffStrategyDraft = async function (strategyId: string, files: File[] = []) {
   try {
     const formData = new FormData();
 
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
+    files.forEach(file => {
+      formData.append('files', file);
     });
 
-    const response = await axiosInstance.post<UseStaffStrategyType>(
-      `/staff-strategy/${strategyId}/submit`,
+    const response = await apiClient.patch<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy/${strategyId}/submit`,
       formData,
       {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
     return response.data;
@@ -210,49 +91,13 @@ export const submitStaffStrategyDraft = async function (
 // ========== UPDATE ==========
 export const updateStaffStrategy = async function (
   strategyId: string,
-  data: Partial<StaffStrategyType>,
-  files: File[]
+  data: Partial<IStaffStrategy>,
 ) {
   try {
-    const formData = new FormData();
+    const response = await apiClient.patch<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy/${strategyId}`,
+      data,
 
-    // Append accountabilityAreas as JSON if present
-    if (data.accountabilityAreas) {
-      formData.append(
-        "accountabilityAreas",
-        JSON.stringify(data.accountabilityAreas)
-      );
-    }
-
-    // Append standard fields
-    const simpleFields: (keyof StaffStrategyType)[] = [
-      "staffName",
-      "staffId",
-      "jobTitle",
-      "department",
-      "supervisor",
-      "supervisorId",
-      "period",
-      "approvedBy",
-    ];
-
-    simpleFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.put<StaffStrategyType>(
-      `/staff-strategy/${strategyId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
     );
     return response.data;
   } catch (err) {
@@ -260,17 +105,15 @@ export const updateStaffStrategy = async function (
   }
 };
 
-// ========== UPDATE STATUS ==========
+// ✅ FIXED: Match backend route /hr/staff-strategy/:id/status
 export const updateStatus = async function (
   requestId: string,
   data: { status: string; comment?: string }
 ) {
   try {
-    // Create a plain object for the request body, not FormData
-    // The backend expects JSON for status updates
-    const response = await axiosInstance.patch<Partial<StaffStrategyType>>(
-      `/staff-strategy/update-status/${requestId}`,
-      data // Send as JSON object, not FormData
+    const response = await apiClient.patch<Partial<IStaffStrategy>>(
+      `/hr/staff-strategy/${requestId}/status`,
+      data
     );
     return response.data;
   } catch (err) {
@@ -278,13 +121,10 @@ export const updateStatus = async function (
   }
 };
 
-export const copyTo = async function (
-  requestId: string,
-  data: { userIds: string[] }
-) {
+export const copyTo = async function (requestId: string, data: CopyToData) {
   try {
-    const response = await axiosInstance.patch<Partial<StaffStrategyType>>(
-      `/staff-strategy/copy/${requestId}`,
+    const response = await apiClient.post<Partial<IStaffStrategy>>(
+      `/hr/staff-strategy/${requestId}/copy`,
       data
     );
     return response.data;
@@ -294,15 +134,9 @@ export const copyTo = async function (
 };
 
 // ========== COMMENTS ==========
-export const addComment = async function (
-  requestId: string,
-  data: { text: string }
-) {
+export const addComment = async function (requestId: string, data: CommentData) {
   try {
-    const response = await axiosInstance.post(
-      `/staff-strategy/${requestId}/comments`,
-      data
-    );
+    const response = await apiClient.post(`/hr/staff-strategy/${requestId}/comments`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -312,11 +146,11 @@ export const addComment = async function (
 export const updateComment = async function (
   requestId: string,
   commentId: string,
-  data: { text: string }
+  data: CommentData
 ) {
   try {
-    const response = await axiosInstance.put(
-      `/staff-strategy/${requestId}/comments/${commentId}`,
+    const response = await apiClient.patch(
+      `/hr/staff-strategy/${requestId}/comments/${commentId}`,
       data
     );
     return response.data;
@@ -325,13 +159,10 @@ export const updateComment = async function (
   }
 };
 
-export const deleteComment = async function (
-  requestId: string,
-  commentId: string
-) {
+export const deleteComment = async function (requestId: string, commentId: string) {
   try {
-    const response = await axiosInstance.delete(
-      `/staff-strategy/${requestId}/comments/${commentId}`
+    const response = await apiClient.delete(
+      `/hr/staff-strategy/${requestId}/comments/${commentId}`
     );
     return response.data;
   } catch (err) {
@@ -342,8 +173,8 @@ export const deleteComment = async function (
 // ========== DELETE ==========
 export const deleteStaffStrategy = async function (strategyId: string) {
   try {
-    const response = await axiosInstance.delete<StaffStrategyType>(
-      `/staff-strategy/${strategyId}`
+    const response = await apiClient.delete<IStaffStrategySingleResponse>(
+      `/hr/staff-strategy/${strategyId}`
     );
     return response.data;
   } catch (err) {

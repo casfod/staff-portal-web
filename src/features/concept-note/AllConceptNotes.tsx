@@ -1,201 +1,121 @@
-import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
-import {
-  useAllConceptNotes,
-  useDeleteConceptNote,
-} from "./Hooks/useConceptNotes";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useDebounce } from "use-debounce";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { Pagination } from "../../ui/Pagination";
-import { useNavigate } from "react-router-dom";
-import { setPage, setSearchTerm } from "../../store/genericQuerySlice";
-import Spinner from "../../ui/Spinner";
-import { ConceptNoteType } from "../../interfaces";
-import { setConceptNote } from "../../store/conceptNoteSlice";
+// AllConceptNotes.tsx
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { GoXCircle } from "react-icons/go";
-import { BiSearch } from "react-icons/bi";
-import TextHeader from "../../ui/TextHeader";
-import Button from "../../ui/Button";
-import ConceptNoteTableRow from "./ConceptNoteTableRow";
-import useDeleteRequest from "../../hooks/useDeleteRequest";
+import { ListPage } from '../../components/custom/ListPage';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { useAllConceptNotes, useDeleteConceptNote } from './Hooks/useConceptNotes';
+import ConceptNoteTableRow from './ConceptNoteTableRow';
+import { setConceptNote } from '../../store/conceptNoteSlice';
+import { IConceptNote, IFilterConfig, STATUS_OPTIONS } from '../../interfaces';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { getDefaultTableHeaders } from '@/config/tableConfigs';
 
-// Update tableHeadData to match Purchase Request structure
-const tableHeadData = [
-  { label: "Prepared By", showOnMobile: true, minWidth: "120px" },
-  { label: "Status", showOnMobile: true, minWidth: "100px" },
-  {
-    label: "Date",
-    showOnMobile: false,
-    showOnTablet: true,
-    minWidth: "100px",
-  },
-  { label: "Actions", showOnMobile: true, minWidth: "100px" },
+// Matches concept-note.service.ts's filterableFields.
+const conceptNoteFilterConfigs: IFilterConfig[] = [
+  { key: 'status', label: 'Status', type: 'select', options: STATUS_OPTIONS, placeholder: 'All' },
+  { key: 'activityTitle', label: 'Activity title', type: 'text', placeholder: 'Any' },
+  { key: 'cnNumber', label: 'CN number', type: 'text', placeholder: 'Any' },
+  { key: 'dateFrom', label: 'Date from', type: 'date' },
+  { key: 'dateTo', label: 'Date to', type: 'date' },
 ];
 
 const AllConceptNotes = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
-    {}
-  );
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600); // 500ms debounce
-
-  const { data, isLoading, isError } = useAllConceptNotes(
-    debouncedSearchTerm,
-    sort,
-    page,
-    limit
-  );
-
-  const conceptNotes = useMemo(() => data?.data?.conceptNotes ?? [], [data]);
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
-
-  const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
-  };
-
-  const toggleViewItems = (requestId: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [requestId]: !prev[requestId], // Toggle visibility for the specific request
-    }));
-  };
-
-  const handleEdit = (conceptNote: ConceptNoteType) => {
-    dispatch(setConceptNote(conceptNote));
-    navigate(`/concept-notes/edit-concept-note/${conceptNote.id}`);
-  };
-  const handleAction = (conceptNote: ConceptNoteType) => {
-    dispatch(setConceptNote(conceptNote));
-    navigate(`/concept-notes/request/${conceptNote.id}`);
-  };
-
-  const { deleteConceptNote } = useDeleteConceptNote(
+  const {
     searchTerm,
-    sort,
+    handleSearchChange,
     page,
-    limit
+    handlePageChange,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: conceptNoteFilterConfigs,
+    defaultFilters: {},
+  });
+
+  const { data, isLoading, isError } = useAllConceptNotes(queryParams);
+  const { deleteConceptNote } = useDeleteConceptNote(queryParams);
+
+  const conceptNotes = useMemo(() => data?.data ?? [], [data]);
+  const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
+
+  const handleAction = useCallback(
+    (request: IConceptNote) => {
+      dispatch(setConceptNote(request));
+      navigate(`/concept-notes/request/${request.id}`);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleEdit = useCallback(
+    (request: IConceptNote) => {
+      dispatch(setConceptNote(request));
+      navigate(`/concept-notes/edit-concept-note/${request.id}`);
+    },
+    [dispatch, navigate]
   );
 
   const handleDelete = useDeleteRequest(deleteConceptNote, {
-    entityName: "Concept Note",
+    entityName: 'Concept Note',
   });
 
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
+  const tableHeadData = getDefaultTableHeaders();
+
+  const filterToolbar = (
+    <FilterToolbar
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      filters={filters}
+      onFilterChange={setFilter}
+      filterConfigs={filterConfigs}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
+      searchPlaceholder="Search concept notes..."
+    />
+  );
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        {/* Header with title and button */}
-        <div className="flex justify-between items-center">
-          <TextHeader>Concept Notes</TextHeader>
-
-          <Button
-            onClick={() => navigate("/concept-notes/create-concept-note")} // Use relative path here
-          >
-            <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            Add
-          </Button>
-        </div>
-
-        {/* Search Bar and Sort Dropdown */}
-        <div className="flex items-center space-x-4">
-          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-            <span className="p-2 text-gray-400">
-              <BiSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2   placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search"
-            />
-            <span
-              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-              onClick={() => dispatch(setSearchTerm(""))}
-            >
-              <GoXCircle />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Concept Notes Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200 ">
-          <thead className="bg-gray-50 hidden sm:table-header-group">
-            <tr>
-              {tableHeadData.map((header, index) => (
-                <th
-                  key={index}
-                  className={`
-                    px-3 py-2.5 md:px-4 md:py-3 
-                    text-left font-medium uppercase 
-                    tracking-wider
-                    ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                    ${
-                      header.showOnTablet
-                        ? "hidden sm:table-cell md:table-cell"
-                        : ""
-                    }
-                    text-xs md:text-sm
-                    whitespace-nowrap
-                  `}
-                  style={{ minWidth: header.minWidth }}
-                >
-                  {header.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="max-w-full bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              conceptNotes.map((request) => (
-                <ConceptNoteTableRow
-                  key={request.id}
-                  request={request}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                  tableHeadData={tableHeadData}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {(conceptNotes.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <ListPage
+      title="Concept Notes"
+      data={conceptNotes}
+      headers={tableHeadData}
+      isLoading={isLoading}
+      isError={isError}
+      currentPage={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      renderRow={request => (
+        <ConceptNoteTableRow
+          key={request.id}
+          request={request}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleAction={handleAction}
+          tableHeadData={tableHeadData}
         />
       )}
-    </div>
+      onAdd={() => navigate('/concept-notes/create-concept-note')}
+      emptyMessage={
+        hasActiveFilters ? 'No concept notes match your filters' : 'No concept notes found'
+      }
+      emptySubMessage={
+        hasActiveFilters
+          ? 'Try adjusting your filters or search terms'
+          : 'Create your first concept note'
+      }
+      searchComponent={filterToolbar}
+    />
   );
 };
 

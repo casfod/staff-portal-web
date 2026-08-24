@@ -1,15 +1,11 @@
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import {
-  PaymentRequestType,
-  UsePaymentRequest,
-  usePaymentRequestType,
-  UsePaymentStatsType,
-} from "../../../interfaces";
+  IHookError,
+  IPaymentRequest,
+  IPaymentRequestSingleResponse,
+  IPaymentRequestsListResponse,
+  IPaymentRequestStatsResponse,
+} from '../../../interfaces';
 import {
   getAllPaymentRequest,
   getPaymentRequest,
@@ -23,40 +19,28 @@ import {
   updateComment as updateCommentApi,
   deleteComment as deleteCommentApi,
   deletePaymentRequest as deletePaymentRequestAPI,
-} from "../../../services/apiPaymentRequest";
-import { AxiosError, AxiosResponse } from "axios";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useState } from "react";
-
-interface ErrorResponse {
-  message: string;
-}
-
-interface HookError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+} from '../../../services/apiPaymentRequest';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 export function useAllPaymentRequests(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<usePaymentRequestType, Error> // Add options parameter
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IPaymentRequestsListResponse, Error> // Add options parameter
 ) {
-  return useQuery<usePaymentRequestType, Error>({
-    queryKey: ["all-payment-requests", search, sort, page, limit],
-    queryFn: () => getAllPaymentRequest({ search, sort, page, limit }),
+  return useQuery<IPaymentRequestsListResponse, Error>({
+    queryKey: ['all-payment-requests', queryParams],
+    queryFn: () => getAllPaymentRequest(queryParams),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
 }
 
 export function usePaymentRequestStats(
-  options?: UseQueryOptions<UsePaymentStatsType, Error> // Add options parameter
+  options?: UseQueryOptions<IPaymentRequestStatsResponse, Error> // Add options parameter
 ) {
-  return useQuery<UsePaymentStatsType, Error>({
-    queryKey: ["payment-requests-stats"],
+  return useQuery<IPaymentRequestStatsResponse, Error>({
+    queryKey: ['payment-requests-stats'],
     queryFn: () => getPaymentRequestStats(),
     staleTime: 0,
     ...options, // Spread the options to include onError
@@ -64,8 +48,8 @@ export function usePaymentRequestStats(
 }
 
 export function usePaymentRequest(id: string) {
-  return useQuery<UsePaymentRequest, Error>({
-    queryKey: ["payment-request", id],
+  return useQuery<IPaymentRequestSingleResponse, Error>({
+    queryKey: ['payment-request', id],
     queryFn: () => getPaymentRequest(id),
     staleTime: 0,
   });
@@ -80,16 +64,15 @@ export function useSavePaymentRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<PaymentRequestType>) =>
-      savePaymentRequestsApi(data),
+    mutationFn: (data: Partial<IPaymentRequest>) => savePaymentRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("PaymentRequest saved successfully");
+        toast.success('PaymentRequest saved successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-payment-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-payment-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -97,12 +80,12 @@ export function useSavePaymentRequest() {
       }
     },
 
-    onError: (err: HookError) => {
+    onError: (err: IHookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Payment Request save Error:", err.response?.data.message);
+      console.error('Payment Request save Error:', err.response?.data.message);
     },
   });
 
@@ -118,21 +101,15 @@ export function useSendPaymentRequest() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<PaymentRequestType>;
-      files: File[];
-    }) => sendPaymentRequestsApi(data, files),
+    mutationFn: ({ data }: { data: Partial<IPaymentRequest> }) => sendPaymentRequestsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("PaymentRequest sent successfully");
+        toast.success('PaymentRequest sent successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-payment-requests"] });
+        queryClient.invalidateQueries({ queryKey: ['all-payment-requests'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -140,12 +117,12 @@ export function useSendPaymentRequest() {
       }
     },
 
-    onError: (err: HookError) => {
+    onError: (err: IHookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Payment Request send Error:", err.response?.data.message);
+      console.error('Payment Request send Error:', err.response?.data.message);
     },
   });
 
@@ -161,34 +138,29 @@ export function useUpdatePaymentRequest(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<PaymentRequestType>;
-      files: File[];
-    }) => updatePaymentRequestApi(requestId, data, files),
+    mutationFn: ({ data }: { data: Record<string, unknown> }) =>
+      updatePaymentRequestApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Payment Request updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Payment Request updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Payment Request update not successful");
+        toast.error('Payment Request update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating Payment Request");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error updating Payment Request');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("PaymentRequest Error:", error);
+      console.error('PaymentRequest Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -205,29 +177,28 @@ export function useUpdateStatus(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
-      updateStatusApi(requestId, data),
+    mutationFn: (data: { status: string; comment: string }) => updateStatusApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Status update not successful");
+        toast.error('Status update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating Status");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error updating Status');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Status update Error:", error);
+      console.error('Status update Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -244,28 +215,28 @@ export function useCopy(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyToApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message); // Log error directly here
+        console.error('Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Copy Error:", error);
+      console.error('Copy Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -284,25 +255,25 @@ export function useAddComment(requestId: string) {
   } = useMutation({
     mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 201) {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Add Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error adding comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Add Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -322,25 +293,25 @@ export function useUpdateComment(requestId: string) {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateCommentApi(requestId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error updating comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -359,25 +330,25 @@ export function useDeleteComment(requestId: string) {
   } = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["payment-request", requestId],
+          queryKey: ['payment-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Delete Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error deleting comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Delete Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -385,12 +356,7 @@ export function useDeleteComment(requestId: string) {
   return { deleteComment, isPending, isError, errorMessage };
 }
 
-export function useDeletePaymentRequest(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
+export function useDeletePaymentRequest(queryParams: Record<string, string | number | undefined>) {
   const queryClient = useQueryClient();
 
   const {
@@ -398,25 +364,24 @@ export function useDeletePaymentRequest(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, HookError, string>({
+  } = useMutation<void, IHookError, string>({
     mutationFn: async (userID: string) => {
       await deletePaymentRequestAPI(userID);
     },
     onSuccess: () => {
-      toast.success("Payment Request deleted");
+      toast.success('Payment Request deleted');
 
       queryClient.invalidateQueries({
-        queryKey: ["all-payment-requests", search, sort, page, limit],
+        queryKey: ['all-payment-requests', queryParams],
       });
     },
 
-    onError: (error) => {
-      toast.error("Error deleting Payment Request");
+    onError: error => {
+      toast.error('Error deleting Payment Request');
 
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Payment Request.";
-      console.error("Delete Payment Request Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deleting the Payment Request.';
+      console.error('Delete Payment Request Error:', errorMessage);
     },
   });
 

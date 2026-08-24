@@ -1,9 +1,9 @@
 // hooks/usePOPDF.ts
-import { useState, useRef } from "react";
-import toast from "react-hot-toast";
-import { generatePdf } from "../utils/generatePdf";
-import { PurchaseOrderType } from "../interfaces";
-import { addPdfFooter } from "../utils/pdfFooterUtils";
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { generatePdf } from '../utils/generatePdf';
+import { IPurchaseOrder } from '../interfaces';
+import { addPdfFooter } from '../utils/pdfFooterUtils';
 
 interface UsePOPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -15,31 +15,31 @@ interface UsePOPDFReturn {
   downloadPDF: () => Promise<void>;
 }
 
-export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
+export const usePOPDF = (poData: IPurchaseOrder | null): UsePOPDFReturn => {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const generatePDF = async (): Promise<File | null> => {
-    if (!poData || !poData.POCode) {
-      toast.error("Purchase Order data is incomplete");
+    if (!poData || !poData.poCode) {
+      toast.error('Purchase Order data is incomplete');
       return null;
     }
 
     if (!pdfRef.current) {
-      toast.error("PDF template not found");
+      toast.error('PDF template not found');
       return null;
     }
 
     setIsGenerating(true);
 
     try {
-      const filename = `${poData.POCode || "PurchaseOrder"}.pdf`;
+      const filename = `${poData.poCode || 'PurchaseOrder'}.pdf`;
       const pdf = await generatePdfViaCanvas(pdfRef.current, filename, poData);
       return pdf;
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF");
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF');
       return null;
     } finally {
       setIsGenerating(false);
@@ -49,23 +49,23 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
   const generatePdfViaCanvas = async (
     element: HTMLElement,
     filename: string,
-    poData: PurchaseOrderType
+    poData: IPurchaseOrder
   ): Promise<File | null> => {
-    const { jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
+    const { jsPDF } = await import('jspdf');
+    const html2canvas = (await import('html2canvas')).default;
 
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: '#ffffff',
       logging: false,
     });
 
     const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
       compress: true,
     });
 
@@ -76,8 +76,7 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
 
     const imgWidth = contentWidth;
     const availableContentHeight = pdfHeight - margin * 2;
-    const pageContentHeightPx =
-      (availableContentHeight * canvas.width) / imgWidth;
+    const pageContentHeightPx = (availableContentHeight * canvas.width) / imgWidth;
     const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
     // Process each page
@@ -91,12 +90,12 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
       const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
       const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
 
-      const pageCanvas = document.createElement("canvas");
+      const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = pageImgHeightPx;
 
-      const ctx = pageCanvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas context not available");
+      const ctx = pageCanvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context not available');
 
       ctx.drawImage(
         canvas,
@@ -110,72 +109,72 @@ export const usePOPDF = (poData: PurchaseOrderType | null): UsePOPDFReturn => {
         pageImgHeightPx
       );
 
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
+      const pageImgData = pageCanvas.toDataURL('image/jpeg', 1.0);
 
       pdf.addImage(
         pageImgData,
-        "JPEG",
+        'JPEG',
         margin,
         margin,
         imgWidth,
         pageImgHeight,
         undefined,
-        "FAST",
+        'FAST',
         0
       );
 
       // ADD FOOTER WITH PO CODE AND PAGE NUMBER
-      addPdfFooter(pdf, poData.POCode, "PO Code", i + 1, totalPages, margin);
+      addPdfFooter(pdf, poData.poCode, 'PO Code', i + 1, totalPages, margin);
     }
 
-    const pdfBlob = pdf.output("blob");
-    return new File([pdfBlob], filename, { type: "application/pdf" });
+    const pdfBlob = pdf.output('blob');
+    return new File([pdfBlob], filename, { type: 'application/pdf' });
   };
 
   const downloadPDF = async (): Promise<void> => {
     if (!poData || !pdfRef.current) {
-      toast.error("No Purchase Order data available");
+      toast.error('No Purchase Order data available');
       return;
     }
 
     try {
-      const filename = `${poData.POCode || "PurchaseOrder"}.pdf`;
+      const filename = `${poData.poCode || 'PurchaseOrder'}.pdf`;
       await generatePdf(pdfRef.current, {
         filename,
-        format: "a4",
-        orientation: "portrait",
+        format: 'a4',
+        orientation: 'portrait',
         scale: 2,
         margin: 10,
         multiPage: true,
         quality: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: '#FFFFFF',
         titleOptions: {
-          text: `Purchase Order - ${poData.POCode || ""}`,
+          text: `Purchase Order - ${poData.poCode || ''}`,
           fontSize: 16,
-          fontStyle: "bold",
-          color: "#000000",
+          fontStyle: 'bold',
+          color: '#000000',
           marginBottom: 10,
         },
         footerOptions: {
-          left: `PO Code: ${poData.POCode || "N/A"}`,
+          left: `PO Code: ${poData.poCode || 'N/A'}`,
           right: (currentPage: number, totalPages: number) =>
             `Page ${currentPage} of ${totalPages}`,
           fontSize: 9,
-          color: "#666666",
-          lineColor: "#E0E0E0",
+          color: '#666666',
+          lineColor: '#E0E0E0',
         },
         save: true,
       });
-      toast.success("PDF downloaded successfully");
+      toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error("PDF download failed:", error);
-      toast.error("Failed to download PDF");
+      console.error('PDF download failed:', error);
+      toast.error('Failed to download PDF');
     }
   };
 
   const previewPDF = () => {
     if (!poData) {
-      toast.error("No Purchase Order data available");
+      toast.error('No Purchase Order data available');
       return;
     }
     setShowPreview(true);

@@ -1,5 +1,5 @@
 // store/store.ts
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import {
   persistStore,
   persistReducer,
@@ -9,29 +9,30 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from "redux-persist";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
-import modalReducer from "./modalSlice";
-import projectReducer from "./projectSlice";
-import conceptNoteReducer from "./conceptNoteSlice";
-import purchaseRequestReducer from "./purchaseRequestSlice";
-import advanceRequestReducer from "./advanceRequestSlice";
-import travelRequestReducer from "./travelRequestSlice";
-import paymentRequestReducer from "./paymentRequestSlice";
-import genericQuerySliceReducer from "./genericQuerySlice";
-import navigationSliceReducer from "./navigationSlice";
-import expenseClaimReducer from "./expenseClaimSlice";
-import vendorReducer from "./vendorSlice";
-import rfqReducer from "./rfqSlice";
-import userReducer from "./userSlice";
-import purchaseOrderReducer from "./purchaseOrderSlice";
-import goodsReceivedSliceReducer from "./goodsReceivedSlice";
-import paymentVoucherSliceReducer from "./paymentVoucherSlice";
-import leaveReducer from "./leaveSlice";
-import staffStrategyReducer from "./staffStrategySlice";
-import appraisalReducer from "./appraisalSlice";
-import reportReducer from "./reportSlice";
+import modalReducer from './modalSlice';
+import projectReducer from './projectSlice';
+import conceptNoteReducer from './conceptNoteSlice';
+import purchaseRequestReducer from './purchaseRequestSlice';
+import advanceRequestReducer from './advanceRequestSlice';
+import travelRequestReducer from './travelRequestSlice';
+import paymentRequestReducer from './paymentRequestSlice';
+import genericQuerySliceReducer from './genericQuerySlice';
+import navigationSliceReducer from './navigationSlice';
+import expenseClaimReducer from './expenseClaimSlice';
+import vendorReducer from './vendorSlice';
+import rfqReducer from './rfqSlice';
+import userReducer from './userSlice';
+import purchaseOrderReducer from './purchaseOrderSlice';
+import goodsReceivedSliceReducer from './goodsReceivedSlice';
+import paymentVoucherSliceReducer from './paymentVoucherSlice';
+import leaveReducer from './leaveSlice';
+import staffStrategyReducer from './staffStrategySlice';
+import appraisalReducer from './appraisalSlice';
+import reportReducer from './reportSlice';
+import userSubTabReducer from './userSubTabSlice';
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -55,29 +56,27 @@ const rootReducer = combineReducers({
   staffStrategy: staffStrategyReducer,
   appraisal: appraisalReducer,
   report: reportReducer,
+  userSubTab: userSubTabReducer,
 });
 
 // Create persist config
 const persistConfig = {
-  key: "root",
+  key: 'root',
   storage,
-  // Optionally blacklist or whitelist slices
-  blacklist: ["genericQuerySlice"], // if you don’t want to persist this
-  // whitelist: ['purchaseRequest'] // only persist these
+  blacklist: ['genericQuerySlice'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Configure store
+// Configure store - FIXED with type assertion
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Required for redux-persist to avoid warnings
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }) as any, // Type assertion to fix the error
 });
 
 // Create the persistor

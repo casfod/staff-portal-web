@@ -1,15 +1,11 @@
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import {
-  ExpenseClaimType,
-  UseExpenseClaim,
-  UseExpenseClaimStatsType,
-  useExpenseClaimType,
-} from "../../../interfaces";
+  IHookError,
+  IExpenseClaim,
+  IExpenseClaimSingleResponse,
+  IExpenseClaimsListResponse,
+  IExpenseClaimStatsResponse,
+} from '../../../interfaces';
 import {
   getAllExpenseClaim,
   getExpenseClaim,
@@ -23,40 +19,28 @@ import {
   updateComment as updateCommentApi,
   deleteComment as deleteCommentApi,
   deleteExpenseClaim as deleteExpenseClaimAPI,
-} from "../../../services/apiExpenseClaim";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
-
-interface ErrorResponse {
-  message: string;
-}
-
-interface HookError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+} from '../../../services/apiExpenseClaim';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 export function useAllExpenseClaims(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<useExpenseClaimType, Error> // Add options parameter
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IExpenseClaimsListResponse, Error> // Add options parameter
 ) {
-  return useQuery<useExpenseClaimType, Error>({
-    queryKey: ["all-expense-claims", search, sort, page, limit],
-    queryFn: () => getAllExpenseClaim({ search, sort, page, limit }),
+  return useQuery<IExpenseClaimsListResponse, Error>({
+    queryKey: ['all-expense-claims', queryParams],
+    queryFn: () => getAllExpenseClaim(queryParams),
     staleTime: 0,
     ...options, // Spread the options to include onError
   });
 }
 
 export function useExpenseClaimStats(
-  options?: UseQueryOptions<UseExpenseClaimStatsType, Error> // Add options parameter
+  options?: UseQueryOptions<IExpenseClaimStatsResponse, Error> // Add options parameter
 ) {
-  return useQuery<UseExpenseClaimStatsType, Error>({
-    queryKey: ["expense-claim-stats"],
+  return useQuery<IExpenseClaimStatsResponse, Error>({
+    queryKey: ['expense-claim-stats'],
     queryFn: () => getExpenseClaimStats(),
     staleTime: 0,
     ...options, // Spread the options to include onError
@@ -64,8 +48,8 @@ export function useExpenseClaimStats(
 }
 
 export function useExpenseClaim(id: string) {
-  return useQuery<UseExpenseClaim, Error>({
-    queryKey: ["expense-claim", id],
+  return useQuery<IExpenseClaimSingleResponse, Error>({
+    queryKey: ['expense-claim', id],
     queryFn: () => getExpenseClaim(id),
     staleTime: 0,
   });
@@ -80,21 +64,21 @@ export function useSaveExpenseClaim() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<ExpenseClaimType>) => saveExpenseClaimsApi(data),
+    mutationFn: (data: Partial<IExpenseClaim>) => saveExpenseClaimsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("ExpenseClaim saved successfully");
-        queryClient.invalidateQueries({ queryKey: ["all-expense-claims"] });
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('ExpenseClaim saved successfully');
+        queryClient.invalidateQueries({ queryKey: ['all-expense-claims'] });
         navigate(-1);
       } else {
         toast.error(data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error(err.response?.data.message || "An error occurred");
-      console.error("Expense Claim save error:", err.response?.data.message);
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data.message || 'An error occurred');
+      console.error('Expense Claim save error:', err.response?.data.message);
     },
   });
 
@@ -110,21 +94,15 @@ export function useSendExpenseClaim() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<ExpenseClaimType>;
-      files: File[];
-    }) => sendExpenseClaimsApi(data, files),
+    mutationFn: ({ data }: { data: Partial<IExpenseClaim> }) => sendExpenseClaimsApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         // Show success toast
-        toast.success("Expense Claim sent successfully");
+        toast.success('Expense Claim sent successfully');
 
         // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["all-expense-claims"] });
+        queryClient.invalidateQueries({ queryKey: ['all-expense-claims'] });
         navigate(-1);
       } else {
         // Handle unexpected response
@@ -132,12 +110,12 @@ export function useSendExpenseClaim() {
       }
     },
 
-    onError: (err: HookError) => {
+    onError: (err: IHookError) => {
       // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
+      toast.error(err.response?.data.message || 'An error occurred');
 
       // Log the error for debugging
-      console.error("Travel Request send Error:", err.response?.data.message);
+      console.error('Travel Request send Error:', err.response?.data.message);
     },
   });
 
@@ -153,33 +131,28 @@ export function useUpdateExpenseClaim(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      data,
-      files,
-    }: {
-      data: Partial<ExpenseClaimType>;
-      files: File[];
-    }) => updateExpenseClaimApi(requestId, data, files),
+    mutationFn: ({ data }: { data: Record<string, unknown> }) =>
+      updateExpenseClaimApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Expense Claim updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Expense Claim updated successfully');
 
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Expense Claim update not successful");
+        toast.error('Expense Claim update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating Expense Claim");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error updating Expense Claim');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Expense Claim Error:", error);
+      console.error('Expense Claim Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -196,28 +169,27 @@ export function useUpdateStatus(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
-      updateStatusApi(requestId, data),
+    mutationFn: (data: { status: string; comment: string }) => updateStatusApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
 
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Status update not successful");
+        toast.error('Status update not successful');
         setErrorMessage(data.message);
-        console.error("Login Error:", data.message); // Log error directly here
+        console.error('Login Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating Status");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error updating Status');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Status update Error:", error);
+      console.error('Status update Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -234,28 +206,28 @@ export function useCopy(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyToApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message); // Log error directly here
+        console.error('Error:', data.message); // Log error directly here
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error");
-      const error = err.response?.data.message || "An error occurred";
+    onError: (err: IHookError) => {
+      toast.error('Error');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Copy Error:", error);
+      console.error('Copy Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -274,25 +246,25 @@ export function useAddComment(requestId: string) {
   } = useMutation({
     mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 201) {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Add Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error adding comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Add Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -312,25 +284,25 @@ export function useUpdateComment(requestId: string) {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateCommentApi(requestId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error updating comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -349,25 +321,25 @@ export function useDeleteComment(requestId: string) {
   } = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
 
         // Invalidate and refetch
         queryClient.invalidateQueries({
-          queryKey: ["expense-claim", requestId],
+          queryKey: ['expense-claim', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Delete Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error deleting comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Delete Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -375,12 +347,7 @@ export function useDeleteComment(requestId: string) {
   return { deleteComment, isPending, isError, errorMessage };
 }
 
-export function useDeleteExpenseClaim(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
+export function useDeleteExpenseClaim(queryParams: Record<string, string | number | undefined>) {
   const queryClient = useQueryClient();
 
   const {
@@ -388,25 +355,24 @@ export function useDeleteExpenseClaim(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, HookError, string>({
+  } = useMutation<void, IHookError, string>({
     mutationFn: async (userID: string) => {
       await deleteExpenseClaimAPI(userID);
     },
     onSuccess: () => {
-      toast.success("Expens Claim deleted");
+      toast.success('Expens Claim deleted');
 
       queryClient.invalidateQueries({
-        queryKey: ["all-expense-claims", search, sort, page, limit],
+        queryKey: ['all-expense-claims', queryParams],
       });
     },
 
-    onError: (error) => {
-      toast.error("Error deleting Expens Claim");
+    onError: error => {
+      toast.error('Error deleting Expens Claim');
 
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the Expens Claim.";
-      console.error("Delete Expens Claim Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deleting the Expens Claim.';
+      console.error('Delete Expens Claim Error:', errorMessage);
     },
   });
 

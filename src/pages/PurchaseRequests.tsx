@@ -1,7 +1,7 @@
-import { Outlet } from "react-router-dom";
-import { MaintenanceBanner } from "../ui/MaintenanceBanner";
+import { Outlet } from 'react-router-dom';
+import { MaintenanceBanner } from '../components/custom/MaintenanceBanner';
 
-export function PurchaseRequests() {
+export default function PurchaseRequests() {
   const isUnderMaintenance = false; // Set this based on your maintenance status
 
   return (

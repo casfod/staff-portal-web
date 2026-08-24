@@ -1,38 +1,57 @@
-import { List } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { RootState } from "../../store/store";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { moneyFormat } from "../../utils/moneyFormat";
-import { localStorageUser } from "../../utils/localStorageUser";
-import { useAdmins } from "../user/Hooks/useUsers";
+// PurchaseRequest.tsx - Complete Fixed Version
+import { List, Loader2 } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { RootState } from '../../store/store';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { useAdmins } from '../user/Hooks/useUsers';
+import { useRequestPermissions } from '../../hooks/useRequestPermissions';
 
-import { PurchaseRequestDetails } from "./PurchaseRequestDetails";
-import RequestDetailLayout from "../../ui/RequestDetailLayout";
-import StatusBadge from "../../ui/StatusBadge";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
-import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import Spinner from "../../ui/Spinner";
-import { DataStateContainer } from "../../ui/DataStateContainer";
-import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
-import ActionIcons from "../../ui/ActionIcons";
-import { usePdfDownload } from "../../hooks/usePdfDownload";
+// Radix UI Components
+import { Button } from '../../components/ui/button';
+
+// Custom Components
+import TextHeader from '../../components/custom/TextHeader';
+import StatusBadge from '../../components/custom/StatusBadge';
+import ActionIcons from '../../components/custom/ActionIcons';
+import RequestDetailLayout, { TRequestEntity } from '../../components/custom/RequestDetailLayout';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import { DataStateContainer } from '../../components/custom/DataStateContainer';
+import { MaintenanceBanner } from '../../components/custom/MaintenanceBanner';
+
+// Feature Components
+import { PurchaseRequestDetails } from './PurchaseRequestDetails';
 import {
   useAddComment,
   useCopy,
   useDeleteComment,
   usePurchaseRequest,
   useUpdateComment,
-  useUpdatePurChaseRequest,
+  useUpdatePurchaseRequest,
   useUpdateStatus,
-} from "./Hooks/PRHook";
-import { Comment as AppComment, PurChaseRequestType } from "../../interfaces";
-import TableRowMain from "../../ui/TableRowMain";
-import TableData from "../../ui/TableData";
-import RequestCard from "../../ui/RequestCard";
+} from './Hooks/PRHook';
+import { useStatusUpdate } from '../../hooks/useStatusUpdate';
+import { usePdfDownload } from '../../hooks/usePdfDownload';
+import {
+  IComment,
+  IItemGroup,
+  IPurchaseRequest,
+  IRequestDetailFormData,
+  IUser,
+} from '../../interfaces';
+import PurchaseRequestCard from './PurchaseRequestCard';
+import { getDefaultTableHeaders } from '@/config/tableConfigs';
+
+// Type for status update data
+interface StatusUpdateData {
+  status: string;
+  comment: string;
+  financeReviewStatus?: 'pending' | 'approved' | 'rejected';
+  procurementReviewStatus?: 'pending' | 'approved' | 'rejected';
+}
 
 const PurchaseRequest = () => {
   const isUnderMaintenance = false;
@@ -41,121 +60,130 @@ const PurchaseRequest = () => {
   const navigate = useNavigate();
   const { requestId } = useParams();
 
-  // Data fetching and reconciliation
-  const {
-    data: remoteData,
-    isLoading,
-    isError,
-  } = usePurchaseRequest(requestId!);
+  // Data fetching
+  const { data: remoteData, isLoading, isError } = usePurchaseRequest(requestId!);
 
-  const purchaseRequest = useSelector(
-    (state: RootState) => state.purchaseRequest.purchaseRequest
-  );
+  const purchaseRequest = useSelector((state: RootState) => state.purchaseRequest.purchaseRequest);
 
-  const request = useMemo(
-    () => remoteData?.data || purchaseRequest,
-    [remoteData, purchaseRequest]
-  );
+  const request = useMemo(() => remoteData?.data || purchaseRequest, [remoteData, purchaseRequest]);
 
   // Redirect logic
   useEffect(() => {
     if (!requestId || (!isLoading && !request)) {
-      navigate("/purchase-requests");
+      navigate('/purchase-requests');
     }
   }, [request, requestId, navigate, isLoading]);
 
-  const [status, setStatus] = useState("");
-  const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState<Partial<PurChaseRequestType>>({
-    approvedBy: null,
+  // State
+  const [status, setStatus] = useState('');
+  const [comment, setComment] = useState('');
+  const [formData, setFormData] = useState<IRequestDetailFormData>({
+    approvedBy: undefined,
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
-  // Custom hooks
+  // Hooks
   const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
-    requestId!
-  );
-  const { updatePurchaseRequest, isPending: isUpdating } =
-    useUpdatePurChaseRequest(requestId!);
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(requestId!);
+  const { updatePurchaseRequest, isPending: isUpdating } = useUpdatePurchaseRequest(requestId!);
+  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
   // Comment hooks
   const { addComment, isPending: isAddingComment } = useAddComment(requestId!);
-  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
-    requestId!
-  );
-  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
-    requestId!
-  );
+  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(requestId!);
+  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(requestId!);
 
-  // Fetch admins data
+  // Admins
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
-  const { copyto, isPending: isCopying } = useCopy(requestId!);
 
-  const handleFormChange = (
-    field: keyof PurChaseRequestType,
-    value: string
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  // Permissions using shared hook - isTwoStep = true for PurchaseRequest
+  const permissions = useRequestPermissions({
+    request,
+    currentUser,
+    isTwoStep: true,
+  });
+
+  // PDF
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { downloadPdf, isGenerating } = usePdfDownload({
+    filename: `PurchaseRequest-${request?.id}`,
+    multiPage: true,
+    titleOptions: {
+      text: 'Purchase Request',
+    },
+  });
+
+  const handleDownloadPDF = () => {
+    downloadPdf(pdfContentRef);
   };
 
-  // In PurchaseRequest.tsx, update the onStatusChangeHandler function:
+  const totalAmount = useMemo(() => {
+    return (
+      request?.itemGroups?.reduce((sum: number, item: IItemGroup) => sum + (item.total || 0), 0) ||
+      0
+    );
+  }, [request?.itemGroups]);
 
-  const onStatusChangeHandler = () => {
-    handleStatusChange(status, comment, async (data) => {
-      try {
-        // Create update data with review statuses if applicable
-        const updateData: any = { ...data };
+  // Handlers
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-        // REMOVE THIS: Don't set main status for finance/procurement reviews
-        // delete updateData.status;
+  // ✅ FIXED: Status change handler using permissions from the hook
+  const onStatusChangeHandler = useCallback(() => {
+    if (!status) {
+      console.warn('⚠️ No status selected');
+      return;
+    }
+    handleStatusChange(status, comment, async (data: StatusUpdateData) => {
+      // ✅ Use permissions from the hook as the source of truth
+      const canReviewFinance = permissions.canReviewFinance;
+      const canReviewProcurement = permissions.canReviewProcurement;
+      const canApprove = permissions.canApprove;
+      const isFinanceReviewer = permissions.isFinanceReviewer;
+      const isProcurementReviewer = permissions.isProcurementReviewer;
+      const isApprover = permissions.isApprover;
 
-        // Add review statuses based on user role
-        const currentUserId = currentUser.id;
-        const isFinanceReviewer =
-          request?.financeReviewBy?.id === currentUserId;
-        const isProcurementReviewer =
-          request?.procurementReviewBy?.id === currentUserId;
+      const updateData: StatusUpdateData = {
+        comment: data.comment || comment,
+        status: request?.status || 'pending',
+      };
 
-        if (isFinanceReviewer) {
-          updateData.financeReviewStatus =
-            status === "approved" ? "approved" : "rejected";
-          // Don't set main status for finance reviewer
-          delete updateData.status;
-        }
-
-        if (isProcurementReviewer) {
-          updateData.procurementReviewStatus =
-            status === "approved" ? "approved" : "rejected";
-          // Don't set main status for procurement reviewer
-          delete updateData.status;
-        }
-
-        // Only approver should set main status
-        const isApprover = request?.approvedBy?.id === currentUserId;
-        if (isApprover) {
-          updateData.status = status; // "approved" or "rejected"
-        }
-
-        await updateStatus(updateData, {
-          onError: (error) => {
-            throw error;
-          },
-        });
-      } catch (error) {
-        throw error;
+      // Determine user's role and build appropriate payload
+      if (canReviewFinance || isFinanceReviewer) {
+        // ✅ Finance reviewer - send financeReviewStatus
+        updateData.financeReviewStatus = data.status === 'approved' ? 'approved' : 'rejected';
+        // ✅ Keep the current main status - DO NOT change it
+        updateData.status = request?.status || 'pending';
+      } else if (canReviewProcurement || isProcurementReviewer) {
+        // ✅ Procurement reviewer - send procurementReviewStatus
+        updateData.procurementReviewStatus = data.status === 'approved' ? 'approved' : 'rejected';
+        // ✅ Keep the current main status - DO NOT change it
+        updateData.status = request?.status || 'pending';
+      } else if (canApprove || isApprover) {
+        // ✅ Approver - update main status
+        updateData.status = data.status;
+      } else {
+        // ✅ Default - just send the status
+        updateData.status = data.status;
       }
-    });
-  };
 
+      // ✅ Send the update to the backend
+      updateStatus(updateData);
+    });
+  }, [permissions, request?.status, status, comment, handleStatusChange, updateStatus]);
+
+  // formData.approvedBy holds the selected admin's id (string | null)
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePurchaseRequest({ data: formData, files: selectedFiles });
+    const payload: Partial<IPurchaseRequest> = {
+      approvedBy: formData.approvedBy ? (formData.approvedBy as Partial<IUser>) : undefined,
+    };
+    updatePurchaseRequest({ data: payload });
   };
 
-  // Comment handlers
   const handleAddComment = async (text: string) => {
     await addComment({ text });
   };
@@ -168,155 +196,9 @@ const PurchaseRequest = () => {
     await deleteComment(commentId);
   };
 
-  // PDF logic
-  const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `PurchaseRequest-${request?.id}`,
-    multiPage: true,
-    titleOptions: {
-      text: "Purchase Request",
-    },
-  });
+  const comments = (request?.comments || []) as IComment[];
 
-  const handleDownloadPDF = () => {
-    downloadPdf(pdfContentRef);
-  };
-
-  const totalAmount =
-    request?.itemGroups?.reduce(
-      (sum: number, item: any) => sum + (item.total || 0),
-      0
-    ) || 0;
-
-  // User references
-  const currentUserId = currentUser.id;
-  const userRole = currentUser.role;
-  const requestStatus = request?.status || "draft";
-
-  // Permission flags
-  const isCreator = request?.createdBy?.id === currentUserId;
-  const isFinanceReviewer = request?.financeReviewBy?.id === currentUserId;
-  const isProcurementReviewer =
-    request?.procurementReviewBy?.id === currentUserId;
-  const isApprover = request?.approvedBy?.id === currentUserId;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
-
-  // Check if user is in copiedTo array
-  const isCopiedTo = request?.copiedTo?.some(
-    (user: any) => user.id === currentUserId
-  );
-
-  // Determine which status buttons to show
-  const canReviewFinance =
-    isFinanceReviewer &&
-    request?.status === "pending" &&
-    request?.financeReviewStatus === "pending";
-
-  const canReviewProcurement =
-    isProcurementReviewer &&
-    request?.status === "pending" &&
-    request?.procurementReviewStatus === "pending";
-
-  const canApprove = isApprover && request?.status === "reviewed";
-
-  // Determine which update status to show
-  const canUpdateStatus =
-    canReviewFinance || canReviewProcurement || canApprove;
-
-  console.log("Procurement Reviewer Check:", {
-    isProcurementReviewer,
-    canReviewProcurement,
-    canUpdateStatus,
-    requestStatus: request?.status,
-    procurementReviewStatus: request?.procurementReviewStatus,
-  });
-
-  // Conditional rendering flags
-  const canUploadFiles = isCreator && requestStatus === "approved";
-  const canShareRequest =
-    isCreator ||
-    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
-
-  // Users who can add comments
-  const canAddComments =
-    isCreator ||
-    isFinanceReviewer ||
-    isProcurementReviewer ||
-    isApprover ||
-    isCopiedTo ||
-    isAdmin;
-
-  const showAdminApproval =
-    !request?.approvedBy &&
-    requestStatus === "reviewed" &&
-    request?.financeReviewStatus === "approved" &&
-    request?.procurementReviewStatus === "approved" &&
-    (isCreator || isApprover);
-
-  const requestCreatedAt = request?.createdAt ?? "";
-  const fullDate = formatToDDMMYYYY(requestCreatedAt);
-
-  // Table data configuration
-  const tableHeadData = [
-    { label: "Request", showOnMobile: true, minWidth: "120px" },
-    { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Amount", showOnMobile: true, minWidth: "100px" },
-    {
-      label: "Date",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "100px",
-    },
-    { label: "Actions", showOnMobile: true, minWidth: "100px" },
-  ];
-
-  const tableRowData = [
-    {
-      id: "requestedBy",
-      content: request?.requestedBy,
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-    {
-      id: "status",
-      content: <StatusBadge status={request?.status!} />,
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-    {
-      id: "amount",
-      content: moneyFormat(totalAmount, "NGN"),
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-    {
-      id: "date",
-      content: fullDate,
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    {
-      id: "actions",
-      content: (
-        <ActionIcons
-          copyTo={copyto}
-          isCopying={isCopying}
-          canShareRequest={canShareRequest}
-          requestId={request?.id}
-          isGeneratingPDF={isGenerating}
-          onDownloadPDF={handleDownloadPDF}
-          showTagDropdown={showTagDropdown}
-          setShowTagDropdown={setShowTagDropdown}
-          hideInspect={true}
-        />
-      ),
-      showOnMobile: true,
-      showOnTablet: true,
-    },
-  ];
-
-  // Cast comments to Comment[] type for TypeScript
-  const comments = (request?.comments || []) as AppComment[];
+  const tableHeadData = getDefaultTableHeaders();
 
   if (isUnderMaintenance) {
     return (
@@ -328,30 +210,37 @@ const PurchaseRequest = () => {
     );
   }
 
+  if (isError) return <NetworkErrorUI />;
+
   return (
     <div className="flex flex-col space-y-3 pb-20">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+      {/* Header */}
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Purchase Request</TextHeader>
-          <Button onClick={() => navigate("/purchase-requests")}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/purchase-requests')}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>
         </div>
       </div>
 
-      {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
+      {/* Main Content */}
+      <div ref={pdfContentRef}>
         <DataStateContainer
           isLoading={isLoading}
           isError={isError}
           data={request}
           errorComponent={<NetworkErrorUI />}
-          loadingComponent={<Spinner />}
+          loadingComponent={
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+            </div>
+          }
           emptyComponent={<div>No data available</div>}
         >
-          <div className="overflow-x-auto">
-            <div className="md:min-w-full">
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden border">
+            <div className="overflow-x-auto">
               <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 hidden sm:table-header-group">
                   <tr>
@@ -360,15 +249,9 @@ const PurchaseRequest = () => {
                         key={index}
                         className={`
                           px-3 py-2.5 md:px-4 md:py-3 
-                          text-left font-medium uppercase 
-                          tracking-wider
-                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            header.showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          text-xs md:text-sm
+                          text-left text-xs font-medium text-gray-500 uppercase tracking-wider
+                          ${!header.showOnMobile ? 'hidden md:table-cell' : ''}
+                          ${header.showOnTablet ? 'hidden sm:table-cell md:table-cell' : ''}
                           whitespace-nowrap
                         `}
                         style={{ minWidth: header.minWidth }}
@@ -380,49 +263,44 @@ const PurchaseRequest = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {/* Desktop/Tablet Row */}
-                  <TableRowMain
-                    key={request?.id}
-                    requestId={request?.id || ""}
-                    toggleViewItems={() => {}}
-                    className="hidden sm:table-row"
-                  >
-                    {tableRowData.map(
-                      ({ id, content, showOnMobile, showOnTablet }) => (
-                        <TableData
-                          key={`${request?.id}-${id}`}
-                          className={`
-                          ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          px-3 py-2.5 md:px-4 md:py-3
-                        `}
-                        >
-                          {content}
-                        </TableData>
-                      )
-                    )}
-                  </TableRowMain>
+                  {/* Main Row */}
+                  <tr className="hidden sm:table-row">
+                    <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm">
+                      {request?.createdBy?.firstName || request?.createdBy?.lastName || 'N/A'}
+                    </td>
+                    <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm">
+                      <StatusBadge status={request?.status ?? 'unknown'} />
+                    </td>
+                    <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm">
+                      {moneyFormat(totalAmount, 'NGN')}
+                    </td>
+                    <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm hidden md:table-cell">
+                      {formatToDDMMYYYY(request?.createdAt ?? '')}
+                    </td>
+                    <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm">
+                      <ActionIcons
+                        copyTo={copyto}
+                        isCopying={isCopying}
+                        canShareRequest={permissions.canShare}
+                        requestId={request?.id}
+                        isGeneratingPDF={isGenerating}
+                        onDownloadPDF={handleDownloadPDF}
+                        showTagDropdown={showTagDropdown}
+                        setShowTagDropdown={setShowTagDropdown}
+                        hideInspect={true}
+                      />
+                    </td>
+                  </tr>
 
                   {/* Mobile Card View */}
-                  <tr key={`${request?.id}-mobile`} className="sm:hidden">
-                    <td
-                      colSpan={tableHeadData.length}
-                      className="p-4 border-b border-gray-200"
-                    >
-                      <RequestCard
-                        request={request!}
-                        totalAmount={totalAmount}
-                        requestId={request?.id || ""}
-                        identifier={request?.pcrNumber}
-                        dateValue={requestCreatedAt}
+                  <tr className="sm:hidden">
+                    <td colSpan={tableHeadData.length} className="p-4 border-b border-gray-200">
+                      <PurchaseRequestCard
+                        purchaseRequest={request!}
                         actionIconsProps={{
                           copyTo: copyto,
                           isCopying,
-                          canShareRequest,
+                          canShareRequest: permissions.canShare,
                           isGeneratingPDF: isGenerating,
                           onDownloadPDF: handleDownloadPDF,
                           showTagDropdown,
@@ -430,64 +308,52 @@ const PurchaseRequest = () => {
                           hideInspect: true,
                         }}
                         context="detail"
-                        showActions={true}
-                        showStatus={true}
-                        showIdentifier={true}
-                        showDate={true}
-                        className="sm:hidden"
                       />
                     </td>
                   </tr>
 
                   {/* Details Section */}
                   <tr>
-                    <td colSpan={tableHeadData.length}>
+                    <td colSpan={tableHeadData.length} className="px-3 py-4 md:px-6">
                       <RequestDetailLayout
-                        request={request}
-                        requestStatus={requestStatus}
+                        request={request as unknown as TRequestEntity}
+                        requestStatus={request?.status || 'draft'}
                         // Two-step approval props
-                        isFinanceReviewer={isFinanceReviewer}
-                        isProcurementReviewer={isProcurementReviewer}
-                        isApprover={isApprover}
+                        isFinanceReviewer={permissions.isFinanceReviewer}
+                        isProcurementReviewer={permissions.isProcurementReviewer}
+                        isApprover={permissions.isApprover}
                         financeReviewStatus={request?.financeReviewStatus}
-                        procurementReviewStatus={
-                          request?.procurementReviewStatus
-                        }
-                        canReviewFinance={canReviewFinance}
-                        canReviewProcurement={canReviewProcurement}
-                        canApprove={canApprove}
-                        // File upload props
-                        canUploadFiles={canUploadFiles}
+                        procurementReviewStatus={request?.procurementReviewStatus}
+                        canReviewFinance={permissions.canReviewFinance || false}
+                        canReviewProcurement={permissions.canReviewProcurement || false}
+                        canApprove={permissions.canApprove}
+                        // File upload
+                        canUploadFiles={permissions.canUploadFiles}
                         selectedFiles={selectedFiles}
                         setSelectedFiles={setSelectedFiles}
                         isUploading={isUpdating}
                         handleUpload={handleSend}
-                        // Status update props
-                        canUpdateStatus={canUpdateStatus}
+                        // Status update
+                        canUpdateStatus={permissions.canUpdateStatus}
                         status={status}
                         setStatus={setStatus}
                         comment={comment}
                         setComment={setComment}
                         isUpdatingStatus={isUpdatingStatus}
                         handleStatusChange={onStatusChangeHandler}
-                        // Comment props
+                        // Comments
                         comments={comments}
-                        canAddComments={canAddComments}
+                        canAddComments={permissions.canAddComments}
                         handleAddComment={handleAddComment}
                         handleUpdateComment={handleUpdateComment}
                         handleDeleteComment={handleDeleteComment}
                         isAddingComment={isAddingComment}
                         isUpdatingComment={isUpdatingComment}
                         isDeletingComment={isDeletingComment}
-                        // Admin approval props
-                        showAdminApproval={showAdminApproval}
+                        // Admin approval
+                        showAdminApproval={permissions.showAdminApproval}
                         formData={formData}
-                        handleFormChange={(field: string, value: string) =>
-                          handleFormChange(
-                            field as keyof PurChaseRequestType,
-                            value
-                          )
-                        }
+                        handleFormChange={handleFormChange}
                         admins={admins}
                         isLoadingAmins={isLoadingAmins}
                       >

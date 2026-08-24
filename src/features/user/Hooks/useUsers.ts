@@ -1,33 +1,36 @@
+// useUsers.ts
 import {
   useQuery,
   UseQueryOptions,
   useMutation,
   useQueryClient,
-} from "@tanstack/react-query";
-import { useAdminsType, UserType, useUsersType } from "../../../interfaces";
+  // InvalidateQueryFilters,
+} from '@tanstack/react-query';
+import {
+  IUserSingleResponse,
+  IUsersListResponse,
+  IAdminsListResponse,
+  IUser,
+} from '../../../interfaces';
 import {
   getUsers,
   getAdmins,
   getReviewers,
   addUser as addUserApi,
   updateUserAdmin as updateUserAdminAPI,
-  deleteUser as deleteUserApi,
+  deactivateUser as deactivateUserApi,
+  activateUser as activateUserApi,
   getUserById,
   exportUsersToExcel,
-} from "../../../services/apiUser";
-import { getUser } from "../../../services/apiAuth";
-import { useDispatch } from "react-redux";
-import { closeModal } from "../../../store/modalSlice.ts";
+  updatePassword as updatePasswordApi,
+} from '../../../services/apiUser';
+import { getUser } from '../../../services/apiAuth';
+import { useDispatch } from 'react-redux';
+import { closeModal } from '../../../store/modalSlice.ts';
 
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
-import toast from "react-hot-toast";
-
-interface useUserType {
-  status: number;
-  message: string;
-  data: UserType;
-}
+import { AxiosError, AxiosResponse } from 'axios';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface ErrorResponse {
   message: string;
@@ -46,86 +49,62 @@ export function useAddUser() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<UserType>) => addUserApi(data),
+    mutationFn: (data: Partial<IUser>) => addUserApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        // Close the modal
+    onSuccess: data => {
+      if (data.statusCode === 201) {
         dispatch(closeModal());
-
-        // Show success toast
-        toast.success("User added successfully");
-
-        // Invalidate the users query to refetch data
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+        toast.success('User added successfully');
+        queryClient.invalidateQueries({ queryKey: ['users'] });
       } else {
-        // Handle unexpected response
         toast.error(data.message);
       }
     },
 
     onError: (err: HookError) => {
-      // Show error toast
-      toast.error(err.response?.data.message || "An error occurred");
-
-      // Log the error for debugging
-      console.error("Add User Error:", err.response?.data.message);
+      toast.error(err.response?.data.message || 'An error occurred');
+      console.error('Add User Error:', err.response?.data.message);
     },
   });
 
   return { addUser, isPending, isError };
 }
 
-export function useAdmins(
-  options?: UseQueryOptions<useAdminsType, Error> // Add options parameter
-) {
-  return useQuery<useAdminsType, Error>({
-    queryKey: ["admins"],
+export function useAdmins(options?: UseQueryOptions<IAdminsListResponse, Error>) {
+  return useQuery<IAdminsListResponse, Error>({
+    queryKey: ['admins'],
     queryFn: () => getAdmins(),
     staleTime: 0,
-    ...options, // Spread the options to include onError
+    ...options,
   });
 }
 
-export function useUsers({
-  search,
-  sort,
-  page,
-  limit,
-  options,
-}: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-  options?: UseQueryOptions<useUsersType, Error>;
-}) {
-  return useQuery<useUsersType, Error>({
-    queryKey: ["users", search, sort, page, limit],
-    queryFn: () => getUsers({ search, sort, page, limit }),
+export function useUsers(
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IUsersListResponse, Error>
+) {
+  return useQuery<IUsersListResponse, Error>({
+    queryKey: ['users', queryParams],
+    queryFn: () => getUsers(queryParams),
     staleTime: 0,
-    ...options, // Spread the options to include onError
+    ...options,
   });
 }
 
 export function useUser(id: string) {
-  return useQuery<useUserType, Error>({
-    queryKey: ["user", id],
+  return useQuery<IUserSingleResponse, Error>({
+    queryKey: ['user', id],
     queryFn: getUser,
     staleTime: 0,
   });
 }
+
 export function useUserById(id: string) {
-  return useQuery<useUserType, Error>({
+  return useQuery<IUserSingleResponse, Error>({
     queryKey: [`user-${id}`, id],
     queryFn: () => getUserById(id),
     staleTime: 0,
   });
-}
-
-interface ErrorResponse {
-  message: string; // Assuming the error response has a 'message' field
-  // Add any other properties that might be in the error response
 }
 
 interface Error extends AxiosError {
@@ -141,76 +120,129 @@ export function useUpdateUser(id: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: Partial<UserType>) => updateUserAdminAPI(id, data),
+    mutationFn: (data: Partial<IUser>) => updateUserAdminAPI(id, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        queryClient.invalidateQueries(["users"] as any);
-        toast.success("User updated");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: [`user-${id}`] });
+        toast.success('User updated successfully');
+      } else {
+        toast.error(data.message || 'Failed to update user');
       }
     },
 
     onError: (err: Error) => {
-      // Check if the error has a response, if so, display it
-      toast.error("Error updating user");
-
-      const error = err.response?.data.message || "An error occurred";
-
-      console.error("Error:", error);
-      setErrorMessage(error); // Set the error message to display
+      const error = err.response?.data.message || 'An error occurred while updating the user';
+      toast.error(error);
+      console.error('Update User Error:', error);
+      setErrorMessage(error);
     },
   });
 
   return { UpdateUser, isPending, isError, errorMessage };
 }
 
-export function useReviewers(
-  options?: UseQueryOptions<useAdminsType, Error> // Add options parameter
-) {
-  return useQuery<useAdminsType, Error>({
-    queryKey: ["reviewers"],
+export function useReviewers(options?: UseQueryOptions<IAdminsListResponse, Error>) {
+  return useQuery<IAdminsListResponse, Error>({
+    queryKey: ['reviewers'],
     queryFn: () => getReviewers(),
     staleTime: 0,
-    ...options, // Spread the options to include onError
+    ...options,
   });
 }
 
-export function useDeleteUser() {
+export function useDeactivateUser() {
   const queryClient = useQueryClient();
 
   const {
-    mutate: deleteUser,
-    isPending: isDeleting,
-    isError: isErrorDeleting,
-    error: errorDeleting,
+    mutate: deactivateUser,
+    isPending: isDeactivating,
+    isError: isErrorDeactivating,
+    error: errorDeactivating,
   } = useMutation<void, HookError, string>({
     mutationFn: async (userID: string) => {
-      await deleteUserApi(userID);
+      await deactivateUserApi(userID);
     },
-    onSuccess: (data) => {
-      console.log(data);
-
-      toast.success("User deleted");
-
-      queryClient.invalidateQueries([`users`] as any);
+    onSuccess: userId => {
+      toast.success('User deactivated successfully');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: [`user-${userId}`] });
     },
 
-    onError: (error) => {
-      toast.error("Error deleting User");
-
+    onError: error => {
+      toast.error('Error deactivating User');
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the user.";
-      console.error("Delete user Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deactivating the user.';
+      console.error('Deactivate user Error:', errorMessage);
     },
   });
 
   return {
-    deleteUser,
-    isDeleting,
-    isErrorDeleting,
-    errorDeleting,
+    deactivateUser,
+    isDeactivating,
+    isErrorDeactivating,
+    errorDeactivating,
   };
+}
+
+export function useActivateUser() {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: activateUser,
+    isPending: isActivating,
+    isError: isErrorActivating,
+    error: errorActivating,
+  } = useMutation<void, HookError, string>({
+    mutationFn: async (userID: string) => {
+      await activateUserApi(userID);
+    },
+    onSuccess: userId => {
+      toast.success('User activated successfully');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: [`user-${userId}`] });
+    },
+
+    onError: error => {
+      toast.error('Error activating User');
+      const errorMessage =
+        error.response?.data.message || 'An error occurred while activating the user.';
+      console.error('Activating user Error:', errorMessage);
+    },
+  });
+
+  return {
+    activateUser,
+    isActivating,
+    isErrorActivating,
+    errorActivating,
+  };
+}
+
+export function useChangePassword() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const {
+    mutate: changePassword,
+    isPending,
+    isSuccess,
+  } = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) => updatePasswordApi(data),
+
+    onSuccess: () => {
+      setErrorMessage(null);
+      toast.success('Password changed successfully');
+    },
+
+    onError: (err: HookError) => {
+      const message = err.response?.data?.message || 'Failed to change password';
+      toast.error(message);
+      setErrorMessage(message);
+    },
+  });
+
+  return { changePassword, isPending, isSuccess, errorMessage };
 }
 
 export const useExportUsersToExcel = () => {
@@ -223,25 +255,21 @@ export const useExportUsersToExcel = () => {
     mutationFn: exportUsersToExcel,
 
     onSuccess: (blob: Blob) => {
-      // Create download link
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.setAttribute("download", `users_export_${Date.now()}.xlsx`);
+      link.setAttribute('download', `users_export_${Date.now()}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-
-      toast.success("users exported successfully");
+      toast.success('Users exported successfully');
     },
 
     onError: (err: HookError) => {
-      const errorMessage =
-        err.response?.data?.message ||
-        "An error occurred while exporting users";
+      const errorMessage = err.response?.data?.message || 'An error occurred while exporting users';
       toast.error(errorMessage);
-      console.error("Users export error:", errorMessage);
+      console.error('Users export error:', errorMessage);
     },
   });
 

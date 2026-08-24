@@ -1,10 +1,10 @@
 // Redux Slice: aravelRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ExpenseClaimType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IExpenseClaim } from '../interfaces';
 
 // Define the initial state with proper typing
 interface AravelRequestStateType {
-  expenseClaim: ExpenseClaimType | null;
+  expenseClaim: IExpenseClaim | null;
 }
 
 const initialState: AravelRequestStateType = {
@@ -13,18 +13,15 @@ const initialState: AravelRequestStateType = {
 
 // Create the slice
 const expenseClaimSlice = createSlice({
-  name: "expenseClaim",
+  name: 'expenseClaim',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setExpenseClaim: (
-      state,
-      action: PayloadAction<ExpenseClaimType | null>
-    ) => {
+    setExpenseClaim: (state, action: PayloadAction<IExpenseClaim | null>) => {
       state.expenseClaim = action.payload;
     },
     // Add a reset action to clear the state
-    resetExpenseClaim: (state) => {
+    resetExpenseClaim: state => {
       state.expenseClaim = null;
     },
   },

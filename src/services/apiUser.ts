@@ -1,82 +1,14 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser.ts";
-import { baseUrl } from "./baseUrl.ts";
-import { useAdminsType, UserType, useUsersType } from "../interfaces.ts";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      // console.log("Token attached to request:", token);
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+// src/services/apiUser.ts
+import { IAdminsListResponse, IQueryParams, IUser, IUsersListResponse } from '../interfaces.ts';
+import apiClient, { handleError } from './apiClient';
 
 // API Functions
 
 export const exportUsersToExcel = async function (): Promise<Blob> {
   try {
-    const response = await axiosInstance.get(`/users/export/excel`, {
-      responseType: "blob", // Important for file downloads
+    const response = await apiClient.get(`/users/export`, {
+      responseType: 'blob',
     });
-
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -85,32 +17,30 @@ export const exportUsersToExcel = async function (): Promise<Blob> {
 
 export const getAdmins = async function () {
   try {
-    const response = await axiosInstance.get<useAdminsType>(`/users/admins`);
+    const response = await apiClient.get<IAdminsListResponse>(`/users`, {
+      params: { role: 'ADMIN' },
+    });
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
+
 export const getReviewers = async function () {
   try {
-    const response = await axiosInstance.get<useAdminsType>(`/users/reviewers`);
-
+    const response = await apiClient.get<IAdminsListResponse>(`/users`, {
+      params: { role: 'REVIEWER' },
+    });
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getUsers = async function (queryParams: {
-  search?: string;
-  role?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}) {
+export const getUsers = async function (_queryParams: IQueryParams) {
   try {
-    const response = await axiosInstance.get<useUsersType>(`/users`, {
-      params: queryParams,
+    const response = await apiClient.get<IUsersListResponse>(`/users`, {
+      params: _queryParams,
     });
     return response.data;
   } catch (err) {
@@ -120,64 +50,69 @@ export const getUsers = async function (queryParams: {
 
 export const getUserById = async function (userId: string) {
   try {
-    const response = await axiosInstance.get<UserType>(`/users/${userId}`);
-
+    const response = await apiClient.get<IUser>(`/users/${userId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const updateUser = async function (data: UserType) {
+export const updateUser = async function (data: IUser) {
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updateMe`,
-      data
-    );
+    const response = await apiClient.patch<IUser>(`/users/updateMe`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const updateUserAdmin = async function (
-  userId: string,
-  data: Partial<UserType>
-) {
+export const updateUserAdmin = async function (userId: string, data: Partial<IUser>) {
+  console.log({ data });
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updateUserAdmin/${userId}`,
-      data
-    );
-    return response.data;
-  } catch (err) {
-    return handleError(err);
-  }
-};
-export const addUser = async function (data: Partial<UserType>) {
-  try {
-    const response = await axiosInstance.post<UserType>(`/users/addUser`, data);
+    const response = await apiClient.patch<IUser>(`/users/${userId}`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const updatePassword = async function (data: any) {
+export const addUser = async function (data: Partial<IUser>) {
+  console.log('staff:', { data });
   try {
-    const response = await axiosInstance.patch<UserType>(
-      `/users/updatePassword`,
-      data
-    );
+    const response = await apiClient.post<IUser>(`users/staff`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const deleteUser = async function (userId: string) {
+interface UpdatePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export const updatePassword = async function (data: UpdatePasswordData) {
   try {
-    const response = await axiosInstance.delete<UserType>(`/users/${userId}`);
+    const response = await apiClient.patch<IUser>(`/users/me/password`, data);
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+// These now correctly use isActive (not isDeleted)
+export const activateUser = async function (userId: string) {
+  try {
+    const response = await apiClient.patch<IUser>(`/users/${userId}/activate`);
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const deactivateUser = async function (userId: string) {
+  try {
+    const response = await apiClient.patch<IUser>(`/users/${userId}/deactivate`);
     return response.data;
   } catch (err) {
     return handleError(err);

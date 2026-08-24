@@ -1,75 +1,137 @@
-import React from "react";
-import logo from "../../assets/logo.webp";
-import { GoodsReceivedType } from "../../interfaces";
-import { casfodAddress } from "../rfq/RFQPDFTemplate";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
+// GRNPDFTemplate.tsx - Fixed with signature support
+import React, { RefObject } from 'react';
+import logo from '../../assets/logo.webp';
+import { IGoodsReceived, IUser } from '../../interfaces';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { getAddress, infoConfig } from '@/config/config-info';
 
 interface GRNPDFTemplateProps {
-  pdfRef?: any;
+  pdfRef?: RefObject<HTMLDivElement | null> | null;
   isGenerating?: boolean;
-  grnData: GoodsReceivedType;
+  grnData: IGoodsReceived;
 }
 
 const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
-  // isGenerating = false,
   grnData,
   pdfRef,
 }) => {
-  const purchaseOrder =
-    typeof grnData.purchaseOrder === "object" ? grnData.purchaseOrder : null;
+  const purchaseOrder = typeof grnData.purchaseOrder === 'object' ? grnData.purchaseOrder : null;
 
-  const getAddress = () => {
-    if (!purchaseOrder) return casfodAddress.borno;
+  const address = getAddress(grnData);
 
-    const address =
-      casfodAddress[
-        purchaseOrder.casfodAddressId as keyof typeof casfodAddress
-      ];
-    return address || casfodAddress.borno;
+  const getItemName = (itemId: string): string => {
+    if (!purchaseOrder) return 'Unknown Item';
+    const item = purchaseOrder.itemGroups.find(poItem => poItem._id === itemId);
+    return item?.itemName || 'Unknown Item';
   };
 
-  const address = getAddress();
+  const getItemDescription = (itemId: string): string => {
+    if (!purchaseOrder) return '';
+    const item = purchaseOrder.itemGroups.find(poItem => poItem._id === itemId);
+    return item?.description || '';
+  };
 
-  const getItemName = (itemid: string): string => {
-    if (!purchaseOrder) return "Unknown Item";
+  const totalOrdered = grnData.grnItems.reduce((sum, item) => sum + item.numberOrdered, 0);
+  const totalReceived = grnData.grnItems.reduce((sum, item) => sum + item.numberReceived, 0);
+  const totalDifference = grnData.grnItems.reduce((sum, item) => sum + item.difference, 0);
 
-    const item = purchaseOrder.itemGroups.find(
-      (poItem) => poItem._id === itemid
+  // Helper to render signature if available
+  const renderSignature = (user: Partial<IUser> | null , label?: string) => {
+    if (!user) {
+      return (
+        <div className="mt-2">
+          <div className="h-12 border-b border-gray-400"></div>
+          <p className="text-xs text-gray-500 mt-1 text-center">{label || 'Signature'}</p>
+        </div>
+      );
+    }
+    
+    // Check if user has a signature URL
+    const signatureUrl = user?.signature?.url;
+    
+    if (signatureUrl) {
+      return (
+        <div className="mt-2">
+          <img 
+            src={signatureUrl} 
+            alt="Signature" 
+            className="max-h-12 max-w-32 object-contain mx-auto"
+            style={{ maxWidth: '120px' }}
+          />
+          <p className="text-xs text-gray-500 mt-1 text-center">{label || 'Signature'}</p>
+        </div>
+      );
+    }
+    
+    // Fallback: empty line for handwritten signature
+    return (
+      <div className="mt-2">
+        <div className="h-12 border-b border-gray-400"></div>
+        <p className="text-xs text-gray-500 mt-1 text-center">{label || 'Signature'}</p>
+      </div>
     );
-    return item?.itemName || "Unknown Item";
   };
 
-  const getItemDescription = (itemid: string): string => {
-    if (!purchaseOrder) return "";
+  // Helper to render user info with signature
+  const renderUserSection = (user: Partial<IUser>, title: string, showPosition: boolean = true) => {
+    if (!user) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Name</p>
+            <div className="h-6 border-b border-gray-400"></div>
+          </div>
+          {showPosition && (
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Position</p>
+              <div className="h-6 border-b border-gray-400"></div>
+            </div>
+          )}
+          {renderSignature(null, `${title}'s Signature`)}
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Date</p>
+            <div className="h-6 border-b border-gray-400"></div>
+          </div>
+        </div>
+      );
+    }
 
-    const item = purchaseOrder.itemGroups.find(
-      (poItem) => poItem._id === itemid
+    return (
+      <div className="space-y-4">
+        <div>
+          <p className="text-sm text-gray-600 mb-1">Name</p>
+          <div className="h-6 border-b border-gray-400 text-center font-medium">
+            {user.firstName} {user.lastName}
+          </div>
+        </div>
+        {showPosition && (
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Position</p>
+            <div className="h-6 border-b border-gray-400 text-center">
+              {user.position || user.role || 'N/A'}
+            </div>
+          </div>
+        )}
+        {renderSignature(user, `${title}'s Signature`)}
+        <div>
+          <p className="text-sm text-gray-600 mb-1">Date</p>
+          <div className="h-6 border-b border-gray-400 text-center">
+            {new Date().toLocaleDateString()}
+          </div>
+        </div>
+      </div>
     );
-    return item?.description || "";
   };
-
-  const totalOrdered = grnData.GRNitems.reduce(
-    (sum, item) => sum + item.numberOrdered,
-    0
-  );
-  const totalReceived = grnData.GRNitems.reduce(
-    (sum, item) => sum + item.numberReceived,
-    0
-  );
-  const totalDifference = grnData.GRNitems.reduce(
-    (sum, item) => sum + item.difference,
-    0
-  );
 
   return (
     <div
-      ref={pdfRef}
+      ref={pdfRef as React.LegacyRef<HTMLDivElement>}
       className="pdf-container bg-white p-8"
       style={{
-        fontFamily: "Arial, sans-serif",
-        width: "210mm",
-        minHeight: "297mm",
-        margin: "0 auto",
+        fontFamily: 'Arial, sans-serif',
+        width: '210mm',
+        minHeight: '297mm',
+        margin: '0 auto',
       }}
     >
       {/* Header with Logo */}
@@ -80,53 +142,37 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           </div>
         </div>
         <div className="text-right">
-          <h2 className="text-lg font-bold text-gray-700">
-            Goods Received Note
-          </h2>
-          <p className="text-md font-semibold text-blue-600 mt-1">
-            {grnData.GRDCode}
-          </p>
-          {/* <p className="text-sm text-gray-500 mt-1">
-            GRN Date: {formatToDDMMYYYY(grnData.createdAt)}
-          </p> */}
+          <h2 className="text-lg font-bold text-gray-700">Goods Received Note</h2>
+          <p className="text-md font-semibold text-blue-600 mt-1">{grnData.grdCode}</p>
         </div>
       </div>
 
       {/* Purchase Order Information */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-blue-500">
-        <h3 className="font-bold mb-2 text-lg text-gray-700">
-          Purchase Order Information:
-        </h3>
+        <h3 className="font-bold mb-2 text-lg text-gray-700">Purchase Order Information:</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <strong>PO Number:</strong> {purchaseOrder?.POCode || "N/A"}
+            <strong>PO Number:</strong> {purchaseOrder?.poCode || 'N/A'}
           </div>
           <div>
-            <strong>Vendor:</strong>{" "}
-            {purchaseOrder?.selectedVendor?.businessName || "N/A"}
+            <strong>Vendor:</strong> {purchaseOrder?.selectedVendor?.businessName || 'N/A'}
           </div>
           <div>
-            <strong>PO Date:</strong>{" "}
-            {purchaseOrder?.poDate
-              ? formatToDDMMYYYY(purchaseOrder.poDate)
-              : "N/A"}
+            <strong>PO Date:</strong>{' '}
+            {purchaseOrder?.poDate ? formatToDDMMYYYY(purchaseOrder.poDate) : 'N/A'}
           </div>
           <div>
-            <strong>Delivery Date:</strong>{" "}
-            {purchaseOrder?.deliveryDate
-              ? formatToDDMMYYYY(purchaseOrder.deliveryDate)
-              : "N/A"}
+            <strong>Delivery Date:</strong>{' '}
+            {purchaseOrder?.deliveryDate ? formatToDDMMYYYY(purchaseOrder.deliveryDate) : 'N/A'}
           </div>
         </div>
       </div>
 
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-green-500">
-        <h3 className="font-bold mb-2 text-lg text-gray-700">
-          CASFOD Delivery address:
-        </h3>
+        <h3 className="font-bold mb-2 text-lg text-gray-700">${infoConfig.abbriviation} Delivery address:</h3>
         <p className="text-md text-gray-600">
-          Unique Care and Support Foundation
+          {infoConfig.name}
           <br />
           {address.street}
           <br />
@@ -141,58 +187,42 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
       {/* GRN Details */}
       <div className="mb-6">
         <p className="leading-relaxed text-md text-gray-700 mb-4">
-          This Goods Received Note confirms receipt of the following items as
-          per the referenced Purchase Order.
+          This Goods Received Note confirms receipt of the following items as per the referenced
+          Purchase Order.
         </p>
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <strong>GRN Number:</strong> {grnData.GRDCode}
+            <strong>GRN Number:</strong> {grnData.grdCode}
           </div>
           <div>
-            <strong>Status:</strong>{" "}
-            {grnData.isCompleted ? "COMPLETED" : "IN PROGRESS"}
+            <strong>Status:</strong>{' '}
+            <span className={`font-semibold ${grnData.isCompleted ? 'text-green-600' : 'text-yellow-600'}`}>
+              {grnData.isCompleted ? 'COMPLETED' : 'IN PROGRESS'}
+            </span>
           </div>
         </div>
       </div>
-
-      {/* {isGenerating && <div className="h-80"></div>} */}
 
       {/* Items Table */}
       <div className="mb-6">
         <table className="w-full border-collapse border border-gray-300 text-sm">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                SN
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                ITEM NAME
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                ORDERED QTY
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                RECEIVED QTY
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                DIFFERENCE
-              </th>
-              <th className="border border-gray-300 p-2 text-left font-bold">
-                STATUS
-              </th>
+              <th className="border border-gray-300 p-2 text-left font-bold">SN</th>
+              <th className="border border-gray-300 p-2 text-left font-bold">ITEM NAME</th>
+              <th className="border border-gray-300 p-2 text-left font-bold">ORDERED QTY</th>
+              <th className="border border-gray-300 p-2 text-left font-bold">RECEIVED QTY</th>
+              <th className="border border-gray-300 p-2 text-left font-bold">DIFFERENCE</th>
+              <th className="border border-gray-300 p-2 text-left font-bold">STATUS</th>
             </tr>
           </thead>
           <tbody>
-            {grnData.GRNitems.map((item, index) => (
+            {grnData.grnItems.map((item, index) => (
               <React.Fragment key={index}>
-                <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                  <td className="border border-gray-300 p-2 text-sm">
-                    {index + 1}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-sm">
-                    {getItemName(item.itemid)}
-                  </td>
+                <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="border border-gray-300 p-2 text-sm">{index + 1}</td>
+                  <td className="border border-gray-300 p-2 text-sm">{getItemName(item.itemId)}</td>
                   <td className="border border-gray-300 p-2 text-sm text-right">
                     {item.numberOrdered.toLocaleString()}
                   </td>
@@ -206,23 +236,22 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         item.isFullyReceived
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
                       }`}
                     >
-                      {item.isFullyReceived ? "Fully Received" : "Partial"}
+                      {item.isFullyReceived ? 'Fully Received' : 'Partial'}
                     </span>
                   </td>
                 </tr>
                 {/* Item Description Row */}
-                {getItemDescription(item.itemid) && (
-                  <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                {getItemDescription(item.itemId) && (
+                  <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td
                       colSpan={6}
                       className="border border-gray-300 p-2 text-sm text-gray-600 italic"
                     >
-                      <strong>Description:</strong>{" "}
-                      {getItemDescription(item.itemid)}
+                      <strong>Description:</strong> {getItemDescription(item.itemId)}
                     </td>
                   </tr>
                 )}
@@ -231,10 +260,7 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
 
             {/* Summary Row */}
             <tr className="bg-gray-100 font-bold">
-              <td
-                colSpan={2}
-                className="border border-gray-300 p-2 text-right text-sm"
-              >
+              <td colSpan={2} className="border border-gray-300 p-2 text-right text-sm">
                 TOTALS:
               </td>
               <td className="border border-gray-300 p-2 text-right text-sm">
@@ -247,46 +273,42 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
                 {totalDifference.toLocaleString()}
               </td>
               <td className="border border-gray-300 p-2 text-center text-sm">
-                {grnData.isCompleted ? "COMPLETED" : "IN PROGRESS"}
+                {grnData.isCompleted ? 'COMPLETED' : 'IN PROGRESS'}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      {/* Receipt Confirmation - Three Sections */}
+      {/* Receipt Confirmation - Three Sections with Signatures */}
       <div className="mt-12 pt-8 border-t border-gray-300">
         <div className="grid grid-cols-3 gap-6">
           {/* Delivered By (Vendor) */}
           <div>
-            <p className="font-semibold mb-3 text-gray-700">
-              DELIVERED BY (VENDOR):
-            </p>
+            <p className="font-semibold mb-3 text-gray-700">DELIVERED BY (VENDOR):</p>
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Vendor Name</p>
                 <div className="h-6 border-b border-gray-400 text-center font-medium">
-                  {purchaseOrder?.selectedVendor?.businessName || "N/A"}
+                  {purchaseOrder?.selectedVendor?.businessName || 'N/A'}
                 </div>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">Contact Person</p>
                 <div className="h-6 border-b border-gray-400 text-center">
-                  {purchaseOrder?.selectedVendor?.contactPerson || "N/A"}
+                  {purchaseOrder?.selectedVendor?.contactPerson || 'N/A'}
                 </div>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">Phone Number</p>
                 <div className="h-6 border-b border-gray-400 text-center">
-                  {purchaseOrder?.selectedVendor?.contactPhoneNumber || "N/A"}
+                  {purchaseOrder?.selectedVendor?.contactPhoneNumber || 'N/A'}
                 </div>
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-1">Signature</p>
                 <div className="h-12 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Vendor's Signature)
-                </p>
+                <p className="text-xs text-gray-500 mt-1 text-center">(Vendor's Signature)</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">Date</p>
@@ -296,65 +318,15 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           </div>
 
           {/* Verified By (CASFOD) */}
-          <div>
-            <p className="font-semibold mb-3 text-gray-700">
-              VERIFIED BY (CASFOD):
-            </p>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Name</p>
-                <div className="h-6 border-b border-gray-400"></div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Position</p>
-                <div className="h-6 border-b border-gray-400"></div>
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-1">Signature</p>
-                <div className="h-12 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Verifier's Signature)
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Date</p>
-                <div className="h-6 border-b border-gray-400"></div>
-              </div>
-            </div>
-          </div>
+          {/* <div>
+            <p className="font-semibold mb-3 text-gray-700">VERIFIED BY (CASFOD):</p>
+            {renderUserSection(grnData.approvedBy, 'Verifier', true)}
+          </div> */}
 
           {/* Received By (CASFOD) */}
           <div>
-            <p className="font-semibold mb-3 text-gray-700">
-              RECEIVED BY (CASFOD):
-            </p>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Name</p>
-                <div className="h-6 border-b border-gray-400 text-center font-medium">
-                  {grnData.createdBy?.first_name} {grnData.createdBy?.last_name}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Position</p>
-                <div className="h-6 border-b border-gray-400 text-center">
-                  {grnData.createdBy?.role || "N/A"}
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-1">Signature</p>
-                <div className="h-12 border-b border-gray-400"></div>
-                <p className="text-xs text-gray-500 mt-1 text-center">
-                  (Receiver's Signature)
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Date</p>
-                <div className="h-6 border-b border-gray-400 text-center">
-                  {/* {formatToDDMMYYYY(grnData.createdAt)} */}
-                </div>
-              </div>
-            </div>
+            <p className="font-semibold mb-3 text-gray-700">RECEIVED BY ({infoConfig.abbriviation}):</p>
+            {renderUserSection(grnData.createdBy, 'Receiver', true)}
           </div>
         </div>
       </div>
@@ -362,10 +334,8 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-gray-300 text-center">
         <p className="text-sm text-gray-700">
-          Unique Care and Support Foundation |{" "}
-          <span className="font-semibold text-blue-600">
-            procurement@casfod.org
-          </span>
+          {infoConfig.name} |{' '}
+          <span className="font-semibold text-blue-600">procurement@casfod.org</span>
         </p>
       </div>
     </div>

@@ -1,100 +1,28 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser";
-import { baseUrl } from "./baseUrl";
+// src/services/apiVendor.ts
 import {
-  CreateVendorType,
-  UpdateVendorType,
-  UseVendor,
-  UseVendorStatsType,
-  UseVendorType,
-} from "../interfaces";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IVendor,
+  IVendorsListResponse,
+  IVendorSingleResponse,
+  IVendorStatsResponse,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams } from './apiClient';
 
 // API Functions
 
-export const getVendorsStats = async function (): Promise<UseVendorStatsType> {
+export const getVendorsStats = async function (): Promise<IVendorStatsResponse> {
   try {
-    const response = await axiosInstance.get<UseVendorStatsType>(
-      `/vendors/stats`
-    );
+    const response = await apiClient.get<IVendorStatsResponse>(`/admin/vendors/stats`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getAllVendors = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}): Promise<UseVendorType> {
+export const getAllVendors = async function (
+  queryParams: QueryParams
+): Promise<IVendorsListResponse> {
   try {
-    const response = await axiosInstance.get<UseVendorType>(`/vendors`, {
+    const response = await apiClient.get<IVendorsListResponse>(`/admin/vendors`, {
       params: queryParams,
     });
     return response.data;
@@ -105,19 +33,12 @@ export const getAllVendors = async function (queryParams: {
 
 export const getVendorsByStatus = async function (
   status: string,
-  queryParams: {
-    search?: string;
-    sort?: string;
-    page?: number;
-    limit?: number;
-  }
-): Promise<UseVendorType> {
+  queryParams: QueryParams
+): Promise<IVendorsListResponse> {
   try {
-    const response = await axiosInstance.get<UseVendorType>(
-      `/vendors/status/${status}`,
-      {
-        params: queryParams,
-      }
+    const response = await apiClient.get<IVendorsListResponse>(
+      `/admin/vendors`,
+      { params: { status, ...queryParams } } // <- spread, don't nest
     );
     return response.data;
   } catch (err) {
@@ -125,30 +46,36 @@ export const getVendorsByStatus = async function (
   }
 };
 
-export const getVendorApprovalSummary = async function (): Promise<any> {
+export const getVendorApprovalSummary = async function (): Promise<{
+  status: number;
+  message: string;
+  data: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+}> {
   try {
-    const response = await axiosInstance.get(`/vendors/approval/summary`);
+    const response = await apiClient.get(`/admin/vendors/approval/summary`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getVendor = async function (vendorId: string): Promise<UseVendor> {
+export const getVendor = async function (vendorId: string): Promise<IVendorSingleResponse> {
   try {
-    const response = await axiosInstance.get<UseVendor>(`/vendors/${vendorId}`);
+    const response = await apiClient.get<IVendorSingleResponse>(`/admin/vendors/${vendorId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getVendorByCode = async function (
-  vendorCode: string
-): Promise<UseVendor> {
+export const getVendorByCode = async function (vendorCode: string): Promise<IVendorSingleResponse> {
   try {
-    const response = await axiosInstance.get<UseVendor>(
-      `/vendors/code/${vendorCode}`
+    const response = await apiClient.get<IVendorSingleResponse>(
+      `/admin/vendors/code/${vendorCode}`
     );
     return response.data;
   } catch (err) {
@@ -157,57 +84,10 @@ export const getVendorByCode = async function (
 };
 
 export const createVendor = async function (
-  data: CreateVendorType & { approvedBy?: string },
-  files: File[] = []
-): Promise<UseVendor> {
+  data: Partial<IVendor>
+): Promise<IVendorSingleResponse> {
   try {
-    const formData = new FormData();
-
-    // Append all vendor fields
-    const vendorFields: (keyof CreateVendorType)[] = [
-      "businessName",
-      "businessType",
-      "address",
-      "email",
-      "businessPhoneNumber",
-      "contactPhoneNumber",
-      "categories",
-      "contactPerson",
-      "position",
-      "tinNumber",
-      "businessRegNumber",
-      "bankName",
-      "accountName",
-      "accountNumber",
-      "businessState",
-      "operatingLGA",
-    ];
-
-    vendorFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "categories" && Array.isArray(data[key])) {
-          (data[key] as string[]).forEach((category) => {
-            formData.append("categories", category);
-          });
-        } else {
-          formData.append(key, String(data[key]));
-        }
-      }
-    });
-
-    // Append approvedBy separately
-    if (data.approvedBy) {
-      formData.append("approvedBy", data.approvedBy);
-    }
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UseVendor>(`/vendors`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await apiClient.post<IVendorSingleResponse>(`/admin/vendors`, data);
 
     return response.data;
   } catch (err) {
@@ -216,56 +96,10 @@ export const createVendor = async function (
 };
 
 export const createVendorDraft = async function (
-  data: CreateVendorType,
-  files: File[] = []
-): Promise<UseVendor> {
+  data: Partial<IVendor>
+): Promise<IVendorSingleResponse> {
   try {
-    const formData = new FormData();
-
-    // Append all vendor fields
-    const vendorFields: (keyof CreateVendorType)[] = [
-      "businessName",
-      "businessType",
-      "address",
-      "email",
-      "businessPhoneNumber",
-      "contactPhoneNumber",
-      "categories",
-      "contactPerson",
-      "position",
-      "tinNumber",
-      "businessRegNumber",
-      "bankName",
-      "accountName",
-      "accountNumber",
-      "businessState",
-      "operatingLGA",
-    ];
-
-    vendorFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "categories" && Array.isArray(data[key])) {
-          (data[key] as string[]).forEach((category) => {
-            formData.append("categories", category);
-          });
-        } else {
-          formData.append(key, String(data[key]));
-        }
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UseVendor>(
-      `/vendors/draft`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    const response = await apiClient.post<IVendorSingleResponse>(`/admin/vendors/draft`, data);
 
     return response.data;
   } catch (err) {
@@ -275,53 +109,12 @@ export const createVendorDraft = async function (
 
 export const updateVendor = async function (
   vendorId: string,
-  data: UpdateVendorType,
-  files: File[] = []
-): Promise<UseVendor> {
+  data: Partial<IVendor>
+): Promise<IVendorSingleResponse> {
   try {
-    const formData = new FormData();
-
-    const vendorFields: (keyof UpdateVendorType)[] = [
-      "businessName",
-      "businessType",
-      "address",
-      "email",
-      "businessPhoneNumber",
-      "contactPhoneNumber",
-      "categories",
-      "contactPerson",
-      "position",
-      "tinNumber",
-      "businessRegNumber",
-      "bankName",
-      "accountName",
-      "accountNumber",
-      "businessState",
-      "operatingLGA",
-    ];
-
-    vendorFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "categories" && Array.isArray(data[key])) {
-          (data[key] as string[]).forEach((category) => {
-            formData.append("categories", category);
-          });
-        } else {
-          formData.append(key, String(data[key]));
-        }
-      }
-    });
-
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.patch<UseVendor>(
-      `/vendors/${vendorId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+    const response = await apiClient.patch<IVendorSingleResponse>(
+      `/admin/vendors/${vendorId}`,
+      data
     );
 
     return response.data;
@@ -333,10 +126,10 @@ export const updateVendor = async function (
 export const updateVendorStatus = async function (
   vendorId: string,
   data: { status: string; comment?: string }
-): Promise<any> {
+): Promise<IVendorSingleResponse> {
   try {
-    const response = await axiosInstance.patch(
-      `/vendors/${vendorId}/status`,
+    const response = await apiClient.patch<IVendorSingleResponse>(
+      `/admin/vendors/${vendorId}/status`,
       data
     );
     return response.data;
@@ -347,8 +140,8 @@ export const updateVendorStatus = async function (
 
 export const exportVendorsToExcel = async function (): Promise<Blob> {
   try {
-    const response = await axiosInstance.get(`/vendors/export/excel`, {
-      responseType: "blob",
+    const response = await apiClient.get(`/admin/vendors/export`, {
+      responseType: 'blob',
     });
     return response.data;
   } catch (err) {
@@ -356,14 +149,9 @@ export const exportVendorsToExcel = async function (): Promise<Blob> {
   }
 };
 
-export const deleteVendor = async function (
-  vendorId: string
-): Promise<{ status: string; message: string }> {
+export const deleteVendor = async function (vendorId: string): Promise<IVendorSingleResponse> {
   try {
-    const response = await axiosInstance.delete<{
-      status: string;
-      message: string;
-    }>(`/vendors/${vendorId}`);
+    const response = await apiClient.delete<IVendorSingleResponse>(`/admin/vendors/${vendorId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

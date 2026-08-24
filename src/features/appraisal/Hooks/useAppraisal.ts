@@ -1,13 +1,8 @@
 // src/features/appraisal/Hooks/useAppraisal.ts
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { AxiosError, AxiosResponse } from "axios";
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AxiosError, AxiosResponse } from 'axios';
 import {
   getAllAppraisals,
   getAppraisal,
@@ -23,14 +18,17 @@ import {
   deleteComment,
   deleteAppraisal,
   getAppraisalStats,
-  copyTo as copyToApi,
-} from "../../../services/apiAppraisal";
+  copyAppraisal as copyToApi,
+} from '../../../services/apiAppraisal';
 import {
-  AppraisalType,
-  UseAppraisal,
-  UseAppraisalType,
-} from "../../../interfaces";
-import { useState } from "react";
+  IAppraisal,
+  IAppraisalSingleResponse,
+  IAppraisalsListResponse,
+  IAppraisalStatsResponse,
+  IObjectiveRating,
+} from '../../../interfaces';
+import { useState } from 'react';
+import { QueryParams } from '@/services/apiClient';
 
 interface ErrorResponse {
   message: string;
@@ -42,16 +40,16 @@ interface ApiError extends AxiosError {
 
 // Query keys
 export const appraisalKeys = {
-  all: ["appraisals"] as const,
-  stats: () => [...appraisalKeys.all, "stats"] as const,
-  lists: () => [...appraisalKeys.all, "list"] as const,
-  list: (filters: any) => [...appraisalKeys.lists(), filters] as const,
-  details: () => [...appraisalKeys.all, "detail"] as const,
+  all: ['appraisals'] as const,
+  stats: () => [...appraisalKeys.all, 'stats'] as const,
+  lists: () => [...appraisalKeys.all, 'list'] as const,
+  list: (filters: QueryParams) => [...appraisalKeys.lists(), filters] as const,
+  details: () => [...appraisalKeys.all, 'detail'] as const,
   detail: (id: string) => [...appraisalKeys.details(), id] as const,
 };
 
 // ========== GET STATS ==========
-export const useAppraisalStats = (options?: UseQueryOptions<any, Error>) => {
+export const useAppraisalStats = (options?: UseQueryOptions<IAppraisalStatsResponse, Error>) => {
   return useQuery({
     queryKey: appraisalKeys.stats(),
     queryFn: () => getAppraisalStats(),
@@ -62,21 +60,14 @@ export const useAppraisalStats = (options?: UseQueryOptions<any, Error>) => {
 
 // ========== GET ALL ==========
 export const useAppraisals = (
-  queryParams: {
-    search?: string;
-    sort?: string;
-    page?: number;
-    limit?: number;
-    status?: string;
-    period?: string;
-  },
-  options?: UseQueryOptions<UseAppraisalType, Error>
+queryParams: QueryParams,
+  options?: UseQueryOptions<IAppraisalsListResponse, Error>
 ) => {
   return useQuery({
     queryKey: appraisalKeys.list(queryParams),
     queryFn: () => getAllAppraisals(queryParams),
     staleTime: 2 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     ...options,
   });
 };
@@ -84,7 +75,7 @@ export const useAppraisals = (
 // ========== GET BY ID ==========
 export const useAppraisal = (
   appraisalId: string,
-  options?: UseQueryOptions<UseAppraisal, Error>
+  options?: UseQueryOptions<IAppraisalSingleResponse, Error>
 ) => {
   return useQuery({
     queryKey: appraisalKeys.detail(appraisalId),
@@ -101,22 +92,20 @@ export const useSaveAppraisalDraft = () => {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<AppraisalType>) => saveAppraisalDraft(data),
+    mutationFn: (data: Partial<IAppraisal>) => saveAppraisalDraft(data),
 
-    onSuccess: (data) => {
-      if (data?.status === 201 || data?.status === 200) {
-        toast.success("Appraisal saved as draft");
+    onSuccess: data => {
+      if (data?.statusCode === 201 || data?.status === 200) {
+        toast.success('Appraisal saved as draft');
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
-        navigate("/human-resources/appraisals");
+        navigate('/human-resources/appraisals');
       } else {
-        toast.error(data?.message || "Failed to save draft");
+        toast.error(data?.message || 'Failed to save draft');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while saving draft"
-      );
+      toast.error(err.response?.data?.message || 'An error occurred while saving draft');
     },
   });
 
@@ -133,23 +122,20 @@ export const useCreateAndSubmitAppraisal = () => {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<AppraisalType>) =>
-      createAndSubmitAppraisal(data),
+    mutationFn: (data: Partial<IAppraisal>) => createAndSubmitAppraisal(data),
 
-    onSuccess: (data) => {
-      if (data?.status === 201) {
-        toast.success("Appraisal created and submitted successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 201) {
+        toast.success('Appraisal created and submitted successfully');
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
-        navigate("/human-resources/appraisals");
+        navigate('/human-resources/appraisals');
       } else {
-        toast.error(data?.message || "Failed to submit appraisal");
+        toast.error(data?.message || 'Failed to submit appraisal');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while submitting"
-      );
+      toast.error(err.response?.data?.message || 'An error occurred while submitting');
     },
   });
 
@@ -168,20 +154,18 @@ export const useSubmitExistingAppraisal = () => {
   const mutation = useMutation({
     mutationFn: (appraisalId: string) => submitExistingAppraisal(appraisalId),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Appraisal submitted successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Appraisal submitted successfully');
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
-        navigate("/human-resources/appraisals");
+        navigate('/human-resources/appraisals');
       } else {
-        toast.error(data?.message || "Failed to submit appraisal");
+        toast.error(data?.message || 'Failed to submit appraisal');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while submitting"
-      );
+      toast.error(err.response?.data?.message || 'An error occurred while submitting');
     },
   });
 
@@ -198,27 +182,25 @@ export const useUpdateAppraisalStatus = (appraisalId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: { status: "approved" | "rejected"; comment?: string }) =>
+    mutationFn: (data: { status: 'approved' | 'rejected'; comment?: string }) =>
       updateAppraisalStatus(appraisalId, data),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
         toast.success(`Appraisal ${data.data.status} successfully`);
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error(data?.message || "Failed to update status");
+        toast.error(data?.message || 'Failed to update status');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while updating status"
-      );
-      setErrorMessage(err.response?.data?.message || "An error occurred");
+      toast.error(err.response?.data?.message || 'An error occurred while updating status');
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
     },
   });
 
@@ -236,33 +218,25 @@ export const useUpdateAppraisal = (appraisalId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({
-      data,
-      files = [],
-    }: {
-      data: Partial<AppraisalType>;
-      files?: File[];
-    }) => updateAppraisal(appraisalId, data, files),
+    mutationFn: ({ data }: { data: Partial<IAppraisal>; files?: File[] }) =>
+      updateAppraisal(appraisalId, data),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Appraisal updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Appraisal updated successfully');
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error(data?.message || "Failed to update appraisal");
+        toast.error(data?.message || 'Failed to update appraisal');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message ||
-          "An error occurred while updating appraisal"
-      );
-      setErrorMessage(err.response?.data?.message || "An error occurred");
+      toast.error(err.response?.data?.message || 'An error occurred while updating appraisal');
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
     },
   });
 
@@ -280,27 +254,24 @@ export const useUpdateAppraisalObjectives = (appraisalId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (objectives: any[]) =>
+    mutationFn: (objectives: IObjectiveRating[]) =>
       updateAppraisalObjectives(appraisalId, objectives),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Objectives updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Objectives updated successfully');
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error(data?.message || "Failed to update objectives");
+        toast.error(data?.message || 'Failed to update objectives');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message ||
-          "An error occurred while updating objectives"
-      );
-      setErrorMessage(err.response?.data?.message || "An error occurred");
+      toast.error(err.response?.data?.message || 'An error occurred while updating objectives');
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
     },
   });
 
@@ -322,28 +293,26 @@ export const useSignAppraisal = (appraisalId: string) => {
       signatureType,
       comments,
     }: {
-      signatureType: "staff" | "supervisor";
+      signatureType: 'staff' | 'supervisor';
       comments?: string;
     }) => signAppraisal(appraisalId, signatureType, comments),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Appraisal signed successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Appraisal signed successfully');
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
         queryClient.invalidateQueries({ queryKey: appraisalKeys.lists() });
       } else {
-        toast.error(data?.message || "Failed to sign appraisal");
+        toast.error(data?.message || 'Failed to sign appraisal');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while signing"
-      );
-      setErrorMessage(err.response?.data?.message || "An error occurred");
+      toast.error(err.response?.data?.message || 'An error occurred while signing');
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
     },
   });
 
@@ -364,28 +333,28 @@ export function useCopy(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyToApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyToApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
 
         //Invalidate
         queryClient.invalidateQueries({
-          queryKey: ["advance-request", requestId],
+          queryKey: ['advance-request', requestId],
         });
       } else if (data.status !== 200) {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message); // Log error directly here
+        console.error('Error:', data.message); // Log error directly here
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error("Error");
-      const error = err.response?.data.message || "An error occurred";
+      toast.error('Error');
+      const error = err.response?.data.message || 'An error occurred';
 
-      console.error("Copy Error:", error);
+      console.error('Copy Error:', error);
       setErrorMessage(error); // Set the error message to display
     },
   });
@@ -401,21 +370,21 @@ export const useAddComment = (appraisalId: string) => {
   const mutation = useMutation({
     mutationFn: (data: { text: string }) => addComment(appraisalId, data),
 
-    onSuccess: (data) => {
-      if (data?.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 201) {
+        toast.success('Comment added successfully');
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data?.message || "An error occurred";
+      toast.error('Error adding comment');
+      const error = err.response?.data?.message || 'An error occurred';
       setErrorMessage(error);
     },
   });
@@ -436,21 +405,21 @@ export const useUpdateComment = (appraisalId: string) => {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateComment(appraisalId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Comment updated successfully');
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data?.message || "An error occurred";
+      toast.error('Error updating comment');
+      const error = err.response?.data?.message || 'An error occurred';
       setErrorMessage(error);
     },
   });
@@ -470,21 +439,21 @@ export const useDeleteComment = (appraisalId: string) => {
   const mutation = useMutation({
     mutationFn: (commentId: string) => deleteComment(appraisalId, commentId),
 
-    onSuccess: (data) => {
-      if (data?.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data?.statusCode === 200) {
+        toast.success('Comment deleted successfully');
         queryClient.invalidateQueries({
           queryKey: appraisalKeys.detail(appraisalId),
         });
       } else {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data?.message);
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data?.message || "An error occurred";
+      toast.error('Error deleting comment');
+      const error = err.response?.data?.message || 'An error occurred';
       setErrorMessage(error);
     },
   });
@@ -499,10 +468,7 @@ export const useDeleteComment = (appraisalId: string) => {
 
 // ========== DELETE ==========
 export const useDeleteAppraisal = (
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
+  queryParams: QueryParams
 ) => {
   const queryClient = useQueryClient();
 
@@ -511,17 +477,16 @@ export const useDeleteAppraisal = (
       await deleteAppraisal(appraisalId);
     },
     onSuccess: () => {
-      toast.success("Appraisal deleted successfully");
+      toast.success('Appraisal deleted successfully');
       queryClient.invalidateQueries({
-        queryKey: appraisalKeys.list({ search, sort, page, limit }),
+        queryKey: appraisalKeys.list(queryParams),
       });
     },
-    onError: (error) => {
-      toast.error("Error deleting appraisal");
+    onError: error => {
+      toast.error('Error deleting appraisal');
       const errorMessage =
-        error.response?.data?.message ||
-        "An error occurred while deleting the appraisal.";
-      console.error("Delete Appraisal Error:", errorMessage);
+        error.response?.data?.message || 'An error occurred while deleting the appraisal.';
+      console.error('Delete Appraisal Error:', errorMessage);
     },
   });
 

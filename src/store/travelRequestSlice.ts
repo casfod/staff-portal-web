@@ -1,10 +1,10 @@
 // Redux Slice: aravelRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { TravelRequestType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ITravelRequest } from '../interfaces';
 
 // Define the initial state with proper typing
 interface AravelRequestStateType {
-  travelRequest: TravelRequestType | null;
+  travelRequest: ITravelRequest | null;
 }
 
 const initialState: AravelRequestStateType = {
@@ -13,26 +13,22 @@ const initialState: AravelRequestStateType = {
 
 // Create the slice
 const travelRequestSlice = createSlice({
-  name: "travelRequest",
+  name: 'travelRequest',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setTravelRequest: (
-      state,
-      action: PayloadAction<TravelRequestType | null>
-    ) => {
+    setTravelRequest: (state, action: PayloadAction<ITravelRequest | null>) => {
       state.travelRequest = action.payload;
     },
     // Add a reset action to clear the state
-    resetTravelRequest: (state) => {
+    resetTravelRequest: state => {
       state.travelRequest = null;
     },
   },
 });
 
 // Export the actions
-export const { setTravelRequest, resetTravelRequest } =
-  travelRequestSlice.actions;
+export const { setTravelRequest, resetTravelRequest } = travelRequestSlice.actions;
 
 // Export the reducer
 export default travelRequestSlice.reducer;

@@ -5,12 +5,12 @@
  * @returns {string} Formatted date in dd/mm/yyyy format, or empty string if input is null
  */
 export const dateformat = (date: string | Date | null): string => {
-  if (!date) return "";
+  if (!date) return '';
 
   const inputDate = new Date(date);
 
   // Return empty string for invalid dates
-  if (isNaN(inputDate.getTime())) return "";
+  if (isNaN(inputDate.getTime())) return '';
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -28,8 +28,8 @@ export const dateformat = (date: string | Date | null): string => {
 
   // Format time as HH:MM AM/PM (12-hour format)
   const hours = inputDate.getHours();
-  const minutes = String(inputDate.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
+  const minutes = String(inputDate.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
   const twelveHour = hours % 12 || 12; // Convert 0 to 12 for 12AM
   const timeString = `${twelveHour}:${minutes} ${ampm}`;
 
@@ -50,8 +50,8 @@ export const dateformat = (date: string | Date | null): string => {
   }
 
   // Format as dd/mm/yyyy for older dates (no timestamp)
-  const day = String(inputDate.getDate()).padStart(2, "0");
-  const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+  const day = String(inputDate.getDate()).padStart(2, '0');
+  const month = String(inputDate.getMonth() + 1).padStart(2, '0');
   const year = inputDate.getFullYear();
 
   return `${day}/${month}/${year}`; // No time included for older dates

@@ -1,10 +1,10 @@
 // Redux Slice: purchaseRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Project } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IProject } from '../interfaces';
 
 // Define the initial state with proper typing
 interface projectStateType {
-  project: Project | null;
+  project: IProject | null;
 }
 
 const initialState: projectStateType = {
@@ -13,15 +13,15 @@ const initialState: projectStateType = {
 
 // Create the slice
 const projectSlice = createSlice({
-  name: "project",
+  name: 'project',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setProject: (state, action: PayloadAction<Project | null>) => {
+    setProject: (state, action: PayloadAction<IProject>) => {
       state.project = action.payload;
     },
     // Add a reset action to clear the state
-    resetProject: (state) => {
+    resetProject: state => {
       state.project = null;
     },
   },

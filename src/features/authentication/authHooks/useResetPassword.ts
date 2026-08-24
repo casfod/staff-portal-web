@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import { resetPassword as resetPasswordApi } from "../../../services/apiAuth.ts";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { PasswordResetTypes } from "../../../interfaces.ts";
+import { useMutation } from '@tanstack/react-query';
+import { resetPassword as resetPasswordApi } from '../../../services/apiAuth.ts';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { IPasswordReset } from '../../../interfaces.ts';
 
 export function useResetPassword(token: string) {
   const navigate = useNavigate();
@@ -12,24 +12,24 @@ export function useResetPassword(token: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ password, passwordConfirm }: PasswordResetTypes) =>
-      resetPasswordApi(token, { password, passwordConfirm }),
+    mutationFn: ({ password, passwordConfirm }: Partial<IPasswordReset>) =>
+      resetPasswordApi({ token, password, passwordConfirm }),
 
-    onSuccess: (data) => {
-      if (data.status === "success") {
+    onSuccess: data => {
+      if (data.statusCode === 200) {
         // console.log(data.data.user);
-        toast.success("Password reset successful");
+        toast.success('Password reset successful');
 
-        navigate("/login", { replace: true });
+        navigate('/login', { replace: true });
       } else {
         toast.error(`${data.message}`);
-        console.error("resetPassword Error:", data.message);
+        console.error('resetPassword Error:', data.message);
       }
     },
 
-    onError: (err) => {
-      toast.error("Network or server error");
-      console.log("ERROR", err);
+    onError: err => {
+      toast.error('Network or server error');
+      console.log('ERROR', err);
     },
   });
 

@@ -1,12 +1,8 @@
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { AxiosError, AxiosResponse } from "axios";
+// useVendor.ts - Fixed any types
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AxiosError, AxiosResponse } from 'axios';
 import {
   getVendorsStats,
   getAllVendors,
@@ -20,13 +16,13 @@ import {
   exportVendorsToExcel,
   getVendorsByStatus,
   getVendorApprovalSummary,
-} from "../../../services/apiVendor";
+} from '../../../services/apiVendor';
 import {
-  CreateVendorType,
-  UpdateVendorType,
-  UseVendor,
-  UseVendorType,
-} from "../../../interfaces";
+  IVendor,
+  IVendorSingleResponse,
+  IVendorsListResponse,
+  IVendorStatsResponse,
+} from '../../../interfaces';
 
 interface ErrorResponse {
   message: string;
@@ -38,20 +34,20 @@ interface ApiError extends AxiosError {
 
 // Query keys
 export const vendorKeys = {
-  all: ["vendors"] as const,
-  lists: () => [...vendorKeys.all, "list"] as const,
-  list: (filters: any) => [...vendorKeys.lists(), filters] as const,
-  details: () => [...vendorKeys.all, "detail"] as const,
+  all: ['vendors'] as const,
+  lists: () => [...vendorKeys.all, 'list'] as const,
+  list: (filters: Record<string, unknown>) => [...vendorKeys.lists(), filters] as const,
+  details: () => [...vendorKeys.all, 'detail'] as const,
   detail: (id: string) => [...vendorKeys.details(), id] as const,
-  stats: () => [...vendorKeys.all, "stats"] as const,
-  export: () => [...vendorKeys.all, "export"] as const,
-  byStatus: (status: string, filters: any) =>
-    [...vendorKeys.all, "status", status, filters] as const,
-  approvalSummary: () => [...vendorKeys.all, "approval-summary"] as const,
+  stats: () => [...vendorKeys.all, 'stats'] as const,
+  export: () => [...vendorKeys.all, 'export'] as const,
+  byStatus: (status: string, filters: Record<string, unknown>) =>
+    [...vendorKeys.all, 'status', status, filters] as const,
+  approvalSummary: () => [...vendorKeys.all, 'approval-summary'] as const,
 };
 
 // Hooks
-export const useVendorsStats = (options?: UseQueryOptions<any, Error>) => {
+export const useVendorsStats = (options?: UseQueryOptions<IVendorStatsResponse, Error>) => {
   return useQuery({
     queryKey: vendorKeys.stats(),
     queryFn: () => getVendorsStats(),
@@ -67,17 +63,28 @@ export const useVendors = (
     page?: number;
     limit?: number;
   },
-  options?: UseQueryOptions<UseVendorType, Error>
+  options?: UseQueryOptions<IVendorsListResponse, Error>
 ) => {
   return useQuery({
     queryKey: vendorKeys.list(queryParams),
     queryFn: () => getAllVendors(queryParams),
     staleTime: 2 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     ...options,
   });
 };
 
+// Define the approval summary response type
+interface ApprovalSummaryResponse {
+  status: number;
+  message: string;
+  data: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+}
+// In useVendor.ts - Fix the useVendorsByStatus return type
 export const useVendorsByStatus = (
   status: string,
   queryParams: {
@@ -86,20 +93,20 @@ export const useVendorsByStatus = (
     page?: number;
     limit?: number;
   },
-  options?: UseQueryOptions<UseVendorType, Error>
+  options?: UseQueryOptions<IVendorsListResponse, Error>
 ) => {
   return useQuery({
     queryKey: vendorKeys.byStatus(status, queryParams),
     queryFn: () => getVendorsByStatus(status, queryParams),
     enabled: !!status,
     staleTime: 2 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     ...options,
   });
 };
 
 export const useVendorApprovalSummary = (
-  options?: UseQueryOptions<any, Error>
+  options?: UseQueryOptions<ApprovalSummaryResponse, Error>
 ) => {
   return useQuery({
     queryKey: vendorKeys.approvalSummary(),
@@ -111,7 +118,7 @@ export const useVendorApprovalSummary = (
 
 export const useVendor = (
   vendorId: string,
-  options?: UseQueryOptions<UseVendor, Error>
+  options?: UseQueryOptions<IVendorSingleResponse, Error>
 ) => {
   return useQuery({
     queryKey: vendorKeys.detail(vendorId),
@@ -124,10 +131,10 @@ export const useVendor = (
 
 export const useVendorByCode = (
   vendorCode: string,
-  options?: UseQueryOptions<UseVendor, Error>
+  options?: UseQueryOptions<IVendorSingleResponse, Error>
 ) => {
   return useQuery({
-    queryKey: [...vendorKeys.details(), "code", vendorCode],
+    queryKey: [...vendorKeys.details(), 'code', vendorCode],
     queryFn: () => getVendorByCode(vendorCode),
     enabled: !!vendorCode,
     staleTime: 5 * 60 * 1000,
@@ -144,28 +151,26 @@ export const useCreateVendor = () => {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: CreateVendorType) => createVendor(data, data.files),
+    mutationFn: (data: Partial<IVendor>) => createVendor(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Vendor created successfully and submitted for approval");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Vendor created successfully and submitted for approval');
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
         queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
         queryClient.invalidateQueries({
           queryKey: vendorKeys.approvalSummary(),
         });
-        navigate("/procurement/vendor-management");
+        navigate('/procurement/vendor-management');
       } else {
-        toast.error(data.message || "Failed to create vendor");
+        toast.error(data.message || 'Failed to create vendor');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while creating vendor"
-      );
-      console.error("Vendor creation error:", err.response?.data?.message);
+      toast.error(err.response?.data?.message || 'An error occurred while creating vendor');
+      console.error('Vendor creation error:', err.response?.data?.message);
     },
   });
 
@@ -181,29 +186,26 @@ export const useCreateVendorDraft = () => {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: CreateVendorType) => createVendorDraft(data, data.files),
+    mutationFn: (data: Partial<IVendor>) => createVendorDraft(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Vendor draft saved successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Vendor draft saved successfully');
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
         queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
         queryClient.invalidateQueries({
           queryKey: vendorKeys.approvalSummary(),
         });
-        navigate("/procurement/vendor-management");
+        navigate('/procurement/vendor-management');
       } else {
-        toast.error(data.message || "Failed to save vendor draft");
+        toast.error(data.message || 'Failed to save vendor draft');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message ||
-          "An error occurred while saving vendor draft"
-      );
-      console.error("Vendor draft error:", err.response?.data?.message);
+      toast.error(err.response?.data?.message || 'An error occurred while saving vendor draft');
+      console.error('Vendor draft error:', err.response?.data?.message);
     },
   });
 
@@ -218,17 +220,12 @@ export const useUpdateVendor = () => {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({
-      vendorId,
-      data,
-    }: {
-      vendorId: string;
-      data: UpdateVendorType;
-    }) => updateVendor(vendorId, data, data.files),
+    mutationFn: ({ vendorId, data }: { vendorId: string; data: Partial<IVendor> }) =>
+      updateVendor(vendorId, data),
 
     onSuccess: (data, variables) => {
-      if (data.status === 200) {
-        toast.success("Vendor updated successfully");
+      if (data.statusCode === 200) {
+        toast.success('Vendor updated successfully');
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
         queryClient.invalidateQueries({
@@ -236,15 +233,13 @@ export const useUpdateVendor = () => {
         });
         queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
       } else {
-        toast.error(data.message || "Failed to update vendor");
+        toast.error(data.message || 'Failed to update vendor');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while updating vendor"
-      );
-      console.error("Vendor update error:", err.response?.data?.message);
+      toast.error(err.response?.data?.message || 'An error occurred while updating vendor');
+      console.error('Vendor update error:', err.response?.data?.message);
     },
   });
 
@@ -268,7 +263,7 @@ export const useUpdateVendorStatus = () => {
     }) => updateVendorStatus(vendorId, data),
 
     onSuccess: (data, variables) => {
-      if (data.status === 200) {
+      if (data.statusCode === 200) {
         toast.success(`Vendor ${variables.data.status} successfully`);
 
         queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
@@ -280,16 +275,13 @@ export const useUpdateVendorStatus = () => {
           queryKey: vendorKeys.approvalSummary(),
         });
       } else {
-        toast.error(data.message || "Failed to update vendor status");
+        toast.error(data.message || 'Failed to update vendor status');
       }
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message ||
-          "An error occurred while updating vendor status"
-      );
-      console.error("Vendor status update error:", err.response?.data?.message);
+      toast.error(err.response?.data?.message || 'An error occurred while updating vendor status');
+      console.error('Vendor status update error:', err.response?.data?.message);
     },
   });
 
@@ -306,31 +298,22 @@ export const useDeleteVendor = () => {
   } = useMutation({
     mutationFn: (vendorId: string) => deleteVendor(vendorId),
 
-    onSuccess: (data) => {
-      if ((data.status as any) === 200) {
-        toast.success("Vendor deleted successfully");
-
-        queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
-        queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
-        queryClient.invalidateQueries({
-          queryKey: vendorKeys.approvalSummary(),
-        });
-      } else {
-        toast.error(data.message || "Failed to delete vendor");
-      }
+    onSuccess: () => {
+      // axios only resolves on 2xx — if we got here, it worked.
+      toast.success('Vendor deleted successfully');
+      queryClient.invalidateQueries({ queryKey: vendorKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: vendorKeys.stats() });
+      queryClient.invalidateQueries({ queryKey: vendorKeys.approvalSummary() });
     },
 
     onError: (err: ApiError) => {
-      toast.error(
-        err.response?.data?.message || "An error occurred while deleting vendor"
-      );
-      console.error("Vendor deletion error:", err.response?.data?.message);
+      toast.error(err.response?.data?.message || 'An error occurred while deleting vendor');
+      console.error('Vendor deletion error:', err.response?.data?.message);
     },
   });
 
   return { deleteVendor: deleteVendorMutation, isPending, isError };
 };
-
 export const useExportVendorsToExcel = () => {
   const {
     mutate: exportVendorsMutation,
@@ -342,23 +325,22 @@ export const useExportVendorsToExcel = () => {
 
     onSuccess: (blob: Blob) => {
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.setAttribute("download", `vendors_export_${Date.now()}.xlsx`);
+      link.setAttribute('download', `vendors_export_${Date.now()}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      toast.success("Vendors exported successfully");
+      toast.success('Vendors exported successfully');
     },
 
     onError: (err: ApiError) => {
       const errorMessage =
-        err.response?.data?.message ||
-        "An error occurred while exporting vendors";
+        err.response?.data?.message || 'An error occurred while exporting vendors';
       toast.error(errorMessage);
-      console.error("Vendor export error:", errorMessage);
+      console.error('Vendor export error:', errorMessage);
     },
   });
 

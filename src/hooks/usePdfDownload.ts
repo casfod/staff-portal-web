@@ -1,9 +1,9 @@
 // usePdfDownload.ts - Unified hook: download, preview, or generate a File
-import { useState, useCallback, RefObject } from "react";
-import { generatePdf, PdfOptions } from "../utils/generatePdf";
-import toast from "react-hot-toast";
+import { useState, useCallback, RefObject } from 'react';
+import { generatePdf, PdfOptions } from '../utils/generatePdf';
+import toast from 'react-hot-toast';
 
-export type PdfDownloadStatus = "idle" | "generating" | "success" | "error";
+export type PdfDownloadStatus = 'idle' | 'generating' | 'success' | 'error';
 
 export type UsePdfDownloadOptions = PdfOptions & {
   /**
@@ -30,7 +30,7 @@ export type UsePdfDownloadOptions = PdfOptions & {
  *    "Code: xxx  |  Page N of M" footer without wiring up footerOptions manually.
  */
 export const usePdfDownload = (defaultOptions?: UsePdfDownloadOptions) => {
-  const [status, setStatus] = useState<PdfDownloadStatus>("idle");
+  const [status, setStatus] = useState<PdfDownloadStatus>('idle');
   const [error, setError] = useState<string | null>(null);
 
   // ── Internal runner ────────────────────────────────────────────────────────
@@ -41,14 +41,14 @@ export const usePdfDownload = (defaultOptions?: UsePdfDownloadOptions) => {
       returnFile: boolean
     ): Promise<T> => {
       if (!elementRef.current) {
-        const msg = "Component reference is not available";
+        const msg = 'Component reference is not available';
         setError(msg);
-        setStatus("error");
+        setStatus('error');
         throw new Error(msg);
       }
 
       try {
-        setStatus("generating");
+        setStatus('generating');
         setError(null);
 
         const mergedOptions: PdfOptions = { ...defaultOptions, ...options };
@@ -67,15 +67,14 @@ export const usePdfDownload = (defaultOptions?: UsePdfDownloadOptions) => {
           result = undefined;
         }
 
-        setStatus("success");
-        setTimeout(() => setStatus("idle"), 2000);
+        setStatus('success');
+        setTimeout(() => setStatus('idle'), 2000);
         return result as T;
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Failed to generate PDF";
+        const msg = err instanceof Error ? err.message : 'Failed to generate PDF';
         setError(msg);
-        setStatus("error");
-        setTimeout(() => setStatus("idle"), 3000);
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
         throw err;
       }
     },
@@ -109,15 +108,10 @@ export const usePdfDownload = (defaultOptions?: UsePdfDownloadOptions) => {
    *   await uploadFile(file);
    */
   const generateFile = useCallback(
-    async (
-      ref?: RefObject<HTMLElement>,
-      options?: PdfOptions
-    ): Promise<File> => {
+    async (ref?: RefObject<HTMLElement>, options?: PdfOptions): Promise<File> => {
       const targetRef = ref ?? defaultOptions?.templateRef;
       if (!targetRef) {
-        throw new Error(
-          "generateFile requires either a ref argument or templateRef in options"
-        );
+        throw new Error('generateFile requires either a ref argument or templateRef in options');
       }
       return run<File>(
         targetRef,
@@ -137,26 +131,23 @@ export const usePdfDownload = (defaultOptions?: UsePdfDownloadOptions) => {
    *  <button onClick={() => previewPdf(setShowPreview)}>Preview</button>
    *  <PDFPreviewModal isOpen={showPreview} onClose={() => setShowPreview(false)} ... />
    */
-  const previewPdf = useCallback(
-    (setOpen: (v: boolean) => void, data?: unknown) => {
-      if (data === null || data === undefined) {
-        // Caller passed data explicitly and it's empty — guard
-        toast.error("No data available for preview");
-        return;
-      }
-      setOpen(true);
-    },
-    []
-  );
+  const previewPdf = useCallback((setOpen: (v: boolean) => void, data?: unknown) => {
+    if (data === null || data === undefined) {
+      // Caller passed data explicitly and it's empty — guard
+      toast.error('No data available for preview');
+      return;
+    }
+    setOpen(true);
+  }, []);
 
   return {
     // ── Existing API (unchanged) ───────────────────────────────────────────
     downloadPdf,
     status,
     error,
-    isGenerating: status === "generating",
-    isSuccess: status === "success",
-    isError: status === "error",
+    isGenerating: status === 'generating',
+    isSuccess: status === 'success',
+    isError: status === 'error',
 
     // ── New API ───────────────────────────────────────────────────────────
     generateFile,

@@ -1,31 +1,90 @@
-///////////////////////
-//File
-///////////////////////
+// =============================================
+// COMMON / SHARED TYPES
+// =============================================
 
-// First, define a type for your file object
-export interface FileType {
-  name: string;
-  url: string;
-  cloudinaryId: string;
-  mimeType: string;
-  size: number;
-  fileType: string;
-  createdAt: string;
-  updatedAt: string;
-  id: string;
+import { AxiosError, AxiosResponse } from 'axios';
+
+// src/types/filters.ts
+
+export interface IFilterOption {
+  value: string;
+  label: string;
 }
 
-///////////////////////
-//Comment
-///////////////////////
+export interface IFilterConfig {
+  key: string;
+  label: string;
+  type: 'select' | 'date' | 'text' | 'multiselect';
+  options?: IFilterOption[];
+  placeholder?: string;
+}
 
-export interface Comment {
-  _id: string;
+export interface IFilterState {
+  [key: string]: string | string[] | Date | null;
+}
+
+export interface IFilterPreset {
+  id: string;
+  name: string;
+  filters: IFilterState;
+}
+
+export const STATUS_OPTIONS: IFilterOption[] = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'reviewed', label: 'Reviewed' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+];
+
+export const REVIEW_STATUS_OPTIONS: IFilterOption[] = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+];
+
+export const SORT_OPTIONS: IFilterOption[] = [
+  { value: '-createdAt', label: 'Newest First' },
+  { value: 'createdAt', label: 'Oldest First' },
+  { value: '-updatedAt', label: 'Recently Updated' },
+  { value: 'updatedAt', label: 'Least Recently Updated' },
+  { value: 'status', label: 'By Status' },
+  { value: '-status', label: 'By Status (Desc)' },
+];
+
+export interface IRequestDetailFormData {
+  approvedBy?: string | null | undefined;
+}
+
+interface IErrorResponse {
+  message: string;
+}
+
+export interface IHookError extends AxiosError {
+  response?: AxiosResponse<IErrorResponse>;
+}
+
+export interface IQueryParams {
+  search?: string;
+  sort?: string;
+  limit?: number;
+  page?: number;
+}
+
+export type TableHeaderConfig = {
+  label: string;
+  showOnMobile: boolean;
+  showOnTablet?: boolean;
+  minWidth: string;
+};
+
+export interface IComment {
+  id: string;
   user: {
     id: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     role: string;
   };
   text: string;
@@ -35,150 +94,297 @@ export interface Comment {
   updatedAt: string;
 }
 
-///////////////////////
-//User
-///////////////////////
-
-export interface useAdminsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: UserType[];
-}
-export interface useUsersType {
-  status: number;
-  message: string;
-  data: {
-    users: UserType[];
-    totalUsers: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface UserType {
-  id?: string;
-  first_name: string;
-  last_name: string;
+export interface IUserReference {
+  id: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
-
-  procurementRole?: {
-    canCreate?: boolean;
-    canView?: boolean;
-    canUpdate?: boolean;
-    canDelete?: boolean;
-  };
-
-  financeRole?: {
-    canCreate?: boolean;
-    canView?: boolean;
-    canUpdate?: boolean;
-    canDelete?: boolean;
-  };
   position?: string;
+}
 
-  isDeleted?: boolean;
+export interface IBaseQueryParams {
+  search?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
+
+export type WorkflowStatus = 'draft' | 'pending' | 'reviewed' | 'approved' | 'rejected';
+
+export interface IApiListResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: T[];
+  count: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext?: boolean;
+    hasPrev?: boolean;
+  };
+}
+
+export interface IApiSingleResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: T;
+}
+
+export interface IApiStatsResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  amount?: number;
+  data: T;
+}
+
+export interface IFile {
+  id: string;
+  _id: string;
+  name: string;
+  url: string;
+  cloudinaryId: string;
+  publicId: string;
+  format: string;
+  resourceType: string;
+  size: number;
+  originalName: string;
+  folder: string;
+  mimeType: string;
+  fileType: 'image' | 'pdf' | 'spreadsheet' | 'document' | 'other';
+  description?: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    duration?: number;
+  };
+  userId?: string;
+  associatedTo?: {
+    model: string;
+    id: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+// ─── File API Response Types ─────────────────────────────────────────────────
+
+// For listing files (array response)
+export interface IFileListResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: {
+    files: IFile[];
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
+// For single file response
+export interface IFileSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: IFile;
+}
+
+// For file upload response (multiple files)
+export interface IFileUploadResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: IFile[];
+}
+
+// For avatar upload response
+export interface IAvatarResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: {
+    url: string;
+    publicId: string;
+  };
+}
+
+// For file delete response (no data)
+export interface IFileDeleteResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+  data: null;
+}
+
+// ─── Legacy/Compat Types (if needed for backward compatibility) ─────────────
+
+// This is a wrapper for when the API returns { file: IFile } instead of just IFile
+export interface IFileWrapper {
+  file: IFile;
+}
+
+// For API responses that return { files: IFile[] } in data
+export type FileListResponse = IFileListResponse;
+export type FileSingleResponse = IFileSingleResponse;
+export type FileUploadResponse = IFileUploadResponse;
+
+// =============================================
+// USER TYPES
+// =============================================
+
+export interface IPasswordReset {
+  token: string;
+  password: string;
+  passwordConfirm?: string;
+}
+
+export interface IPasswordForgot {
+  email: string;
+}
+
+export interface IRolePermissions {
+  canCreate: boolean;
+  canView: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+}
+
+export interface IPersonalDetails {
+  fullName?: string;
+  stateOfOrigin?: string;
+  lga?: string;
+  religion?: string;
+  gender?: 'male' | 'female';
+  address?: string;
+  homePhone?: string;
+  cellPhone?: string;
+  emailAddress?: string;
+  ninNumber?: string;
+  birthDate?: string | Date;
+  maritalStatus?: 'Single' | 'Married' | 'Divorced' | 'Widowed';
+  spouseName?: string;
+  spouseAddress?: string;
+  spousePhone?: string;
+  numberOfChildren?: number;
+}
+
+export interface IJobDetails {
+  title?: string;
+  idNo?: string;
+  staffTaxIdNo?: string;
+  workLocation?: string;
+  workEmail?: string;
+  workPhone?: string;
+  workCellPhone?: string;
+  startDate?: string | Date;
+  endDate?: string | Date | null;
+  supervisor?: string;
+  supervisorId?: Partial<IUser>
+}
+
+export interface IEmergencyContact {
+  fullName?: string;
+  address?: string;
+  primaryPhone?: string;
+  cellPhone?: string;
+  relationship?: string;
+}
+
+export interface IBankDetails {
+  bankName?: string;
+  accountName?: string;
+  bankSortCode?: string;
+  accountNumber?: string;
+}
+
+export interface IEmploymentInfo {
+  isProfileComplete: boolean;
+  isEmploymentInfoLocked: boolean;
+  personalDetails?: IPersonalDetails;
+  jobDetails?: IJobDetails;
+  emergencyContact?: IEmergencyContact;
+  bankDetails?: IBankDetails;
+}
+
+export interface IUserAvatar {
+  url: string;
+  publicId: string;
+}
+export interface IUserSignature {
+  url: string;
+  publicId: string;
+}
+
+export type IUserRole = 'SUPER-ADMIN' | 'ADMIN' | 'REVIEWER' | 'STAFF';
+
+export interface IUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: IUserRole;
+  procurementRole: IRolePermissions;
+  financeRole: IRolePermissions;
+  position?: string;
+  avatar: IUserAvatar;
+  signature: IUserSignature;
+  isActive: boolean;
+  isDeleted: boolean;
+  employmentInfo: IEmploymentInfo;
+  createdAt: string;
+  updatedAt: string;
+  fullName: string;
   password?: string;
   passwordConfirm?: string;
+}
 
-  // Add employmentInfo directly to UserType
-  employmentInfo?: EmploymentInfoType;
+export interface ISystemSettings {
+  globalEmploymentInfoLock: boolean;
+  lastUpdatedBy?: string;
+  lastUpdatedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface PasswordResetTypes {
-  password: string;
-  passwordConfirm: string;
-}
-export interface PasswordForgotTypes {
-  email: string;
-}
-
-///////////////////////
-// Employment Information
-///////////////////////
-
-export interface EmploymentInfoType {
-  isProfileComplete?: boolean;
-  isEmploymentInfoLocked?: boolean; // Match backend: true = locked
-
-  personalDetails?: {
-    fullName?: string;
-    stateOfOrigin?: string;
-    lga?: string;
-    religion?: string;
-    address?: string;
-    homePhone?: string;
-    cellPhone?: string;
-    emailAddress?: string;
-    ninNumber?: string;
-    birthDate?: string | Date;
-    maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
-    spouseName?: string;
-    spouseAddress?: string;
-    spousePhone?: string;
-    numberOfChildren?: number;
-  };
-
-  jobDetails?: {
-    title?: string;
-    idNo?: string;
-    staffTaxIdNo?: string;
-    workLocation?: string;
-    workEmail?: string;
-    workPhone?: string;
-    workCellPhone?: string;
-    startDate?: string | Date;
-    endDate?: string | Date | null;
-    supervisor?: string;
-    supervisorId?: any;
-  };
-
-  emergencyContact?: {
-    fullName?: string;
-    address?: string;
-    primaryPhone?: string;
-    cellPhone?: string;
-    relationship?: string;
-  };
-
-  bankDetails?: {
-    bankName?: string;
-    accountName?: string;
-    bankSortCode?: string;
-    accountNumber?: string;
-  };
-}
-
 // API Response Types
-export interface UseEmploymentInfoType {
-  status: number;
-  message: string;
-  data: {
-    employmentInfo: EmploymentInfoType;
-    isProfileComplete: boolean;
-    canUpdate: boolean; // Computed: !isEmploymentInfoLocked
-    isLocked: boolean; // Actual lock status
+export type IUsersListResponse = IApiListResponse<IUser>;
+export type IUserSingleResponse = IApiSingleResponse<IUser>;
+export type IAdminsListResponse = IApiListResponse<IUser>;
+export type IEmploymentInfoResponse = IApiSingleResponse<{
+  employmentInfo: IEmploymentInfo;
+  isProfileComplete: boolean;
+  canUpdate: boolean;
+  isLocked: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
+  position: string;
+}>;
+export type IEmploymentInfoStatusResponse = IApiSingleResponse<
+  Array<{
+    id: string;
     firstName: string;
     lastName: string;
     email: string;
-    position: string;
-  };
-}
-
-export interface UseEmploymentInfoStatusType {
-  status: number;
-  message: string;
-  data: Array<{
-    _id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
     employmentInfo: {
       isProfileComplete?: boolean;
-      isEmploymentInfoLocked?: boolean; // Match backend
+      isEmploymentInfoLocked?: boolean;
       personalDetails?: {
         fullName?: string;
       };
@@ -186,606 +392,392 @@ export interface UseEmploymentInfoStatusType {
         title?: string;
       };
     };
-  }>;
+  }>
+>;
+export type ISystemSettingsResponse = IApiSingleResponse<ISystemSettings>;
+
+// =============================================
+// PROJECT TYPES
+// =============================================
+
+export interface IAccountCode {
+  name: string;
 }
 
-export interface SystemSettingsType {
-  globalEmploymentInfoLock: boolean; // Match backend
-  lastUpdatedBy?: string;
-  lastUpdatedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
+export interface ISector {
+  name: 'Education' | 'Protection' | 'WASH' | 'Nutrition/Health' | 'Livelihood';
+  percentage: number;
 }
 
-export interface UseSystemSettingsResponse {
-  status: number;
-  message: string;
-  data: SystemSettingsType;
+export interface IImplementationPeriod {
+  from: string;
+  to: string;
 }
 
-///////////////////////
-//PurChaseRequest
-///////////////////////
-export interface PurchaseRequestStats {
+export interface IMilestone {
+  title: string;
+  description: string;
+  status: 'pending' | 'active' | 'completed';
+}
+
+export interface IProject {
+  id: string;
+  projectTitle: string;
+  donor: string;
+  projectPartners: string[];
+  projectCode: string;
+  implementationPeriod: IImplementationPeriod;
+  projectBudget: number;
+  accountCodes: IAccountCode[];
+  sectors: ISector[];
+  projectLocations: string[]; // ✅ Keep as plural
+  targetBeneficiaries: string[];
+  projectObjectives: string;
+  milestones?: IMilestone[];
+  projectSummary: string;
+  status: 'ongoing' | 'completed' | 'cancelled'; // ✅ Add missing field
+  createdAt: string;
+  updatedAt: string;
+  files?: IFile[];
+}
+
+export interface IProjectStats {
+  totalProjects: number;
+}
+
+// API Response Types
+export type IProjectsListResponse = IApiListResponse<IProject>;
+export type IProjectSingleResponse = IApiSingleResponse<IProject>;
+export type IProjectStatsResponse = IApiStatsResponse<IProjectStats>;
+
+// =============================================
+// CONCEPT NOTE TYPES
+// =============================================
+
+export interface IActivityPeriod {
+  from: string;
+  to: string;
+}
+
+export interface IConceptNote {
+  id: string;
+  cnNumber: string;
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<IProject> | string | null;
+  activityTitle: string;
+  activityLocation: string;
+  activityPeriod: IActivityPeriod;
+  backgroundContext: string;
+  objectivesPurpose: string;
+  detailedActivityDescription: string;
+  strategicPlan: string;
+  benefitsOfProject: string;
+  activityBudget: number;
+  meansOfVerification: string;
+  createdBy: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  status: WorkflowStatus;
+  comments: IComment[];
+  copiedTo: IUser[];
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IConceptNoteStats {
   totalRequests: number;
   totalApprovedRequests: number;
 }
 
-export interface UsePurchaseStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: PurchaseRequestStats;
-}
+// API Response Types
+export type IConceptNotesListResponse = IApiListResponse<IConceptNote>;
+export type IConceptNoteSingleResponse = IApiSingleResponse<IConceptNote>;
+export type IConceptNoteStatsResponse = IApiStatsResponse<IConceptNoteStats>;
 
-export interface UsePurChaseRequest {
-  status: number;
-  message: string;
-  data: PurChaseRequestType;
-}
+// =============================================
+// ITEM GROUP TYPES
+// =============================================
 
-export interface usePurChaseRequestType {
-  status: number;
-  message: string;
-  data: {
-    purchaseRequests: PurChaseRequestType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface PurChaseRequestType {
+export interface IItemGroup {
   id?: string;
-  pcrNumber?: string;
-  department: string;
-  suggestedSupplier: string;
-  requestedBy?: string;
-  address: string;
-  finalDeliveryPoint: string;
-  city: string;
-  periodOfActivity: {
-    from: any;
-    to: any;
-  };
-  activityDescription: string;
-  expenseChargedTo: string;
-  accountCode: string;
-  project?: Partial<Project> | string | null;
-
-  // Two-step approval fields
-  financeReviewBy?: any;
-  financeReviewStatus?: "pending" | "approved" | "rejected";
-  procurementReviewBy?: any;
-  procurementReviewStatus?: "pending" | "approved" | "rejected";
-
-  // Backward compatibility
-  reviewedBy?: any;
-  approvedBy?: any;
-
-  itemGroups?: PurchaseRequesItemGroupType[];
-  comments?: Comment[];
-  status?: string;
-  createdBy?: Partial<UserType>;
-  createdAt?: string;
-  updatedAt?: string;
-  files?: [];
-  copiedTo?: UserType[];
-}
-
-export interface PurchaseRequesItemGroupType {
-  id?: string;
-  description: string;
   itemName?: string;
+  description: string;
+  frequency: number;
+  quantity: number;
+  unitCost: number;
+  unit: string;
+  total?: number;
+}
+
+export interface IExpenseItem {
+  id?: string;
+  expense: string;
+  description?: string;
   frequency: number;
   quantity: number;
   unit: string;
   unitCost: number;
   total: number;
 }
-///////////////////////
-//AdvanceRequest
-///////////////////////
-export interface AdvanceRequestStats {
-  totalRequests: number;
-  totalApprovedRequests: number;
-}
 
-export interface UseAdvanceStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: AdvanceRequestStats;
-}
+export type IUnifiedItem = IItemGroup | IExpenseItem;
 
-export interface UseAdvanceRequest {
-  status: number;
-  message: string;
-  data: AdvanceRequestType;
-}
+// =============================================
+// ADVANCE REQUEST TYPES
+// =============================================
 
-export interface UseAdvanceRequestType {
-  status: number;
-  message: string;
-  data: {
-    advanceRequests: AdvanceRequestType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface AdvanceRequestType {
-  id?: string;
-  arNumber?: string;
+export interface IAdvanceRequest {
+  id: string;
+  arNumber: string;
   department: string;
   suggestedSupplier: string;
-  requestedBy?: string;
   address: string;
   finalDeliveryPoint: string;
   city: string;
-  periodOfActivity: {
-    from: any;
-    to: any;
-  };
-  activityDescription: string;
-  expenseChargedTo: string;
-  accountCode: string;
-  project?: Partial<Project> | string | null;
-
   accountNumber: string;
   accountName: string;
   bankName: string;
-  reviewedBy?: any;
-  approvedBy?: any;
-  itemGroups?: AdvanceRequesItemGroupType[];
-  comments?: Comment[];
-  status?: string;
-  createdBy?: Partial<UserType>;
-  createdAt?: string;
-  updatedAt?: string;
-  files?: [];
-  copiedTo?: UserType[];
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<IProject> | string | null;
+  periodOfActivity: IActivityPeriod;
+  activityDescription: string;
+  approvedBy?: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  itemGroups: IItemGroup[];
+  comments: IComment[];
+  copiedTo: IUser[];
+  status: WorkflowStatus;
+  createdBy: Partial<IUser>;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface AdvanceRequesItemGroupType {
-  id?: string;
-  itemName?: string;
-  description: string;
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
-
-///////////////////////
-//TravelRequest
-///////////////////////
-
-export interface TravelRequestStats {
+export interface IAdvanceRequestStats {
   totalRequests: number;
   totalApprovedRequests: number;
 }
 
-export interface UseTravelStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: TravelRequestStats;
-}
+// API Response Types
+export type IAdvanceRequestsListResponse = IApiListResponse<IAdvanceRequest>;
+export type IAdvanceRequestSingleResponse = IApiSingleResponse<IAdvanceRequest>;
+export type IAdvanceRequestStatsResponse = IApiStatsResponse<IAdvanceRequestStats>;
 
-export interface UseTravelRequest {
-  status: number;
-  message: string;
-  data: TravelRequestType;
-}
+// =============================================
+// PURCHASE REQUEST TYPES
+// =============================================
 
-export interface useTravelRequestType {
-  status: number;
-  message: string;
-  data: {
-    travelRequests: TravelRequestType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
+export type ReviewDecision = 'pending' | 'approved' | 'rejected';
 
-export interface TravelRequestItemGroup {
-  id?: string;
-  expense: string;
-  description?: string; // For Purchase/Advance
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
-
-export interface TravelRequestType {
-  id?: string;
-  trNumber?: string;
-  staffName?: string;
-  travelRequest: {
-    from: string;
-    to: string;
-  };
+export interface IPurchaseRequest {
+  id: string;
+  pcrNumber: string;
+  department: string;
+  suggestedSupplier: string;
+  address: string;
+  finalDeliveryPoint: string;
+  city: string;
+  periodOfActivity: IActivityPeriod;
+  activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
-  project?: Partial<Project> | string | null;
+  project?: Partial<IProject> | string | null;
+  financeReviewBy?: Partial<IUser>;
+  financeReviewStatus: ReviewDecision;
+  procurementReviewBy?: Partial<IUser>;
+  procurementReviewStatus: ReviewDecision;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  itemGroups: IItemGroup[];
+  comments: IComment[];
+  copiedTo: IUser[];
+  status: WorkflowStatus;
+  createdBy: Partial<IUser>;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
+}
 
+export interface IPurchaseRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+// API Response Types
+export type IPurchaseRequestsListResponse = IApiListResponse<IPurchaseRequest>;
+export type IPurchaseRequestSingleResponse = IApiSingleResponse<IPurchaseRequest>;
+export type IPurchaseRequestStatsResponse = IApiStatsResponse<IPurchaseRequestStats>;
+
+// =============================================
+// TRAVEL REQUEST TYPES
+// =============================================
+
+export interface ITravelPeriod {
+  from: string;
+  to: string;
+}
+
+export interface ITravelRequest {
+  id: string;
+  trNumber: string;
+  staffName: string;
+  travelRequest: ITravelPeriod;
+  expenseChargedTo: string;
+  accountCode: string;
+  project?: Partial<IProject> | string | null;
   budget: number;
   amountInWords: string;
   travelReason: string;
-  dayOfDeparture: Date | undefined;
-  dayOfReturn: Date | string | null;
-  expenses: TravelRequestItemGroup[];
-
-  comments?: Comment[];
-  status?: string;
-  createdBy?: Partial<UserType>;
-  createdAt?: string;
-  updatedAt?: string;
-  reviewedBy?: any;
-  approvedBy?: any;
-  files?: [];
-  copiedTo?: UserType[];
+  dayOfDeparture: string;
+  dayOfReturn: string;
+  expenses: IExpenseItem[];
+  createdBy: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  status: WorkflowStatus;
+  comments: IComment[];
+  copiedTo: IUser[];
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-///////////////////////
-//ExpenseClaim
-///////////////////////
-
-export interface ExpenseClaimStats {
+export interface ITravelRequestStats {
   totalRequests: number;
   totalApprovedRequests: number;
 }
 
-export interface UseExpenseClaimStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: ExpenseClaimStats;
-}
-export interface UseExpenseClaim {
-  status: number;
-  message: string;
-  data: ExpenseClaimType;
+// API Response Types
+export type ITravelRequestsListResponse = IApiListResponse<ITravelRequest>;
+export type ITravelRequestSingleResponse = IApiSingleResponse<ITravelRequest>;
+export type ITravelRequestStatsResponse = IApiStatsResponse<ITravelRequestStats>;
+
+// =============================================
+// EXPENSE CLAIM TYPES
+// =============================================
+
+export interface IClaimPeriod {
+  from: string;
+  to: string;
 }
 
-export interface useExpenseClaimType {
-  status: number;
-  message: string;
-  data: {
-    expenseClaims: ExpenseClaimType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface ExpenseClaimItemGroup {
-  id?: string;
-  expense: string;
-  description?: string; // For Purchase/Advance
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
-
-export interface ExpenseClaimType {
-  id?: string;
-  ecNumber?: string;
-  staffName?: string;
-  expenseClaim: {
-    from: any;
-    to: any;
-  };
+export interface IExpenseClaim {
+  id: string;
+  ecNumber: string;
+  staffName: string;
+  expenseClaim: IClaimPeriod;
   expenseChargedTo: string;
   accountCode: string;
-  project?: Partial<Project> | string | null;
+  project?: Partial<IProject> | string | null;
   budget: number;
   amountInWords: string;
   expenseReason: string;
-  dayOfDeparture: Date | string | null;
-  dayOfReturn: Date | string | null;
-  expenses: ExpenseClaimItemGroup[];
-
-  comments?: Comment[];
-  status?: string;
-  createdBy?: Partial<UserType>;
-  createdAt?: string;
-  updatedAt?: string;
-  reviewedBy?: any;
-  approvedBy?: any;
-  files?: [];
-  copiedTo?: UserType[];
+  dayOfDeparture: string;
+  dayOfReturn: string;
+  expenses: IExpenseItem[];
+  createdBy: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  status: WorkflowStatus;
+  comments: IComment[];
+  copiedTo: IUser[];
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-///////////////////////
-//PaymentRequest
-///////////////////////
-
-export interface PaymentRequestStats {
+export interface IExpenseClaimStats {
   totalRequests: number;
   totalApprovedRequests: number;
 }
 
-export interface UsePaymentStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: PaymentRequestStats;
-}
+// API Response Types
+export type IExpenseClaimsListResponse = IApiListResponse<IExpenseClaim>;
+export type IExpenseClaimSingleResponse = IApiSingleResponse<IExpenseClaim>;
+export type IExpenseClaimStatsResponse = IApiStatsResponse<IExpenseClaimStats>;
 
-export interface UsePaymentRequest {
-  status: number;
-  message: string;
-  data: PaymentRequestType;
-}
+// =============================================
+// PAYMENT REQUEST TYPES
+// =============================================
 
-export interface usePaymentRequestType {
-  status: number;
-  message: string;
-  data: {
-    paymentRequests: PaymentRequestType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface PaymentRequestType {
-  id?: string;
-  pmrNumber?: string;
-  requestBy: string;
+export interface IPaymentRequest {
+  id: string;
+  pmrNumber: string;
   amountInFigure: number;
   amountInWords: string;
   purposeOfExpense: string;
   grantCode: string;
-  dateOfExpense: Date | string | null;
+  dateOfExpense: string;
   specialInstruction: string;
   accountNumber: string;
   accountName: string;
   bankName: string;
-
-  requestedBy?: Partial<UserType>;
+  createdBy?: Partial<IUser>;
   requestedAt?: string;
-
-  reviewedBy?: any;
+  reviewedBy?: Partial<IUser>;
   reviewedAt?: string;
-
-  approvedBy?: any;
+  approvedBy?: Partial<IUser>;
   approvedAt?: string;
-
-  comments?: Comment[];
-  status: string;
-
-  // Mongoose timestamps (auto-generated)
-  createdAt?: string;
-  updatedAt?: string;
-  files?: [];
-  copiedTo?: UserType[];
+  comments: IComment[];
+  copiedTo: IUser[];
+  status: WorkflowStatus;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-///////////////////////
-//Project
-///////////////////////
-
-export interface ProjectStats {
-  totalProjects: number;
-}
-export interface UseProjectStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: ProjectStats;
-}
-
-export interface UseProject {
-  status: number;
-  message: string;
-  data: Project;
-}
-
-export interface useProjectType {
-  status: number;
-  message: string;
-  data: {
-    projects: Project[];
-    totalProjects: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface Project {
-  id?: string;
-  project_title: string;
-  donor: string;
-  project_partners: string[];
-  project_code: string;
-  implementation_period: ImplementationPeriod;
-  project_budget: number;
-  account_code: AccountCode[];
-  sectors: Sector[];
-  project_locations: string[];
-  target_beneficiaries: string[];
-  // target_beneficiaries: TargetBeneficiaries;
-  project_objectives: string;
-  project_summary: string;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  files?: [];
-}
-
-export interface ImplementationPeriod {
-  from: any;
-  to: any;
-}
-
-export interface AccountCode {
-  name: string;
-  // code?: string;
-}
-export interface Sector {
-  name: string;
-  percentage: number;
-}
-
-export interface TargetBeneficiaries {
-  women: number;
-  girls: number;
-  boys: number;
-  men: number;
-}
-
-///////////////////////
-//ConceptNote //
-///////////////////////
-export interface ConceptNoteStats {
+export interface IPaymentRequestStats {
   totalRequests: number;
   totalApprovedRequests: number;
 }
 
-export interface UseConceptNoteStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: ConceptNoteStats;
-}
+// API Response Types
+export type IPaymentRequestsListResponse = IApiListResponse<IPaymentRequest>;
+export type IPaymentRequestSingleResponse = IApiSingleResponse<IPaymentRequest>;
+export type IPaymentRequestStatsResponse = IApiStatsResponse<IPaymentRequestStats>;
 
-export interface UseConceptNote {
-  status: number;
-  message: string;
-  data: ConceptNoteType;
-}
+// =============================================
+// VENDOR TYPES
+// =============================================
 
-export interface UseConceptNoteType {
-  status: number;
-  message: string;
-  data: {
-    conceptNotes: ConceptNoteType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface ConceptNoteType {
-  id?: string;
-  cnNumber?: string;
-  staff_name?: string;
-  staff_role?: string;
-  // project_code: string;
-  activity_title: string;
-  activity_location: string;
-  expense_Charged_To: string;
-  account_Code: string;
-  project?: Partial<Project> | string | null;
-  activity_period: {
-    from: any;
-    to: any;
-  };
-  background_context: string;
-  // objectives_purpose: string[];
-  objectives_purpose: string;
-  detailed_activity_description: string;
-  // detailed_activity_description: {
-  //   title: string;
-  //   description: string;
-  // }[];
-  strategic_plan: string;
-  // benefits_of_project: string[];
-  benefits_of_project: string;
-  means_of_verification: string;
-  activity_budget: number;
-  comments?: Comment[];
-  reviewedBy?: any;
-  preparedBy?: any;
-  approvedBy?: any;
-  status?: "pending" | "approved" | "rejected" | "reviewed" | "draft";
-  createdAt?: string;
-  updatedAt?: string;
-
-  files?: [];
-  copiedTo?: UserType[];
-}
-
-///////////////////////
-//Vendor //
-///////////////////////
-export interface VendorType {
-  status: string; // Make sure this is included
+export interface IVendor {
   id: string;
   businessName: string;
   businessType: string;
+  businessRegNumber: string;
+  businessState: string;
+  operatingLga?: string;
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
   address: string;
   email: string;
   businessPhoneNumber: string;
   contactPhoneNumber: string;
-  categories?: string[];
+  categories: string[];
   contactPerson: string;
+  createdBy: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
   position: string;
   vendorCode: string;
-  createdBy: UserType | any;
-  approvedBy?: any;
   tinNumber: string;
+  status: string;
+  files?: File[];
+  comments?: IComment[];
   createdAt: string;
   updatedAt: string;
-  businessRegNumber: string;
-  businessState: string;
-  operatingLGA: string;
-  accountNumber: string;
-  accountName: string;
-  bankName: string;
-  files?: [];
-  comments?: any[];
 }
 
-// export interface UseVendorType {
-//   status: string;
-//   message: string;
-//   data: {
-//     vendors: VendorType[];
-//     totalVendors: number;
-//     totalPages: number;
-//     currentPage: number;
-//   };
-// }
-export interface UseVendorType {
-  status: string;
-  message: string;
-  data: {
-    vendors: VendorType[];
-    totalVendors: number;
-    totalPages: number;
-    currentPage: number;
-  };
+export interface IVendorStats {
+  totalVendors: number;
+  activeVendors: number;
+  vendorsByCategory: { category: string; count: number }[];
 }
 
-export interface UseVendor {
-  status: string | number;
-  message: string;
-  data: VendorType;
-}
-
-export interface UseVendorStatsType {
-  status: number | number;
-  message: string;
-  data: {
-    totalVendors: number;
-    activeVendors: number;
-    vendorsByCategory: { category: string; count: number }[];
-  };
-}
-
-export interface CreateVendorType {
-  approvedBy?: string;
+export interface ICreateVendorPayload {
   businessName: string;
   businessType: string;
   address: string;
@@ -798,14 +790,14 @@ export interface CreateVendorType {
   tinNumber: string;
   businessRegNumber: string;
   businessState: string;
-  operatingLGA?: string;
+  operatingLga?: string;
   accountNumber: string;
   accountName: string;
   bankName: string;
-  files?: File[];
+  files?: IFile[];
 }
 
-export interface UpdateVendorType {
+export interface IUpdateVendorPayload {
   businessName?: string;
   businessType?: string;
   address?: string;
@@ -818,282 +810,212 @@ export interface UpdateVendorType {
   tinNumber?: string;
   businessRegNumber?: string;
   businessState?: string;
-  operatingLGA?: string;
+  operatingLga?: string;
   accountNumber?: string;
   accountName?: string;
   bankName?: string;
-  files?: File[];
+  files?: IFile[];
 }
 
-///////////////////////
-//RFQ //
-///////////////////////
+// API Response Types
+export type IVendorsListResponse = IApiListResponse<IVendor>;
+export type IVendorSingleResponse = IApiSingleResponse<IVendor>;
+export type IVendorStatsResponse = IApiSingleResponse<IVendorStats>;
 
-// export interface ItemGroupType {
-//   description: string;
-//   frequency: number;
-//   quantity: number;
-//   unit: string;
-//   unitCost: number;
-//   total: number;
-// }
+// =============================================
+// RFQ TYPES
+// =============================================
 
-export interface RFQItemGroupType {
+export interface IRFQItemGroup {
+  id?: string;
   description: string;
-  itemName: string;
+  itemName?: string;
   frequency: number;
   quantity: number;
   unit: string;
   unitCost: number;
   total: number;
-  _id?: string;
 }
 
-export interface RFQType {
-  deliveryDate: string;
-  poDate: string;
+export type RFQStatus = 'preview' | 'draft' | 'sent' | 'cancelled';
+
+export interface IRFQ {
   id: string;
-  RFQTitle: string;
-  RFQCode: string;
-  itemGroups: RFQItemGroupType[];
-  copiedTo: string[] | VendorType[];
+  rfqTitle: string;
+  rfqCode: string;
+  itemGroups: IRFQItemGroup[];
+  copiedTo: (string | IVendor)[];
   deadlineDate: string;
   rfqDate: string;
-  pdfUrl?: string;
   casfodAddressId: string;
-  cloudinaryId?: string;
-  status: "draft" | "preview" | "sent" | "cancelled";
-  createdBy: UserType;
+  pdfUrl: string;
+  cloudinaryId: string;
+  createdBy: Partial<IUser>;
+  status: RFQStatus;
+  files?: IFile[];
   createdAt: string;
   updatedAt: string;
-  approvedBy: Partial<UserType> | string;
-  files?: FileType[];
 }
 
-export interface CreateRFQType {
-  RFQTitle: string;
+export interface IRFQStats {
+  totalRFQs: number;
+  totalSentRFQs: number;
+  totalDraftRFQs: number;
+}
+
+export interface ICreateRFQPayload {
+  rfqTitle: string;
   deadlineDate: string;
   rfqDate: string;
   casfodAddressId: string;
-  itemGroups: RFQItemGroupType[];
+  itemGroups: IRFQItemGroup[];
   copiedTo: string[];
-  files?: File[];
+  files?: IFile[];
 }
 
-export interface UpdateRFQType {
-  RFQTitle?: string;
+export interface IUpdateRFQPayload {
+  rfqTitle?: string;
   deadlineDate?: string;
   rfqDate?: string;
   casfodAddressId?: string;
-  itemGroups?: RFQItemGroupType[];
+  itemGroups?: IRFQItemGroup[];
   copiedTo?: string[];
-  files?: File[];
+  files?: IFile[];
 }
 
-export interface UseRFQ {
-  status: number;
-  message: string;
-  data: {
-    rfq: RFQType;
-  };
+// API Response Types
+export type IRFQsListResponse = IApiListResponse<IRFQ>;
+export type IRFQSingleResponse = IApiSingleResponse<IRFQ>;
+export type IRFQStatsResponse = IApiSingleResponse<IRFQStats>;
+
+// =============================================
+// PURCHASE ORDER TYPES
+// =============================================
+
+export interface IPOItemGroup {
+  // id?: string;
+  _id?: string;
+  description?: string;
+  itemName?: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  total: number;
 }
 
-export interface UseRFQType {
-  status: number;
-  message: string;
-  data: {
-    rfqs: RFQType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface UseRFQStatsType {
-  status: number;
-  message: string;
-  data: {
-    totalRFQs: number;
-    totalSentRFQs: number;
-    totalDraftRFQs: number;
-  };
-}
-
-///////////////////////////////////
-// PURCHASE ORDER
-///////////////////////////////////
-
-// Keep the old Comment interface for backward compatibility
-export interface OldComment {
-  user: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-  };
-  text: string;
-  createdAt?: string;
-}
-
-export interface PurchaseOrderType {
+export interface IPurchaseOrder {
   id: string;
-  RFQTitle: string;
-  RFQCode: string;
-  POCode: string;
-  deliveryDate?: string;
-  poDate?: string;
-  itemGroups: RFQItemGroupType[];
-  copiedTo: Array<{
-    id: string;
-    businessName: string;
-    email: string;
-    contactPerson: string;
-    businessPhoneNumber?: string;
-    address?: string;
-  }>;
-  selectedVendor: {
-    vendorName: string;
-    id: string;
-    businessName: string;
-    email: string;
-    contactPerson: string;
-    businessPhoneNumber?: string;
-    contactPhoneNumber?: string;
-    address?: string;
-  };
-
+  rfqTitle: string;
+  rfqCode: string;
+  poCode: string;
+  itemGroups: IPOItemGroup[];
+  copiedTo: (string | IVendor)[];
+  selectedVendor?: IVendor;
+  deliveryDate: string;
+  poDate: string;
   casfodAddressId: string;
   totalAmount: number;
-  VAT: number;
+  vat: number;
   pdfUrl: string;
   cloudinaryId: string;
-  createdBy: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-  };
-  status: "pending" | "approved" | "rejected";
-  isFromRFQ: boolean;
-  comments: Comment[] | OldComment[]; // Support both new and old comment formats
-  approvedBy?: Partial<UserType>;
+  createdBy: Partial<IUser>;
+  status: 'pending' | 'approved' | 'rejected';
+  isFromRfq: boolean;
+  comments: IComment[];
+  approvedBy?: Partial<IUser>;
+  files?: File[];
   createdAt: string;
   updatedAt: string;
-  files?: FileType[];
 }
 
-export interface CreatePurchaseOrderType {
-  RFQTitle: string;
-  itemGroups: RFQItemGroupType[];
+export interface ICreatePurchaseOrderPayload {
+  rfqTitle: string;
+  itemGroups: IPOItemGroup[];
   deliveryDate?: string;
-  casfodAddressId: string;
-  VAT: number;
   poDate?: string;
+  casfodAddressId: string;
+  vat: number;
   copiedTo?: string[];
   selectedVendor: string;
-  approvedBy?: Partial<UserType> | string;
-
-  files?: FileType[];
+  files?: IFile[];
 }
 
-export interface UpdatePurchaseOrderType {
-  RFQTitle?: string;
-  itemGroups?: RFQItemGroupType[];
+export interface IUpdatePurchaseOrderPayload {
+  rfqTitle?: string;
+  itemGroups?: IPOItemGroup[];
   deliveryDate?: string;
   poDate?: string;
-  casfodAddressId: string;
-  VAT: number;
+  casfodAddressId?: string;
+  vat?: number;
   status?: string;
   copiedTo?: string[];
   selectedVendor?: string;
-  approvedBy: Partial<UserType> | string;
-  files?: File[];
+  files?: IFile[];
   comment?: string;
 }
 
-export interface UsePurchaseOrder {
-  status: string;
-  message: string;
-  data: PurchaseOrderType;
-}
+// API Response Types
+export type IPurchaseOrdersListResponse = IApiListResponse<IPurchaseOrder>;
+export type IPurchaseOrderSingleResponse = IApiSingleResponse<IPurchaseOrder>;
 
-export interface UsePurchaseOrderType {
-  status: string;
-  message: string;
-  data: {
-    purchaseOrders: PurchaseOrderType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
+// =============================================
+// GOODS RECEIVED TYPES
+// =============================================
 
-///////////////////////////////////
-// GOODS RECIEVED
-///////////////////////////////////
-// Add to your existing interfaces.ts
-export interface GoodsReceivedItemsType {
-  isFullyReceived: boolean;
-  itemid: string;
+export interface IGRNItem {
+  itemId: string;
   numberOrdered: number;
   numberReceived: number;
   difference: number;
+  isFullyReceived: boolean;
 }
 
-export interface GoodsReceivedType {
-  isCompleted: boolean; // Changed from 'any' to 'boolean'
+export interface IGoodsReceived {
   id: string;
-  GRDCode: string;
-  files?: FileType[];
-  purchaseOrder: PurchaseOrderType | string;
-  GRNitems: GoodsReceivedItemsType[];
-  createdBy: UserType;
+  grdCode: string;
+  purchaseOrder: string | IPurchaseOrder;
+  grnItems: IGRNItem[];
+  createdBy: Partial<IUser>;
+  status: WorkflowStatus;
+  isCompleted: boolean;
+  files?: IFile[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateGoodsReceivedType {
+export interface ICreateGoodsReceivedPayload {
   purchaseOrder: string;
-  files?: File[];
-  GRNitems: {
-    itemid: string;
+  grnItems: {
+    itemId: string;
     numberOrdered: number;
     numberReceived: number;
   }[];
+  files?: IFile[];
 }
 
-export interface UseGoodsReceived {
-  status: string;
-  message: string;
-  data: GoodsReceivedType;
-}
+// API Response Types
+export type IGoodsReceivedListResponse = IApiListResponse<IGoodsReceived>;
+export type IGoodsReceivedSingleResponse = IApiSingleResponse<IGoodsReceived>;
 
-export interface UseGoodsReceivedType {
-  status: string;
-  message: string;
-  data: {
-    goodsReceived: GoodsReceivedType[];
-    totalPages: number;
-    currentPage: number;
-    totalCount: number;
-  };
-}
+// =============================================
+// PAYMENT VOUCHER TYPES
+// =============================================
 
-///////////////////////////////////
-//Payment Voucher
-///////////////////////////////////
-// interfaces.ts - Update the PaymentVoucherType interface
-export interface PaymentVoucherType {
-  id?: string;
+export type PaymentVoucherStatus =
+  'draft' | 'pending' | 'reviewed' | 'approved' | 'rejected' | 'paid';
+
+export interface IPaymentVoucher {
+  id: string;
   pvNumber: string;
-  pvDate: string;
   payingStation: string;
   payTo: string;
   being: string;
+  pvDate: string;
   amountInWords: string;
   accountCode: string;
+  projectCode: string;
+  project: string;
   grossAmount: number;
   vat: number;
   wht: number;
@@ -1103,22 +1025,26 @@ export interface PaymentVoucherType {
   chartOfAccountCategories: string;
   organisationalChartOfAccount: string;
   chartOfAccountCode: string;
-  project: string;
-  projectCode: string;
   note: string;
-  createdBy?: Partial<UserType>; // Made optional for form creation
-  reviewedBy?: UserType[] | any; // Changed to string for form handling
-  approvedBy?: UserType[] | any; // Changed to string for form handling
-  status?: "draft" | "pending" | "reviewed" | "approved" | "rejected" | "paid"; // Made optional
-  comments?: Comment[];
-  copiedTo?: UserType[];
-  files?: FileType[];
-  createdAt?: string;
-  updatedAt?: string;
+  createdBy: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  comments: IComment[];
+  copiedTo: IUser[];
+  status: PaymentVoucherStatus;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Add a separate interface for form data
-export interface PaymentVoucherFormData {
+export interface IPaymentVoucherStats {
+  totalVouchers: number;
+  totalApprovedVouchers: number;
+  totalPaidVouchers: number;
+  totalAmount: number;
+}
+
+export interface IPaymentVoucherFormData {
   payingStation: string;
   payTo: string;
   being: string;
@@ -1141,70 +1067,102 @@ export interface PaymentVoucherFormData {
   approvedBy?: string | null;
 }
 
-export interface UsePaymentVoucherStatsType {
-  status: number;
-  message: string;
-  data: {
-    totalVouchers: number;
-    totalApprovedVouchers: number;
-    totalPaidVouchers: number;
-    totalAmount: number;
-  };
+// API Response Types
+export type IPaymentVouchersListResponse = IApiListResponse<IPaymentVoucher>;
+export type IPaymentVoucherSingleResponse = IApiSingleResponse<IPaymentVoucher>;
+export type IPaymentVoucherStatsResponse = IApiSingleResponse<IPaymentVoucherStats>;
+
+// =============================================
+// LEAVE MANAGEMENT TYPES
+// =============================================
+
+export type ILeaveEnum =
+  | 'Annual leave'
+  | 'Compassionate leave'
+  | 'Sick leave'
+  | 'Maternity leave'
+  | 'Paternity leave'
+  | 'Emergency leave'
+  | 'Study Leave'
+  | 'Leave without pay';
+
+export interface IILeaveConfig {
+  maxDays: number;
+  description?: string;
+  isCalendarDays: boolean;
 }
 
-export interface usePaymentVoucherType {
-  status: number;
-  message: string;
-  data: {
-    paymentVouchers: PaymentVoucherType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
+export interface ILeaveCover {
+  nameOfCover?: string;
+  signature?: string;
 }
 
-export interface UsePaymentVoucher {
-  status: number;
-  message: string;
-  data: PaymentVoucherType;
-}
-
-////////////////////
-// UnifiedItemType;
-////////////////////
-
-export interface UnifiedItemType {
-  // Common fields
-  id?: string;
-  description?: string; // For Purchase/Advance
-  itemName?: string;
-  expense?: string; // For Travel/Expense
-  frequency: number;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  total: number;
-}
-
-export type ItemGroupType = UnifiedItemType;
-
-// src/interfaces.ts - Add these interfaces
-
-///////////////////////
-// Leave Management
-///////////////////////
-
-export interface UserReference {
+export interface ILeave {
   id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
+  leaveNumber: string;
+  user: string | IUser;
+  staffName: string;
+  staffRole: string;
+  leaveType: ILeaveEnum;
+  ILeaveConfig: IILeaveConfig;
+  startDate: string;
+  endDate: string;
+  totalDaysApplied: number;
+  leaveBalanceAtApplication: number;
+  amountAccruedLeave: number;
+  createdBy?: Partial<IUser>;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  status: string;
+  comments: IComment[];
+  copiedTo: IUser[];
+  leaveCover?: ILeaveCover;
+  reasonForLeave?: string;
+  contactDuringLeave?: string;
+  isDeleted: boolean;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type UserIdReference = string | null;
+export interface ILeaveFormData {
+  leaveType?: ILeaveEnum;
+  startDate?: string;
+  endDate?: string;
+  reasonForLeave?: string;
+  contactDuringLeave?: string;
+  approvedBy?: string | null;
+  leaveCover?: {
+    nameOfCover?: string;
+    signature?: string;
+  };
+}
 
-export interface LeaveStats {
+export interface IILeaveBalance {
+  maxDays: number;
+  totalApplied: number;
+  accrued: number;
+  balance: number;
+  year: number;
+}
+
+export interface ILeaveBalance {
+  id: string;
+  user: string | IUser;
+  annualLeave: IILeaveBalance;
+  compassionateLeave: IILeaveBalance;
+  sickLeave: IILeaveBalance;
+  maternityLeave: IILeaveBalance;
+  paternityLeave: IILeaveBalance;
+  emergencyLeave: IILeaveBalance;
+  studyLeave: IILeaveBalance;
+  leaveWithoutPay: IILeaveBalance;
+  lastResetYear: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ILeaveStats {
   totalRequests: number;
   totalApprovedRequests: number;
   totalPendingRequests: number;
@@ -1213,220 +1171,19 @@ export interface LeaveStats {
   totalDaysApproved: number;
 }
 
-export interface UseLeaveStatsType {
-  status: number;
-  message: string;
-  data: LeaveStats;
-}
+// API Response Types
+export type ILeavesListResponse = IApiListResponse<ILeave>;
+export type ILeaveSingleResponse = IApiSingleResponse<ILeave>;
+export type ILeaveBalanceResponse = IApiSingleResponse<ILeaveBalance>;
+export type ILeaveStatsResponse = IApiSingleResponse<ILeaveStats>;
 
-export interface UseLeave {
-  status: number;
-  message: string;
-  data: LeaveType;
-}
+// =============================================
+// STAFF STRATEGY TYPES
+// =============================================
 
-export interface UseLeaveType {
-  status: number;
-  message: string;
-  data: {
-    leaves: LeaveType[];
-    totalLeaves: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
+export type StrategyStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 
-// Leave Balance Interface
-export interface LeaveBalanceType {
-  id?: string;
-  user: string | UserType;
-  annualLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  compassionateLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  sickLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  maternityLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  paternityLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  emergencyLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  studyLeave: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  leaveWithoutPay: {
-    maxDays: number;
-    totalApplied: number;
-    accrued: number;
-    balance: number;
-    year: number;
-  };
-  lastResetYear: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface UseLeaveBalance {
-  status: number;
-  message: string;
-  data: LeaveBalanceType;
-}
-
-export interface LeaveFormData {
-  leaveType?: string;
-  startDate?: string;
-  endDate?: string;
-  reasonForLeave?: string;
-  contactDuringLeave?: string;
-  reviewedById?: string | null;
-  approvedById?: string | null;
-  approvedBy?: string | null;
-  leaveCover?: {
-    nameOfCover?: string;
-    signature?: string;
-  };
-}
-
-// interfaces/index.ts - Update LeaveType interface
-
-export interface LeaveType {
-  id?: string;
-  leaveNumber?: string;
-  user?: UserReference;
-  staff_name?: string;
-  staff_role?: string;
-
-  leaveType:
-    | "Annual leave"
-    | "Compassionate leave"
-    | "Sick leave"
-    | "Maternity leave"
-    | "Paternity leave"
-    | "Emergency leave"
-    | "Study Leave"
-    | "Leave without pay";
-
-  leaveTypeConfig?: {
-    maxDays: number;
-    description: string;
-    isCalendarDays: boolean;
-  };
-
-  startDate: string;
-  endDate: string;
-  totalDaysApplied: number;
-  leaveBalanceAtApplication: number;
-  amountAccruedLeave?: number;
-
-  // For API responses - full user objects
-  reviewedBy?: UserReference; // Keep for backward compatibility, but may be null
-  approvedBy?: UserReference;
-
-  // For form submissions - just IDs
-  reviewedById?: string; // Keep for backward compatibility
-  approvedById?: string;
-
-  // Simplified status - removed "reviewed"
-  status: "draft" | "pending" | "approved" | "rejected";
-
-  comments?: Comment[];
-  copiedTo?: UserReference[];
-
-  leaveCover?: {
-    nameOfCover?: string;
-    signature?: string;
-  };
-
-  reasonForLeave?: string;
-  contactDuringLeave?: string;
-
-  isDeleted?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  files?: FileType[];
-}
-
-// Leave Type Configuration (for reference)
-export const LEAVE_TYPE_CONFIG = {
-  "Annual leave": {
-    maxDays: 24,
-    description: "24 days",
-    isCalendarDays: false,
-  },
-  "Compassionate leave": {
-    maxDays: 10,
-    description: "10 days Max",
-    isCalendarDays: false,
-  },
-  "Sick leave": { maxDays: 12, description: "12 Days", isCalendarDays: false },
-  "Maternity leave": {
-    maxDays: 90,
-    description: "90 Working days",
-    isCalendarDays: false,
-  },
-  "Paternity leave": {
-    maxDays: 14,
-    description: "14 Calendar Days",
-    isCalendarDays: true,
-  },
-  "Emergency leave": {
-    maxDays: 5,
-    description: "5 days",
-    isCalendarDays: false,
-  },
-  "Study Leave": {
-    maxDays: 10,
-    description: "10 working day",
-    isCalendarDays: false,
-  },
-  "Leave without pay": {
-    maxDays: 365,
-    description: "Up to 1 year",
-    isCalendarDays: true,
-  },
-} as const;
-
-/////////////////////////////////////
-// StaffStrategyType
-/////////////////////////////////////
-// Add to your existing interfaces file
-
-export interface ObjectiveType {
+export interface IObjective {
   objective: string;
   timeline: string;
   expectedOutcome: string;
@@ -1435,158 +1192,85 @@ export interface ObjectiveType {
   supportRequired?: string;
 }
 
-export interface AccountabilityAreaType {
+export interface IAccountabilityArea {
   areaName: string;
-  objectives: ObjectiveType[];
+  objectives: IObjective[];
 }
 
-// Already in your interfaces.ts - this is correct
-export interface StaffStrategyType {
+export interface IStaffStrategy {
   id: string;
   strategyCode: string;
-  staffName?: string;
-  staffId?: any;
-  jobTitle?: string;
+  // staffName/jobTitle are NOT sent by the API — read them off the
+  // populated `staffId` (firstName/lastName, employmentInfo.jobDetails.title).
+  staffId?: string | IUser;
   department: string;
-  supervisor?: string;
-  supervisorId?: any;
+  // `approvedBy` is the single supervisor reference (populated). There is
+  // no separate `supervisor`/`supervisorId` — those were dead duplicates.
   date: string;
   period: string;
-  accountabilityAreas: AccountabilityAreaType[];
-  comments: Comment[];
-  createdBy: UserType | any;
-  createdAt: any;
-  updatedAt: any;
-  status: "pending" | "approved" | "rejected" | "draft";
-  approvedBy: any;
-  files: FileType[];
-  pdfUrl?: string;
-  cloudinaryId?: string;
+  accountabilityAreas: IAccountabilityArea[];
+  comments: IComment[];
+  createdBy: Partial<IUser>;
+  status: StrategyStatus;
+  approvedBy?: Partial<IUser>;
+  copiedTo: IUser[];
+  pdfUrl: string;
+  cloudinaryId: string;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface UseStaffStrategyType {
-  status: number;
-  message: string;
-  data: {
-    strategies: StaffStrategyType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
+// API Response Types
+export type IStaffStrategiesListResponse = IApiListResponse<IStaffStrategy>;
+export type IStaffStrategySingleResponse = IApiSingleResponse<IStaffStrategy>;
 
-export interface UseStaffStrategy {
-  status: number;
-  message: string;
-  data: StaffStrategyType;
-}
+// =============================================
+// APPRAISAL TYPES
+// =============================================
 
-///////////////////////
-// StaffStrategyType
-///////////////////////
+export type ObjectiveRating = '' | 'Achieved' | 'Partly Achieved' | 'Not Achieved';
+export type PerformanceRating =
+  'Pending' | 'Needs Improvement' | 'Meets Expectations' | 'Exceeds Expectations';
+export type OverallRating =
+  'Pending' | 'Meets Requirements' | 'Partly Meets Requirements' | 'Does Not Meet Requirements';
+export type CompletionStatus = 'pending' | 'completed';
+export type AppraisalStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 
-export interface ObjectiveType {
-  objective: string;
-  timeline: string;
-  expectedOutcome: string;
-  kpi: string;
-  possibleChallenges?: string;
-  supportRequired?: string;
-}
-
-export interface AccountabilityAreaType {
-  areaName: string;
-  objectives: ObjectiveType[];
-}
-
-export interface StaffStrategyType {
-  id: string;
-  strategyCode: string;
-  staffName?: string;
-  staffId?: any;
-  jobTitle?: string;
-  department: string;
-  supervisor?: string;
-  supervisorId?: any;
-  date: string;
-  period: string;
-  accountabilityAreas: AccountabilityAreaType[];
-  comments: Comment[];
-  createdBy: UserType | any;
-  createdAt: any;
-  updatedAt: any;
-  status: "pending" | "approved" | "rejected" | "draft";
-  approvedBy: any;
-  files: FileType[];
-  pdfUrl?: string;
-  cloudinaryId?: string;
-}
-
-export interface UseStaffStrategyType {
-  status: number;
-  message: string;
-  data: {
-    strategies: StaffStrategyType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface UseStaffStrategy {
-  status: number;
-  message: string;
-  data: StaffStrategyType;
-}
-
-// src/interfaces.ts (add these to your existing Appraisal types)
-
-///////////////////////
-// Appraisal Types
-///////////////////////
-
-export interface EmployeeRatingType {
-  rating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+export interface IEmployeeRating {
+  rating: ObjectiveRating;
   achievements: string;
 }
 
-export interface ObjectiveRatingType {
-  _id?: string;
+export interface IObjectiveRating {
   objective: string;
-  employeeRating: EmployeeRatingType; // ← was a plain string union
-  supervisorRating: "" | "Achieved" | "Partly Achieved" | "Not Achieved";
+  employeeRating: IEmployeeRating;
+  supervisorRating: ObjectiveRating;
   employeePoints: number;
   supervisorPoints: number;
-  supervisorRatingStatus?: "pending" | "completed";
+  supervisorRatingStatus: CompletionStatus;
 }
 
-export interface PerformanceAreaType {
+export interface IPerformanceArea {
   area:
-    | "Not Rated"
-    | "Job Knowledge"
-    | "Judgement"
-    | "Reliability"
-    | "Quality & Quantity of Work"
-    | "Interpersonal and Communication Skills"
-    | "Teamwork";
-  rating:
-    | "Pending"
-    | "Needs Improvement"
-    | "Meets Expectations"
-    | "Exceeds Expectations";
-  // FIXED: Add pending state
-  supervisorStatus?: "pending" | "completed";
+    | 'Job Knowledge'
+    | 'Judgement'
+    | 'Reliability'
+    | 'Quality & Quantity of Work'
+    | 'Interpersonal and Communication Skills'
+    | 'Teamwork';
+  rating: PerformanceRating;
+  supervisorStatus: CompletionStatus;
 }
 
-export interface SafeguardingType {
+export interface ISafeguarding {
   actionsTaken: string;
-  trainingCompleted: "Yes" | "Partly" | "No";
+  trainingCompleted: 'Yes' | 'Partly' | 'No';
   areasNotUnderstood: string[];
-  // FIXED: Add pending state
-  supervisorStatus?: "pending" | "completed";
+  supervisorStatus: CompletionStatus;
 }
 
-export interface AppraisalSignaturesType {
+export interface ISignatures {
   staffSignature: boolean;
   staffSignatureDate?: string;
   staffComments?: string;
@@ -1595,7 +1279,7 @@ export interface AppraisalSignaturesType {
   hrComments?: string;
 }
 
-export interface AppraisalScoresType {
+export interface IAppraisalScores {
   employeeTotal: number;
   supervisorTotal: number;
   performanceAreasCount: {
@@ -1605,173 +1289,102 @@ export interface AppraisalScoresType {
   };
 }
 
-export interface AppraisalType {
+// In interfaces.ts, update IAppraisal to match the backend model:
+export interface IAppraisal {
   id: string;
   appraisalCode: string;
-
-  // Staff Information
-  staffId: any;
-  staffName: string;
-  position: string;
+  // staffName/position are NOT sent by the API — read them off the
+  // populated `staffId` (firstName/lastName, employmentInfo.jobDetails.title).
+  staffId?: string | IUser;
   department: string;
-  lengthOfTimeInPosition: string;
+  lengthOfTimeInPosition?: string;
   appraisalPeriod: string;
   dateOfAppraisal: string;
-
-  // Supervisor Information
-  supervisorId: any;
-  supervisorName: string;
-  lengthOfTimeSupervised: string;
-  // FIXED: Add supervisor status
-  supervisorStatus: "pending" | "completed";
-
-  // Section 2: Objectives
-  objectives: ObjectiveRatingType[];
-  achievements?: string;
-
-  // Safeguarding
-  safeguarding: SafeguardingType;
-
-  // Section 3: Performance Areas
-  performanceAreas: PerformanceAreaType[];
-  supervisorComments: string;
-  overallRating:
-    | "Pending"
-    | "Meets Requirements"
-    | "Partly Meets Requirements"
-    | "Does Not Meet Requirements";
-
-  // Section 4: Future Goals
-  futureGoals: string;
-
-  // Section 5: Signatures
-  signatures: AppraisalSignaturesType;
-
-  // Calculated scores
-  scores: AppraisalScoresType;
-
-  // Comments
-  comments: Comment[];
-
-  // Metadata
-  createdBy: any;
-  createdAt: string;
-  updatedAt: string;
-
-  // Status
-  status: "pending" | "approved" | "rejected" | "draft";
-
+  // supervisorId is populated on read (IUser) and a plain id string on
+  // write. supervisorName is NOT sent — read it off supervisorId.
+  supervisorId?: string | IUser;
+  lengthOfTimeSupervised?: string;
+  supervisorStatus: CompletionStatus;
+  objectives: IObjectiveRating[];
+  safeguarding: ISafeguarding;
+  performanceAreas: IPerformanceArea[];
+  supervisorComments?: string;
+  overallRating: OverallRating;
+  futureGoals?: string;
+  signatures: ISignatures;
+  scores: IAppraisalScores;
+  comments: IComment[];
+  createdBy: Partial<IUser>;
+  staffStrategy?: string | IStaffStrategy;
+  status: AppraisalStatus;
+  approvedBy?: Partial<IUser>;
+  copiedTo: IUser[];
   submittedByEmployee: boolean;
   submittedBySupervisor: boolean;
   completedAt?: string;
-
-  // Files
-  files: FileType[];
-  pdfUrl?: string;
-  cloudinaryId?: string;
-
-  // For form submissions
-  comment?: string;
-  staffStrategy: StaffStrategyType | string | null;
+  pdfUrl: string;
+  cloudinaryId: string;
+  files?: IFile[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface UseAppraisalType {
-  status: number;
-  message: string;
-  data: {
-    appraisals: AppraisalType[];
+export interface IAppraisalStats {
+  byStatus: Array<{
+    _id: string;
+    count: number;
+    avgEmployeeScore: number;
+    avgSupervisorScore: number;
+  }>;
+  overall: {
     total: number;
-    totalPages: number;
-    currentPage: number;
+    completed: number;
+    pending: number;
+    draft: number;
   };
 }
 
-export interface UseAppraisal {
-  status: number;
-  message: string;
-  data: AppraisalType;
-}
-
-export interface UseAppraisalStatsType {
-  status: number;
-  message: string;
-  data: {
-    byStatus: Array<{
-      _id: string;
-      count: number;
-      avgEmployeeScore: number;
-      avgSupervisorScore: number;
-    }>;
-    overall: {
-      total: number;
-      completed: number;
-      pending: number;
-      draft: number;
-    };
-  };
-}
+// API Response Types
+export type IAppraisalsListResponse = IApiListResponse<IAppraisal>;
+export type IAppraisalSingleResponse = IApiSingleResponse<IAppraisal>;
+export type IAppraisalStatsResponse = IApiSingleResponse<IAppraisalStats>;
 
 // =============================================
-// ADD THESE TO YOUR EXISTING interfaces.ts
+// REPORT TYPES
 // =============================================
-///////////////////////
-// Report
-///////////////////////
 
-export interface ReportStats {
+export interface IReportingPeriod {
+  from: string | Date | null;
+  to: string | Date | null;
+}
+
+export interface IReport {
+  id: string;
+  reportNumber?: string;
+  activityType: 'Workshop' | 'Training' | 'Sector Meeting' | 'Other';
+  otherActivitySpecification?: string;
+  reportType:
+    'Weekly Report' | 'Monthly Report' | 'Quarterly Report' | 'Annual Report' | 'Activity report';
+  reportTitle: string;
+  reportingPeriod?: IReportingPeriod;
+  project?: Partial<IProject> | string | null;
+  reviewedBy?: Partial<IUser>;
+  approvedBy?: Partial<IUser>;
+  comments: IComment[];
+  status: WorkflowStatus;
+  createdBy: Partial<IUser>;
+  files?: IFile[];
+  copiedTo: IUser[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IReportStats {
   totalReports: number;
   totalApprovedReports: number;
 }
 
-export interface UseReportStatsType {
-  status: number;
-  message: string;
-  amount: number;
-  data: ReportStats;
-}
-
-export interface UseReport {
-  status: number;
-  message: string;
-  data: ReportType;
-}
-
-export interface UseReportType {
-  status: number;
-  message: string;
-  data: {
-    reports: ReportType[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-}
-
-export interface ReportingPeriod {
-  from: Date | string | null;
-  to: Date | string | null;
-}
-export interface ReportType {
-  id?: string;
-  reportNumber?: string;
-  activityType: "Workshop" | "Training" | "Sector Meeting" | "Other";
-  otherActivitySpecification?: string; // NEW FIELD
-  reportType:
-    | "Weekly Report"
-    | "Monthly Report"
-    | "Quarterly Report"
-    | "Annual Report"
-    | "Activity report"; // ADDED
-  reportTitle: string;
-  reportingPeriod?: ReportingPeriod; // ADDED
-  project?: Partial<Project> | string | null;
-  reviewedBy?: any;
-  approvedBy?: any;
-  comments?: Comment[];
-  status?: string;
-  createdBy?: Partial<UserType>;
-  createdAt?: string;
-  updatedAt?: string;
-  files?: FileType[];
-  copiedTo?: UserType[];
-}
+// API Response Types
+export type IReportsListResponse = IApiListResponse<IReport>;
+export type IReportSingleResponse = IApiSingleResponse<IReport>;
+export type IReportStatsResponse = IApiStatsResponse<IReportStats>;

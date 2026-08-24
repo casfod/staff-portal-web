@@ -1,10 +1,10 @@
 // Redux Slice: aravelRequestSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { VendorType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IVendor } from '../interfaces';
 
 // Define the initial state with proper typing
 interface VendorStateType {
-  vendor: VendorType | null;
+  vendor: IVendor | null;
 }
 
 const initialState: VendorStateType = {
@@ -13,15 +13,15 @@ const initialState: VendorStateType = {
 
 // Create the slice
 const vendorSlice = createSlice({
-  name: "vendor",
+  name: 'vendor',
   initialState,
   reducers: {
     // Use PayloadAction to enforce type safety for the action payload
-    setVendor: (state, action: PayloadAction<VendorType | null>) => {
+    setVendor: (state, action: PayloadAction<IVendor | null>) => {
       state.vendor = action.payload;
     },
     // Add a reset action to clear the state
-    resetVendor: (state) => {
+    resetVendor: state => {
       state.vendor = null;
     },
   },

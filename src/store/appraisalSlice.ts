@@ -1,9 +1,9 @@
 // src/store/appraisalSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppraisalType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IAppraisal } from '../interfaces';
 
 interface AppraisalState {
-  appraisal: AppraisalType | null;
+  appraisal: IAppraisal | null;
 }
 
 const initialState: AppraisalState = {
@@ -11,13 +11,13 @@ const initialState: AppraisalState = {
 };
 
 const appraisalSlice = createSlice({
-  name: "appraisal",
+  name: 'appraisal',
   initialState,
   reducers: {
-    setAppraisal: (state, action: PayloadAction<AppraisalType>) => {
+    setAppraisal: (state, action: PayloadAction<IAppraisal>) => {
       state.appraisal = action.payload;
     },
-    clearAppraisal: (state) => {
+    clearAppraisal: state => {
       state.appraisal = null;
     },
   },

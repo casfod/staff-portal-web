@@ -1,188 +1,120 @@
-import { StaffStrategyType, UserType } from "../../interfaces";
-import { localStorageUser } from "../../utils/localStorageUser";
-import StatusBadge from "../../ui/StatusBadge";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import { StaffStrategyDetails } from "./StaffStrategyDetails";
-import TableRowMain from "../../ui/TableRowMain";
-import ActionIcons from "../../ui/ActionIcons";
-import TableData from "../../ui/TableData";
-import RequestCard from "../../ui/RequestCard";
+// src/features/staff-strategy/StaffStrategyTableRow.tsx
+import { IStaffStrategy, TableHeaderConfig } from '../../interfaces';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 
-type TableHeaderConfig = {
-  label: string;
-  showOnMobile: boolean;
-  showOnTablet?: boolean;
-  minWidth: string;
-};
+// Custom Components
+import { BaseTableRow } from '../../components/custom/BaseTableRow';
+import ActionIcons from '../../components/custom/ActionIcons';
+import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import StaffStrategyCard from './StaffStrategyCard';
+import { StaffStrategyDetails } from './StaffStrategyDetails';
+import StatusBadge from '@/components/custom/StatusBadge';
 
-type Props = {
-  request: StaffStrategyType;
-  visibleItems: { [key: string]: boolean };
-  toggleViewItems: (id: string) => void;
-  handleEdit: (request: StaffStrategyType) => void;
+interface StaffStrategyTableRowProps {
+  request: IStaffStrategy;
+  handleEdit: (request: IStaffStrategy) => void;
   handleDelete: (id: string) => void;
-  handleAction: (request: StaffStrategyType) => void;
+  handleAction: (request: IStaffStrategy) => void;
   tableHeadData?: TableHeaderConfig[];
-};
+}
 
 const StaffStrategyTableRow = ({
   request,
-  visibleItems,
-  toggleViewItems,
   handleEdit,
   handleDelete,
   handleAction,
-  tableHeadData,
-}: Props) => {
+}: StaffStrategyTableRowProps) => {
   const currentUser = localStorageUser();
 
-  const requestId = request.id ?? "";
-  const requestStatus = request.status ?? "pending";
-  const requestCreatedAt = request.createdAt ?? "";
+  const requestId = request.id ?? '';
+  const requestStatus = request.status ?? '';
+  const requestCreatedAt = request.createdAt ?? '';
   const createdById = request.createdBy?.id;
 
-  const isVisible = !!visibleItems[requestId];
-
   const isEditable =
-    (requestStatus === "draft" || requestStatus === "rejected") &&
-    createdById === currentUser?.id;
-
-  const isDeletable =
-    (requestStatus === "draft" || requestStatus === "rejected") &&
-    (createdById === currentUser?.id || currentUser.role === "SUPER-ADMIN");
+    (requestStatus === 'draft' || requestStatus === 'rejected') && createdById === currentUser?.id;
 
   const fullDate = formatToDDMMYYYY(requestCreatedAt);
-  const createdBy: UserType | null = request.createdBy;
+  const createdBy = request.createdBy;
 
-  // Row data configuration
+  // Define row data for the table
   const rowData = [
     {
-      id: "staff_name",
-      content: `${createdBy?.first_name} ${createdBy?.last_name}`,
+      id: 'staffName',
+      content: `${createdBy?.firstName || 'N/A'} ${createdBy?.lastName || 'N/A'}`.trim(),
       showOnMobile: true,
-      minWidth: "120px",
-      mobileLabel: "Prepared By",
     },
     {
-      id: "status",
-      content: <StatusBadge status={request.status!} />,
-      showOnMobile: true,
-      minWidth: "100px",
-      mobileLabel: "Status",
+      id: 'code',
+      content: request.strategyCode || 'N/A',
+      showOnMobile: false,
+      showOnTablet: true,
     },
     {
-      id: "strategy-code",
-      content: request.strategyCode,
+      id: 'status',
+      content: <StatusBadge status={request.status} />,
       showOnMobile: true,
-      minWidth: "100px",
-      mobileLabel: "Status",
     },
     {
-      id: "date",
+      id: 'date',
       content: fullDate,
       showOnMobile: false,
       showOnTablet: true,
-      minWidth: "100px",
-      mobileLabel: "Date",
-      mobileContent: fullDate,
     },
     {
-      id: "actions",
+      id: 'actions',
       content: (
         <ActionIcons
           isEditable={isEditable}
-          isDeletable={isDeletable}
           requestId={requestId}
-          visibleItems={visibleItems}
-          onToggleView={toggleViewItems}
-          onEdit={handleEdit}
+          onEdit={() => handleEdit(request)}
           onDelete={handleDelete}
           request={request}
+          variant="list"
         />
       ),
       showOnMobile: true,
-      minWidth: "100px",
-      mobileLabel: "Actions",
     },
   ];
 
-  // Use provided tableHeadData or fall back to default
-  const headers =
-    tableHeadData ||
-    rowData.map((item) => ({
-      label: item.mobileLabel || item.id,
-      showOnMobile: item.showOnMobile,
-      showOnTablet: item.showOnTablet,
-      minWidth: item.minWidth,
-    }));
+  // Expanded content when row is expanded
+  const expandedContent = (
+    <>
+      <StaffStrategyDetails request={request} />
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <RequestCommentsAndActions request={request} handleAction={handleAction} />
+      </div>
+    </>
+  );
+
+  // Mobile card for small screens
+  const mobileCard = (
+    <StaffStrategyCard
+      staffStrategy={request}
+      requestId={requestId}
+      actionIconsProps={{
+        isEditable,
+        requestId,
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+        request,
+        variant: 'list',
+        hideInspect: false,
+      }}
+      context="list"
+      className="sm:hidden"
+    />
+  );
 
   return (
-    <>
-      {/* Desktop/Tablet View */}
-      <TableRowMain
-        key={requestId}
-        requestId={requestId}
-        toggleViewItems={toggleViewItems}
-        className="hidden sm:table-row"
-      >
-        {rowData.map(({ id, content, showOnMobile, showOnTablet }) => (
-          <TableData
-            key={`${requestId}-${id}`}
-            className={`
-              ${!showOnMobile ? "hidden md:table-cell" : ""}
-              ${showOnTablet ? "hidden sm:table-cell md:table-cell" : ""}
-              px-3 py-2.5 md:px-4 md:py-3
-            `}
-          >
-            {content}
-          </TableData>
-        ))}
-      </TableRowMain>
-
-      {/* Mobile View - Card Layout */}
-      <tr key={`${requestId}-mobile`} className="sm:hidden">
-        <td colSpan={headers.length} className="p-4 border-b border-gray-200">
-          <RequestCard
-            request={request}
-            totalAmount={0}
-            requestId={requestId}
-            identifier={request.strategyCode}
-            dateValue={requestCreatedAt}
-            actionIconsProps={{
-              isEditable,
-              isDeletable,
-              requestId,
-              visibleItems,
-              onToggleView: toggleViewItems,
-              onEdit: handleEdit,
-              onDelete: handleDelete,
-              request,
-              variant: "list",
-              hideInspect: false,
-            }}
-            context="list"
-            className="sm:hidden"
-          />
-        </td>
-      </tr>
-
-      {/* Expanded Details */}
-      {isVisible && (
-        <tr key={`${requestId}-details`} className="max-w-full rounded-lg">
-          <td
-            colSpan={headers.length}
-            className="w-full bg-[#F8F8F8] border border-gray-300 px-4 md:px-6 py-4 rounded-lg shadow-sm"
-          >
-            <StaffStrategyDetails request={request} />
-            <RequestCommentsAndActions
-              request={request}
-              handleAction={handleAction}
-            />
-          </td>
-        </tr>
-      )}
-    </>
+    <BaseTableRow
+      id={requestId}
+      rowData={rowData}
+      expandedContent={expandedContent}
+      mobileCard={mobileCard}
+      isExpandable={true}
+    />
   );
 };
 

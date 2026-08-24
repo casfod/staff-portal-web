@@ -1,149 +1,138 @@
-import { PurchaseOrderType } from "../../interfaces";
-import { localStorageUser } from "../../utils/localStorageUser";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import TableRowMain from "../../ui/TableRowMain";
-import ActionIcons from "../../ui/ActionIcons";
-import TableData from "../../ui/TableData";
-import { PurchaseOrderDetails } from "./PurchaseOrderDetails";
-import { truncateText } from "../../utils/truncateText";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
+// features/purchase-order/PurchaseOrderTableRow.tsx
+import { IPurchaseOrder, TableHeaderConfig } from '../../interfaces';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+
+// Custom Components
+import { BaseTableRow } from '../../components/custom/BaseTableRow';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { PurchaseOrderDetails } from './PurchaseOrderDetails';
+import PurchaseOrderCard from './PurchaseOrderCard';
+import StatusBadge from '@/components/custom/StatusBadge';
+import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+
+interface PurchaseOrderTableRowProps {
+  purchaseOrder: IPurchaseOrder;
+  handleEdit: (purchaseOrder: IPurchaseOrder) => void;
+  handleDelete: (id: string) => void;
+  handleAction: (purchaseOrder: IPurchaseOrder) => void;
+  tableHeadData?: TableHeaderConfig[];
+}
 
 const PurchaseOrderTableRow = ({
   purchaseOrder,
-  visibleItems,
-  toggleViewItems,
   handleEdit,
   handleDelete,
   handleAction,
-}: {
-  purchaseOrder: PurchaseOrderType;
-  visibleItems: { [key: string]: boolean };
-  toggleViewItems: (id: string) => void;
-  handleEdit: (purchaseOrder: PurchaseOrderType) => void;
-  handleDelete?: (id: string) => void;
-  handleAction: (purchaseOrder: PurchaseOrderType) => void;
-}) => {
+}: PurchaseOrderTableRowProps) => {
   const currentUser = localStorageUser();
 
+  const purchaseOrderId = purchaseOrder.id ?? '';
+  // const purchaseOrderStatus = purchaseOrder.status ?? "";
+  // const createdById = purchaseOrder.createdBy?.id;
+
+  // Get vendor name - handle both string and IVendor
+  const getVendorName = (): string => {
+    if (!purchaseOrder.selectedVendor) return 'No Vendor';
+    if (
+      typeof purchaseOrder.selectedVendor === 'object' &&
+      'businessName' in purchaseOrder.selectedVendor
+    ) {
+      return purchaseOrder.selectedVendor.businessName;
+    }
+    return 'No Vendor';
+  };
+
   const isEditable =
-    ((currentUser.role === "SUPER-ADMIN" && !purchaseOrder.RFQCode) ||
+    ((currentUser.role === 'SUPER-ADMIN' && !purchaseOrder.rfqCode) ||
       currentUser?.procurementRole?.canUpdate) &&
-    purchaseOrder.status === "rejected" &&
-    !purchaseOrder.RFQCode;
+    purchaseOrder.status === 'rejected' &&
+    !purchaseOrder.rfqCode;
 
   const isDeletable =
-    (currentUser.role === "SUPER-ADMIN" ||
-      currentUser?.procurementRole?.canDelete) &&
-    purchaseOrder.status === "rejected";
+    (currentUser.role === 'SUPER-ADMIN' || currentUser?.procurementRole?.canDelete) &&
+    purchaseOrder.status === 'rejected';
 
-  const purchaseOrderId = purchaseOrder.id ?? "";
-  const isVisible = !!visibleItems[purchaseOrderId];
+  const fullDate = formatToDDMMYYYY(purchaseOrder.createdAt);
+  const totalAmount = purchaseOrder.totalAmount || 0;
 
-  // const vendorName =
-  //   purchaseOrder.copiedTo &&
-  //   Array.isArray(purchaseOrder.copiedTo) &&
-  //   purchaseOrder.copiedTo.length > 0
-  //     ? typeof purchaseOrder.copiedTo[0] === "object"
-  //       ? (purchaseOrder.copiedTo[0] as any).businessName
-  //       : "Vendor"
-  //     : "No Vendor";
-
-  const vendorName = purchaseOrder?.selectedVendor?.businessName ?? "";
-
-  // console.log({ purchaseOrder, vendorName });
-
-  // const vendorName = "";
-
+  // Define row data for the table
   const rowData = [
     {
-      id: "vendor",
-      content: vendorName ? (
-        truncateText(vendorName, 20)
-      ) : (
-        <span className="text-red-800/70">No Selected Vendor</span>
-      ),
+      id: 'vendor',
+      content: getVendorName(),
+      showOnMobile: true,
     },
     {
-      id: "status",
-      content: (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            purchaseOrder.status === "approved"
-              ? "bg-green-100 text-green-800"
-              : purchaseOrder.status === "pending"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {purchaseOrder.status.toUpperCase()}
-        </span>
-      ),
-    },
-    // {
-    //   id: "RFQTitle",
-    //   content: truncateText(purchaseOrder.RFQTitle, 40),
-    // },
-    // {
-    //   id: "RFQCode",
-    //   content: purchaseOrder.RFQCode,
-    // },
-
-    {
-      id: "totalAmount",
-      content: `₦${purchaseOrder.totalAmount.toLocaleString()}`,
-    },
-
-    {
-      id: "createdAt",
-      content: formatToDDMMYYYY(purchaseOrder?.createdAt!),
+      id: 'status',
+      content: <StatusBadge status={purchaseOrder.status} />,
+      showOnMobile: true,
     },
     {
-      id: "actions",
+      id: 'amount',
+      content: moneyFormat(totalAmount, 'NGN'),
+      showOnMobile: true,
+    },
+    {
+      id: 'date',
+      content: fullDate,
+      showOnMobile: false,
+      showOnTablet: true,
+    },
+    {
+      id: 'actions',
       content: (
         <ActionIcons
           isEditable={isEditable}
           isDeletable={isDeletable}
           requestId={purchaseOrderId}
-          visibleItems={visibleItems}
-          onToggleView={toggleViewItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={() => handleEdit(purchaseOrder)}
+          onDelete={() => handleDelete(purchaseOrderId)}
           request={purchaseOrder}
+          variant="list"
         />
       ),
+      showOnMobile: true,
     },
   ];
 
-  return (
+  // Expanded content when row is expanded
+  const expandedContent = (
     <>
-      <TableRowMain
-        key={purchaseOrderId}
-        requestId={purchaseOrderId}
-        toggleViewItems={toggleViewItems}
-      >
-        {rowData.map(({ id, content }) => (
-          <TableData key={`${purchaseOrderId}-${id}`}>{content}</TableData>
-        ))}
-      </TableRowMain>
-
-      {isVisible && (
-        <tr
-          key={`${purchaseOrderId}-details`}
-          className="max-w-full rounded-lg"
-        >
-          <td
-            colSpan={6}
-            className="w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm"
-          >
-            <PurchaseOrderDetails purchaseOrder={purchaseOrder} />
-            <RequestCommentsAndActions
-              request={purchaseOrder}
-              handleAction={handleAction}
-            />
-          </td>
-        </tr>
-      )}
+      <PurchaseOrderDetails purchaseOrder={purchaseOrder} />
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <RequestCommentsAndActions request={purchaseOrder} handleAction={handleAction} />
+      </div>
     </>
+  );
+
+  // Mobile card for small screens
+  const mobileCard = (
+    <PurchaseOrderCard
+      purchaseOrder={purchaseOrder}
+      actionIconsProps={{
+        isEditable,
+        isDeletable,
+        requestId: purchaseOrderId,
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+        request: purchaseOrder,
+        variant: 'list',
+      }}
+      context="list"
+      className="sm:hidden"
+    />
+  );
+
+  return (
+    <BaseTableRow
+      id={purchaseOrderId}
+      rowData={rowData}
+      expandedContent={expandedContent}
+      mobileCard={mobileCard}
+      isExpandable={true}
+    />
   );
 };
 

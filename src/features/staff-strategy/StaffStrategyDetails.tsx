@@ -1,84 +1,73 @@
-import { StaffStrategyType, UserType } from "../../interfaces";
-import { useParams } from "react-router-dom";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import DetailContainer from "../../ui/DetailContainer";
-import SystemInfo from "../../ui/SystemInfo";
+import { IStaffStrategy, IUser } from '../../interfaces';
+import { useParams } from 'react-router-dom';
+import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
+import DetailContainer from '../../components/custom/DetailContainer';
+import SystemInfo from '../../components/custom/SystemInfo';
 
 interface StaffStrategyDetailsProps {
-  request: StaffStrategyType;
+  request: IStaffStrategy;
 }
 
-export const StaffStrategyDetails = ({
-  request,
-}: StaffStrategyDetailsProps) => {
+export const StaffStrategyDetails = ({ request }: StaffStrategyDetailsProps) => {
   const { requestId } = useParams();
 
-  const createdBy: UserType | null = request.createdBy;
+  const createdBy = request.createdBy;
 
-  const getSupervisorName = (supervisor: any) => {
-    if (!supervisor) return "N/A";
-    if (typeof supervisor === "object") {
-      return (
-        `${supervisor.first_name || ""} ${supervisor.last_name || ""}`.trim() ||
-        "N/A"
-      );
-    }
-    return supervisor || "N/A";
+  const getUserName = (user: Partial<IUser> | string | undefined) => {
+    if (!user) return 'N/A';
+    if (typeof user === 'string') return user;
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A';
   };
 
   // Staff info fields config
   const staffFields = [
     {
-      label: "Staff Name",
-      value:
-        `${createdBy?.first_name ?? ""} ${createdBy?.last_name ?? ""}`.trim() ||
-        "N/A",
+      label: 'Staff Name',
+      value: `${createdBy?.firstName ?? ''} ${createdBy?.lastName ?? ''}`.trim() || 'N/A',
     },
     {
-      label: "Job Title",
-      value: createdBy?.employmentInfo?.jobDetails?.title || "N/A",
+      label: 'Job Title',
+      value: createdBy?.employmentInfo?.jobDetails?.title || 'N/A',
     },
     {
-      label: "Department",
-      value: request.department || "N/A",
+      label: 'Department',
+      value: request.department || 'N/A',
     },
     {
-      label: "Supervisor",
-      value: getSupervisorName(
-        createdBy?.employmentInfo?.jobDetails?.supervisor
-      ),
+      label: 'Supervisor',
+      // approvedBy is the reviewing supervisor — the single populated
+      // reference this workflow actually uses (see model comment).
+      value: getUserName(request.approvedBy),
     },
     {
-      label: "Period",
-      value: request.period || "N/A",
+      label: 'Period',
+      value: request.period || 'N/A',
     },
   ];
 
   // Objective fields config — defines which keys to show per objective
   const objectiveFields: {
     label: string;
-    key: keyof (typeof request.accountabilityAreas)[0]["objectives"][0];
+    key: keyof (typeof request.accountabilityAreas)[0]['objectives'][0];
     always?: boolean;
   }[] = [
-    { label: "Timeline", key: "timeline", always: true },
-    { label: "Expected Outcome", key: "expectedOutcome", always: true },
-    { label: "KPI", key: "kpi", always: true },
-    { label: "Possible Challenges", key: "possibleChallenges" },
-    { label: "Support Required", key: "supportRequired" },
+    { label: 'Timeline', key: 'timeline', always: true },
+    { label: 'Expected Outcome', key: 'expectedOutcome', always: true },
+    { label: 'KPI', key: 'kpi', always: true },
+    { label: 'Possible Challenges', key: 'possibleChallenges' },
+    { label: 'Support Required', key: 'supportRequired' },
   ];
 
   return (
     <DetailContainer>
       {/* Strategy Header */}
       {request?.strategyCode && (
-        <h1 className="text-center text-lg font-extrabold p-3">
-          {request.strategyCode}
-        </h1>
+        <h1 className="text-center text-lg font-extrabold p-3">{request.strategyCode}</h1>
       )}
 
       <div
         className={`flex flex-col gap-6 w-full ${
-          !requestId ? "text-sm" : "text-sm md:text-base"
+          !requestId ? 'text-sm' : 'text-sm md:text-base'
         } mb-6 break-words`}
       >
         {/* Staff Information Section */}
@@ -106,12 +95,9 @@ export const StaffStrategyDetails = ({
             </h3>
             <div className="space-y-6">
               {request.accountabilityAreas.map((area, areaIndex) => (
-                <div
-                  key={areaIndex}
-                  className="border-l-4 border-blue-500 pl-4"
-                >
+                <div key={areaIndex} className="border-l-4 border-blue-500 pl-4">
                   <h4 className="text-base font-bold text-blue-800 mb-3">
-                    {area.areaName || "Unnamed Area"}
+                    {area.areaName || 'Unnamed Area'}
                   </h4>
 
                   {area.objectives?.length > 0 ? (
@@ -127,7 +113,7 @@ export const StaffStrategyDetails = ({
                               Objective {objIndex + 1}
                             </label>
                             <p className="text-gray-800 whitespace-pre-wrap">
-                              {objective.objective || "N/A"}
+                              {objective.objective || 'N/A'}
                             </p>
                           </div>
 
@@ -141,7 +127,7 @@ export const StaffStrategyDetails = ({
                                   {label}
                                 </label>
                                 <p className="text-gray-800 whitespace-pre-wrap">
-                                  {value || "N/A"}
+                                  {value || 'N/A'}
                                 </p>
                               </div>
                             );
@@ -150,9 +136,7 @@ export const StaffStrategyDetails = ({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 italic">
-                      No objectives defined
-                    </p>
+                    <p className="text-gray-500 italic">No objectives defined</p>
                   )}
                 </div>
               ))}
@@ -160,17 +144,14 @@ export const StaffStrategyDetails = ({
           </div>
         ) : (
           <div className="rounded-lg p-4 border bg-gray-50 border-gray-200">
-            <p className="text-gray-500 italic">
-              No accountability areas defined
-            </p>
+            <p className="text-gray-500 italic">No accountability areas defined</p>
           </div>
         )}
 
         <SystemInfo request={request} />
 
-        {request.files && request.files.length > 0 && (
-          <FileAttachmentContainer files={request.files} />
-        )}
+        <FileAttachmentContainer modelName="StaffStrategy" id={request.id} status={'draft'} canManage={true} />
+        
       </div>
     </DetailContainer>
   );

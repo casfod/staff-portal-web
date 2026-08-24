@@ -1,9 +1,9 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 
-export const Projects = () => {
+export default function Projects() {
   return (
     <div>
       <Outlet />
     </div>
   );
-};
+}

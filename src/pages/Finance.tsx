@@ -1,7 +1,7 @@
-import { Outlet } from "react-router-dom";
-import { MaintenanceBanner } from "../ui/MaintenanceBanner";
+import { Outlet } from 'react-router-dom';
+import { MaintenanceBanner } from '../components/custom/MaintenanceBanner';
 
-export function Finance() {
+export default function Finance() {
   const isUnderMaintenance = false;
   return (
     <div className="space-y-2 md:space-y-4 xl:space-y-6">

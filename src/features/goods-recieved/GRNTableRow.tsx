@@ -1,127 +1,119 @@
-import { GoodsReceivedType } from "../../interfaces";
-import { localStorageUser } from "../../utils/localStorageUser";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import TableRowMain from "../../ui/TableRowMain";
-import ActionIcons from "../../ui/ActionIcons";
-import TableData from "../../ui/TableData";
-import { GRNDetails } from "./GRNDetails";
-import { truncateText } from "../../utils/truncateText";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
+import { IGoodsReceived, TableHeaderConfig } from '../../interfaces';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { BaseTableRow } from '../../components/custom/BaseTableRow';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { GRNDetails } from './GRNDetails';
+import { truncateText } from '../../utils/truncateText';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import GRNCard from './GRNCard';
+import StatusBadge from '@/components/custom/StatusBadge';
+import RequestCommentsAndActions from '@/components/custom/RequestCommentsAndActions';
+
+interface GRNTableRowProps {
+  grn: IGoodsReceived;
+  handleEdit: (grn: IGoodsReceived) => void;
+  handleDelete: (id: string) => void;
+  handleAction: (grn: IGoodsReceived) => void;
+  tableHeadData?: TableHeaderConfig[];
+}
 
 const GRNTableRow = ({
   grn,
-  visibleItems,
-  toggleViewItems,
   handleEdit,
   handleDelete,
   handleAction,
-}: {
-  grn: GoodsReceivedType;
-  visibleItems: { [key: string]: boolean };
-  toggleViewItems: (id: string) => void;
-  handleEdit: (grn: GoodsReceivedType) => void;
-  handleDelete?: (id: string) => void;
-  handleAction: (grn: GoodsReceivedType) => void;
-}) => {
+}: GRNTableRowProps) => {
   const currentUser = localStorageUser();
 
   const isEditable =
-    (currentUser.role === "SUPER-ADMIN" ||
-      currentUser.procurementRole.canUpdate) &&
+    (currentUser.role === 'SUPER-ADMIN' || currentUser.procurementRole?.canUpdate) &&
     !grn.isCompleted;
 
   const isDeletable =
-    (currentUser.role === "SUPER-ADMIN" ||
-      currentUser.procurementRole.canDelete) &&
+    (currentUser.role === 'SUPER-ADMIN' || currentUser.procurementRole?.canDelete) &&
     !grn.isCompleted;
 
-  const grnId = grn.id ?? "";
-  const isVisible = !!visibleItems[grnId];
+  const grnId = grn.id ?? '';
 
-  // const purchaseOrder =
-  //   typeof grn.purchaseOrder === "object" ? grn.purchaseOrder : null;
-  // const vendorName = purchaseOrder?.selectedVendor?.businessName || "N/A";
+  const receivedItems = grn.grnItems.filter(item => item.isFullyReceived).length;
+  const totalItems = grn.grnItems.length;
 
-  const receivedItems = grn.GRNitems.filter(
-    (item) => item.isFullyReceived
-  ).length;
-  const totalItems = grn.GRNitems.length;
-
+  // Define row data for the table
   const rowData = [
     {
-      id: "grnCode",
-      content: truncateText(grn.GRDCode, 20),
-    },
-    // {
-    //   id: "purchaseOrder",
-    //   content: purchaseOrder?.POCode || "N/A",
-    // },
-    {
-      id: "status",
-      content: (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            grn.isCompleted
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
-          }`}
-        >
-          {grn.isCompleted ? "COMPLETED" : "IN PROGRESS"}
-        </span>
-      ),
+      id: 'grnCode',
+      content: truncateText(grn.grdCode, 20),
+      showOnMobile: true,
     },
     {
-      id: "progress",
+      id: 'status',
+      content: <StatusBadge status={grn.isCompleted ? 'completed' : 'in-progress'} />,
+      showOnMobile: true,
+    },
+    {
+      id: 'progress',
       content: `${receivedItems}/${totalItems} items`,
+      showOnMobile: true,
     },
     {
-      id: "createdAt",
+      id: 'createdAt',
       content: formatToDDMMYYYY(grn.createdAt),
+      showOnMobile: false,
+      showOnTablet: true,
     },
     {
-      id: "actions",
+      id: 'actions',
       content: (
         <ActionIcons
           isEditable={isEditable}
           isDeletable={isDeletable}
           requestId={grnId}
-          visibleItems={visibleItems}
-          onToggleView={toggleViewItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={() => handleEdit(grn)}
+          onDelete={() => handleDelete(grnId)}
           request={grn}
+          variant="list"
         />
       ),
+      showOnMobile: true,
     },
   ];
 
-  return (
+  // Expanded content when row is expanded
+  const expandedContent = (
     <>
-      <TableRowMain
-        key={grnId}
-        requestId={grnId}
-        toggleViewItems={toggleViewItems}
-      >
-        {rowData.map(({ id, content }) => (
-          <TableData key={`${grnId}-${id}`}>{content}</TableData>
-        ))}
-      </TableRowMain>
-
-      {isVisible && (
-        <tr key={`${grnId}-details`} className="max-w-full rounded-lg">
-          <td
-            colSpan={6}
-            className="w-full h-10 bg-[#F8F8F8] border border-gray-300 px-6 py-4 rounded-lg shadow-sm"
-          >
-            <GRNDetails grn={grn} />
-            <RequestCommentsAndActions
-              request={grn}
-              handleAction={handleAction}
-            />
-          </td>
-        </tr>
-      )}
+      <GRNDetails grn={grn} />
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <RequestCommentsAndActions request={grn} handleAction={handleAction} />
+      </div>
     </>
+  );
+
+  // Mobile card for small screens
+  const mobileCard = (
+    <GRNCard
+      grn={grn}
+      actionIconsProps={{
+        isEditable,
+        isDeletable,
+        requestId: grnId,
+        onEdit: () => handleEdit(grn),
+        onDelete: () => handleDelete(grnId),
+        request: grn,
+        variant: 'list',
+      }}
+      context="list"
+      className="sm:hidden"
+    />
+  );
+
+  return (
+    <BaseTableRow
+      id={grnId}
+      rowData={rowData}
+      expandedContent={expandedContent}
+      mobileCard={mobileCard}
+      isExpandable={true}
+    />
   );
 };
 

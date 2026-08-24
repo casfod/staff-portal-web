@@ -1,85 +1,56 @@
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { useDebounce } from "use-debounce";
-import { BiSearch } from "react-icons/bi";
-import { GoXCircle } from "react-icons/go";
+// AllExpenseClaims.tsx
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { ExpenseClaimType } from "../../interfaces";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSearchTerm,
-  setPage,
-  resetQuery,
-} from "../../store/genericQuerySlice";
-import { RootState } from "../../store/store";
-import { setExpenseClaim } from "../../store/expenseClaimSlice";
+import { ListPage } from '../../components/custom/ListPage';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { useAllExpenseClaims, useDeleteExpenseClaim } from './Hooks/useExpenseClaims';
+import ExpenseClaimTableRow from './ExpenseClaimTableRow';
+import { setExpenseClaim } from '../../store/expenseClaimSlice';
+import { IExpenseClaim, IFilterConfig, STATUS_OPTIONS } from '../../interfaces';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { getDefaultTableHeaders } from '@/config/tableConfigs';
 
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { Pagination } from "../../ui/Pagination";
-
-import Spinner from "../../ui/Spinner";
-import {
-  useAllExpenseClaims,
-  useDeleteExpenseClaim,
-} from "./Hooks/useExpenseClaims";
-import ExpenseClaimTableRow from "./ExpenseClaimTableRow";
-import TextHeader from "../../ui/TextHeader";
-import Button from "../../ui/Button";
-import useDeleteRequest from "../../hooks/useDeleteRequest";
+// Matches expense-claims.service.ts's filterableFields.
+const expenseClaimFilterConfigs: IFilterConfig[] = [
+  { key: 'status', label: 'Status', type: 'select', options: STATUS_OPTIONS, placeholder: 'All' },
+  { key: 'staffName', label: 'Staff name', type: 'text', placeholder: 'Any' },
+  { key: 'ecNumber', label: 'EC number', type: 'text', placeholder: 'Any' },
+  { key: 'dateFrom', label: 'Date from', type: 'date' },
+  { key: 'dateTo', label: 'Date to', type: 'date' },
+];
 
 const AllExpenseClaims = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-  const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
-  useEffect(() => {
-    return () => {
-      dispatch(resetQuery());
-    };
-  }, [dispatch]);
-
-  const { data, isLoading, isError } = useAllExpenseClaims(
-    debouncedSearchTerm,
-    sort,
+  const {
+    searchTerm,
+    handleSearchChange,
     page,
-    limit
-  );
+    handlePageChange,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: expenseClaimFilterConfigs,
+    defaultFilters: {},
+  });
 
-  const { deleteExpenseClaim } = useDeleteExpenseClaim(
-    debouncedSearchTerm,
-    sort,
-    page,
-    limit
-  );
+  const { data, isLoading, isError } = useAllExpenseClaims(queryParams);
+  const { deleteExpenseClaim } = useDeleteExpenseClaim(queryParams);
 
-  const expenseClaims = useMemo(() => data?.data?.expenseClaims ?? [], [data]);
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
-
-  const toggleViewItems = useCallback((requestId: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [requestId]: !prev[requestId],
-    }));
-  }, []);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      dispatch(setPage(newPage));
-    },
-    [dispatch]
-  );
+  const expenseClaims = useMemo(() => data?.data ?? [], [data]);
+  const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
 
   const handleAction = useCallback(
-    (request: ExpenseClaimType) => {
+    (request: IExpenseClaim) => {
       dispatch(setExpenseClaim(request));
       navigate(`/expense-claims/request/${request.id}`);
     },
@@ -87,7 +58,7 @@ const AllExpenseClaims = () => {
   );
 
   const handleEdit = useCallback(
-    (request: ExpenseClaimType) => {
+    (request: IExpenseClaim) => {
       dispatch(setExpenseClaim(request));
       navigate(`/expense-claims/edit-request/${request.id}`);
     },
@@ -95,132 +66,56 @@ const AllExpenseClaims = () => {
   );
 
   const handleDelete = useDeleteRequest(deleteExpenseClaim, {
-    entityName: "Expense Claim",
+    entityName: 'Expense Claim',
   });
 
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
+  const tableHeadData = getDefaultTableHeaders();
 
-  // Update tableHeadData to match Purchase Request structure
-  const tableHeadData = [
-    { label: "Claim", showOnMobile: true, minWidth: "120px" },
-    { label: "Status", showOnMobile: true, minWidth: "100px" },
-    { label: "Budget", showOnMobile: true, minWidth: "100px" },
-    {
-      label: "Date",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "100px",
-    },
-    { label: "Actions", showOnMobile: true, minWidth: "100px" },
-  ];
+  const filterToolbar = (
+    <FilterToolbar
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      filters={filters}
+      onFilterChange={setFilter}
+      filterConfigs={filterConfigs}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
+      searchPlaceholder="Search expense claims..."
+    />
+  );
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        {/* Header with title and button */}
-        <div className="flex justify-between items-center">
-          <TextHeader>Expense Claims</TextHeader>
-
-          <Button
-            onClick={() => navigate("/expense-claims/create-expense-claim")}
-          >
-            <Plus className="h-4 w-4 mr-1 md:mr-2" />
-            Add
-          </Button>
-        </div>
-
-        {/* Search Bar and Sort Dropdown */}
-        <div className="flex items-center space-x-4">
-          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-            <span className="p-2 text-gray-400">
-              <BiSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2   placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search"
-            />
-            <span
-              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-              onClick={() => dispatch(setSearchTerm(""))}
-            >
-              <GoXCircle />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ///////////////////////////// */}
-      {/*EXPENSE CLAIM TABLE*/}
-      {/* ///////////////////////////// */}
-
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200 ">
-          <thead className="bg-gray-50 hidden sm:table-header-group">
-            <tr>
-              {tableHeadData.map((header, index) => (
-                <th
-                  key={index}
-                  className={`
-                    px-3 py-2.5 md:px-4 md:py-3 
-                    text-left font-medium uppercase 
-                    tracking-wider
-                    ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                    ${
-                      header.showOnTablet
-                        ? "hidden sm:table-cell md:table-cell"
-                        : ""
-                    }
-                    text-xs md:text-sm
-                    whitespace-nowrap
-                  `}
-                  style={{ minWidth: header.minWidth }}
-                >
-                  {header.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="max-w-full bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              expenseClaims.map((request) => (
-                <ExpenseClaimTableRow
-                  key={request.id}
-                  request={request}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                  tableHeadData={tableHeadData}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {(expenseClaims.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <ListPage
+      title="Expense Claims"
+      data={expenseClaims}
+      headers={tableHeadData}
+      isLoading={isLoading}
+      isError={isError}
+      currentPage={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      renderRow={request => (
+        <ExpenseClaimTableRow
+          key={request.id}
+          request={request}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleAction={handleAction}
+          tableHeadData={tableHeadData}
         />
       )}
-    </div>
+      onAdd={() => navigate('/expense-claims/create-expense-claim')}
+      emptyMessage={
+        hasActiveFilters ? 'No expense claims match your filters' : 'No expense claims found'
+      }
+      emptySubMessage={
+        hasActiveFilters
+          ? 'Try adjusting your filters or search terms'
+          : 'Create your first expense claim'
+      }
+      searchComponent={filterToolbar}
+    />
   );
 };
 

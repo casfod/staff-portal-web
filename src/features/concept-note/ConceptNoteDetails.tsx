@@ -1,166 +1,138 @@
-import { moneyFormat } from "../../utils/moneyFormat";
-import { ConceptNoteType } from "../../interfaces";
-import { useParams } from "react-router-dom";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import DetailContainer from "../../ui/DetailContainer";
-import CopiedTo from "../../ui/CopiedTo";
-import SystemInfo from "../../ui/SystemInfo";
+// ConceptNoteDetails.tsx
+import { useParams } from 'react-router-dom';
+import { IConceptNote } from '../../interfaces';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
+import CopiedTo from '../../components/custom/CopiedTo';
+import DetailContainer from '../../components/custom/DetailContainer';
+import { localStorageUser } from '../../utils/localStorageUser';
 
 interface RequestDetailsProps {
-  request: ConceptNoteType;
+  request: IConceptNote;
 }
 
 export const ConceptNoteDetails = ({ request }: RequestDetailsProps) => {
   const { requestId } = useParams();
+  const currentUser = localStorageUser();
 
-  // Create the data object with all fields
-  const conceptNoteData = [
-    { id: "accountCode", label: "Account Code", content: request.account_Code },
+  // Determine if user can manage files (creator or admin)
+  const canManageFiles =
+    currentUser?.role === 'SUPER-ADMIN' || request.createdBy?.id === currentUser?.id;
+
+  // Row data for the details section
+  const rowData = [
     {
-      id: "chargedTo",
-      label: "Charged To",
-      content: request.expense_Charged_To,
+      id: 'accountCode',
+      label: 'Account Code :',
+      content: request.accountCode,
     },
     {
-      id: "activityTitle",
-      label: "Activity Title",
-      content: request.activity_title,
-      isBlock: true,
+      id: 'expenseChargedTo',
+      label: 'Charged To :',
+      content: request.expenseChargedTo,
     },
     {
-      id: "objectives",
-      label: "Objectives Purpose",
-      content: request.objectives_purpose,
-      isBlock: true,
+      id: 'activityTitle',
+      label: 'Activity Title :',
+      content: request.activityTitle,
     },
     {
-      id: "background",
-      label: "Background Context",
-      content: request.background_context,
-      isBlock: true,
+      id: 'activityLocation',
+      label: 'Activity Location :',
+      content: request.activityLocation,
     },
     {
-      id: "benefits",
-      label: "Benefits Of Project",
-      content: request.benefits_of_project,
-      isBlock: true,
-    },
-    {
-      id: "strategicPlan",
-      label: "Strategic Plan",
-      content: request.strategic_plan,
-      isBlock: true,
-    },
-    {
-      id: "location",
-      label: "Activity Location",
-      content: request.activity_location,
-      isBlock: true,
-    },
-    {
-      id: "description",
-      label: "Detailed Activity Description",
-      content: request.detailed_activity_description,
-      isBlock: true,
-    },
-    {
-      id: "period",
-      label: "Activity Period",
+      id: 'activityPeriod',
+      label: 'Activity Period :',
       content: `${formatToDDMMYYYY(
-        request.activity_period.from
-      )} - ${formatToDDMMYYYY(request.activity_period.to)}`,
+        request.activityPeriod.from
+      )} - ${formatToDDMMYYYY(request.activityPeriod.to)}`,
     },
     {
-      id: "verification",
-      label: "Means of verification",
-      content: request.means_of_verification,
+      id: 'activityBudget',
+      label: 'Activity Budget :',
+      content: moneyFormat(Number(request.activityBudget), 'NGN'),
+    },
+    {
+      id: 'backgroundContext',
+      label: 'Background Context :',
+      content: request.backgroundContext,
       isBlock: true,
     },
     {
-      id: "budget",
-      label: "Budget",
-      content: moneyFormat(Number(request.activity_budget), "NGN"),
+      id: 'objectivesPurpose',
+      label: 'Objectives/Purpose :',
+      content: request.objectivesPurpose,
+      isBlock: true,
+    },
+    {
+      id: 'detailedActivityDescription',
+      label: 'Detailed Activity Description :',
+      content: request.detailedActivityDescription,
+      isBlock: true,
+    },
+    {
+      id: 'strategicPlan',
+      label: 'Strategic Plan :',
+      content: request.strategicPlan,
+      isBlock: true,
+    },
+    {
+      id: 'benefitsOfProject',
+      label: 'Benefits of Project :',
+      content: request.benefitsOfProject,
+      isBlock: true,
+    },
+    {
+      id: 'meansOfVerification',
+      label: 'Means of Verification :',
+      content: request.meansOfVerification,
     },
   ];
 
   return (
     <DetailContainer>
-      {/* Concept Note Details Section */}
+      {/* Request Details Section */}
       {request?.cnNumber && (
-        <h1 className="text-center text-lg font-extrabold p-3">
-          {request?.cnNumber}
-        </h1>
+        <h1 className="text-center sm:text-lg font-extrabold pb-3 md:p-6">{request?.cnNumber}</h1>
       )}
 
       <div
-        className={`flex flex-col gap-3 w-full ${
-          !requestId ? "text-sm" : "text-sm md:text-base"
-        } mb-3 break-words`}
+        className={`${
+          !requestId ? 'text-sm' : 'text-sm md:text-base'
+        } mb-6 border-b border-gray-300 pb-6`}
       >
-        {conceptNoteData.map((item) => (
-          <div
-            key={item.id}
-            className={item.isBlock ? "whitespace-pre-line" : ""}
-          >
-            <h2 className="text-sm font-extrabold uppercase mb-1">
-              {item.label}:
-            </h2>
-            <p>{item.content}</p>
-          </div>
-        ))}
+        {/* Left Column - Main Details */}
+        <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+          {rowData.map(data => (
+            <div
+              key={data.id}
+              className={`w-full md:w-fit border-b-2 md:border-b-0 text-xs sm:text-sm flex flex-col gap-1 pb-2 md:pb-0 ${
+                data.isBlock ? 'md:flex-col' : 'md:flex-row'
+              }`}
+            >
+              <span className="font-bold uppercase whitespace-nowrap text-gray-700 mb-1 md:mb-0">
+                {data.label}
+              </span>
+              <span className={`break-words ${data.isBlock ? 'whitespace-pre-line' : ''}`}>
+                {data.content}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
-
-      {/* Approval Chain Section (NEW) */}
-      <div className="w-fit mt-4 border-t border-gray-300 pt-4 space-y-2">
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-          <span className="font-bold mr-1 uppercase">Prepared By:</span>
-          {`${request?.preparedBy?.first_name} ${request?.preparedBy?.last_name}`}
-        </p>
-
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-          <span className="font-bold mr-1 uppercase">Role:</span>
-          {request?.preparedBy?.role}
-        </p>
-
-        {/* Reviewer Information (NEW) */}
-        {request.reviewedBy && (
-          <>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Reviewed By:</span>
-              {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
-            </p>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Reviewer Role:</span>
-              {request?.reviewedBy?.role}
-            </p>
-          </>
-        )}
-
-        {/* Approver Information (NEW) */}
-        {request.approvedBy && (
-          <>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Approved By:</span>
-              {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
-            </p>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Approver Role:</span>
-              {request?.approvedBy?.role}
-            </p>
-          </>
-        )}
-      </div>
-
-      <SystemInfo request={request} />
 
       {/* File Attachments Section */}
-      {request.files && request.files.length > 0 && (
-        <FileAttachmentContainer files={request.files} />
-      )}
+      <FileAttachmentContainer
+        modelName="ConceptNote"
+        id={request.id}
+        status={request.status}
+        canManage={canManageFiles}
+      />
 
       {/* Copied To */}
-      {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
+      {request.copiedTo?.length > 0 && <CopiedTo to={request.copiedTo!} />}
     </DetailContainer>
   );
 };

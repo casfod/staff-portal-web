@@ -1,105 +1,90 @@
 // src/features/leave/LeaveDetails.tsx
-import { LeaveType } from "../../interfaces";
-import { useParams } from "react-router-dom";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import FileAttachmentContainer from "../../ui/FileAttachmentContainer";
-import DetailContainer from "../../ui/DetailContainer";
-import CopiedTo from "../../ui/CopiedTo";
-import SystemInfo from "../../ui/SystemInfo";
-import { LEAVE_TYPE_CONFIG } from "../../interfaces";
-
+import { ILeave } from '../../interfaces';
+import { useParams } from 'react-router-dom';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
+import DetailContainer from '../../components/custom/DetailContainer';
 interface LeaveDetailsProps {
-  request: LeaveType;
+  request: ILeave;
 }
 
 export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
   const { requestId } = useParams();
 
-  const leaveTypeInfo = LEAVE_TYPE_CONFIG[
-    request.leaveType as keyof typeof LEAVE_TYPE_CONFIG
-  ] || { maxDays: 0, description: "", isCalendarDays: false };
+  const ILeaveInfo = {
+    maxDays: 0,
+    description: '',
+    isCalendarDays: false,
+  };
 
   const leaveDetails = [
     {
-      id: "leaveType",
-      label: "Leave Type",
-      content: `${request.leaveType} (Max: ${leaveTypeInfo.maxDays} days)`,
+      id: 'ILeave',
+      label: 'Leave Type',
+      content: `${request.leaveType} (Max: ${ILeaveInfo.maxDays} days)`,
     },
     {
-      id: "period",
-      label: "Leave Period",
-      content: `${formatToDDMMYYYY(request.startDate)} - ${formatToDDMMYYYY(
-        request.endDate
-      )}`,
+      id: 'period',
+      label: 'Leave Period',
+      content: `${formatToDDMMYYYY(request.startDate)} - ${formatToDDMMYYYY(request.endDate)}`,
     },
     {
-      id: "totalDays",
-      label: "Total Days Applied",
+      id: 'totalDays',
+      label: 'Total Days Applied',
       content: `${request.totalDaysApplied} days`,
     },
     {
-      id: "balance",
-      label: "Balance at Application",
+      id: 'balance',
+      label: 'Balance at Application',
       content: `${request.leaveBalanceAtApplication} days`,
     },
     ...(request.amountAccruedLeave
       ? [
           {
-            id: "accrued",
-            label: "Accrued Leave",
+            id: 'accrued',
+            label: 'Accrued Leave',
             content: `${request.amountAccruedLeave} days`,
           },
         ]
       : []),
     {
-      id: "reason",
-      label: "Reason for Leave",
-      content: request.reasonForLeave || "Not specified",
+      id: 'reason',
+      label: 'Reason for Leave',
+      content: request.reasonForLeave || 'Not specified',
       isBlock: true,
     },
     {
-      id: "contact",
-      label: "Contact During Leave",
-      content: request.contactDuringLeave || "Not specified",
+      id: 'contact',
+      label: 'Contact During Leave',
+      content: request.contactDuringLeave || 'Not specified',
     },
   ];
 
   return (
     <DetailContainer>
       {request?.leaveNumber && (
-        <h1 className="text-center text-lg font-extrabold p-3">
-          {request?.leaveNumber}
-        </h1>
+        <h1 className="text-center text-lg font-extrabold p-3">{request?.leaveNumber}</h1>
       )}
 
       <div
         className={`flex flex-col gap-3 w-full ${
-          !requestId ? "text-sm" : "text-sm md:text-base"
+          !requestId ? 'text-sm' : 'text-sm md:text-base'
         } mb-3 break-words`}
       >
-        {leaveDetails.map((item) => (
-          <div
-            key={item.id}
-            className={item.isBlock ? "whitespace-pre-line" : ""}
-          >
-            <h2 className="text-sm font-extrabold uppercase mb-1">
-              {item.label}:
-            </h2>
+        {leaveDetails.map(item => (
+          <div key={item.id} className={item.isBlock ? 'whitespace-pre-line' : ''}>
+            <h2 className="text-sm font-extrabold uppercase mb-1">{item.label}:</h2>
             <p>{item.content}</p>
           </div>
         ))}
 
         {request.leaveCover && (
           <div>
-            <h2 className="text-sm font-extrabold uppercase mb-1">
-              Leave Cover:
-            </h2>
+            <h2 className="text-sm font-extrabold uppercase mb-1">Leave Cover:</h2>
             {request.leaveCover.nameOfCover && (
               <p>Name of Cover: {request.leaveCover.nameOfCover}</p>
             )}
-            {request.leaveCover.signature && (
-              <p>Signature: {request.leaveCover.signature}</p>
-            )}
+            {request.leaveCover.signature && <p>Signature: {request.leaveCover.signature}</p>}
           </div>
         )}
       </div>
@@ -120,7 +105,7 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
           <>
             <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
               <span className="font-bold mr-1 uppercase">Reviewed By:</span>
-              {`${request?.reviewedBy?.first_name} ${request?.reviewedBy?.last_name}`}
+              {`${request?.reviewedBy?.firstName} ${request?.reviewedBy?.lastName}`}
             </p>
             <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
               <span className="font-bold mr-1 uppercase">Reviewer Role:</span>
@@ -133,7 +118,7 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
           <>
             <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
               <span className="font-bold mr-1 uppercase">Approved By:</span>
-              {`${request?.approvedBy?.first_name} ${request?.approvedBy?.last_name}`}
+              {`${request?.approvedBy?.firstName} ${request?.approvedBy?.lastName}`}
             </p>
             <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
               <span className="font-bold mr-1 uppercase">Approver Role:</span>
@@ -143,13 +128,14 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
         )}
       </div> */}
 
-      <SystemInfo request={request} />
-
-      {request.files && request.files.length > 0 && (
-        <FileAttachmentContainer files={request.files} />
-      )}
-
-      {request.copiedTo?.length! > 0 && <CopiedTo to={request.copiedTo!} />}
+      {/* <SystemInfo request={request} /> */}
+      {/* File Attachments Section */}
+      <FileAttachmentContainer
+        modelName="Leave"
+        id={request.id}
+        status={request.status}
+        canManage={true}
+      />
     </DetailContainer>
   );
 };

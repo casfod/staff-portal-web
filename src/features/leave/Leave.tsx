@@ -1,138 +1,65 @@
 // src/features/leave/Leave.tsx
-import { List } from "lucide-react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { localStorageUser } from "../../utils/localStorageUser";
-import Button from "../../ui/Button";
-import StatusBadge from "../../ui/StatusBadge";
-import { LeaveDetails } from "./LeaveDetails";
-import TextHeader from "../../ui/TextHeader";
-import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import Spinner from "../../ui/Spinner";
-import { DataStateContainer } from "../../ui/DataStateContainer";
-import { usePdfDownload } from "../../hooks/usePdfDownload";
-import ActionIcons from "../../ui/ActionIcons";
-import {
-  useLeave,
-  useCopyLeave,
-  useAddComment,
-  useUpdateComment,
-  useDeleteComment,
-  useUpdateLeaveStatus,
-  useUpdateLeaveApplication,
-} from "./Hooks/useLeave";
-import { useUsers } from "../user/Hooks/useUsers";
-import { Comment as AppComment } from "../../interfaces";
-import TableRowMain from "../../ui/TableRowMain";
-import TableData from "../../ui/TableData";
-import RequestCard from "../../ui/RequestCard";
-import RequestDetailLayout from "../../ui/RequestDetailLayout";
+import { List } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+
+// Components
+import TextHeader from '../../components/custom/TextHeader';
+import { Button } from '../../components/ui/button';
+import { LeaveDetails } from './LeaveDetails';
+import { truncateText } from '../../utils/truncateText';
+import { usePdfDownload } from '../../hooks/usePdfDownload';
+import ActionIcons from '../../components/custom/ActionIcons';
+import StatusBadge from '../../components/custom/StatusBadge';
+import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
+import Spinner from '../../components/custom/Spinner';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import { DataStateContainer } from '../../components/custom/DataStateContainer';
+
+// Hooks
+import { useLeave, useUpdateLeaveStatus } from './Hooks/useLeave';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { getUserFullName } from '@/utils/userHelpers';
+import LeaveCard from './LeaveCard';
+import { infoConfig } from '@/config/config-info';
 
 const Leave = () => {
-  const currentUser = localStorageUser();
   const navigate = useNavigate();
   const { leaveId } = useParams();
+  const currentUser = localStorageUser();
 
-  // Data fetching and reconciliation
+  const [status, setStatus] = useState('');
+  const [comment, setComment] = useState('');
+
+  // Fetch leave data
   const { data: remoteData, isLoading, isError } = useLeave(leaveId!);
-
-  const leave = useSelector((state: RootState) => state.leave.leave);
-
-  const request = useMemo(() => remoteData?.data || leave, [remoteData, leave]);
+  const leaveFromStore = useSelector((state: RootState) => state.leave.leave);
+  
+  const leave = remoteData?.data || leaveFromStore;
 
   // Redirect logic
   useEffect(() => {
-    if (!leaveId || (!isLoading && !request)) {
-      navigate("/human-resources/leave");
+    if (!leaveId || (!isLoading && !leave)) {
+      navigate('/human-resources/leave');
     }
-  }, [request, leaveId, navigate, isLoading]);
+  }, [leave, leaveId, navigate, isLoading]);
 
-  const [status, setStatus] = useState("");
-  const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState({ approvedBy: null });
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [showTagDropdown, setShowTagDropdown] = useState(false);
-
-  // Custom hooks
-  const { handleStatusChange } = useStatusUpdate();
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(
-    leaveId!
-  );
-  const { updateLeaveApplication, isPending: isUpdating } =
-    useUpdateLeaveApplication(request?.id!);
-
-  // Comment hooks
-  const { addComment, isPending: isAddingComment } = useAddComment(leaveId!);
-  const { updateComment, isPending: isUpdatingComment } = useUpdateComment(
-    leaveId!
-  );
-  const { deleteComment, isPending: isDeletingComment } = useDeleteComment(
-    leaveId!
-  );
-
-  const { copyto, isPending: isCopying } = useCopyLeave(leaveId!);
-
-  // Fetch users data for approval section
-  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
-    limit: 1000,
-  });
-  const admins = useMemo(
-    () =>
-      usersData?.data?.users.filter((u) =>
-        ["SUPER-ADMIN", "ADMIN"].includes(u.role)
-      ) ?? [],
-    [usersData]
-  );
-
-  const handleFormChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  // EXACTLY matching ConceptNote.tsx handleSend
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateLeaveApplication({ data: formData, files: selectedFiles });
-  };
-
-  // Handle status change with confirmation dialog
-  const onStatusChangeHandler = () => {
-    handleStatusChange(status, comment, async (data) => {
-      try {
-        await updateStatus(data, {
-          onError: (error) => {
-            throw error;
-          },
-        });
-      } catch (error) {
-        throw error;
-      }
-    });
-  };
-
-  // Comment handlers
-  const handleAddComment = async (text: string) => {
-    await addComment({ text });
-  };
-
-  const handleUpdateComment = async (commentId: string, text: string) => {
-    await updateComment({ commentId, text });
-  };
-
-  const handleDeleteComment = async (commentId: string) => {
-    await deleteComment(commentId);
-  };
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateLeaveStatus(leaveId!);
 
   // PDF logic
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = usePdfDownload({
-    filename: `Leave-${request?.id}`,
+    filename: `${infoConfig.abbriviation}-Leave-${leave?.leaveNumber || leave?.id}`,
     multiPage: true,
     titleOptions: {
-      text: "Leave Application",
+      text: `${infoConfig.abbriviation} Leave Application : ${leave?.leaveNumber || ''}`,
+    },
+    footerCode: {
+      label: `${infoConfig.abbriviation} Leave`,
+      value: leave?.leaveNumber ?? '',
     },
   });
 
@@ -140,268 +67,148 @@ const Leave = () => {
     downloadPdf(pdfContentRef);
   };
 
-  // User references and permission logic
-  const currentUserId = currentUser.id;
-  const userRole = currentUser.role;
-  const requestStatus = request?.status;
+  const handleStatusChange = () => {
+    if (!status) return;
 
-  // Permission flags - simplified for single-step approval
-  const isCreator = request?.user?.id === currentUserId;
-  const isApprover = request?.approvedBy?.id === currentUserId;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
+    updateStatus(
+      { status, comment },
+      {
+        onSuccess: () => {
+          setStatus('');
+          setComment('');
+        },
+      }
+    );
+  };
 
-  // Check if user is in copiedTo array
-  const isCopiedTo = request?.copiedTo?.some(
-    (user: any) => user.id === currentUserId
-  );
-
-  // Conditional rendering flags
-  const canUploadFiles = isCreator && requestStatus === "approved";
-  const canShareRequest = isCreator || isAdmin;
-
-  // Permission to update status - single-step approval
-  const canUpdateStatus =
-    !isCreator && requestStatus === "pending" && (isApprover || isAdmin);
-
-  // Users who can add comments - EXACTLY matching ConceptNote.tsx
-  // Users who can add comments
-  const canAddComments = isCreator || isApprover || isCopiedTo || isAdmin;
-
-  // Show admin approval section (for reviewed leave applications)
-  // Show admin approval section - simplified
-  const showAdminApproval =
-    !request?.approvedBy &&
-    requestStatus === "pending" &&
-    (isCreator || (isApprover && !request?.approvedBy));
-  // Cast comments to Comment[] type for TypeScript
-  const comments = (request?.comments || []) as AppComment[];
-
-  const requestCreatedAt = request?.createdAt ?? "";
-  const fullDate = formatToDDMMYYYY(requestCreatedAt);
-
-  // Table data configuration - matching ConceptNote.tsx structure
-  const tableHeadData = [
-    { label: "Staff Name", showOnMobile: true, minWidth: "120px" },
-    { label: "Leave Type", showOnMobile: true, minWidth: "150px" },
-    // { label: "Days", showOnMobile: true, minWidth: "80px" },
-    { label: "Status", showOnMobile: true, minWidth: "100px" },
-    {
-      label: "Date",
-      showOnMobile: false,
-      showOnTablet: true,
-      minWidth: "100px",
-    },
-    { label: "Actions", showOnMobile: true, minWidth: "100px" },
-  ];
+  // Check if user can approve (must be the assigned approver and leave is pending)
+  const canApprove = leave?.status === 'pending' && leave?.approvedBy?.id === currentUser?.id;
+  const tableHeadData = ['Staff Name', 'Status', 'Leave Type', 'Date', 'Actions'];
 
   const tableRowData = [
     {
-      id: "staff_name",
-      content: request?.staff_name,
-      showOnMobile: true,
-      showOnTablet: true,
+      id: 'staffName',
+      content: truncateText(getUserFullName(leave?.createdBy) || 'N/A', 30),
     },
     {
-      id: "leaveType",
-      content: request?.leaveType,
-      showOnMobile: true,
-      showOnTablet: true,
+      id: 'status',
+      content: <StatusBadge status={leave?.status || 'N/A'} />,
     },
-    // {
-    //   id: "days",
-    //   content: `${request?.totalDaysApplied} days`,
-    //   showOnMobile: true,
-    //   showOnTablet: true,
-    // },
+    { id: 'leaveType', content: leave?.leaveType || 'N/A' },
     {
-      id: "status",
-      content: <StatusBadge status={request?.status!} />,
-      showOnMobile: true,
-      showOnTablet: true,
+      id: 'date',
+      content: formatToDDMMYYYY(leave?.createdAt || new Date().toISOString()),
     },
     {
-      id: "date",
-      content: fullDate,
-      showOnMobile: false,
-      showOnTablet: true,
-    },
-    {
-      id: "actions",
+      id: 'action',
       content: (
         <ActionIcons
-          copyTo={copyto}
-          isCopying={isCopying}
-          canShareRequest={canShareRequest}
-          requestId={request?.id}
           isGeneratingPDF={isGenerating}
           onDownloadPDF={handleDownloadPDF}
-          showTagDropdown={showTagDropdown}
-          setShowTagDropdown={setShowTagDropdown}
           hideInspect={true}
         />
       ),
-      showOnMobile: true,
-      showOnTablet: true,
     },
   ];
 
   return (
-    <div className="flex flex-col space-y-3 pb-20">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+    <div className="flex flex-col space-y-3 pb-80">
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
-          <TextHeader>Leave Application</TextHeader>
-          <Button onClick={() => navigate("/human-resources/leave")}>
+          <TextHeader>Leave</TextHeader>
+          <Button variant="outline" size="sm" onClick={() => navigate('/human-resources/leave')}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>
         </div>
       </div>
 
-      {/* Main Content Section */}
-      <div id="pdfContentRef" ref={pdfContentRef}>
-        <DataStateContainer
-          isLoading={isLoading}
-          isError={isError}
-          data={request}
-          errorComponent={<NetworkErrorUI />}
-          loadingComponent={<Spinner />}
-          emptyComponent={<div>No data available</div>}
-        >
-          <div className="overflow-x-auto">
-            <div className="md:min-w-full">
-              <table className="w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 hidden sm:table-header-group">
-                  <tr>
-                    {tableHeadData.map((header, index) => (
-                      <th
-                        key={index}
-                        className={`
-                          px-3 py-2.5 md:px-4 md:py-3 
-                          text-left font-medium uppercase 
-                          tracking-wider
-                          ${!header.showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            header.showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          text-xs md:text-sm
-                          whitespace-nowrap
-                        `}
-                        style={{ minWidth: header.minWidth }}
-                      >
-                        {header.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {/* Desktop/Tablet Row */}
-                  <TableRowMain
-                    key={request?.id}
-                    requestId={request?.id || ""}
-                    toggleViewItems={() => {}}
-                    className="hidden sm:table-row"
-                  >
-                    {tableRowData.map(
-                      ({ id, content, showOnMobile, showOnTablet }) => (
-                        <TableData
-                          key={`${request?.id}-${id}`}
-                          className={`
-                          ${!showOnMobile ? "hidden md:table-cell" : ""}
-                          ${
-                            showOnTablet
-                              ? "hidden sm:table-cell md:table-cell"
-                              : ""
-                          }
-                          px-3 py-2.5 md:px-4 md:py-3
-                        `}
-                        >
-                          {content}
-                        </TableData>
-                      )
-                    )}
-                  </TableRowMain>
-
-                  {/* Mobile Card View */}
-                  <tr key={`${request?.id}-mobile`} className="sm:hidden">
-                    <td
-                      colSpan={tableHeadData.length}
-                      className="p-4 border-b border-gray-200"
+      <DataStateContainer
+        isLoading={isLoading}
+        isError={isError}
+        data={leave}
+        errorComponent={<NetworkErrorUI />}
+        loadingComponent={<Spinner />}
+        emptyComponent={<div>No leave data available.</div>}
+      >
+        {/* Main Table Section */}
+        <div ref={pdfContentRef}>
+          <div className="w-full bg-inherit shadow-sm rounded-lg border pb-[200px] overflow-x-scroll">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr className='hidden sm:table-row'>
+                  {tableHeadData.map((title, index) => (
+                    <th
+                      key={index}
+                      className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider"
                     >
-                      <RequestCard
-                        request={request!}
-                        requestId={request?.id || ""}
-                        identifier={request?.leaveNumber}
-                        dateValue={requestCreatedAt}
+                      {title}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody className="bg-white divide-y divide-gray-200">
+                {/* Desktop Row */}
+                <tr className="hidden sm:table-row" key={leave?.id}>
+                  {tableRowData.map(data => (
+                    <td
+                      key={data.id}
+                      className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium text-sm 2xl:text-text-base tracking-wider"
+                    >
+                      {data.content}
+                    </td>
+                  ))}
+                </tr>
+
+                {/* Mobile Card View */}
+                <tr className="sm:hidden">
+                  <td colSpan={tableHeadData.length} className="p-4 border-b border-gray-200">
+                    {leave && (
+                      <LeaveCard
+                        leave={leave}
                         actionIconsProps={{
-                          copyTo: copyto,
-                          isCopying,
-                          canShareRequest,
                           isGeneratingPDF: isGenerating,
                           onDownloadPDF: handleDownloadPDF,
-                          showTagDropdown,
-                          setShowTagDropdown,
                           hideInspect: true,
                         }}
                         context="detail"
-                        showActions={true}
-                        showStatus={true}
-                        showIdentifier={true}
-                        showDate={true}
-                        className="sm:hidden"
                       />
-                    </td>
-                  </tr>
+                    )}
+                  </td>
+                </tr>
 
-                  {/* Details Section */}
-                  <tr>
-                    <td colSpan={tableHeadData.length}>
-                      <RequestDetailLayout
-                        request={request}
-                        requestStatus={request?.status || ""}
-                        // File upload props
-                        canUploadFiles={canUploadFiles}
-                        selectedFiles={selectedFiles}
-                        setSelectedFiles={setSelectedFiles}
-                        isUploading={isUpdating}
-                        handleUpload={handleSend}
-                        // Status update props
-                        canUpdateStatus={canUpdateStatus}
-                        status={status}
-                        setStatus={setStatus}
-                        comment={comment}
-                        setComment={setComment}
-                        isUpdatingStatus={isUpdatingStatus}
-                        handleStatusChange={onStatusChangeHandler}
-                        // Comment props
-                        comments={comments}
-                        canAddComments={canAddComments}
-                        handleAddComment={handleAddComment}
-                        handleUpdateComment={handleUpdateComment}
-                        handleDeleteComment={handleDeleteComment}
-                        isAddingComment={isAddingComment}
-                        isUpdatingComment={isUpdatingComment}
-                        isDeletingComment={isDeletingComment}
-                        // Admin approval props
-                        showAdminApproval={showAdminApproval}
-                        formData={formData}
-                        handleFormChange={handleFormChange}
-                        admins={admins}
-                        isLoadingAmins={isLoadingUsers}
-                        canApprove={true}
-                      >
-                        <LeaveDetails request={request!} />
-                      </RequestDetailLayout>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                <tr>
+                  <td colSpan={5}>
+                    <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
+                      <LeaveDetails request={leave!} />
+
+                      {/* Status Update Form for Approver */}
+                      {canApprove && (
+                        <div className="mt-4">
+                          <StatusUpdateForm
+                            requestStatus={leave?.status}
+                            status={status}
+                            setStatus={setStatus}
+                            comment={comment}
+                            setComment={setComment}
+                            isUpdatingStatus={isUpdatingStatus}
+                            handleStatusChange={handleStatusChange}
+                            statusOptions={[
+                              { value: 'approved', label: 'Approve Leave' },
+                              { value: 'rejected', label: 'Reject Leave' },
+                            ]}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </DataStateContainer>
-      </div>
+        </div>
+      </DataStateContainer>
     </div>
   );
 };

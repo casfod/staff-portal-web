@@ -1,12 +1,13 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { Info } from "lucide-react";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
-import StaffInformationForm from "./StaffInformationForm";
-import { localStorageUser } from "../../utils/localStorageUser";
-import { useUserById } from "../user/Hooks/useUsers";
-import Spinner from "../../ui/Spinner";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
+import { useNavigate, useParams } from 'react-router-dom';
+import { Info } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import TextHeader from '../../components/custom/TextHeader';
+// import StaffInformationForm from "./StaffInformationForm";
+import { localStorageUser } from '../../utils/localStorageUser';
+import { useUserById } from '../user/Hooks/useUsers';
+import Spinner from '../../components/custom/Spinner';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import StaffInformationForm from './StaffInformationForm';
 
 const EditStaffInformation = () => {
   const navigate = useNavigate();
@@ -16,12 +17,7 @@ const EditStaffInformation = () => {
   // If userId param exists, edit that user, otherwise edit current user
   const staffId = params.userId || currentUser?.id;
 
-  const {
-    data: userData,
-    isLoading: isLoadingUser,
-    isError,
-    error,
-  } = useUserById(staffId!);
+  const { data: userData, isLoading: isLoadingUser, isError, error } = useUserById(staffId!);
 
   if (isLoadingUser) {
     return (
@@ -45,7 +41,7 @@ const EditStaffInformation = () => {
 
   const user = userData.data;
   const isEditingSelf = !params.userId || params.userId === currentUser?.id;
-  const isSuperAdmin = currentUser?.role === "SUPER-ADMIN";
+  const isSuperAdmin = currentUser?.role === 'SUPER-ADMIN';
 
   // Check if user has permission to edit
   const canEdit = isSuperAdmin || isEditingSelf;
@@ -53,13 +49,11 @@ const EditStaffInformation = () => {
   if (!canEdit) {
     return (
       <div className="flex flex-col space-y-3 pb-80">
-        <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+        <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
           <TextHeader>Access Denied</TextHeader>
         </div>
         <div className="bg-white rounded-lg p-6 text-center">
-          <p className="text-red-600">
-            You don't have permission to edit this user's information.
-          </p>
+          <p className="text-red-600">You don't have permission to edit this user's information.</p>
           <Button onClick={() => navigate(-1)} className="mt-4">
             Go Back
           </Button>
@@ -70,23 +64,21 @@ const EditStaffInformation = () => {
 
   return (
     <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+      <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>
             {isEditingSelf
-              ? "Update My Information"
-              : `Update ${user.first_name} ${user.last_name}'s Information`}
+              ? 'Update My Information'
+              : `Update ${user.firstName} ${user.lastName}'s Information`}
           </TextHeader>
 
-          <Button onClick={() => navigate(-1)} variant="secondary" size="small">
+          <Button onClick={() => navigate(-1)} variant="secondary" size="sm">
             <Info className="h-4 w-4 mr-1 md:mr-2" />
             Cancel
           </Button>
         </div>
         {isSuperAdmin && !isEditingSelf && (
-          <p className="text-xs text-blue-600 mt-1">
-            ⚡ Editing as Super Administrator
-          </p>
+          <p className="text-xs text-blue-600 mt-1">⚡ Editing as Super Administrator</p>
         )}
       </div>
 

@@ -1,244 +1,187 @@
-import { Download, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+// features/Vendor/AllVendors.tsx
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import {
-  useVendors,
-  useExportVendorsToExcel,
-  useDeleteVendor,
-  // useVendorApprovalSummary,
-} from "./Hooks/useVendor";
-import { useDispatch, useSelector } from "react-redux";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { RootState } from "../../store/store";
-import { BiSearch } from "react-icons/bi";
-import { setSearchTerm, setPage } from "../../store/genericQuerySlice";
-import { GoXCircle } from "react-icons/go";
-import { Pagination } from "../../ui/Pagination";
-import { useDebounce } from "use-debounce";
-import { VendorType } from "../../interfaces";
-import { setVendor } from "../../store/vendorSlice";
-import Spinner from "../../ui/Spinner";
-import { localStorageUser } from "../../utils/localStorageUser";
-import TextHeader from "../../ui/TextHeader";
-import Button from "../../ui/Button";
-import VendorTableRow from "./VendorTableRow";
-import SpinnerMini from "../../ui/SpinnerMini";
-import useDeleteRequest from "../../hooks/useDeleteRequest";
-// import Select from "../../ui/Select";
+import { ListPage } from '../../components/custom/ListPage';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { useVendors, useDeleteVendor, useExportVendorsToExcel } from './Hooks/useVendor';
+import VendorTableRow from './VendorTableRow';
+import { setVendor } from '../../store/vendorSlice';
+import { IVendor, IFilterConfig } from '../../interfaces';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { getVendorTableHeaders } from '@/config/tableConfigs';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
-export function AllVendors() {
-  const currentUser = localStorageUser();
+// Define filter configurations for vendors
+const vendorFilterConfigs: IFilterConfig[] = [
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'select',
+    options: [
+      { value: 'draft', label: 'Draft' },
+      { value: 'pending', label: 'Pending' },
+      { value: 'approved', label: 'Approved' },
+      { value: 'rejected', label: 'Rejected' },
+    ],
+    placeholder: 'Filter by status...',
+  },
+  {
+    key: 'businessState',
+    label: 'State',
+    type: 'select',
+    options: [
+      { value: 'Adamawa', label: 'Adamawa' },
+      { value: 'Borno', label: 'Borno' },
+      { value: 'Yobe', label: 'Yobe' },
+      { value: 'Sokoto', label: 'Sokoto' },
+      { value: 'Abuja', label: 'Abuja' },
+    ],
+    placeholder: 'Filter by state...',
+  },
+  {
+    key: 'businessType',
+    label: 'Business Type',
+    type: 'select',
+    options: [
+      { value: 'Sole Proprietorship', label: 'Sole Proprietorship' },
+      { value: 'Partnership', label: 'Partnership' },
+      { value: 'Corporation', label: 'Corporation' },
+      { value: 'Limited Liability Company (LLC)', label: 'Limited Liability Company (LLC)' },
+      { value: 'Non-Profit Organization', label: 'Non-Profit Organization' },
+    ],
+    placeholder: 'Filter by business type...',
+  },
+  {
+    key: 'businessName',
+    label: 'Business Name',
+    type: 'text',
+    placeholder: 'Filter by business name...',
+  },
+  {
+    key: 'vendorCode',
+    label: 'Vendor Code',
+    type: 'text',
+    placeholder: 'Search by vendor code...',
+  },
+  {
+    key: 'dateFrom',
+    label: 'Date From',
+    type: 'date',
+  },
+  {
+    key: 'dateTo',
+    label: 'Date To',
+    type: 'date',
+  },
+];
+
+const AllVendors = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-  // const [statusFilter, setStatusFilter] = useState("all");
-  // console.log(statusFilter);
-
-  // Fetch approval summary for dashboard stats
-  // const { data: summaryData } = useVendorApprovalSummary();
-  // const summary = summaryData?.data;
-
-  const { data, isLoading, isError } = useVendors({
-    search: debouncedSearchTerm,
-    sort,
+  // Use the filtered list hook
+  const {
+    searchTerm,
+    handleSearchChange,
     page,
-    limit,
+    handlePageChange,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: vendorFilterConfigs,
+    defaultFilters: {},
   });
+  
+  const { isSuperAdmin } = useUserRoles();
 
-  const { exportVendors, isExporting } = useExportVendorsToExcel();
+  const { data, isLoading, isError } = useVendors(queryParams);
   const { deleteVendor } = useDeleteVendor();
+  const { exportVendors, isExporting } = useExportVendorsToExcel();
 
-  const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
+  const vendors = useMemo(() => data?.data ?? [], [data]);
+  const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
 
-  const vendors = useMemo(() => data?.data?.vendors ?? [], [data]);
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
+  const handleAction = useCallback(
+    (vendor: IVendor) => {
+      dispatch(setVendor(vendor));
+      navigate(`/procurement/vendor-management/vendor/${vendor.id}`);
+    },
+    [dispatch, navigate]
+  );
 
-  const toggleViewItems = (id: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
-  };
-
-  const handleAction = (vendor: VendorType) => {
-    dispatch(setVendor(vendor));
-    navigate(`/procurement/vendor-management/vendor/${vendor.id}`);
-  };
-
-  const handleEdit = (vendor: VendorType) => {
-    dispatch(setVendor(vendor));
-    navigate(`/procurement/vendor-management/edit-vendor/${vendor.id}`);
-  };
+  const handleEdit = useCallback(
+    (vendor: IVendor) => {
+      dispatch(setVendor(vendor));
+      navigate(`/procurement/vendor-management/edit-vendor/${vendor.id}`);
+    },
+    [dispatch, navigate]
+  );
 
   const handleDelete = useDeleteRequest(deleteVendor, {
-    entityName: "Vendor",
+    entityName: 'Vendor',
   });
 
-  const handleExportExcel = () => {
+  const handleExport = useCallback(() => {
     exportVendors();
-  };
+  }, [exportVendors]);
 
-  // const handleStatusFilterChange = (value: string) => {
-  //   setStatusFilter(value);
-  //   if (value !== "all") {
-  //     navigate(`/procurement/vendor-management/status/${value}`);
-  //   } else {
-  //     navigate("/procurement/vendor-management");
-  //   }
-  // };
+  const tableHeadData = getVendorTableHeaders();
 
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
-
-  // const statusOptions = [
-  //   { id: "all", name: "All Vendors" },
-  //   { id: "draft", name: `Draft (${summary?.draft || 0})` },
-  //   { id: "pending", name: `Pending (${summary?.pending || 0})` },
-  //   { id: "approved", name: `Approved (${summary?.approved || 0})` },
-  //   { id: "rejected", name: `Rejected (${summary?.rejected || 0})` },
-  // ];
-
-  const tableHeadData = [
-    "Business Name",
-    "Status",
-    "Vendor Code",
-    "Contact Person",
-    "Actions",
-  ];
+  // Create the FilterToolbar as a component to pass to ListPage
+  const filterToolbar = (
+    <FilterToolbar
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      filters={filters}
+      onFilterChange={setFilter}
+      filterConfigs={filterConfigs}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
+      searchPlaceholder="Search vendors..."
+    />
+  );
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        {/* Header with title and button */}
-        <div className="flex justify-between items-center">
-          <TextHeader>Vendors</TextHeader>
-
-          <div className="flex items-center gap-3">
-            {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser.procurementRole?.canCreate) && (
-              <Button
-                onClick={() =>
-                  navigate("/procurement/vendor-management/create-vendor")
-                }
-              >
-                <Plus className="h-4 w-4 mr-1 md:mr-2" />
-                Add Vendor
-              </Button>
-            )}
-
-            {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser.procurementRole?.canView) && (
-              <Button onClick={handleExportExcel} disabled={isExporting}>
-                {isExporting ? (
-                  <>
-                    <SpinnerMini width={4} height={4} />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-1 md:mr-2" />
-                    Export Excel
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Search Bar and Status Filter */}
-        <div className="flex items-center space-x-4">
-          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-            <span className="p-2 text-gray-400">
-              <BiSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search vendors..."
-            />
-            <span
-              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-              onClick={() => dispatch(setSearchTerm(""))}
-            >
-              <GoXCircle />
-            </span>
-          </div>
-
-          {/* Status Filter Dropdown */}
-          {/* <Select
-            clearable={false}
-            id="statusFilter"
-            value={statusFilter}
-            onChange={handleStatusFilterChange}
-            options={statusOptions}
-            customLabel="Filter by status"
-            className="w-48"
-          /> */}
-        </div>
-      </div>
-
-      {/* Vendors Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="max-w-full bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={tableHeadData.length} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              vendors.map((vendor) => (
-                <VendorTableRow
-                  key={vendor.id}
-                  vendor={vendor}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {(vendors.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <ListPage
+      title="Vendors"
+      data={vendors}
+      headers={tableHeadData}
+      isLoading={isLoading}
+      isError={isError}
+      currentPage={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      renderRow={vendor => (
+        <VendorTableRow
+          key={vendor.id}
+          vendor={vendor}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleAction={handleAction}
+          tableHeadData={tableHeadData}
         />
       )}
-    </div>
+      onAdd={() => navigate('/procurement/vendor-management/create-vendor')}
+      emptyMessage={hasActiveFilters ? 'No vendors match your filters' : 'No vendors found'}
+      emptySubMessage={
+        hasActiveFilters ? 'Try adjusting your filters or search terms' : 'Create your first vendor'
+      }
+      searchComponent={filterToolbar}
+      showExport={isSuperAdmin}
+      onExport={handleExport}
+      exportLabel="Export Excel"
+      isExporting={isExporting}
+    />
   );
-}
+};
+
+export default AllVendors;

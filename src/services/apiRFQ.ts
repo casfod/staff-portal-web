@@ -1,98 +1,27 @@
-import axios from "axios";
-import Cookies from "js-cookie";
-import { localStorageUser } from "../utils/localStorageUser";
-import { baseUrl } from "./baseUrl";
+// src/services/apiRFQ.ts
 import {
-  CreateRFQType,
-  UpdateRFQType,
-  UseRFQ,
-  UseRFQStatsType,
-  UseRFQType,
-} from "../interfaces";
-
-const url = baseUrl();
-
-const axiosInstance = axios.create({
-  baseURL: url,
-});
-
-const getToken = () => {
-  const currentUser = localStorageUser();
-  return currentUser
-    ? Cookies.get(`token-${currentUser.id}`) ||
-        sessionStorage.getItem(`token-${currentUser.id}`)
-    : null;
-};
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.error("No token found, request not authorized");
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const retryRequest = async (error: any, retries: number = 0): Promise<any> => {
-  if (retries >= MAX_RETRIES) {
-    return Promise.reject(error);
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retries);
-  await new Promise((resolve) => setTimeout(resolve, delay));
-
-  return axiosInstance
-    .request(error.config)
-    .catch((err) => retryRequest(err, retries + 1));
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 429) {
-      return retryRequest(error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Error Handler
-const handleError = (err: any) => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data;
-  } else {
-    console.log(err);
-  }
-};
+  IRFQ,
+  IRFQsListResponse,
+  IRFQSingleResponse,
+  IRFQStatsResponse,
+  IVendor,
+} from '../interfaces';
+import apiClient, { handleError, QueryParams } from './apiClient';
 
 // API Functions
 
-export const getRFQsStats = async function (): Promise<UseRFQStatsType> {
+export const getRFQsStats = async function (): Promise<IRFQStatsResponse> {
   try {
-    const response = await axiosInstance.get<UseRFQStatsType>(`/rfqs/stats`);
+    const response = await apiClient.get<IRFQStatsResponse>(`procurement/rfqs/stats`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getAllRFQs = async function (queryParams: {
-  search?: string;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}): Promise<UseRFQType> {
+export const getAllRFQs = async function (queryParams: QueryParams): Promise<IRFQsListResponse> {
   try {
-    const response = await axiosInstance.get<UseRFQType>(`/rfqs`, {
+    const response = await apiClient.get<IRFQsListResponse>(`procurement/rfqs`, {
       params: queryParams,
     });
     return response.data;
@@ -101,113 +30,36 @@ export const getAllRFQs = async function (queryParams: {
   }
 };
 
-export const getRFQ = async function (rfqId: string): Promise<UseRFQ> {
+export const getRFQ = async function (rfqId: string): Promise<IRFQSingleResponse> {
   try {
-    const response = await axiosInstance.get<UseRFQ>(`/rfqs/${rfqId}`);
+    const response = await apiClient.get<IRFQSingleResponse>(`procurement/rfqs/${rfqId}`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const getRFQByCode = async function (rfqCode: string): Promise<UseRFQ> {
+export const getRFQByCode = async function (rfqCode: string): Promise<IRFQSingleResponse> {
   try {
-    const response = await axiosInstance.get<UseRFQ>(`/rfqs/code/${rfqCode}`);
+    const response = await apiClient.get<IRFQSingleResponse>(`procurement/rfqs/code/${rfqCode}`);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const createRFQ = async function (
-  data: CreateRFQType,
-  files: File[] = []
-): Promise<UseRFQ> {
+export const createRFQ = async function (data: Partial<IRFQ>): Promise<IRFQSingleResponse> {
   try {
-    const formData = new FormData();
-
-    // Append all RFQ fields
-    const rfqFields: (keyof CreateRFQType)[] = [
-      "RFQTitle",
-      "casfodAddressId",
-      "deadlineDate",
-      "rfqDate",
-      "itemGroups",
-      "copiedTo",
-    ];
-
-    rfqFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "itemGroups" && Array.isArray(data[key])) {
-          formData.append(key, JSON.stringify(data[key]));
-        } else if (key === "copiedTo" && Array.isArray(data[key])) {
-          data[key].forEach((vendorId: string) => {
-            formData.append("copiedTo", vendorId);
-          });
-        } else {
-          formData.append(key as string, String(data[key]));
-        }
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UseRFQ>(`/rfqs/save`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
+    const response = await apiClient.post<IRFQSingleResponse>(`procurement/rfqs/draft`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
   }
 };
 
-export const createAndSendRFQ = async function (
-  data: CreateRFQType,
-  files: File[] = []
-): Promise<UseRFQ> {
+export const createAndSendRFQ = async function (data: Partial<IRFQ>): Promise<IRFQSingleResponse> {
   try {
-    const formData = new FormData();
-    // Append all RFQ fields
-    const rfqFields: (keyof CreateRFQType)[] = [
-      "RFQTitle",
-      "casfodAddressId",
-      "deadlineDate",
-      "rfqDate",
-      "itemGroups",
-      "copiedTo",
-    ];
-
-    rfqFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "itemGroups" && Array.isArray(data[key])) {
-          formData.append(key, JSON.stringify(data[key]));
-        } else if (key === "copiedTo" && Array.isArray(data[key])) {
-          data[key].forEach((vendorId: string) => {
-            formData.append("copiedTo", vendorId);
-          });
-        } else {
-          formData.append(key as string, String(data[key]));
-        }
-      }
-    });
-
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await axiosInstance.post<UseRFQ>(
-      `/rfqs/save-to-send`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-
+    const response = await apiClient.post<IRFQSingleResponse>(`procurement/rfqs`, data);
     return response.data;
   } catch (err) {
     return handleError(err);
@@ -216,50 +68,55 @@ export const createAndSendRFQ = async function (
 
 export const updateRFQ = async function (
   rfqId: string,
-  data: UpdateRFQType,
+  data: Partial<IRFQ>,
   files: File[] = []
-): Promise<UseRFQ> {
+): Promise<IRFQSingleResponse> {
   try {
-    const formData = new FormData();
+    // If there are files, use FormData; otherwise use JSON
+    if (files && files.length > 0) {
+      const formData = new FormData();
 
-    // Append all RFQ fields
-    const rfqFields: (keyof UpdateRFQType)[] = [
-      "RFQTitle",
-      "casfodAddressId",
-      "deadlineDate",
-      "rfqDate",
-      "itemGroups",
-      "copiedTo",
-    ];
+      const rfqFields: (keyof Partial<IRFQ>)[] = [
+        'rfqTitle',
+        'casfodAddressId',
+        'deadlineDate',
+        'rfqDate',
+        'itemGroups',
+        'copiedTo',
+      ];
 
-    rfqFields.forEach((key) => {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === "itemGroups" && Array.isArray(data[key])) {
-          formData.append(key, JSON.stringify(data[key]));
-        } else if (key === "copiedTo" && Array.isArray(data[key])) {
-          data[key].forEach((vendorId: string) => {
-            formData.append("copiedTo", vendorId);
-          });
-        } else {
-          formData.append(key as string, String(data[key]));
+      rfqFields.forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          if (key === 'itemGroups' && Array.isArray(data[key])) {
+            formData.append(key, JSON.stringify(data[key]));
+          } else if (key === 'copiedTo' && Array.isArray(data[key])) {
+            data[key].forEach((item: string | IVendor) => {
+              const vendorId = typeof item === 'string' ? item : item.id;
+              formData.append('copiedTo', vendorId);
+            });
+          } else {
+            formData.append(key as string, String(data[key]));
+          }
         }
-      }
-    });
+      });
 
-    // Append files
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
+      files.forEach(file => {
+        formData.append('files', file);
+      });
 
-    const response = await axiosInstance.put<UseRFQ>(
-      `/rfqs/${rfqId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-
-    return response.data;
+      const response = await apiClient.patch<IRFQSingleResponse>(
+        `procurement/rfqs/${rfqId}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+      return response.data;
+    } else {
+      // No files, use JSON
+      const response = await apiClient.patch<IRFQSingleResponse>(`procurement/rfqs/${rfqId}`, data);
+      return response.data;
+    }
   } catch (err) {
     return handleError(err);
   }
@@ -268,10 +125,10 @@ export const updateRFQ = async function (
 export const updateRFQStatus = async function (
   rfqId: string,
   status: string
-): Promise<UseRFQ> {
+): Promise<IRFQSingleResponse> {
   try {
-    const response = await axiosInstance.patch<UseRFQ>(
-      `/rfqs/update-status/${rfqId}`,
+    const response = await apiClient.patch<IRFQSingleResponse>(
+      `procurement/rfqs/update-status/${rfqId}`,
       { status }
     );
     return response.data;
@@ -280,65 +137,37 @@ export const updateRFQStatus = async function (
   }
 };
 
-// Update copyRFQToVendors function in apiRFQ.ts
+// apiRFQ.ts
+//
+// FIX: previously uploaded the PDF as multipart FormData on this same call.
+// The PDF is now uploaded separately, first, via useFileUpload()/apiFile.ts's
+// uploadFiles() (associatedModel: 'RFQs', associatedId: rfqId) — this call
+// only needs to reference the resulting file IDs, so it's a plain JSON POST.
 export const copyRFQToVendors = async function (
   rfqId: string,
-  vendorIds: string[],
-  file?: File
-): Promise<UseRFQ> {
+  recipients: string[],
+  fileIds: string[] = []
+): Promise<IRFQSingleResponse> {
   try {
-    console.log("RFQ Data:", {
-      rfqId,
-      vendorIds,
-      vendorIdsType: typeof vendorIds,
-      vendorIdsLength: vendorIds?.length,
-      file,
+    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+      throw new Error('recipients must be a non-empty array');
+    }
+
+    const response = await apiClient.post<IRFQSingleResponse>(`procurement/rfqs/${rfqId}/send`, {
+      recipients,
+      fileIds,
     });
-
-    const formData = new FormData();
-
-    // Append vendor IDs - try different formats to see what works
-    if (vendorIds && Array.isArray(vendorIds)) {
-      vendorIds.forEach((vendorId, index) => {
-        console.log(`Appending vendorId[${index}]:`, vendorId);
-        // Try both formats
-        formData.append("vendorIds", vendorId); // Standard format
-        formData.append("vendorIds[]", vendorId); // Array format
-      });
-    } else {
-      throw new Error("vendorIds must be an array");
-    }
-
-    // Append PDF file if provided
-    if (file) {
-      console.log("Appending file:", file.name, file.type);
-      formData.append("files", file);
-    }
-
-    // Log FormData contents for debugging
-    console.log("FormData entries:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
-    const response = await axiosInstance.patch<UseRFQ>(
-      `/rfqs/copy/${rfqId}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
     return response.data;
   } catch (err) {
-    console.error("Error in copyRFQToVendors:", err);
+    console.error('Error in copyRFQToVendors:', err);
     return handleError(err);
   }
 };
 
 export const exportRFQsToExcel = async function (): Promise<Blob> {
   try {
-    const response = await axiosInstance.get(`/rfqs/export/excel`, {
-      responseType: "blob",
+    const response = await apiClient.get(`procurement/rfqs/export/excel`, {
+      responseType: 'blob',
     });
     return response.data;
   } catch (err) {
@@ -346,14 +175,9 @@ export const exportRFQsToExcel = async function (): Promise<Blob> {
   }
 };
 
-export const deleteRFQ = async function (
-  rfqId: string
-): Promise<{ status: string; message: string }> {
+export const deleteRFQ = async function (rfqId: string): Promise<IRFQSingleResponse> {
   try {
-    const response = await axiosInstance.delete<{
-      status: string;
-      message: string;
-    }>(`/rfqs/${rfqId}`);
+    const response = await apiClient.delete<IRFQSingleResponse>(`procurement/rfqs/${rfqId}`);
     return response.data;
   } catch (err) {
     return handleError(err);

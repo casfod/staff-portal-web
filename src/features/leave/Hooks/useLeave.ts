@@ -1,17 +1,13 @@
 // src/features/leave/Hooks/useLeave.ts
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import {
-  UseLeave,
-  UseLeaveStatsType,
-  UseLeaveType,
-  UseLeaveBalance,
-  LeaveFormData,
-} from "../../../interfaces";
+  IHookError,
+  ILeave,
+  ILeaveSingleResponse,
+  ILeavesListResponse,
+  ILeaveStatsResponse,
+  ILeaveBalanceResponse,
+} from '../../../interfaces';
 import {
   getAllLeaves,
   getLeave,
@@ -27,49 +23,35 @@ import {
   deleteComment as deleteCommentApi,
   deleteLeave as deleteLeaveAPI,
   copyLeave as copyLeaveApi,
-} from "../../../services/apiLeave";
-
-import { AxiosError, AxiosResponse } from "axios";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-
-interface ErrorResponse {
-  message: string;
-}
-
-interface HookError extends AxiosError {
-  response?: AxiosResponse<ErrorResponse>;
-}
+} from '../../../services/apiLeave';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { QueryParams } from '@/services/apiClient';
 
 export function useAllLeaves(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number,
-  options?: UseQueryOptions<UseLeaveType, Error>
+  queryParams: QueryParams,
+  options?: UseQueryOptions<ILeavesListResponse, Error>
 ) {
-  return useQuery<UseLeaveType, Error>({
-    queryKey: ["all-leaves", search, sort, page, limit],
-    queryFn: () => getAllLeaves({ search, sort, page, limit }),
+  return useQuery<ILeavesListResponse, Error>({
+    queryKey: ['all-leaves', queryParams],
+    queryFn: () => getAllLeaves(queryParams),
     staleTime: 0,
     ...options,
   });
 }
 
 export function useLeave(id: string) {
-  return useQuery<UseLeave, Error>({
-    queryKey: ["leave", id],
+  return useQuery<ILeaveSingleResponse, Error>({
+    queryKey: ['leave', id],
     queryFn: () => getLeave(id),
     staleTime: 0,
   });
 }
 
-export function useLeaveStats(
-  options?: UseQueryOptions<UseLeaveStatsType, Error>
-) {
-  return useQuery<UseLeaveStatsType, Error>({
-    queryKey: ["leave-stats"],
+export function useLeaveStats(options?: UseQueryOptions<ILeaveStatsResponse, Error>) {
+  return useQuery<ILeaveStatsResponse, Error>({
+    queryKey: ['leave-stats'],
     queryFn: () => getLeaveStats(),
     staleTime: 0,
     ...options,
@@ -77,16 +59,16 @@ export function useLeaveStats(
 }
 
 export function useMyLeaveBalance() {
-  return useQuery<UseLeaveBalance, Error>({
-    queryKey: ["my-leave-balance"],
+  return useQuery<ILeaveBalanceResponse, Error>({
+    queryKey: ['my-leave-balance'],
     queryFn: () => getMyLeaveBalance(),
     staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useUserLeaveBalance(userId: string) {
-  return useQuery<UseLeaveBalance, Error>({
-    queryKey: ["user-leave-balance", userId],
+  return useQuery<ILeaveBalanceResponse, Error>({
+    queryKey: ['user-leave-balance', userId],
     queryFn: () => getUserLeaveBalance(userId),
     staleTime: 5 * 60 * 1000,
     enabled: !!userId,
@@ -102,25 +84,25 @@ export function useCopyLeave(requestId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { userIds: string[] }) => copyLeaveApi(requestId, data),
+    mutationFn: (data: { recipients: string[] }) => copyLeaveApi(requestId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Copied successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Copied successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", requestId],
+          queryKey: ['leave', requestId],
         });
       } else {
-        toast.error("Copy not successful");
+        toast.error('Copy not successful');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error copying");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Copy Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error copying');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Copy Error:', error);
       setErrorMessage(error);
     },
   });
@@ -137,21 +119,21 @@ export function useSaveLeaveDraft() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: LeaveFormData) => saveLeaveDraftApi(data),
+    mutationFn: (data: Partial<ILeave>) => saveLeaveDraftApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Leave draft saved successfully");
-        queryClient.invalidateQueries({ queryKey: ["all-leaves"] });
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Leave draft saved successfully');
+        queryClient.invalidateQueries({ queryKey: ['all-leaves'] });
         navigate(-1);
       } else {
         toast.error(data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error(err.response?.data.message || "An error occurred");
-      console.error("Leave draft save Error:", err.response?.data.message);
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data.message || 'An error occurred');
+      console.error('Leave draft save Error:', err.response?.data.message);
     },
   });
 
@@ -167,23 +149,23 @@ export function useCreateLeaveApplication() {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ data, files }: { data: LeaveFormData; files: File[] }) =>
-      createLeaveApplicationApi(data, files),
+    mutationFn: ({ data }: { data: Partial<ILeave> }) =>
+      createLeaveApplicationApi(data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Leave application submitted successfully");
-        queryClient.invalidateQueries({ queryKey: ["all-leaves"] });
-        queryClient.invalidateQueries({ queryKey: ["my-leave-balance"] });
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Leave application submitted successfully');
+        queryClient.invalidateQueries({ queryKey: ['all-leaves'] });
+        queryClient.invalidateQueries({ queryKey: ['my-leave-balance'] });
         navigate(-1);
       } else {
         toast.error(data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error(err.response?.data.message || "An error occurred");
-      console.error("Leave application Error:", err.response?.data.message);
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data.message || 'An error occurred');
+      console.error('Leave application Error:', err.response?.data.message);
     },
   });
 
@@ -199,27 +181,27 @@ export function useUpdateLeaveApplication(leaveId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: ({ data, files }: { data: LeaveFormData; files: File[] }) =>
-      updateLeaveApplicationApi(leaveId, data, files),
+    mutationFn: ({ data }: { data: Partial<ILeave> }) =>
+      updateLeaveApplicationApi(leaveId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Leave application updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Leave application updated successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", leaveId],
+          queryKey: ['leave', leaveId],
         });
-        queryClient.invalidateQueries({ queryKey: ["my-leave-balance"] });
+        queryClient.invalidateQueries({ queryKey: ['my-leave-balance'] });
       } else {
-        toast.error("Update not successful");
+        toast.error('Update not successful');
         setErrorMessage(data.message);
-        console.error("Update Error:", data.message);
+        console.error('Update Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating leave");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error updating leave');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Error:', error);
       setErrorMessage(error);
     },
   });
@@ -236,27 +218,26 @@ export function useUpdateLeaveStatus(leaveId: string) {
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: { status: string; comment: string }) =>
-      updateLeaveStatusApi(leaveId, data),
+    mutationFn: (data: { status: string; comment: string }) => updateLeaveStatusApi(leaveId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Status updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Status updated successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", leaveId],
+          queryKey: ['leave', leaveId],
         });
-        queryClient.invalidateQueries({ queryKey: ["my-leave-balance"] });
+        queryClient.invalidateQueries({ queryKey: ['my-leave-balance'] });
       } else {
-        toast.error("Status update not successful");
+        toast.error('Status update not successful');
         setErrorMessage(data.message);
-        console.error("Status Update Error:", data.message);
+        console.error('Status Update Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating status");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Status Update Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error updating status');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Status Update Error:', error);
       setErrorMessage(error);
     },
   });
@@ -275,23 +256,23 @@ export function useAddComment(leaveId: string) {
   } = useMutation({
     mutationFn: (data: { text: string }) => addCommentApi(leaveId, data),
 
-    onSuccess: (data) => {
-      if (data.status === 201) {
-        toast.success("Comment added successfully");
+    onSuccess: data => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", leaveId],
+          queryKey: ['leave', leaveId],
         });
       } else {
-        toast.error("Failed to add comment");
+        toast.error('Failed to add comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error adding comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Add Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error adding comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Add Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -311,23 +292,23 @@ export function useUpdateComment(leaveId: string) {
     mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
       updateCommentApi(leaveId, commentId, { text }),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment updated successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", leaveId],
+          queryKey: ['leave', leaveId],
         });
       } else {
-        toast.error("Failed to update comment");
+        toast.error('Failed to update comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error updating comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Update Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error updating comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Update Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -346,23 +327,23 @@ export function useDeleteComment(leaveId: string) {
   } = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(leaveId, commentId),
 
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        toast.success("Comment deleted successfully");
+    onSuccess: data => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
         queryClient.invalidateQueries({
-          queryKey: ["leave", leaveId],
+          queryKey: ['leave', leaveId],
         });
       } else {
-        toast.error("Failed to delete comment");
+        toast.error('Failed to delete comment');
         setErrorMessage(data.message);
-        console.error("Error:", data.message);
+        console.error('Error:', data.message);
       }
     },
 
-    onError: (err: HookError) => {
-      toast.error("Error deleting comment");
-      const error = err.response?.data.message || "An error occurred";
-      console.error("Delete Comment Error:", error);
+    onError: (err: IHookError) => {
+      toast.error('Error deleting comment');
+      const error = err.response?.data.message || 'An error occurred';
+      console.error('Delete Comment Error:', error);
       setErrorMessage(error);
     },
   });
@@ -370,12 +351,7 @@ export function useDeleteComment(leaveId: string) {
   return { deleteComment, isPending, isError, errorMessage };
 }
 
-export function useDeleteLeave(
-  search?: string,
-  sort?: string,
-  page?: number,
-  limit?: number
-) {
+export function useDeleteLeave(queryParams: QueryParams) {
   const queryClient = useQueryClient();
 
   const {
@@ -383,22 +359,21 @@ export function useDeleteLeave(
     isPending: isDeleting,
     isError: isErrorDeleting,
     error: errorDeleting,
-  } = useMutation<void, HookError, string>({
+  } = useMutation<void, IHookError, string>({
     mutationFn: async (leaveId: string) => {
       await deleteLeaveAPI(leaveId);
     },
     onSuccess: () => {
-      toast.success("Leave application deleted");
+      toast.success('Leave application deleted');
       queryClient.invalidateQueries({
-        queryKey: ["all-leaves", search, sort, page, limit],
+        queryKey: ['all-leaves', queryParams],
       });
     },
-    onError: (error) => {
-      toast.error("Error deleting leave application");
+    onError: error => {
+      toast.error('Error deleting leave application');
       const errorMessage =
-        error.response?.data.message ||
-        "An error occurred while deleting the leave application.";
-      console.error("Delete Leave Error:", errorMessage);
+        error.response?.data.message || 'An error occurred while deleting the leave application.';
+      console.error('Delete Leave Error:', errorMessage);
     },
   });
 

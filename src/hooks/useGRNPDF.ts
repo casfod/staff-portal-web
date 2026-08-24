@@ -1,9 +1,9 @@
 // hooks/useGRNPDF.ts
-import { useState, useRef } from "react";
-import toast from "react-hot-toast";
-import { generatePdf } from "../utils/generatePdf";
-import { GoodsReceivedType } from "../interfaces";
-import { addPdfFooter } from "../utils/pdfFooterUtils";
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { generatePdf } from '../utils/generatePdf';
+import { IGoodsReceived } from '../interfaces';
+import { addPdfFooter } from '../utils/pdfFooterUtils';
 
 interface UseGRNPDFReturn {
   pdfRef: React.RefObject<HTMLDivElement>;
@@ -15,33 +15,31 @@ interface UseGRNPDFReturn {
   downloadPDF: () => Promise<void>;
 }
 
-export const useGRNPDF = (
-  grnData: GoodsReceivedType | null
-): UseGRNPDFReturn => {
+export const useGRNPDF = (grnData: IGoodsReceived | null): UseGRNPDFReturn => {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const generatePDF = async (): Promise<File | null> => {
-    if (!grnData || !grnData.GRDCode) {
-      toast.error("Goods Received data is incomplete");
+    if (!grnData || !grnData.grdCode) {
+      toast.error('Goods Received data is incomplete');
       return null;
     }
 
     if (!pdfRef.current) {
-      toast.error("PDF template not found");
+      toast.error('PDF template not found');
       return null;
     }
 
     setIsGenerating(true);
 
     try {
-      const filename = `${grnData.GRDCode || "GRN"}.pdf`;
+      const filename = `${grnData.grdCode || 'GRN'}.pdf`;
       const pdf = await generatePdfViaCanvas(pdfRef.current, filename, grnData);
       return pdf;
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF");
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF');
       return null;
     } finally {
       setIsGenerating(false);
@@ -51,23 +49,23 @@ export const useGRNPDF = (
   const generatePdfViaCanvas = async (
     element: HTMLElement,
     filename: string,
-    grnData: GoodsReceivedType
+    grnData: IGoodsReceived
   ): Promise<File | null> => {
-    const { jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
+    const { jsPDF } = await import('jspdf');
+    const html2canvas = (await import('html2canvas')).default;
 
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: '#ffffff',
       logging: false,
     });
 
     const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
       compress: true,
     });
 
@@ -78,8 +76,7 @@ export const useGRNPDF = (
 
     const imgWidth = contentWidth;
     const availableContentHeight = pdfHeight - margin * 2;
-    const pageContentHeightPx =
-      (availableContentHeight * canvas.width) / imgWidth;
+    const pageContentHeightPx = (availableContentHeight * canvas.width) / imgWidth;
     const totalPages = Math.ceil(canvas.height / pageContentHeightPx);
 
     // Process each page
@@ -93,12 +90,12 @@ export const useGRNPDF = (
       const pageImgHeightPx = Math.min(pageContentHeightPx, remainingHeight);
       const pageImgHeight = (pageImgHeightPx * imgWidth) / canvas.width;
 
-      const pageCanvas = document.createElement("canvas");
+      const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = pageImgHeightPx;
 
-      const ctx = pageCanvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas context not available");
+      const ctx = pageCanvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context not available');
 
       ctx.drawImage(
         canvas,
@@ -112,72 +109,72 @@ export const useGRNPDF = (
         pageImgHeightPx
       );
 
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 1.0);
+      const pageImgData = pageCanvas.toDataURL('image/jpeg', 1.0);
 
       pdf.addImage(
         pageImgData,
-        "JPEG",
+        'JPEG',
         margin,
         margin,
         imgWidth,
         pageImgHeight,
         undefined,
-        "FAST",
+        'FAST',
         0
       );
 
       // ADD FOOTER WITH GRN CODE AND PAGE NUMBER
-      addPdfFooter(pdf, grnData.GRDCode, "GRN Code", i + 1, totalPages, margin);
+      addPdfFooter(pdf, grnData.grdCode, 'GRN Code', i + 1, totalPages, margin);
     }
 
-    const pdfBlob = pdf.output("blob");
-    return new File([pdfBlob], filename, { type: "application/pdf" });
+    const pdfBlob = pdf.output('blob');
+    return new File([pdfBlob], filename, { type: 'application/pdf' });
   };
 
   const downloadPDF = async (): Promise<void> => {
     if (!grnData || !pdfRef.current) {
-      toast.error("No Goods Received data available");
+      toast.error('No Goods Received data available');
       return;
     }
 
     try {
-      const filename = `${grnData.GRDCode || "GRN"}.pdf`;
+      const filename = `${grnData.grdCode || 'GRN'}.pdf`;
       await generatePdf(pdfRef.current, {
         filename,
-        format: "a4",
-        orientation: "portrait",
+        format: 'a4',
+        orientation: 'portrait',
         scale: 2,
         margin: 10,
         multiPage: true,
         quality: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: '#FFFFFF',
         titleOptions: {
-          text: `Goods Received Note - ${grnData.GRDCode || ""}`,
+          text: `Goods Received Note - ${grnData.grdCode || ''}`,
           fontSize: 16,
-          fontStyle: "bold",
-          color: "#000000",
+          fontStyle: 'bold',
+          color: '#000000',
           marginBottom: 10,
         },
         footerOptions: {
-          left: `GRN Code: ${grnData.GRDCode || "N/A"}`,
+          left: `GRN Code: ${grnData.grdCode || 'N/A'}`,
           right: (currentPage: number, totalPages: number) =>
             `Page ${currentPage} of ${totalPages}`,
           fontSize: 9,
-          color: "#666666",
-          lineColor: "#E0E0E0",
+          color: '#666666',
+          lineColor: '#E0E0E0',
         },
         save: true,
       });
-      toast.success("PDF downloaded successfully");
+      toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error("PDF download failed:", error);
-      toast.error("Failed to download PDF");
+      console.error('PDF download failed:', error);
+      toast.error('Failed to download PDF');
     }
   };
 
   const previewPDF = () => {
     if (!grnData) {
-      toast.error("No Goods Received data available");
+      toast.error('No Goods Received data available');
       return;
     }
     setShowPreview(true);

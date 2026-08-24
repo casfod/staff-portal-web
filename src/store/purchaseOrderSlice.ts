@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PurchaseOrderType } from "../interfaces";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IPurchaseOrder } from '../interfaces';
 
 interface PurchaseOrderState {
-  purchaseOrder: PurchaseOrderType | null;
+  purchaseOrder: IPurchaseOrder | null;
 }
 
 const initialState: PurchaseOrderState = {
@@ -10,18 +10,17 @@ const initialState: PurchaseOrderState = {
 };
 
 const purchaseOrderSlice = createSlice({
-  name: "purchaseOrder",
+  name: 'purchaseOrder',
   initialState,
   reducers: {
-    setPurchaseOrder: (state, action: PayloadAction<PurchaseOrderType>) => {
+    setPurchaseOrder: (state, action: PayloadAction<IPurchaseOrder>) => {
       state.purchaseOrder = action.payload;
     },
-    clearPurchaseOrder: (state) => {
+    clearPurchaseOrder: state => {
       state.purchaseOrder = null;
     },
   },
 });
 
-export const { setPurchaseOrder, clearPurchaseOrder } =
-  purchaseOrderSlice.actions;
+export const { setPurchaseOrder, clearPurchaseOrder } = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;

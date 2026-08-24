@@ -1,26 +1,26 @@
-import axios from "axios";
-
-import { PasswordResetTypes, UserType } from "../interfaces.ts";
-import { generalApiHeader } from "../utils/generalApiHeader.ts";
-import { baseUrl } from "./baseUrl.ts";
+// src/services/apiAuth.ts
+import axios from 'axios';
+import { IPasswordForgot, IPasswordReset, IUser, IUserSingleResponse } from '../interfaces';
+// import { generalApiHeader } from "../utils/generalApiHeader";
+import { baseUrl } from './baseUrl';
+import apiClient from './apiClient';
 
 const apiURL = baseUrl();
-const headers = generalApiHeader();
+// const headers = generalApiHeader();
 
+// Auth uses a separate axios instance since it doesn't need the token interceptor
 export const login = async function (email: string, password: string) {
   try {
-    const response = await axios.post<UserType>(`${apiURL}/users/login`, {
+    const response = await axios.post<IUser>(`${apiURL}/auth/login`, {
       email,
       password,
     });
 
     return response.data;
   } catch (err) {
-    // ErrorHandler(err);
     if (axios.isAxiosError(err)) {
       return err.response?.data;
     } else {
-      // Handle other errors
       console.log(err);
     }
   }
@@ -28,17 +28,13 @@ export const login = async function (email: string, password: string) {
 
 export const getUser = async function () {
   try {
-    const response = await axios.get<UserType>(`${apiURL}/users/me`, {
-      headers,
-    });
+    const response = await apiClient.get<IUserSingleResponse>(`${apiURL}/auth/me`);
 
     return response.data;
   } catch (err) {
-    // ErrorHandler(err);
     if (axios.isAxiosError(err)) {
       return err.response?.data;
     } else {
-      // Handle other errors
       console.log(err);
     }
   }
@@ -46,8 +42,8 @@ export const getUser = async function () {
 
 export const logout = async function () {
   try {
-    const response = await axios.get(`${apiURL}/users/logout`);
-    document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    const response = await axios.get(`${apiURL}/auth/logout`);
+    document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
     return response.data;
   } catch (err) {
@@ -57,41 +53,29 @@ export const logout = async function () {
 
 export const forgotPassword = async function (email: string) {
   try {
-    const response = await axios.post<UserType>(
-      `${apiURL}/users/forgotPassword`,
-      { email: email }
-    );
-    console.log(response.data);
+    const response = await axios.post<IPasswordForgot>(`${apiURL}/auth/forgot-password`, {
+      email: email,
+    });
 
     return response.data;
   } catch (err) {
-    // ErrorHandler(err);
     if (axios.isAxiosError(err)) {
       return err.response?.data;
     } else {
-      // Handle other errors
       console.log(err);
     }
   }
 };
-export const resetPassword = async function (
-  token: string,
-  data: PasswordResetTypes
-) {
+
+export const resetPassword = async function (data: Partial<IPasswordReset>) {
   try {
-    const response = await axios.patch<UserType>(
-      `${apiURL}/users/resetPassword/${token}`,
-      data
-    );
-    console.log(response.data);
+    const response = await axios.post<IPasswordReset>(`${apiURL}/auth/reset-password/`, data);
 
     return response.data;
   } catch (err) {
-    // ErrorHandler(err);
     if (axios.isAxiosError(err)) {
       return err.response?.data;
     } else {
-      // Handle other errors
       console.log(err);
     }
   }

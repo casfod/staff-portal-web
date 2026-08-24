@@ -1,185 +1,169 @@
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+// features/purchase-order/AllPurchaseOrders.tsx
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import {
-  usePurchaseOrders,
-  useDeletePurchaseOrder,
-} from "./Hooks/usePurchaseOrder";
-import { useDispatch, useSelector } from "react-redux";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import { RootState } from "../../store/store";
-import { BiSearch } from "react-icons/bi";
-import { setSearchTerm, setPage } from "../../store/genericQuerySlice";
-import { GoXCircle } from "react-icons/go";
-import { Pagination } from "../../ui/Pagination";
-import { useDebounce } from "use-debounce";
-import { PurchaseOrderType } from "../../interfaces";
-import { setPurchaseOrder } from "../../store/purchaseOrderSlice";
-import Spinner from "../../ui/Spinner";
-import { localStorageUser } from "../../utils/localStorageUser";
-import TextHeader from "../../ui/TextHeader";
-import Button from "../../ui/Button";
-import PurchaseOrderTableRow from "./PurchaseOrderTableRow";
-import useDeleteRequest from "../../hooks/useDeleteRequest";
+import { ListPage } from '../../components/custom/ListPage';
+import { FilterToolbar } from '@/components/filters/FilterToolbar';
+import { useFilteredList } from '@/hooks/useFilteredList';
+import { usePurchaseOrders, useDeletePurchaseOrder } from './Hooks/usePurchaseOrder';
+import PurchaseOrderTableRow from './PurchaseOrderTableRow';
+import { setPurchaseOrder } from '../../store/purchaseOrderSlice';
+import { IPurchaseOrder, IFilterConfig } from '../../interfaces';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { localStorageUser } from '../../utils/localStorageUser';
 
-export function AllPurchaseOrders() {
-  const currentUser = localStorageUser();
+// Define filter configurations for Purchase Orders
+const purchaseOrderFilterConfigs: IFilterConfig[] = [
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'select',
+    options: [
+      { value: 'pending', label: 'Pending' },
+      { value: 'approved', label: 'Approved' },
+      { value: 'rejected', label: 'Rejected' },
+    ],
+    placeholder: 'Filter by status...',
+  },
+  {
+    key: 'rfqTitle',
+    label: 'PO Title',
+    type: 'text',
+    placeholder: 'Filter by PO title...',
+  },
+  {
+    key: 'poCode',
+    label: 'PO Code',
+    type: 'text',
+    placeholder: 'Search by PO code...',
+  },
+  {
+    key: 'vendor',
+    label: 'Vendor',
+    type: 'text',
+    placeholder: 'Filter by vendor name...',
+  },
+  {
+    key: 'dateFrom',
+    label: 'Date From',
+    type: 'date',
+  },
+  {
+    key: 'dateTo',
+    label: 'Date To',
+    type: 'date',
+  },
+];
+
+const AllPurchaseOrders = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const currentUser = localStorageUser();
 
-  const { searchTerm, sort, page, limit } = useSelector(
-    (state: RootState) => state.genericQuerySlice
-  );
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 600);
-
-  const { data, isLoading, isError, refetch } = usePurchaseOrders({
-    search: debouncedSearchTerm,
-    sort,
+  // Use the filtered list hook
+  const {
+    searchTerm,
+    handleSearchChange,
     page,
-    limit,
+    handlePageChange,
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    queryParams,
+    filterConfigs,
+  } = useFilteredList({
+    filterConfigs: purchaseOrderFilterConfigs,
+    defaultFilters: {},
   });
 
+  const { data, isLoading, isError } = usePurchaseOrders(queryParams);
   const { deletePurchaseOrder } = useDeletePurchaseOrder();
 
-  // State for toggling nested tables
-  const [visibleItems, setVisibleItems] = useState<Record<string, boolean>>({});
-  useEffect(() => {
-    refetch();
-  }, []);
+  const purchaseOrders = useMemo(() => data?.data ?? [], [data]);
+  const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
 
-  const purchaseOrders = useMemo(
-    () => data?.data?.purchaseOrders ?? [],
-    [data]
+  const handleAction = useCallback(
+    (purchaseOrder: IPurchaseOrder) => {
+      dispatch(setPurchaseOrder(purchaseOrder));
+      navigate(`/procurement/purchase-order/${purchaseOrder.id}`);
+    },
+    [dispatch, navigate]
   );
 
-  const totalPages = useMemo(() => data?.data?.totalPages ?? 1, [data]);
-
-  // Toggle nested table visibility
-  const toggleViewItems = (id: string) => {
-    setVisibleItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
-  };
-
-  const handleAction = (purchaseOrder: PurchaseOrderType) => {
-    dispatch(setPurchaseOrder(purchaseOrder));
-    navigate(`/procurement/purchase-order/${purchaseOrder.id}`);
-  };
-
-  const handleEdit = (purchaseOrder: PurchaseOrderType) => {
-    dispatch(setPurchaseOrder(purchaseOrder));
-    navigate(`/procurement/purchase-order/edit/${purchaseOrder.id}`);
-  };
+  const handleEdit = useCallback(
+    (purchaseOrder: IPurchaseOrder) => {
+      dispatch(setPurchaseOrder(purchaseOrder));
+      navigate(`/procurement/purchase-order/edit/${purchaseOrder.id}`);
+    },
+    [dispatch, navigate]
+  );
 
   const handleDelete = useDeleteRequest(deletePurchaseOrder, {
-    entityName: "Purchase Order",
+    entityName: 'Purchase Order',
   });
 
-  if (isError) {
-    return <NetworkErrorUI />;
-  }
+  // Check if user can create PO
+  const canCreate = currentUser.role === 'SUPER-ADMIN' || currentUser?.procurementRole?.canCreate;
 
-  const tableHeadData = ["Vendor", "Status", "Amount", "Date", "Actions"];
+  const tableHeadData = [
+    { label: 'Vendor', showOnMobile: true, minWidth: '150px' },
+    { label: 'Status', showOnMobile: true, minWidth: '100px' },
+    { label: 'Amount', showOnMobile: true, minWidth: '120px' },
+    { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '120px' },
+    { label: 'Actions', showOnMobile: true, minWidth: '100px' },
+  ];
+
+  // Create the FilterToolbar as a component to pass to ListPage
+  const filterToolbar = (
+    <FilterToolbar
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      filters={filters}
+      onFilterChange={setFilter}
+      filterConfigs={filterConfigs}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
+      searchPlaceholder="Search purchase orders..."
+    />
+  );
 
   return (
-    <div className="flex flex-col space-y-3 pb-80">
-      <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-        {/* Header with title and button */}
-        <div className="flex justify-between items-center">
-          <TextHeader>Purchase Orders</TextHeader>
-
-          <div className="flex items-center gap-3">
-            {(currentUser.role === "SUPER-ADMIN" ||
-              currentUser?.procurementRole?.canCreate) && (
-              <Button
-                onClick={() => navigate("/procurement/purchase-order/create")}
-              >
-                <Plus className="h-4 w-4 mr-1 md:mr-2" />
-                Create PO
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="flex items-center space-x-4">
-          <div className="relative flex items-center w-full max-w-[298px] h-9 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus-within:border-gray-400 transition">
-            <span className="p-2 text-gray-400">
-              <BiSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-              className="w-full h-full px-2 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-0 mr-7"
-              placeholder="Search Purchase Orders..."
-            />
-            <span
-              className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer hover:scale-110"
-              onClick={() => dispatch(setSearchTerm(""))}
-            >
-              <GoXCircle />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Purchase Orders Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden border overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {tableHeadData.map((title, index) => (
-                <th
-                  key={index}
-                  className="px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-xs 2xl:text-text-sm tracking-wider overflow-x-scroll"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody className="max-w-full bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={tableHeadData.length} className="py-8">
-                  <div className="flex justify-center items-center">
-                    <Spinner />
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              purchaseOrders.map((purchaseOrder) => (
-                <PurchaseOrderTableRow
-                  key={purchaseOrder.id}
-                  purchaseOrder={purchaseOrder}
-                  visibleItems={visibleItems}
-                  toggleViewItems={toggleViewItems}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleAction={handleAction}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {(purchaseOrders.length >= limit || totalPages > 1) && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <ListPage
+      title="Purchase Orders"
+      data={purchaseOrders}
+      headers={tableHeadData}
+      isLoading={isLoading}
+      isError={isError}
+      currentPage={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      renderRow={purchaseOrder => (
+        <PurchaseOrderTableRow
+          key={purchaseOrder.id}
+          purchaseOrder={purchaseOrder}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleAction={handleAction}
+          tableHeadData={tableHeadData}
         />
       )}
-    </div>
+      onAdd={canCreate ? () => navigate('/procurement/purchase-order/create') : undefined}
+      addButtonLabel="Create PO"
+      emptyMessage={
+        hasActiveFilters ? 'No purchase orders match your filters' : 'No purchase orders found'
+      }
+      emptySubMessage={
+        hasActiveFilters
+          ? 'Try adjusting your filters or search terms'
+          : 'Create your first purchase order'
+      }
+      searchComponent={filterToolbar}
+    />
   );
-}
+};
+
+export default AllPurchaseOrders;

@@ -1,39 +1,54 @@
 // components/payment-vouchers/PaymentVoucher.tsx
-import { List, Download } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { RootState } from "../../store/store";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { formatToDDMMYYYY } from "../../utils/formatToDDMMYYYY";
-import { moneyFormat } from "../../utils/moneyFormat";
-import { localStorageUser } from "../../utils/localStorageUser";
-import { useAdmins } from "../user/Hooks/useUsers";
-import { PaymentVoucherDetails } from "./PaymentVoucherDetails";
-import StatusBadge from "../../ui/StatusBadge";
-import RequestCommentsAndActions from "../../ui/RequestCommentsAndActions";
-import StatusUpdateForm from "../../ui/StatusUpdateForm";
-import AdminApprovalSection from "../../ui/AdminApprovalSection";
-import Button from "../../ui/Button";
-import TextHeader from "../../ui/TextHeader";
-import { FileUpload } from "../../ui/FileUpload";
-import SpinnerMini from "../../ui/SpinnerMini";
-import { useStatusUpdate } from "../../hooks/useStatusUpdate";
-import NetworkErrorUI from "../../ui/NetworkErrorUI";
-import Spinner from "../../ui/Spinner";
-import { DataStateContainer } from "../../ui/DataStateContainer";
-import { MaintenanceBanner } from "../../ui/MaintenanceBanner";
-import ActionIcons from "../../ui/ActionIcons";
-import { usePdfDownload } from "../../hooks/usePdfDownload";
+import { List, Loader2, CheckCircle, FileUp } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { RootState } from '../../store/store';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
+import { moneyFormat } from '../../utils/moneyFormat';
+import { localStorageUser } from '../../utils/localStorageUser';
+import { useAdmins } from '../user/Hooks/useUsers';
+import { PaymentVoucherDetails } from './PaymentVoucherDetails';
+import StatusBadge from '../../components/custom/StatusBadge';
+import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
+import AdminApprovalSection from '../../components/custom/AdminApprovalSection';
+import { Button } from '../../components/ui/button';
+import TextHeader from '../../components/custom/TextHeader';
+import { FileUpload } from '../../components/custom/FileUpload';
+import SpinnerMini from '../../components/custom/SpinnerMini';
+import { useStatusUpdate } from '../../hooks/useStatusUpdate';
+import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
+import Spinner from '../../components/custom/Spinner';
+import { DataStateContainer } from '../../components/custom/DataStateContainer';
+import { MaintenanceBanner } from '../../components/custom/MaintenanceBanner';
+import ActionIcons from '../../components/custom/ActionIcons';
+import { usePdfDownload } from '../../hooks/usePdfDownload';
 import {
   usePaymentVoucherDetail,
-  useUpdatePaymentVoucherLegacy as useUpdatePaymentVoucher,
+  useUpdatePaymentVoucher,
   useUpdateStatus,
   useCopy,
-  useAddFilesToPaymentVoucher,
-} from "./Hooks/usePaymentVoucher";
-import PVPDFTemplate from "./PVPDFTemplate";
-import PDFPreviewModal from "../../ui/PDFPreviewModal";
-import toast from "react-hot-toast";
+} from './Hooks/usePaymentVoucher';
+import PVPDFTemplate from './PVPDFTemplate';
+import PDFPreviewModal from '../../components/custom/PDFPreviewModal';
+import toast from 'react-hot-toast';
+import { useEntityFiles, useFileUpload } from '../../hooks/useFile';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { infoConfig } from '@/config/config-info';
+
+// Helper to generate consistent PDF filename
+const getPDFFileName = (pvNumber: string): string => {
+  // Remove slashes and replace with hyphens for safe filename
+  const sanitizedPvNumber = pvNumber.replace(/\//g, '-');
+  return `Payment-voucher-${sanitizedPvNumber}.pdf`;
+};
+
+// Helper to check if a file matches our naming pattern
+const isTargetPDFFile = (fileName: string, pvNumber: string): boolean => {
+  const sanitizedPvNumber = pvNumber.replace(/\//g, '-');
+  return fileName === `Payment-voucher-${sanitizedPvNumber}.pdf`;
+};
 
 const PaymentVoucher = () => {
   const isUnderMaintenance = false;
@@ -43,15 +58,9 @@ const PaymentVoucher = () => {
   const { voucherId } = useParams();
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const {
-    data: remoteData,
-    isLoading,
-    isError,
-  } = usePaymentVoucherDetail(voucherId!);
+  const { data: remoteData, isLoading, isError } = usePaymentVoucherDetail(voucherId!);
 
-  const paymentVoucher = useSelector(
-    (state: RootState) => state.paymentVoucher.paymentVoucher
-  );
+  const paymentVoucher = useSelector((state: RootState) => state.paymentVoucher.paymentVoucher);
 
   const voucherData = useMemo(
     () => remoteData?.data || paymentVoucher,
@@ -60,13 +69,46 @@ const PaymentVoucher = () => {
 
   useEffect(() => {
     if (!voucherId || (!isLoading && !voucherData)) {
-      navigate("/payment-vouchers");
+      navigate('/payment-vouchers');
     }
   }, [voucherData, voucherId, navigate, isLoading]);
 
-  const [status, setStatus] = useState("");
-  const [comment, setComment] = useState("");
-  const [formData, setFormData] = useState({ approvedBy: null });
+  // ─── PDF upload state ─────────────────────────────────────────────
+  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
+  const [isPdfReady, setIsPdfReady] = useState(false);
+  const generatedPdfFileRef = useRef<File | null>(null);
+  const isGeneratingOrUploadingRef = useRef(false);
+  const [isDeletingOldFiles, setIsDeletingOldFiles] = useState(false);
+
+  // ─── Get existing files for this Payment Voucher ─────────────────
+  const {
+    files: existingFiles,
+    isLoading: isLoadingFiles,
+    deleteFile: deleteExistingFile,
+    refetch: refetchFiles,
+  } = useEntityFiles('PaymentVoucher', voucherData?.id || '');
+
+  // ─── Check if a PDF already exists ───────────────────────────────
+  useEffect(() => {
+    if (voucherData?.id && existingFiles.length > 0 && voucherData?.pvNumber) {
+      // const pdfFileName = getPDFFileName(voucherData.pvNumber);
+      const existingPDF = existingFiles.find(file =>
+        isTargetPDFFile(file.name, voucherData.pvNumber)
+      );
+
+      if (existingPDF) {
+        setUploadedFileIds([existingPDF.id]);
+        setIsPdfReady(true);
+      } else {
+        setUploadedFileIds([]);
+        setIsPdfReady(false);
+      }
+    }
+  }, [existingFiles, voucherData]);
+
+  const [status, setStatus] = useState('');
+  const [comment, setComment] = useState('');
+  const [formData, setFormData] = useState({ approvedBy: undefined });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -74,14 +116,15 @@ const PaymentVoucher = () => {
   const { handleStatusChange } = useStatusUpdate();
 
   // ── Mutations ──────────────────────────────────────────────────────────────
-  const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(
-    voucherId!
-  );
-  const { updatePaymentVoucher, isPending: isUpdating } =
-    useUpdatePaymentVoucher(voucherId!);
-  const { addFilesToPaymentVoucher, isPending: isUploadingFiles } =
-    useAddFilesToPaymentVoucher();
+  const { updateStatus, isPending: isUpdatingStatus } = useUpdateStatus(voucherId!);
+  const { updatePaymentVoucher, isPending: isUpdating } = useUpdatePaymentVoucher(voucherId!);
   const { copyto, isPending: isCopying } = useCopy(voucherId!);
+
+  // ── File Upload Hook ──────────────────────────────────────────────────────
+  const { uploadFiles, isUploading: isUploadingPdf } = useFileUpload({
+    associatedModel: 'PaymentVoucher',
+    associatedId: voucherData?.id,
+  });
 
   const { data: adminsData, isLoading: isLoadingAmins } = useAdmins();
   const admins = useMemo(() => adminsData?.data ?? [], [adminsData]);
@@ -93,121 +136,172 @@ const PaymentVoucher = () => {
   const pvTemplateRef = useRef<HTMLDivElement>(null);
 
   // ── Unified PDF hook ───────────────────────────────────────────────────────
-  // templateRef wires the off-screen template automatically into generateFile()
   const {
     downloadPdf,
     generateFile,
     previewPdf,
     isGenerating: isGeneratingPDF,
   } = usePdfDownload({
-    filename: `CASFOD-PAYMENT-VOUCHER-${(voucherData?.pvNumber ?? "").replace(
-      /\//g,
-      "-"
-    )}.pdf`,
-    format: "a4",
-    orientation: "landscape",
+    filename: `${infoConfig.abbriviation}-PAYMENT-VOUCHER-${(voucherData?.pvNumber ?? '').replace(/\//g, '-')}.pdf`,
+    format: 'a4',
+    orientation: 'landscape',
     scale: 2,
     margin: 10,
     multiPage: true,
     quality: 1,
-    backgroundColor: "#FFFFFF",
-    // ✅ Standard footer: "PV Number: CASFOD/… | Page 1 of 1"
+    backgroundColor: '#FFFFFF',
     footerCode: {
-      label: "CASDFOD PV Number",
-      value: voucherData?.pvNumber ?? "",
+      label: `${infoConfig.abbriviation} PV Number`,
+      value: voucherData?.pvNumber ?? '',
     },
     templateRef: pvTemplateRef,
   });
 
   const handleDownloadPDF = () => downloadPdf(pdfContentRef);
 
-  const handleUploadPDF = async () => {
-    if (!voucherData) return;
-    try {
-      // generateFile() automatically uses pvTemplateRef (off-screen template)
-      const pdfFile = await generateFile();
-      await addFilesToPaymentVoucher({
-        paymentVoucherId: voucherId!,
-        files: [pdfFile],
-      });
-    } catch (error) {
-      console.error("PDF upload failed:", error);
-      toast.error("Failed to generate or upload PDF");
+  // ─── Step 1: Generate & Upload (with cleanup) ───────────────────────────
+  const handleGenerateAndUploadPDF = useCallback(async (): Promise<boolean> => {
+    if (!voucherData?.id || !voucherData?.pvNumber) {
+      toast.error('No payment voucher found');
+      return false;
     }
-  };
 
-  // ── Form handlers ──────────────────────────────────────────────────────────
+    // Already ready → skip re-upload
+    if (isPdfReady && uploadedFileIds.length > 0) {
+      toast.success('PDF is already generated and uploaded');
+      return true;
+    }
+
+    if (isGeneratingOrUploadingRef.current) {
+      return false;
+    }
+    isGeneratingOrUploadingRef.current = true;
+
+    try {
+      // 1. Generate PDF using the existing generateFile function
+      const pdfFile = await generateFile();
+      if (!pdfFile) {
+        toast.error('Failed to generate Payment Voucher PDF');
+        return false;
+      }
+
+      // 2. Rename the file with our naming convention
+      const targetFileName = getPDFFileName(voucherData.pvNumber);
+      const renamedFile = new File([pdfFile], targetFileName, {
+        type: pdfFile.type,
+      });
+      generatedPdfFileRef.current = renamedFile;
+
+      // 3. Delete any existing PDF with the same name
+      const existingPDF = existingFiles.find(file =>
+        isTargetPDFFile(file.name, voucherData.pvNumber)
+      );
+
+      if (existingPDF) {
+        setIsDeletingOldFiles(true);
+        try {
+          await deleteExistingFile(existingPDF.id);
+          toast.success(`Removed old PDF: ${existingPDF.name}`);
+        } catch (deleteError) {
+          console.error('Failed to delete existing PDF:', deleteError);
+          // Continue with upload even if delete fails
+        } finally {
+          setIsDeletingOldFiles(false);
+        }
+      }
+
+      // 4. Upload the new PDF using our upload hook
+      const uploaded = await uploadFiles([renamedFile]);
+      if (!uploaded.length) {
+        toast.error('Failed to upload Payment Voucher PDF');
+        return false;
+      }
+
+      const fileIds = uploaded.map(f => f.id);
+      setUploadedFileIds(fileIds);
+      setIsPdfReady(true);
+
+      // 5. Refresh the file list
+      await refetchFiles();
+
+      toast.success(`PDF generated and uploaded: ${targetFileName}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to generate/upload PDF:', error);
+      toast.error('Failed to prepare PDF');
+      return false;
+    } finally {
+      isGeneratingOrUploadingRef.current = false;
+    }
+  }, [
+    voucherData?.id,
+    voucherData?.pvNumber,
+    generateFile,
+    uploadFiles,
+    existingFiles,
+    deleteExistingFile,
+    refetchFiles,
+    isPdfReady,
+    uploadedFileIds,
+  ]);
+
+  // ─── Form handlers ──────────────────────────────────────────────────────────
   const handleFormChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const onStatusChangeHandler = () => {
-    handleStatusChange(
-      status,
-      comment,
-      async (data: { status: string; comment: string }) => {
-        try {
-          await updateStatus(data);
-        } catch (error) {
-          throw error;
-        }
-      }
-    );
+    handleStatusChange(status, comment, async (data: { status: string; comment: string }) => {
+      await updateStatus(data);
+    });
   };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePaymentVoucher({ data: formData, files: selectedFiles });
+    updatePaymentVoucher({ data: formData });
   };
 
   // ── Permission flags ───────────────────────────────────────────────────────
-  const currentUserId = currentUser.id;
+    const { currentUserId } = useUserRoles();
   const userRole = currentUser.role;
   const voucherStatus = voucherData?.status;
 
   const isCreator = voucherData?.createdBy?.id === currentUserId;
   const isReviewer = voucherData?.reviewedBy?.id === currentUserId;
   const isApprover = voucherData?.approvedBy?.id === currentUserId;
-  const isAdmin = ["SUPER-ADMIN", "ADMIN"].includes(userRole);
+  const isAdmin = ['SUPER-ADMIN', 'ADMIN'].includes(userRole);
 
-  const canUploadFiles = isCreator && voucherStatus === "approved";
+  const canUploadFiles = isCreator && voucherStatus === 'approved';
   const canShareVoucher =
-    isCreator ||
-    ["SUPER-ADMIN", "ADMIN", "REVIEWER"].includes(currentUser.role);
+    isCreator || ['SUPER-ADMIN', 'ADMIN', 'REVIEWER'].includes(currentUser.role);
   const canUpdateStatus =
     !isCreator &&
-    ((userRole === "REVIEWER" && voucherStatus === "pending" && isReviewer) ||
-      (isAdmin && voucherStatus === "reviewed" && isApprover));
+    ((userRole === 'REVIEWER' && voucherStatus === 'pending' && isReviewer) ||
+      (isAdmin && voucherStatus === 'reviewed' && isApprover));
 
   const showAdminApproval =
     !voucherData?.approvedBy &&
-    voucherStatus === "reviewed" &&
+    voucherStatus === 'reviewed' &&
     (isCreator ||
       (isReviewer && !voucherData?.reviewedBy) ||
       (isApprover && !voucherData?.approvedBy));
 
-  const canGeneratePDF = isCreator && voucherStatus !== "draft";
+  // Update canGeneratePDF to use our new logic
+  const canGeneratePDF = isCreator && voucherStatus !== 'draft';
 
   // ── Table data ─────────────────────────────────────────────────────────────
-  const tableHeadData = [
-    "Voucher",
-    "Status",
-    "Pay To",
-    "Amount",
-    "Date",
-    "Actions",
-  ];
+  const tableHeadData = ['Voucher', 'Status', 'Pay To', 'Amount', 'Date', 'Actions'];
   const tableRowData = [
-    { id: "pvNumber", content: voucherData?.pvNumber },
-    { id: "status", content: <StatusBadge status={voucherData?.status!} /> },
-    { id: "payTo", content: voucherData?.payTo },
+    { id: 'pvNumber', content: voucherData?.pvNumber },
+    { id: 'status', content: <StatusBadge status={voucherData?.status ?? ''} /> },
+    { id: 'payTo', content: voucherData?.payTo },
     {
-      id: "netAmount",
-      content: moneyFormat(voucherData?.netAmount || 0, "NGN"),
+      id: 'netAmount',
+      content: moneyFormat(voucherData?.netAmount || 0, 'NGN'),
     },
-    { id: "createdAt", content: formatToDDMMYYYY(voucherData?.createdAt!) },
+    { id: 'createdAt', content: formatToDDMMYYYY(voucherData?.createdAt ?? '') },
     {
-      id: "action",
+      id: 'action',
       content: (
         <ActionIcons
           copyTo={copyto}
@@ -224,6 +318,8 @@ const PaymentVoucher = () => {
     },
   ];
 
+  const isBusy = isUploadingPdf || isGeneratingPDF || isDeletingOldFiles || isCopying;
+
   return (
     <>
       {isUnderMaintenance ? (
@@ -234,14 +330,56 @@ const PaymentVoucher = () => {
         />
       ) : (
         <div className="flex flex-col space-y-3 pb-80">
-          <div className="sticky top-0 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
-            <div className="flex justify-between items-center">
-              <TextHeader>Payment Voucher - {voucherData?.pvNumber}</TextHeader>
-              <Button onClick={() => navigate("/payment-vouchers")}>
-                <List className="h-4 w-4 mr-1 md:mr-2" />
-                List
-              </Button>
+          <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
+            <div className="flex flex-wrap md:flex-row justify-between md:items-center gap-3 md:gap-0">
+              <TextHeader>Payment Voucher</TextHeader>
+              <div className="flex flex-wrap md:flex-row md:items-center gap-3">
+                {/* Generate & Upload PDF */}
+                {canGeneratePDF && (
+                  <Button
+                    onClick={handleGenerateAndUploadPDF}
+                    variant="outline"
+                    size="sm"
+                    disabled={isBusy || isPdfReady || isLoadingFiles}
+                  >
+                    {isUploadingPdf || isGeneratingPDF || isDeletingOldFiles ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {isDeletingOldFiles ? 'Removing old PDF…' : 'Preparing…'}
+                      </>
+                    ) : isPdfReady ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                        PDF Ready ({uploadedFileIds.length} file)
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="h-4 w-4 mr-2" />
+                        Generate & Upload
+                      </>
+                    )}
+                  </Button>
+                )}
+                <Button onClick={() => navigate('/payment-vouchers')} variant="outline" size="sm">
+                  <List className="h-4 w-4 mr-1 md:mr-2" />
+                  List
+                </Button>
+              </div>
             </div>
+
+            {isPdfReady && (
+              <div className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                <CheckCircle className="h-4 w-4" />
+                PDF ready for sharing ({uploadedFileIds.length} file
+                {uploadedFileIds.length !== 1 ? 's' : ''})
+              </div>
+            )}
+
+            {isPdfReady && uploadedFileIds.length > 0 && voucherData?.pvNumber && (
+              <div className="text-xs text-gray-500 mt-0.5">
+                Filename: {getPDFFileName(voucherData.pvNumber)}
+              </div>
+            )}
           </div>
 
           {/* ── Main Content ──────────────────────────────────────────────── */}
@@ -270,7 +408,7 @@ const PaymentVoucher = () => {
 
                 <tbody className="bg-white divide-y divide-gray-200">
                   <tr key={voucherData?.id} className="h-[40px] max-h-[40px]">
-                    {tableRowData.map((data) => (
+                    {tableRowData.map(data => (
                       <td
                         key={data.id}
                         className="min-w-[150px] px-3 py-2.5 md:px-6 md:py-3 text-left font-medium uppercase text-sm 2xl:text-text-base tracking-wider"
@@ -296,58 +434,31 @@ const PaymentVoucher = () => {
                             />
                             {selectedFiles.length > 0 && (
                               <div className="self-center">
-                                <Button
-                                  disabled={isUpdating}
-                                  onClick={handleSend}
-                                >
-                                  {isUpdating ? (
-                                    <SpinnerMini />
-                                  ) : (
-                                    "Upload Files"
-                                  )}
+                                <Button disabled={isUpdating} onClick={handleSend}>
+                                  {isUpdating ? <SpinnerMini /> : 'Upload Files'}
                                 </Button>
                               </div>
                             )}
                           </div>
                         )}
 
-                        {/* Generate & Upload PDF */}
-                        {canGeneratePDF && (
-                          <div className="flex justify-center w-full p-4 mt-4 border-t pt-6">
-                            <Button
-                              variant="primary"
-                              size="small"
-                              onClick={handleUploadPDF}
-                              disabled={isUploadingFiles || isGeneratingPDF}
-                            >
-                              <Download className="h-4 w-4 mr-1" />
-                              {isUploadingFiles || isGeneratingPDF
-                                ? "Generating..."
-                                : "Generate & Upload PDF"}
-                            </Button>
+                        {/* Comments & Status */}
+                        {voucherData?.reviewedBy && voucherStatus !== 'draft' && (
+                          <div className="mt-4 tracking-wide">
+                            <RequestCommentsAndActions request={voucherData} />
+                            {canUpdateStatus && (
+                              <StatusUpdateForm
+                                requestStatus={voucherStatus}
+                                status={status}
+                                setStatus={setStatus}
+                                comment={comment}
+                                setComment={setComment}
+                                isUpdatingStatus={isUpdatingStatus}
+                                handleStatusChange={onStatusChangeHandler}
+                              />
+                            )}
                           </div>
                         )}
-
-                        {/* Comments & Status */}
-                        {voucherData?.reviewedBy &&
-                          voucherStatus !== "draft" && (
-                            <div className="mt-4 tracking-wide">
-                              <RequestCommentsAndActions
-                                request={voucherData}
-                              />
-                              {canUpdateStatus && (
-                                <StatusUpdateForm
-                                  requestStatus={voucherStatus}
-                                  status={status}
-                                  setStatus={setStatus}
-                                  comment={comment}
-                                  setComment={setComment}
-                                  isUpdatingStatus={isUpdatingStatus}
-                                  handleStatusChange={onStatusChangeHandler}
-                                />
-                              )}
-                            </div>
-                          )}
 
                         {/* Admin Approval */}
                         {showAdminApproval && (
@@ -373,7 +484,7 @@ const PaymentVoucher = () => {
           {/* ── Off-screen PDF template (for generate & upload) ───────────── */}
           <div
             ref={pvTemplateRef}
-            style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
+            style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}
           >
             {voucherData && (
               <PVPDFTemplate
@@ -393,9 +504,7 @@ const PaymentVoucher = () => {
             title={`Payment Voucher Preview - ${voucherData?.pvNumber}`}
             orientation="landscape"
           >
-            {voucherData && (
-              <PVPDFTemplate pvData={voucherData} orientation="landscape" />
-            )}
+            {voucherData && <PVPDFTemplate pvData={voucherData} orientation="landscape" />}
           </PDFPreviewModal>
         </div>
       )}
