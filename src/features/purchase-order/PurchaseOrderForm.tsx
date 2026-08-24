@@ -574,7 +574,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       </FormRow>
 
       {/* Delivery Address */}
-      <FormRow label="Select ${infoConfig.abbriviation}Delivery Address *">
+      <FormRow label="Select CASFOD Delivery Address *">
         <Select
           value={formData.casfodAddressId || ''}
           onValueChange={value => handleFormChange('casfodAddressId', value)}
