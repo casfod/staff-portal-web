@@ -11,7 +11,7 @@ import { useVendor } from './Hooks/useVendor';
 import { useUpdateVendorStatus } from './Hooks/useVendor';
 import { localStorageUser } from '../../utils/localStorageUser';
 import StatusBadge from '../../components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
 import Spinner from '../../components/custom/Spinner';
 import NetworkErrorUI from '../../components/custom/NetworkErrorUI';

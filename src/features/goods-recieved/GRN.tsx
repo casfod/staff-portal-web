@@ -17,7 +17,7 @@ import ActionIcons from '../../components/custom/ActionIcons';
 import { GRNDetails } from './GRNDetails';
 import GRNPDFTemplate from './GRNPDFTemplate';
 import PDFPreviewModal from '../../components/custom/PDFPreviewModal';
-import RequestCommentsAndActions, { TRequestEntityComments } from '@/components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions, { TRequestEntityComments } from '@/components/custom/RequestActions';
 import { useEntityFiles, useFileUpload } from '../../hooks/useFile';
 import toast from 'react-hot-toast';
 import { infoConfig } from '@/config/config-info';

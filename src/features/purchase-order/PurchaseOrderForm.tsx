@@ -280,6 +280,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       vat: formData.vat,
       selectedVendor: formData.selectedVendor,
       itemGroups: itemGroupsForApi,
+      approvedBy: formData.approvedBy
     };
   }, [formData]);
 

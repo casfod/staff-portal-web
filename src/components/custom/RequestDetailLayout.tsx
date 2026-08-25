@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import AdminApprovalSection from './AdminApprovalSection';
 import CommentSection from './CommentSection';
 import { FileUpload } from './FileUpload';
-import RequestCommentsAndActions from './RequestCommentsAndActions';
+import RequestActions from './RequestActions';
 import StatusUpdateForm from './StatusUpdateForm';
 import { IComment, IUser, WorkflowStatus } from '@/interfaces';
 
@@ -174,8 +174,6 @@ const RequestDetailLayout = ({
   canUpdateStatus = false,
   status = '',
   setStatus,
-  comment = '',
-  setComment,
   isUpdatingStatus = false,
   handleStatusChange,
 
@@ -295,7 +293,7 @@ const RequestDetailLayout = ({
       {/* Comments and Actions Section */}
       {request?.reviewedBy && requestStatus !== 'draft' && (
         <div className="mt-4 tracking-wide">
-          <RequestCommentsAndActions request={request} handleAction={handleAction} />
+          <RequestActions request={request} handleAction={handleAction} />
         </div>
       )}
 
@@ -306,8 +304,6 @@ const RequestDetailLayout = ({
             requestStatus={requestStatus}
             status={status}
             setStatus={setStatus || (() => {})}
-            comment={comment}
-            setComment={setComment || (() => {})}
             isUpdatingStatus={isUpdatingStatus}
             handleStatusChange={handleStatusChange || (() => {})}
             statusOptions={statusOptions}

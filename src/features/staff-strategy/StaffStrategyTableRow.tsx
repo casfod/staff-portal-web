@@ -6,7 +6,7 @@ import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 // Custom Components
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestActions from '../../components/custom/RequestActions';
 import StaffStrategyCard from './StaffStrategyCard';
 import { StaffStrategyDetails } from './StaffStrategyDetails';
 import StatusBadge from '@/components/custom/StatusBadge';
@@ -83,7 +83,7 @@ const StaffStrategyTableRow = ({
     <>
       <StaffStrategyDetails request={request} />
       <div className="mt-4 pt-4 border-t border-gray-200">
-        <RequestCommentsAndActions request={request} handleAction={handleAction} />
+        <RequestActions request={request} handleAction={handleAction} />
       </div>
     </>
   );

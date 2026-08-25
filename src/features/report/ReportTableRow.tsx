@@ -6,7 +6,7 @@ import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 // Custom Components
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import ReportCard from './ReportCard';
 import { ReportDetails } from './ReportDetails';
 import StatusBadge from '@/components/custom/StatusBadge';

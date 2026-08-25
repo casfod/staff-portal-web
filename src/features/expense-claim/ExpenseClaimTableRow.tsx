@@ -8,7 +8,7 @@ import { moneyFormat } from '../../utils/moneyFormat';
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
 import ExpenseClaimDetails from './ExpenseClaimDetails';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import ExpenceClaimCard from './ExpenceClaimCard';
 import StatusBadge from '@/components/custom/StatusBadge';
 

@@ -117,7 +117,7 @@ export const navigationItems: NavItem[] = [
     to: '/user-management/users',
     label: 'User Management',
     icon: Users,
-    permission: user => user?.role === 'ADMIN' || user?.role === 'SUPER-ADMIN',
+    permission: user => user?.role === 'SUPER-ADMIN',
   },
   {
     to: '/user-management/change-password',

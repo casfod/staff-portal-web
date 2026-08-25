@@ -144,7 +144,9 @@ export const PurchaseOrderDetails = ({ purchaseOrder }: PurchaseOrderDetailsProp
           id: 'approvedBy',
           label: 'Approved By',
           content: purchaseOrder.approvedBy
-            ? `${purchaseOrder.approvedBy.firstName} ${purchaseOrder.approvedBy.lastName}`
+            ? purchaseOrder.status === 'approved'
+              ? `${purchaseOrder.approvedBy.firstName} ${purchaseOrder.approvedBy.lastName}`
+              : 'Pending Approval'
             : 'Pending Approval',
           icon: <UserCheck className="w-4 h-4" />,
         },
