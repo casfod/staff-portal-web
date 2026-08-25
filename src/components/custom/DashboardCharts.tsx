@@ -50,12 +50,13 @@ const PENDING_OPACITY = 0.35;
 
 export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
   const hasData = data && data.length > 0;
+  const dataDisplayed: ChartData[] = hasData ? data.filter(item => item.name != 'Projects') : [{ name: 'No Data', total: 1, approved: 0, color: '#e5e7eb'}];
 
   // Prepare data for pie chart — each slice uses the same color as its
   // matching StatCard icon (item.color), so a user can visually link a
   // slice back to its stat card / icon at a glance.
   const pieData = hasData
-    ? data.filter(item => item.name != 'Projects').map(item => ({
+    ? dataDisplayed.map(item => ({
         name: item.name,
         value: item.total || 0,
         color: item.color || FALLBACK_COLOR,
@@ -65,7 +66,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
   // Prepare data for approval rate chart — color carried through per row so
   // each category's bars/area can be tinted with its icon color.
   const approvalData = hasData
-    ? data.filter(item => item.name != 'Projects').map(item => ({
+    ? dataDisplayed.map(item => ({
         name: item.name,
         Approved: item.approved || 0,
         Pending: (item.total || 0) - (item.approved || 0),
@@ -93,7 +94,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
             <div className="h-[240px] sm:h-[280px] overflow-x-auto overflow-y-hidden -mx-1 px-1">
               <div className="h-full min-w-[560px] sm:min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={approvalData} margin={{ left: -12 }}>
+                  <BarChart data={approvalData} margin={{ left: -1 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis
                       dataKey="name"
@@ -138,7 +139,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
             {/* Category color key — ties bar colors back to each StatCard icon */}
             {hasData && (
               <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-gray-100">
-                {data.map(item => (
+                {dataDisplayed.map(item => (
                   <div key={item.name} className="flex items-center gap-1.5">
                     <span
                       className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -196,7 +197,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
             {/* Category color key — same colors/order as the bar chart above */}
             {hasData && (
               <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-gray-100">
-                {data.map(item => (
+                {dataDisplayed.map(item => (
                   <div key={item.name} className="flex items-center gap-1.5">
                     <span
                       className="w-2.5 h-2.5 rounded-full shrink-0"

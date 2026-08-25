@@ -141,14 +141,14 @@ const Navigation: React.FC<NavigationProps> = ({
       <div className="flex-shrink-0">
         <Link
           to="/dashboard"
-          className="flex items-center justify-center border w-12 h-12 rounded-2xl bg-white to-primary/5 hover:shadow-md transition-all duration-200 group mx-auto shadow-md"
+          className="flex items-stretch justify-stretch overflow-hidden border w-32 h-12 p-0 rounded-2xl bg-white to-primary/5 hover:shadow-md transition-all duration-200 group mx-auto shadow-md"
           aria-label="Home"
           onClick={() => onNavigate?.()}
         >
           <img
-            src={infoConfig.smallLogoUrl}
+            src={infoConfig.bigLogoUrl}
             alt="CASFOD"
-            className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-200"
+            className="block w-full h-full object-fill group-hover:scale-105 transition-transform duration-200"
           />
         </Link>
       </div>
