@@ -29,6 +29,9 @@ import {
   usePurchaseOrder,
   useUpdatePurchaseOrderStatus,
   useSendPurchaseOrderToVendor,
+  useAddPurchaseOrderComment,
+  useUpdatePurchaseOrderComment,
+  useDeletePurchaseOrderComment,
 } from './Hooks/usePurchaseOrder';
 import POPDFTemplate from './POPDFTemplate';
 import { PurchaseOrderDetails } from './PurchaseOrderDetails';
@@ -111,6 +114,11 @@ const PurchaseOrder = () => {
   const [comment, setComment] = useState('');
   const [formData, setFormData] = useState<{ approvedBy?: string }>({ approvedBy: undefined });
   const [showTagDropdown, setShowTagDropdown] = useState(false);
+
+  // Comment hooks
+  const { addComment, isPending: isAddingComment } = useAddPurchaseOrderComment(purchaseOrderId!);
+  const { updateComment, isPending: isUpdatingComment } = useUpdatePurchaseOrderComment(purchaseOrderId!);
+  const { deleteComment, isPending: isDeletingComment } = useDeletePurchaseOrderComment(purchaseOrderId!);
 
   const { sendToVendor, isPending: isSendingToVendor } = useSendPurchaseOrderToVendor();
 
@@ -350,6 +358,30 @@ const PurchaseOrder = () => {
     e.preventDefault();
   }, []);
 
+  // const handleAddComment = async (text: string) => {
+  //   await addComment({ text });
+  // };
+  const handleAddComment = useCallback(
+    async (text: string) => {
+      await addComment({ text });
+    },
+    [addComment]
+  );
+
+  const handleUpdateComment = useCallback(
+    async (commentId: string, text: string) => {
+      await updateComment({ commentId, text });
+    },
+    [updateComment]
+  );
+
+  const handleDeleteComment = useCallback(
+    async (commentId: string) => {
+      await deleteComment(commentId);
+    },
+    [deleteComment]
+  );
+
   const tableHeadData = [
     { label: 'Vendor', showOnMobile: true, minWidth: '150px' },
     { label: 'Status', showOnMobile: true, minWidth: '100px' },
@@ -569,9 +601,12 @@ const PurchaseOrder = () => {
                         handleStatusChange={onStatusChangeHandler}
                         comments={comments}
                         canAddComments={isCreator || showStatusUpdate}
-                        isAddingComment={false}
-                        isUpdatingComment={false}
-                        isDeletingComment={false}
+                        handleAddComment={handleAddComment}
+                        handleUpdateComment={handleUpdateComment}
+                        handleDeleteComment={handleDeleteComment}
+                        isAddingComment={isAddingComment}
+                        isUpdatingComment={isUpdatingComment}
+                        isDeletingComment={isDeletingComment}
                         showAdminApproval={false}
                         formData={formData}
                         handleFormChange={handleFormChange}

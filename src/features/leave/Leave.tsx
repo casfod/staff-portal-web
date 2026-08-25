@@ -190,8 +190,6 @@ const Leave = () => {
                             requestStatus={leave?.status}
                             status={status}
                             setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
                             isUpdatingStatus={isUpdatingStatus}
                             handleStatusChange={handleStatusChange}
                             statusOptions={[

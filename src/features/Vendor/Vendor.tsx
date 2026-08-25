@@ -159,8 +159,6 @@ const Vendor = () => {
                             requestStatus={vendor?.status}
                             status={status}
                             setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
                             isUpdatingStatus={isUpdatingStatus}
                             handleStatusChange={handleStatusChange}
                             statusOptions={[

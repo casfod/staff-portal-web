@@ -5,7 +5,7 @@ import {
   IPurchaseOrderSingleResponse,
   IItemGroup,
 } from '../interfaces';
-import apiClient, { handleError, QueryParams } from './apiClient';
+import apiClient, { CommentData, handleError, QueryParams } from './apiClient';
 
 // API Functions
 
@@ -175,6 +175,7 @@ export const sendPurchaseOrderToVendor = async function (
     return handleError(err);
   }
 };
+
 export const deletePurchaseOrder = async function (
   purchaseOrderId: string
 ): Promise<{ status: string; message: string }> {
@@ -187,4 +188,31 @@ export const deletePurchaseOrder = async function (
   } catch (err) {
     return handleError(err);
   }
+};
+
+export const addCommentApi = async function (purchaseOrderId: string, data: CommentData) {
+  try {
+    const response = await apiClient.post(
+      `procurement/purchase-orders/${purchaseOrderId}/comments`,
+      data
+    );
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const updateCommentApi = async (purchaseOrderId: string, commentId: string, data: { text: string }) => {
+  const response = await apiClient.patch(
+    `/procurement/purchase-orders/${purchaseOrderId}/comments/${commentId}`,
+    data
+  );
+  return response.data;
+};
+
+export const deleteCommentApi = async (purchaseOrderId: string, commentId: string) => {
+  const response = await apiClient.delete(
+    `/procurement/purchase-orders/${purchaseOrderId}/comments/${commentId}`
+  );
+  return response.data;
 };

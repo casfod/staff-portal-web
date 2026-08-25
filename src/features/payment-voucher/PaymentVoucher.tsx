@@ -10,7 +10,7 @@ import { localStorageUser } from '../../utils/localStorageUser';
 import { useAdmins } from '../user/Hooks/useUsers';
 import { PaymentVoucherDetails } from './PaymentVoucherDetails';
 import StatusBadge from '../../components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestActions';
+import RequestActions from '../../components/custom/RequestActions';
 import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
 import AdminApprovalSection from '../../components/custom/AdminApprovalSection';
 import { Button } from '../../components/ui/button';
@@ -108,6 +108,7 @@ const PaymentVoucher = () => {
 
   const [status, setStatus] = useState('');
   const [comment, setComment] = useState('');
+  console.log(setComment, 'setComment');
   const [formData, setFormData] = useState({ approvedBy: undefined });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -442,17 +443,15 @@ const PaymentVoucher = () => {
                           </div>
                         )}
 
-                        {/* Comments & Status */}
+                        {/* Status */}
                         {voucherData?.reviewedBy && voucherStatus !== 'draft' && (
                           <div className="mt-4 tracking-wide">
-                            <RequestCommentsAndActions request={voucherData} />
+                            <RequestActions request={voucherData} />
                             {canUpdateStatus && (
                               <StatusUpdateForm
                                 requestStatus={voucherStatus}
                                 status={status}
                                 setStatus={setStatus}
-                                comment={comment}
-                                setComment={setComment}
                                 isUpdatingStatus={isUpdatingStatus}
                                 handleStatusChange={onStatusChangeHandler}
                               />
