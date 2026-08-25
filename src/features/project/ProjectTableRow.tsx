@@ -9,7 +9,7 @@ import { truncateText } from '../../utils/truncateText';
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
 import { ProjectDetails } from './ProjectDetails';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import ProjectCard from './ProjectCard';
 
 interface ProjectTableRowProps {

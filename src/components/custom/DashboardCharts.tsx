@@ -230,7 +230,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
             <div className="h-[180px] sm:h-[200px] overflow-x-auto overflow-y-hidden -mx-1 px-1">
               <div className="h-full min-w-[560px] sm:min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={approvalData} margin={{ left: -12 }}>
+                  <AreaChart data={approvalData} margin={{ left: -1 }}>
                     <defs>
                       <linearGradient id="colorApproved" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={TREND_COLORS.approved} stopOpacity={0.3} />

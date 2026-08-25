@@ -45,6 +45,10 @@ const CommentSection = ({
   const [isAdding, setIsAdding] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
+  // ✅ Local loading states for individual operations
+  const [updatingCommentId, setUpdatingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+
   const handleAddComment = async () => {
     if (newComment.trim() === '') return;
 
@@ -67,23 +71,33 @@ const CommentSection = ({
   const handleUpdateComment = async () => {
     if (!editingCommentId || editingText.trim() === '') return;
 
+    // ✅ Set local loading state for this specific comment
+    setUpdatingCommentId(editingCommentId);
+
     try {
       await onUpdateComment(editingCommentId, editingText);
       setEditingCommentId(null);
       setEditingText('');
     } catch (error) {
       console.error('Failed to update comment:', error);
+    } finally {
+      setUpdatingCommentId(null);
     }
   };
 
   const handleDeleteComment = async () => {
     if (!deleteTargetId) return;
 
+    // ✅ Set local loading state for this specific comment
+    setDeletingCommentId(deleteTargetId);
+
     try {
       await onDeleteComment(deleteTargetId);
       setDeleteTargetId(null);
     } catch (error) {
       console.error('Failed to delete comment:', error);
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -167,6 +181,11 @@ const CommentSection = ({
           const edited = isEdited(comment);
           const key = commentId ?? `temp-comment-${index}`;
 
+          // ✅ Check if this specific comment is being updated or deleted
+          const isThisCommentUpdating = updatingCommentId === commentId;
+          const isThisCommentDeleting = deletingCommentId === commentId;
+          const isThisCommentEditing = editingCommentId === commentId;
+
           return (
             <div key={key} className="border rounded-lg p-4 bg-gray-50">
               <div className="flex justify-between items-start mb-2">
@@ -178,20 +197,22 @@ const CommentSection = ({
                   {edited && <span className="text-xs text-gray-500 ml-2">(edited)</span>}
                 </div>
 
-                {isOwner && (
+                
+                {isOwner && !isThisCommentDeleting && (
                   <div className="flex space-x-2">
-                    {editingCommentId === commentId ? (
+                    {isThisCommentEditing ? (
                       <>
                         <button
                           onClick={handleUpdateComment}
-                          disabled={isUpdating}
-                          className="text-xs text-blue-600 hover:text-blue-800"
+                          disabled={isThisCommentUpdating || isUpdating}
+                          className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
                         >
-                          {isUpdating ? <SpinnerMini /> : 'Save'}
+                          {isThisCommentUpdating ? <SpinnerMini /> : 'Save'}
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="text-xs text-gray-600 hover:text-gray-800"
+                          disabled={isThisCommentUpdating}
+                          className="text-xs text-gray-600 hover:text-gray-800 disabled:opacity-50"
                         >
                           Cancel
                         </button>
@@ -201,29 +222,37 @@ const CommentSection = ({
                         <button
                           onClick={() => handleStartEdit(comment)}
                           className="text-xs text-blue-600 hover:text-blue-800"
-                          disabled={isDeleting}
+                          disabled={isDeleting || !!deletingCommentId}
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteTargetId(commentId)}
-                          disabled={isDeleting}
-                          className="text-xs text-red-600 hover:text-red-800"
+                          disabled={isDeleting || !!deletingCommentId}
+                          className="text-xs text-red-600 hover:text-red-800 disabled:opacity-50"
                         >
-                          {isDeleting ? <SpinnerMini /> : 'Delete'}
+                          Delete
                         </button>
                       </>
                     )}
                   </div>
                 )}
+                {/* Show loading state for deletion */}
+                {isOwner && isThisCommentDeleting && (
+                  <div className="flex items-center space-x-2">
+                    <SpinnerMini />
+                    <span className="text-xs text-gray-500">Deleting...</span>
+                  </div>
+                )}
               </div>
 
-              {editingCommentId === commentId ? (
+              {isThisCommentEditing ? (
                 <textarea
                   className="w-full p-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={editingText}
                   onChange={e => setEditingText(e.target.value)}
                   rows={3}
+                  disabled={isThisCommentUpdating}
                 />
               ) : (
                 <p className="text-gray-700 text-sm break-words">{comment.text}</p>
@@ -266,9 +295,17 @@ const CommentSection = ({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteComment}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              disabled={!!deletingCommentId}
             >
-              Delete
+              {deletingCommentId ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete'
+                            )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

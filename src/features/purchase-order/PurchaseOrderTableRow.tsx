@@ -10,7 +10,7 @@ import ActionIcons from '../../components/custom/ActionIcons';
 import { PurchaseOrderDetails } from './PurchaseOrderDetails';
 import PurchaseOrderCard from './PurchaseOrderCard';
 import StatusBadge from '@/components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 
 interface PurchaseOrderTableRowProps {
   purchaseOrder: IPurchaseOrder;

@@ -4,7 +4,7 @@ import { localStorageUser } from '../../utils/localStorageUser';
 import StatusBadge from '../../components/custom/StatusBadge';
 import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 import { moneyFormat } from '../../utils/moneyFormat';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import { PaymentVoucherDetails } from './PaymentVoucherDetails';
 import ActionIcons from '../../components/custom/ActionIcons';
 import { BaseTableRow } from '../../components/custom/BaseTableRow';

@@ -8,15 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 
 interface StatusUpdateFormProps {
   requestStatus: string;
   status: string;
   setStatus: (value: string) => void;
-  comment: string;
-  setComment: (value: string) => void;
   isUpdatingStatus: boolean;
   handleStatusChange: () => void;
   statusOptions?: Array<{ value: string; label: string }>;
@@ -29,8 +26,6 @@ const StatusUpdateForm = ({
   requestStatus,
   status,
   setStatus,
-  comment,
-  setComment,
   isUpdatingStatus,
   handleStatusChange,
   statusOptions,
@@ -80,20 +75,6 @@ const StatusUpdateForm = ({
 
   return (
     <form className="flex flex-col w-full gap-4 tracking-wide" onSubmit={handleSubmit}>
-      <div className="flex flex-col w-full gap-2">
-        <Label htmlFor="comment" className="font-bold uppercase">
-          Comment <em className="font-normal lowercase text-gray-500">(Optional)</em>
-        </Label>
-        <textarea
-          id="comment"
-          className="w-full p-3 min-h-40 text-base rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-          value={comment}
-          onChange={e => setComment(e.target.value)}
-          placeholder="Enter your comment here..."
-          disabled={isUpdatingStatus}
-          aria-label="Enter your comment"
-        />
-      </div>
 
       <div className="w-full max-w-xs">
         <Select value={status} onValueChange={setStatus} disabled={isUpdatingStatus}>

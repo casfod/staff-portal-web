@@ -6,7 +6,7 @@ import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 // Custom Components
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import AppraisalCard from './AppraisalCard';
 import { AppraisalDetails } from './AppraisalDetails';
 import StatusBadge from '@/components/custom/StatusBadge';

@@ -7,7 +7,7 @@ import { truncateText } from '../../utils/truncateText';
 import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 import GRNCard from './GRNCard';
 import StatusBadge from '@/components/custom/StatusBadge';
-import RequestCommentsAndActions from '@/components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '@/components/custom/RequestActions';
 
 interface GRNTableRowProps {
   grn: IGoodsReceived;

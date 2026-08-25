@@ -10,7 +10,7 @@ import ActionIcons from '../../components/custom/ActionIcons';
 import { VendorDetails } from './VendorDetails';
 import VendorCard from './VendorCard';
 import StatusBadge from '@/components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 
 interface VendorTableRowProps {
   vendor: IVendor;

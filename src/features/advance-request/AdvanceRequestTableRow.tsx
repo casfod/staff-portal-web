@@ -10,7 +10,7 @@ import { moneyFormat } from '../../utils/moneyFormat';
 import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
 import { AdvanceRequestDetails } from './AdvanceRequestDetails';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import AdvanceRequestCard from './AdvanceRequestCard';
 import StatusBadge from '@/components/custom/StatusBadge';
 

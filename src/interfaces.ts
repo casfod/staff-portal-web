@@ -938,6 +938,7 @@ export interface ICreatePurchaseOrderPayload {
   vat: number;
   copiedTo?: string[];
   selectedVendor: string;
+  approvedBy?: string;
   files?: IFile[];
 }
 

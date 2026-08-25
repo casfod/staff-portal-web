@@ -10,7 +10,7 @@ import { localStorageUser } from '../../utils/localStorageUser';
 import { useAdmins } from '../user/Hooks/useUsers';
 import { PaymentVoucherDetails } from './PaymentVoucherDetails';
 import StatusBadge from '../../components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 import StatusUpdateForm from '../../components/custom/StatusUpdateForm';
 import AdminApprovalSection from '../../components/custom/AdminApprovalSection';
 import { Button } from '../../components/ui/button';

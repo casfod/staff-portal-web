@@ -9,7 +9,7 @@ import ActionIcons from '../../components/custom/ActionIcons';
 import { RFQDetails } from './RFQDetails';
 import RFQCard from './RFQCard';
 import StatusBadge from '@/components/custom/StatusBadge';
-import RequestCommentsAndActions from '../../components/custom/RequestCommentsAndActions';
+import RequestCommentsAndActions from '../../components/custom/RequestActions';
 
 interface RFQTableRowProps {
   rfq: IRFQ;

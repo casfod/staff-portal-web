@@ -282,7 +282,7 @@ export const SignatureUpload: React.FC<SignatureUploadProps> = ({
             <Button
               type="button"
               size="sm"
-              variant="secondary"
+              variant="outlineDestructive"
               onClick={handleRemoveExisting}
               disabled={isRemoving}
             >
@@ -472,7 +472,7 @@ export const SignatureUpload: React.FC<SignatureUploadProps> = ({
             </p>
 
             <div className="flex flex-wrap justify-end gap-2">
-              <Button type="button" size="sm" variant="secondary" onClick={handleReset}>
+              <Button type="button" size="sm" variant="outlineDestructive" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-1" />
                 Start over
               </Button>
@@ -480,7 +480,7 @@ export const SignatureUpload: React.FC<SignatureUploadProps> = ({
                 <Button
                   type="button"
                   size="sm"
-                  variant="secondary"
+                  variant="outline"
                   onClick={handleSaveOriginal}
                   disabled={isUploading}
                   title="Upload the photo exactly as-is, without processing"

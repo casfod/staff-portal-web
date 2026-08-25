@@ -1,8 +1,6 @@
 // RequestCommentsAndActions.tsx - Fixed Version
 import { SlMagnifier } from 'react-icons/sl';
-import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 // import { Badge } from "@/components/ui/badge";
 import { IComment, IUser, WorkflowStatus } from '@/interfaces';
 import SystemInfo from './SystemInfo';
@@ -33,7 +31,7 @@ export type TRequestEntityComments = IBaseRequestComments | ITwoStepRequestComme
 // }
 
 // Generic props with constraint
-interface RequestCommentsAndActionsProps<
+interface RequestActionsProps<
   T extends TRequestEntityComments = TRequestEntityComments,
 > {
   request: T;
@@ -42,22 +40,14 @@ interface RequestCommentsAndActionsProps<
   renderCustomComments?: (request: T) => React.ReactNode;
 }
 
-const RequestCommentsAndActions = <T extends TRequestEntityComments>({
+const RequestActions = <T extends TRequestEntityComments>({
   request,
   handleAction,
   renderCustomApprovalInfo,
   renderCustomComments,
-}: RequestCommentsAndActionsProps<T>) => {
-  const { requestId } = useParams();
+}: RequestActionsProps<T>) => {
 
   if (request.status === 'draft') return null;
-
-  const getCommentUserDisplayName = (comment: IComment): string => {
-    if (comment.user?.firstName && comment.user?.lastName) {
-      return `${comment.user.role || 'User'}: ${comment.user.firstName} ${comment.user.lastName}`;
-    }
-    return `${comment.user?.role || 'User'}: Unknown User`;
-  };
 
   return (
     <div className="flex flex-col gap-4 mt-4 text-sm tracking-wide">
@@ -68,25 +58,6 @@ const RequestCommentsAndActions = <T extends TRequestEntityComments>({
 
       {/* Custom comments renderer */}
       {renderCustomComments && renderCustomComments(request)}
-
-      {/* Default comments */}
-      {!renderCustomComments && request.comments && request.comments.length > 0 && !requestId && (
-        <div className="flex flex-col gap-2">
-          <span className="font-bold uppercase">Comments:</span>
-          <div className="flex flex-col gap-2">
-            {request.comments.map((comment: IComment, index: number) => (
-              <Card key={index} className="max-w-md md:max-w-full">
-                <CardContent className="p-4">
-                  <p className="text-xs sm:text-base font-extrabold">
-                    {getCommentUserDisplayName(comment)}
-                  </p>
-                  <p className="text-sm mt-1">{comment.text}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Action button */}
       {handleAction && (
@@ -101,4 +72,4 @@ const RequestCommentsAndActions = <T extends TRequestEntityComments>({
   );
 };
 
-export default RequestCommentsAndActions;
+export default RequestActions;

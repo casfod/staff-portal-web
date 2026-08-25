@@ -434,7 +434,7 @@ const PurchaseOrder = () => {
               )}
               <Button
                 variant="outline"
-                onClick={() => navigate('/procurement/purchase-orders')}
+                onClick={() => navigate('/procurement/purchase-order')}
                 size="sm"
               >
                 <List className="h-4 w-4 mr-1 md:mr-2" />
