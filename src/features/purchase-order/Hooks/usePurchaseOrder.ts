@@ -1,4 +1,4 @@
-// usePurchaseOrder.ts
+// usePurchaseOrder.ts - Updated for two-step review
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -7,12 +7,16 @@ import { AxiosError, AxiosResponse } from 'axios';
 import {
   getAllPurchaseOrders,
   getPurchaseOrder,
+  // getPurchaseOrderByCode,
   createPurchaseOrderFromRFQ,
   createIndependentPurchaseOrder,
   updatePurchaseOrder,
   updatePurchaseOrderStatus,
   deletePurchaseOrder,
-  sendPurchaseOrderToVendor, // Add this
+  sendPurchaseOrderToVendor,
+  addCommentApi,
+  updateCommentApi,
+  deleteCommentApi,
 } from '../../../services/apiPurchaseOrder';
 import {
   IPurchaseOrdersListResponse,
@@ -20,6 +24,7 @@ import {
   ICreatePurchaseOrderPayload,
   IItemGroup,
   IHookError,
+  // IUpdatePurchaseOrderPayload,
 } from '../../../interfaces';
 
 interface ErrorResponse {
@@ -37,6 +42,7 @@ export const purchaseOrderKeys = {
   list: (filters: Record<string, unknown>) => [...purchaseOrderKeys.lists(), filters] as const,
   details: () => [...purchaseOrderKeys.all, 'detail'] as const,
   detail: (id: string) => [...purchaseOrderKeys.details(), id] as const,
+  code: (code: string) => [...purchaseOrderKeys.all, 'code', code] as const,
 };
 
 // Hooks
@@ -70,6 +76,19 @@ export const usePurchaseOrder = (
     ...options,
   });
 };
+
+// export const usePurchaseOrderByCode = (
+//   poCode: string,
+//   options?: UseQueryOptions<IPurchaseOrderSingleResponse, Error>
+// ) => {
+//   return useQuery({
+//     queryKey: purchaseOrderKeys.code(poCode),
+//     queryFn: () => getPurchaseOrderByCode(poCode),
+//     enabled: !!poCode,
+//     staleTime: 5 * 60 * 1000,
+//     ...options,
+//   });
+// };
 
 export const useCreatePurchaseOrderFromRFQ = () => {
   const queryClient = useQueryClient();
@@ -134,7 +153,7 @@ export const useCreateIndependentPurchaseOrder = () => {
       if (data.statusCode === 201 || data.statusCode === 200) {
         toast.success('Purchase Order created successfully');
         queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.lists() });
-        navigate('/procurement/purchase-order/purchase-orders');
+        navigate('/procurement/purchase-order');
       } else {
         toast.error(data.message || 'Failed to create Purchase Order');
       }
@@ -301,4 +320,95 @@ export const useSendPurchaseOrderToVendor = () => {
   });
 
   return { sendToVendor, isPending, isError };
+};
+
+export const useAddPurchaseOrderComment = (requestId: string) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data: { text: string }) => addCommentApi(requestId, data),
+
+    onSuccess: (data) => {
+      if (data.statusCode === 201) {
+        toast.success('Comment added successfully');
+        queryClient.invalidateQueries({
+          queryKey: purchaseOrderKeys.detail(requestId),
+        });
+      } else {
+        toast.error('Failed to add comment');
+      }
+    },
+
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'Error adding comment');
+    },
+  });
+
+  return {
+    addComment: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
+};
+
+export const useUpdatePurchaseOrderComment = (requestId: string) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
+      updateCommentApi(requestId, commentId, { text }),
+
+    onSuccess: (data) => {
+      if (data.statusCode === 200) {
+        toast.success('Comment updated successfully');
+        queryClient.invalidateQueries({
+          queryKey: purchaseOrderKeys.detail(requestId),
+        });
+      } else {
+        toast.error('Failed to update comment');
+      }
+    },
+
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'Error updating comment');
+    },
+  });
+
+  return {
+    updateComment: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
+};
+
+export const useDeletePurchaseOrderComment = (requestId: string) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(requestId, commentId),
+
+    onSuccess: (data) => {
+      if (data.statusCode === 200) {
+        toast.success('Comment deleted successfully');
+        queryClient.invalidateQueries({
+          queryKey: purchaseOrderKeys.detail(requestId),
+        });
+      } else {
+        toast.error('Failed to delete comment');
+      }
+    },
+
+    onError: (err: IHookError) => {
+      toast.error(err.response?.data?.message || 'Error deleting comment');
+    },
+  });
+
+  return {
+    deleteComment: mutation.mutate,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
 };

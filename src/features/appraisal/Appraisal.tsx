@@ -226,8 +226,6 @@ const Appraisal = () => {
                             requestStatus={request?.status}
                             status={status}
                             setStatus={setStatus}
-                            comment={comment}
-                            setComment={setComment}
                             isUpdatingStatus={isUpdatingStatus}
                             handleStatusChange={handleStatusChange}
                             statusOptions={[
