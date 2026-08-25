@@ -263,8 +263,11 @@ const PurchaseOrder = () => {
 
   const onStatusChangeHandler = useCallback(async () => {
     await handleStatusChange(status, comment, async data => {
-      if (data.status !== 'approved') {
-        throw new Error('Status not approved');
+      // if (data.status !== 'approved') {
+      //   throw new Error('Status not approved');
+      // }
+      if (!status) {
+        throw new Error('⚠️ No status selected');
       }
 
       updatePurchaseOrderStatus({
@@ -295,6 +298,7 @@ const PurchaseOrder = () => {
   const isCreator = requestData?.createdBy?.id === currentUser.id;
   const showStatusUpdate =
     requestData?.status === 'pending' && requestData?.approvedBy?.id === currentUser.id;
+  const isApprover = requestData?.approvedBy?.id === currentUser.id;
 
   const canSendToVendor = useMemo(() => {
     if (!isCreator) return false;
@@ -593,6 +597,7 @@ const PurchaseOrder = () => {
                         isUploading={false}
                         handleUpload={handleSend}
                         canUpdateStatus={showStatusUpdate}
+                        isApprover={isApprover}
                         status={status}
                         setStatus={setStatus}
                         comment={comment}
