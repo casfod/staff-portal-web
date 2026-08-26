@@ -21,6 +21,7 @@ import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
 import StatusBadge from '../../components/custom/StatusBadge';
 import { IComment } from '../../interfaces';
 import RFQCard from './RFQCard';
+import { infoConfig } from '@/config/config-info';
 
 // Helper to generate consistent PDF filename
 const getPDFFileName = (rfqCode: string): string => {
@@ -210,10 +211,10 @@ const RFQ = () => {
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
   const { downloadPdf, isGenerating: isDownloadingPDF } = usePdfDownload({
-    filename: `QUOTATTION-${rfq?.rfqCode ?? 'unknown'}`,
+    filename: `QUOTATION-${rfq?.rfqCode ?? 'unknown'}`,
     multiPage: true,
     titleOptions: {
-      text: '${infoConfig.abbriviation}Request For Quotation',
+      text: `${infoConfig.abbriviation} - Request For Quotation`,
     },
     footerCode: {
       label: 'RFQ',
@@ -251,7 +252,7 @@ const RFQ = () => {
   }, []);
 
   const handleStatusChange = useCallback(() => {
-    // QUOTATTION-specific status update logic would go here
+    // QUOTATION-specific status update logic would go here
   }, []);
 
   const handleAddComment = useCallback(async (text: string) => {

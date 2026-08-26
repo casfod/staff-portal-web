@@ -16,7 +16,7 @@ export interface IInfoConfig {
 
 export const infoConfig: IInfoConfig = {
   name: 'CASFOD POSSIBILITY HUB',
-  abbriviation: 'CASFOD POSSIBILITY HUB',
+  abbriviation: 'CASFOD',
   motto: '',
   subLocation: '',
   smallLogoUrl: `${smallLogo}`,

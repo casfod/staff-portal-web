@@ -88,7 +88,7 @@ const RFQPDFTemplate: React.FC<RFQPDFTemplateProps> = ({
 
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-blue-500">
-        <h3 className="font-bold mb-2 text-lg text-gray-700">${infoConfig.abbriviation} Delivery address:</h3>
+        <h3 className="font-bold mb-2 text-lg text-gray-700">{infoConfig.abbriviation} Delivery address:</h3>
         <p className="text-md text-gray-600">
           {infoConfig.name}
           <br />

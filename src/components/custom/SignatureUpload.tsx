@@ -472,7 +472,7 @@ export const SignatureUpload: React.FC<SignatureUploadProps> = ({
             </p>
 
             <div className="flex flex-wrap justify-end gap-2">
-              <Button type="button" size="sm" variant="outlineDestructive" onClick={handleReset}>
+              <Button type="button" size="sm" variant="destructive" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-1" />
                 Start over
               </Button>
