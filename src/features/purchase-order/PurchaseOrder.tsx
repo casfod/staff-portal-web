@@ -263,9 +263,6 @@ const PurchaseOrder = () => {
 
   const onStatusChangeHandler = useCallback(async () => {
     await handleStatusChange(status, comment, async data => {
-      // if (data.status !== 'approved') {
-      //   throw new Error('Status not approved');
-      // }
       if (!status) {
         throw new Error('⚠️ No status selected');
       }
