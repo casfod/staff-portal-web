@@ -404,7 +404,7 @@ const RFQ = () => {
                       <ActionIcons
                         copyToVendors={handleCopyToVendors}
                         isCopying={isCopying || isUploadingPdf}
-                        canShareRequest={!!canShareRequest}
+                        canShareRequest={!!canShareRequest && isPdfReady}
                         isGeneratingPDF={isDownloadingPDF}
                         onDownloadPDF={handleDownloadPDF}
                         onPreviewPDF={previewPDF}
@@ -427,7 +427,7 @@ const RFQ = () => {
                         <RFQCard
                           rfq={rfq}
                           actionIconsProps={{
-                            canShareRequest: !!canShareRequest,
+                            canShareRequest: !!canShareRequest && isPdfReady,
                             requestId: rfq?.id,
                             isGeneratingPDF: isDownloadingPDF,
                             onDownloadPDF: handleDownloadPDF,
