@@ -88,10 +88,10 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
             </div>
           )}
           {renderSignature(null, `${title}'s Signature`)}
-          <div>
+          {/* <div>
             <p className="text-sm text-gray-600 mb-1">Date</p>
             <div className="h-6 border-b border-gray-400"></div>
-          </div>
+          </div> */}
         </div>
       );
     }
@@ -113,12 +113,12 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           </div>
         )}
         {renderSignature(user, `${title}'s Signature`)}
-        <div>
+        {/* <div>
           <p className="text-sm text-gray-600 mb-1">Date</p>
           <div className="h-6 border-b border-gray-400 text-center">
             {new Date().toLocaleDateString()}
           </div>
-        </div>
+        </div> */}
       </div>
     );
   };
@@ -170,7 +170,7 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
 
       {/* Delivery Address */}
       <div className="mb-6 p-4 bg-gray-50 border-l-4 border-green-500">
-        <h3 className="font-bold mb-2 text-lg text-gray-700">${infoConfig.abbriviation} Delivery address:</h3>
+        <h3 className="font-bold mb-2 text-lg text-gray-700">{infoConfig.abbriviation} Delivery address:</h3>
         <p className="text-md text-gray-600">
           {infoConfig.name}
           <br />
@@ -318,10 +318,21 @@ const GRNPDFTemplate: React.FC<GRNPDFTemplateProps> = ({
           </div>
 
           {/* Verified By (CASFOD) */}
-          {/* <div>
+          <div>
             <p className="font-semibold mb-3 text-gray-700">VERIFIED BY (CASFOD):</p>
-            {renderUserSection(grnData.approvedBy, 'Verifier', true)}
-          </div> */}
+            <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Name</p>
+            <div className="h-6 border-b border-gray-400"></div>
+          </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Position</p>
+              <div className="h-6 border-b border-gray-400"></div>
+            </div>
+          {renderSignature(null)}
+        </div>
+            
+          </div>
 
           {/* Received By (CASFOD) */}
           <div>
