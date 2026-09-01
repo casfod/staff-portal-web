@@ -30,7 +30,7 @@ const PurchaseRequestTableRow = ({
 
   const requestId = request.id ?? '';
   const requestStatus = request.status ?? 'pending';
-  const requestCreatedAt = request.createdAt ?? '';
+  const requestCreatedAt = request.purchaseRequestDate ?? request.createdAt;
   const createdById = request.createdBy?.id;
 
   const isEditable =

@@ -36,6 +36,7 @@ interface PurchaseRequestFormData {
   finalDeliveryPoint: string;
   city: string;
   periodOfActivity: { from: string; to: string };
+  purchaseRequestDate: string;
   activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
@@ -76,6 +77,7 @@ const PurchaseRequestForm: React.FC<PurchaseRequestFormProps> = ({ mode, initial
         finalDeliveryPoint: initialData.finalDeliveryPoint || '',
         city: initialData.city || '',
         periodOfActivity: initialData.periodOfActivity || { from: '', to: '' },
+        purchaseRequestDate: initialData.purchaseRequestDate || new Date().toISOString(),
         activityDescription: initialData.activityDescription || '',
         expenseChargedTo: initialData.expenseChargedTo || '',
         accountCode: initialData.accountCode || '',
@@ -99,6 +101,7 @@ const PurchaseRequestForm: React.FC<PurchaseRequestFormProps> = ({ mode, initial
       finalDeliveryPoint: '',
       city: '',
       periodOfActivity: { from: '', to: '' },
+      purchaseRequestDate: new Date().toISOString(),
       activityDescription: '',
       expenseChargedTo: '',
       accountCode: '',
@@ -242,6 +245,7 @@ const PurchaseRequestForm: React.FC<PurchaseRequestFormProps> = ({ mode, initial
       finalDeliveryPoint: formData.finalDeliveryPoint,
       city: formData.city,
       periodOfActivity: formData.periodOfActivity,
+      purchaseRequestDate: formData.purchaseRequestDate,
       activityDescription: formData.activityDescription,
       expenseChargedTo: formData.expenseChargedTo,
       accountCode: formData.accountCode,
@@ -511,6 +515,20 @@ const PurchaseRequestForm: React.FC<PurchaseRequestFormProps> = ({ mode, initial
             />
           </FormRow>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormRow label="Purchase Request Date">
+          <DatePicker
+            selected={formData.purchaseRequestDate ? new Date(formData.purchaseRequestDate) : null}
+            onChange={date =>
+              handleFormChange('purchaseRequestDate', date ? date.toISOString() : '')
+            }
+            variant="secondary"
+            placeholder="Select date"
+            disabled={isPending}
+          />
+        </FormRow>
       </div>
 
       <FormRow label="Activity Description">

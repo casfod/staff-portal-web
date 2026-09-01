@@ -581,6 +581,7 @@ export interface IPurchaseRequest {
   finalDeliveryPoint: string;
   city: string;
   periodOfActivity: IActivityPeriod;
+  purchaseRequestDate: string;
   activityDescription: string;
   expenseChargedTo: string;
   accountCode: string;
