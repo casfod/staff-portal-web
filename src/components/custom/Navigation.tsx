@@ -148,7 +148,12 @@ const Navigation: React.FC<NavigationProps> = ({
           <img
             src={infoConfig.bigLogoUrl}
             alt="CASFOD"
-            className="block w-full h-full object-fill group-hover:scale-105 transition-transform duration-200"
+            className={`${collapsed ? 'hidden' : 'block'} w-full h-full object-fill group-hover:scale-105 transition-transform duration-200`}
+          />
+          <img
+            src={infoConfig.smallLogoUrl}
+            alt="CASFOD"
+            className={`${collapsed ? 'block' : 'hidden'} min-w-10 h-full object-fill group-hover:scale-105 transition-transform duration-200`}
           />
         </Link>
       </div>

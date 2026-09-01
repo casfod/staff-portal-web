@@ -47,6 +47,12 @@ const paymentVoucherFilterConfigs: IFilterConfig[] = [
     placeholder: 'Filter by account code...',
   },
   {
+    key: 'createdBy',
+    label: 'Created By',
+    type: 'text',
+    placeholder: 'Filter by creator name...',
+  },
+  {
     key: 'dateFrom',
     label: 'Date From',
     type: 'date',
