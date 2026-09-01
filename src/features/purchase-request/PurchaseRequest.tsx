@@ -275,7 +275,7 @@ const PurchaseRequest = () => {
                       {moneyFormat(totalAmount, 'NGN')}
                     </td>
                     <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm hidden md:table-cell">
-                      {formatToDDMMYYYY(request?.createdAt ?? '')}
+                      {formatToDDMMYYYY(request?.purchaseRequestDate ?? request?.createdAt)}
                     </td>
                     <td className="px-3 py-2.5 md:px-4 md:py-3 text-sm">
                       <ActionIcons
