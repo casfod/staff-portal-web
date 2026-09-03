@@ -303,7 +303,11 @@ const StaffDetails = ({ staffInfo }: StaffDetailsProps) => {
           </div>
           <div>
             <p className="text-xs text-gray-600">Supervisor</p>
-            <p className="text-sm">{employmentInfo.jobDetails?.supervisor || 'Not specified'}</p>
+            <p className="text-sm">
+              {typeof employmentInfo.jobDetails?.supervisorId === 'string'
+                ? employmentInfo.jobDetails.supervisorId
+                : employmentInfo.jobDetails?.supervisorId?.fullName || 'Not specified'}
+            </p>
           </div>
         </div>
       </div>
