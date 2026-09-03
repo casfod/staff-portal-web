@@ -142,7 +142,7 @@ const StaffStrategyForm: React.FC<StaffStrategyFormProps> = ({ mode, initialData
   const supervisorDisplayName =
     mode === 'edit' && initialData?.approvedBy
       ? getSupervisorName(initialData.approvedBy)
-      : currentUser?.employmentInfo?.jobDetails?.supervisor || 'N/A';
+      : getSupervisorName(currentUser?.employmentInfo?.jobDetails?.supervisorId) || 'N/A';
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});

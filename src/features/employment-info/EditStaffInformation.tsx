@@ -2,7 +2,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import TextHeader from '../../components/custom/TextHeader';
-// import StaffInformationForm from "./StaffInformationForm";
 import { localStorageUser } from '../../utils/localStorageUser';
 import { useUserById } from '../user/Hooks/useUsers';
 import Spinner from '../../components/custom/Spinner';

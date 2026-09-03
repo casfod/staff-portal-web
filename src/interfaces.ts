@@ -294,8 +294,7 @@ export interface IJobDetails {
   workCellPhone?: string;
   startDate?: string | Date;
   endDate?: string | Date | null;
-  supervisor?: string;
-  supervisorId?: Partial<IUser>
+  supervisorId?: string | Partial<IUser>;
 }
 
 export interface IEmergencyContact {

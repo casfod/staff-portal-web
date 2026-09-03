@@ -41,7 +41,6 @@ const EMPTY_FORM: IEmploymentInfo = {
     workCellPhone: '',
     startDate: undefined,
     endDate: undefined,
-    supervisor: undefined,
   },
   emergencyContact: {
     fullName: '',
@@ -77,18 +76,6 @@ export const useStaffInformationForm = (
 
   const [formData, setFormData] = useState<IEmploymentInfo>(() => {
     if (staffInfo?.employmentInfo) {
-      // Find the supervisor name from users list if supervisor exists
-      let supervisorName = staffInfo.employmentInfo.jobDetails?.supervisor || '';
-
-      if (staffInfo.employmentInfo.jobDetails?.supervisor && !supervisorName) {
-        const supervisor = users.find(
-          u => u.id === staffInfo.employmentInfo?.jobDetails?.supervisor
-        );
-        if (supervisor) {
-          supervisorName = `${supervisor.firstName} ${supervisor.lastName}`;
-        }
-      }
-
       return {
         ...EMPTY_FORM,
         ...staffInfo.employmentInfo,
@@ -103,7 +90,6 @@ export const useStaffInformationForm = (
           ...EMPTY_FORM.jobDetails,
           ...staffInfo.employmentInfo.jobDetails,
           title: staffInfo.employmentInfo.jobDetails?.title || staffInfo.position || '',
-          supervisor: staffInfo.employmentInfo.jobDetails?.supervisor || undefined,
         },
         emergencyContact: {
           ...EMPTY_FORM.emergencyContact,
@@ -146,13 +132,6 @@ export const useStaffInformationForm = (
     if (isAdminView || !data?.data?.employmentInfo) return;
 
     const existingData = data.data.employmentInfo;
-    let supervisorName = existingData.jobDetails?.supervisor || '';
-    if (existingData.jobDetails?.supervisor && !supervisorName) {
-      const supervisor = users.find(u => u.id === existingData.jobDetails?.supervisor);
-      if (supervisor) {
-        supervisorName = `${supervisor.firstName} ${supervisor.lastName}`;
-      }
-    }
 
     setFormData(prev => ({
       ...prev,
@@ -164,7 +143,6 @@ export const useStaffInformationForm = (
       jobDetails: {
         ...prev.jobDetails,
         ...existingData.jobDetails,
-        supervisor: existingData.jobDetails?.supervisor || undefined,
       },
       emergencyContact: {
         ...prev.emergencyContact,
@@ -255,16 +233,7 @@ export const useStaffInformationForm = (
   };
 
   const handleSupervisorChange = (selectedId: string) => {
-    if (selectedId) {
-      const selectedUser = userOptions.find(u => u.id === selectedId);
-      if (selectedUser) {
-        handleFormChange('jobDetails', 'supervisor', selectedUser.name);
-        handleFormChange('jobDetails', 'supervisor', selectedId);
-      }
-    } else {
-      handleFormChange('jobDetails', 'supervisor', '');
-      handleFormChange('jobDetails', 'supervisor', undefined);
-    }
+    handleFormChange('jobDetails', 'supervisorId', selectedId || undefined);
   };
 
   const updateAvatarUrl = (avatarUrl: string) => {
@@ -381,19 +350,9 @@ export const useStaffInformationForm = (
   }, [users]);
 
   const getSelectedsupervisor = () => {
-    const currentSupervisorName = formData.jobDetails?.supervisor;
-    const currentsupervisor = formData.jobDetails?.supervisor;
-
-    if (currentsupervisor) {
-      return currentsupervisor;
-    }
-
-    if (currentSupervisorName) {
-      const user = users.find(u => `${u.firstName} ${u.lastName}` === currentSupervisorName);
-      return user?.id || '';
-    }
-
-    return '';
+    const supervisorId = formData.jobDetails?.supervisorId;
+    if (!supervisorId) return '';
+    return typeof supervisorId === 'string' ? supervisorId : supervisorId.id || '';
   };
 
   const completionPercentage = Math.round(
