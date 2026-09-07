@@ -14,6 +14,7 @@ export interface DatePickerProps {
   minDate?: Date | string | null;
   maxDate?: Date | string | null;
   placeholder?: string;
+  id?: string;
   label?: string;
   disabled?: boolean;
   className?: string;
@@ -50,6 +51,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   minDate,
   maxDate,
   placeholder = 'Select date',
+  id,
   label,
   disabled = false,
   className = '',
@@ -184,6 +186,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <Popover.Trigger asChild>
           <div
             ref={triggerRef}
+            id={id}
             role="button"
             tabIndex={disabled ? -1 : 0}
             aria-disabled={disabled}

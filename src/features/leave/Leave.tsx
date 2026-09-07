@@ -88,7 +88,7 @@ const Leave = () => {
   const tableRowData = [
     {
       id: 'staffName',
-      content: truncateText(getUserFullName(leave?.createdBy) || 'N/A', 30),
+      content: truncateText(getUserFullName(leave?.user) || 'N/A', 30),
     },
     {
       id: 'status',
