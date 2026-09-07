@@ -24,7 +24,7 @@ import {
 import { Button } from '../../components/ui/button';
 import SpinnerMini from '../../components/custom/SpinnerMini';
 import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
-import DatePicker from '../../features/datePicker/DatePicker';
+import DatePicker from '../datePicker/DatePicker';
 import LeaveBalanceCard from '../../components/custom/LeaveBalanceCard';
 
 interface LeaveFormProps {
@@ -172,7 +172,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
   // Validation
   const validateField = useCallback((name: string, value: unknown): string => {
     switch (name) {
-      case 'ILeave':
+      case 'leaveType':
         return !value ? 'Leave type is required' : '';
       case 'approvedById':
         return !value ? 'Approver is required' : '';
@@ -187,7 +187,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
     }
   }, []);
 
-  const validateForm = useCallback((): boolean => {
+  const validateForm = useCallback((): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.leaveType) newErrors.leaveType = 'Leave type is required';
@@ -197,7 +197,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
     if (!formData.reasonForLeave?.trim()) newErrors.reasonForLeave = 'Reason for leave is required';
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   }, [formData]);
 
   // Handlers
@@ -266,9 +266,16 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const validationErrors = validateForm();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setTouched(prev => ({
+        ...prev,
+        ...Object.fromEntries(Object.keys(validationErrors).map(field => [field, true])),
+      }));
+
       // Scroll to first error
-      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorField = Object.keys(validationErrors)[0];
       const element = document.getElementById(firstErrorField);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -290,7 +297,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
     } else {
       updateLeaveApplication({ data });
     }
-  }, [validateForm, errors, totalDays, availableBalance, buildSubmitData, mode, createLeaveApplication, updateLeaveApplication]);
+  }, [validateForm, totalDays, availableBalance, buildSubmitData, mode, createLeaveApplication, updateLeaveApplication]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -388,7 +395,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
             >
               <SelectTrigger 
                 className={errors.leaveType && touched.leaveType ? 'border-red-500' : ''}
-                id="ILeave"
+                id="leaveType"
               >
                 <SelectValue placeholder="Select Leave Type" />
               </SelectTrigger>
@@ -435,6 +442,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormRow 
             label="Start Date *"
+            id="startDate"
             error={touched.startDate ? errors.startDate : undefined}
           >
             <DatePicker
@@ -449,6 +457,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ mode, initialData }) => {
           {formData.startDate && (
             <FormRow 
               label="End Date *"
+              id="endDate"
               error={touched.endDate ? errors.endDate : undefined}
             >
               <DatePicker

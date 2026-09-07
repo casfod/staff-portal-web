@@ -42,7 +42,7 @@ const LeaveTableRow = ({
   const rowData = [
     {
       id: 'staffName',
-      content: getUserFullName(request.createdBy),
+      content: getUserFullName(request.user),
       showOnMobile: true,
     },
     {
