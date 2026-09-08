@@ -300,7 +300,7 @@ const PaymentVoucher = () => {
       id: 'netAmount',
       content: moneyFormat(voucherData?.netAmount || 0, 'NGN'),
     },
-    { id: 'createdAt', content: formatToDDMMYYYY(voucherData?.createdAt ?? '') },
+    { id: 'createdAt', content: formatToDDMMYYYY(voucherData?.pvDate ?? '') },
     {
       id: 'action',
       content: (

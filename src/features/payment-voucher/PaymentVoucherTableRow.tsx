@@ -60,7 +60,7 @@ const PaymentVoucherTableRow = ({
     },
     {
       id: 'date',
-      content: formatToDDMMYYYY(voucher.createdAt),
+      content: formatToDDMMYYYY(voucher.pvDate),
       showOnMobile: false,
       showOnTablet: true,
     },
