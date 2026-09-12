@@ -257,6 +257,11 @@ const RequestDetailLayout = ({
   };
 
   // const isTwoStep = isTwoStepApprovalRequest(request);
+  // Keep the conditional render value boolean so object-valued reviewer fields
+  // are not treated as JSX children.
+  const hasBeenReviewed = Boolean(
+    request?.reviewedBy || request?.procurementReviewBy || request?.financeReviewBy
+  );
 
   return (
     <div className="border border-gray-300 px-3 py-2.5 md:px-6 md:py-3 rounded-md h-auto relative">
@@ -290,8 +295,8 @@ const RequestDetailLayout = ({
         </div>
       )}
 
-      {/* Comments and Actions Section */}
-      {request?.reviewedBy && requestStatus !== 'draft' && (
+      {/* Request Actions - Show if request has been reviewed */}
+      {hasBeenReviewed && requestStatus !== 'draft' && (
         <div className="mt-4 tracking-wide">
           <RequestActions request={request} handleAction={handleAction} />
         </div>
