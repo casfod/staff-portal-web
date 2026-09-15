@@ -54,16 +54,22 @@ const VendorTableRow = ({
       showOnMobile: true,
     },
     {
-      id: 'vendorCode',
-      content: vendor.vendorCode,
+      id: 'category',
+      content: vendor.categories[0],
       showOnMobile: true,
-    },
-    {
-      id: 'contactPerson',
-      content: vendor.contactPerson,
-      showOnMobile: false,
       showOnTablet: true,
     },
+    {
+      id: 'vendorCode',
+      content: vendor.vendorCode,
+      showOnMobile: false,
+    },
+    // {
+    //   id: 'contactPerson',
+    //   content: vendor.contactPerson,
+    //   showOnMobile: false,
+    //   showOnTablet: true,
+    // },
     {
       id: 'actions',
       content: (
