@@ -19,9 +19,9 @@ export const getProjectTableHeaders = (): TableHeaderConfig[] => [
 
 export const getVendorTableHeaders = (): TableHeaderConfig[] => [
   { label: 'Business Name', showOnMobile: true, minWidth: '150px' },
-  { label: 'Category', showOnMobile: true, minWidth: '100px' },
   { label: 'Status', showOnMobile: true, minWidth: '100px' },
-  { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '100px' },
+  { label: 'Category', showOnMobile: true, minWidth: '100px' },
+  { label: 'Vendor Code', showOnMobile: false, showOnTablet: true, minWidth: '100px' },
   { label: 'Actions', showOnMobile: true, minWidth: '100px' },
 ];
 

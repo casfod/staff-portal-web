@@ -1,8 +1,9 @@
 // VendorConstants.ts
 export const categories = [
-  { id: 'General Supplies and Non Food Items', name: 'General Supplies and Non Food Items' },
+  { id: 'General Supplies', name: 'General Supplies' },
   { id: 'Outdoor Catering Services', name: 'Outdoor Catering Services' },
   { id: 'Hall Rental and Catering Services', name: 'Hall Rental and Catering Services' },
+  { id: 'Non Food Items', name: 'Non Food Items' },
   { id: 'Furniture Supplies and Repairs', name: 'Furniture Supplies and Repairs' },
   { id: 'Automobile Repairs', name: 'Automobile Repairs' },
   { id: 'Health and Medical', name: 'Health and Medical' },
@@ -17,6 +18,8 @@ export const categories = [
   { id: 'Hotels and Hospitality', name: 'Hotels and Hospitality' },
   { id: 'Travel Agents and Agency', name: 'Travel Agents and Agency' },
   { id: 'Car/Vehicle Hire and Leasing', name: 'Car/Vehicle Hire and Leasing' },
+  { id: 'IT and Computer Services', name: 'IT and Computer Services' },
+  { id: 'Financial Services', name: 'Financial Services' },
 ];
 
 export const businessState = [
