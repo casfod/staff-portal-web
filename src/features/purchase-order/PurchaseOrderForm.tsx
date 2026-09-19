@@ -24,6 +24,8 @@ import { useVendors } from '../Vendor/Hooks/useVendor';
 import {
   useCreateIndependentPurchaseOrder,
   useCreatePurchaseOrderFromRFQ,
+  useSaveIndependentPurchaseOrderDraft,
+  useSavePurchaseOrderDraftFromRFQ,
   useUpdatePurchaseOrder,
 } from './Hooks/usePurchaseOrder';
 import {
@@ -152,6 +154,10 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     useCreateIndependentPurchaseOrder();
   const { createPurchaseOrderFromRFQ, isPending: isCreatingFromRFQ } =
     useCreatePurchaseOrderFromRFQ();
+  const { saveIndependentPurchaseOrderDraft, isPending: isSavingDraft } =
+    useSaveIndependentPurchaseOrderDraft();
+  const { savePurchaseOrderDraftFromRFQ, isPending: isSavingDraftFromRFQ } =
+    useSavePurchaseOrderDraftFromRFQ();
   const { updatePurchaseOrder, isPending: isUpdating } = useUpdatePurchaseOrder();
 
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({ limit: 1000 });
@@ -175,7 +181,9 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   }, [vendorsData]);
 
   const isPending =
-    mode === 'create' || mode === 'create-from-rfq' ? isCreating || isCreatingFromRFQ : isUpdating;
+    mode === 'create' || mode === 'create-from-rfq'
+      ? isCreating || isCreatingFromRFQ || isSavingDraft || isSavingDraftFromRFQ
+      : isUpdating;
 
   // Filter vendors from RFQ for create-from-rfq mode
   const rfqVendors = useMemo(() => {
@@ -280,7 +288,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       vat: formData.vat,
       selectedVendor: formData.selectedVendor,
       itemGroups: itemGroupsForApi,
-      approvedBy: formData.approvedBy
+      ...(formData.approvedBy ? { approvedBy: formData.approvedBy } : {}),
     };
   }, [formData]);
 
@@ -352,7 +360,15 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         return;
       }
 
-      if (mode === 'create') {
+      const isDraft = (mode === 'create' || mode === 'create-from-rfq') && !formData.approvedBy;
+
+      if (mode === 'create' && isDraft) {
+        const submitData = buildSubmitData();
+        saveIndependentPurchaseOrderDraft(
+          { data: submitData },
+          { onSuccess: () => onSuccess?.() }
+        );
+      } else if (mode === 'create') {
         const submitData = buildSubmitData();
         createIndependentPurchaseOrder(
           { data: submitData },
@@ -361,6 +377,12 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
               onSuccess?.();
             },
           }
+        );
+      } else if (mode === 'create-from-rfq' && rfqId && isDraft) {
+        const submitData = buildRFQSubmitData();
+        savePurchaseOrderDraftFromRFQ(
+          { rfqId, vendorId: formData.selectedVendor, data: submitData },
+          { onSuccess: () => onSuccess?.() }
         );
       } else if (mode === 'create-from-rfq' && rfqId) {
         const submitData = buildRFQSubmitData();
@@ -400,6 +422,8 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       buildRFQSubmitData,
       createIndependentPurchaseOrder,
       createPurchaseOrderFromRFQ,
+      saveIndependentPurchaseOrderDraft,
+      savePurchaseOrderDraftFromRFQ,
       updatePurchaseOrder,
       initialData,
       onSuccess,
@@ -411,13 +435,16 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       return mode === 'edit' ? 'Updating...' : 'Creating...';
     }
     if (mode === 'edit') {
-      return 'Update Purchase Order';
+      return formData.approvedBy ? 'Save and Send' : 'Update as draft';
+    }
+    if (!formData.approvedBy) {
+      return 'Save as Draft';
     }
     if (mode === 'create-from-rfq') {
       return 'Create Purchase Order from RFQ';
     }
     return 'Create Purchase Order';
-  }, [isPending, mode]);
+  }, [formData.approvedBy, isPending, mode]);
 
   // Render item group (matches RFQForm styling)
   const renderItem = useCallback(
@@ -759,7 +786,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {mode === 'edit' ? 'Updating...' : 'Creating...'}
+                {mode === 'edit' ? 'Updating...' : formData.approvedBy ? 'Creating...' : 'Saving...'}
               </>
             ) : (
               getSubmitLabel()

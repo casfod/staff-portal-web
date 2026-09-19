@@ -47,12 +47,13 @@ const PurchaseOrderTableRow = ({
   const isEditable =
     ((currentUser.role === 'SUPER-ADMIN' && !purchaseOrder.rfqCode) ||
       currentUser?.procurementRole?.canUpdate) &&
-    purchaseOrder.status === 'rejected' &&
+    (purchaseOrder.status === 'rejected' ||
+      purchaseOrder.status === 'draft') &&
     !purchaseOrder.rfqCode;
 
   const isDeletable =
-    (currentUser.role === 'SUPER-ADMIN' || currentUser?.procurementRole?.canDelete) &&
-    purchaseOrder.status === 'rejected';
+    (currentUser.role === 'SUPER-ADMIN' || currentUser?.procurementRole?.canDelete || (currentUser.id === purchaseOrder.createdBy?.id)) &&
+    (purchaseOrder.status === 'rejected' || purchaseOrder.status === 'draft');
 
   const fullDate = formatToDDMMYYYY(purchaseOrder.createdAt);
   const totalAmount = purchaseOrder.totalAmount || 0;
