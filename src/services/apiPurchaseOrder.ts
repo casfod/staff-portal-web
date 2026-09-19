@@ -3,9 +3,10 @@ import {
   IPurchaseOrdersListResponse,
   ICreatePurchaseOrderPayload,
   IPurchaseOrderSingleResponse,
-  IItemGroup,
+  PurchaseOrderFromRFQPayload,
 } from '../interfaces';
 import apiClient, { CommentData, handleError, QueryParams } from './apiClient';
+
 
 // API Functions
 
@@ -41,15 +42,7 @@ export const getPurchaseOrder = async function (
 export const createPurchaseOrderFromRFQ = async function (
   rfqId: string,
   vendorId: string,
-  data: {
-    itemGroups: IItemGroup[];
-    approvedBy?: string;
-    deliveryDate?: string;
-    poDate?: string;
-    casfodAddressId: string;
-    vat: number;
-    rfqTitle?: string;
-  }
+  data: PurchaseOrderFromRFQPayload
 ): Promise<IPurchaseOrderSingleResponse> {
   console.log('Creating purchase order from RFQ with data:', data);
   try {
@@ -80,46 +73,83 @@ export const createIndependentPurchaseOrder = async function (
   }
 };
 
+export const saveIndependentPurchaseOrderDraft = async function (
+  data: ICreatePurchaseOrderPayload
+): Promise<IPurchaseOrderSingleResponse> {
+  try {
+    const response = await apiClient.post<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/draft`,
+      data
+    );
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
+export const savePurchaseOrderDraftFromRFQ = async function (
+  rfqId: string,
+  vendorId: string,
+  data: PurchaseOrderFromRFQPayload
+): Promise<IPurchaseOrderSingleResponse> {
+  try {
+    const response = await apiClient.post<IPurchaseOrderSingleResponse>(
+      `/procurement/purchase-orders/rfq/${rfqId}/vendor/${vendorId}/draft`,
+      data
+    );
+
+    return response.data;
+  } catch (err) {
+    return handleError(err);
+  }
+};
+
 export const updatePurchaseOrder = async function (
   purchaseOrderId: string,
   data: ICreatePurchaseOrderPayload,
   files: File[] = []
 ): Promise<IPurchaseOrderSingleResponse> {
   try {
-    const formData = new FormData();
+    if (files && files.length > 0) {
+      const formData = new FormData();
 
-    // The backend expects these field names in FormData
-    if (data.rfqTitle !== undefined) formData.append('rfqTitle', data.rfqTitle);
-    if (data.vat !== undefined) formData.append('vat', data.vat.toString());
-    if (data.casfodAddressId !== undefined) formData.append('casfodAddressId', data.casfodAddressId);
-    if (data.selectedVendor !== undefined) {
-      formData.append('selectedVendor', data.selectedVendor);
-    }
-    if (data.poDate !== undefined) formData.append('poDate', data.poDate);
-    if (data.deliveryDate !== undefined) formData.append('deliveryDate', data.deliveryDate);
-
-    if (data.itemGroups && Array.isArray(data.itemGroups)) {
-      formData.append('itemGroups', JSON.stringify(data.itemGroups));
-    }
-
-    if (data.copiedTo && Array.isArray(data.copiedTo)) {
-      data.copiedTo.forEach(vendorId => {
-        formData.append('copiedTo', vendorId);
-      });
-    }
-
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-
-    const response = await apiClient.patch<IPurchaseOrderSingleResponse>(
-      `/procurement/purchase-orders/${purchaseOrderId}`,
-      formData,
-      {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // The backend expects these field names in FormData
+      if (data.rfqTitle !== undefined) formData.append('rfqTitle', data.rfqTitle);
+      if (data.vat !== undefined) formData.append('vat', data.vat.toString());
+      if (data.casfodAddressId !== undefined) formData.append('casfodAddressId', data.casfodAddressId);
+      if (data.selectedVendor !== undefined) {
+        formData.append('selectedVendor', data.selectedVendor);
       }
-    );
+      if (data.poDate !== undefined) formData.append('poDate', data.poDate);
+      if (data.deliveryDate !== undefined) formData.append('deliveryDate', data.deliveryDate);
 
+      if (data.itemGroups && Array.isArray(data.itemGroups)) {
+        formData.append('itemGroups', JSON.stringify(data.itemGroups));
+      }
+
+      if (data.copiedTo && Array.isArray(data.copiedTo)) {
+        data.copiedTo.forEach(vendorId => {
+          formData.append('copiedTo', vendorId);
+        });
+      }
+
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await apiClient.patch<IPurchaseOrderSingleResponse>(
+        `/procurement/purchase-orders/${purchaseOrderId}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+
+      return response.data;
+    }
+
+    const response = await apiClient.patch<IPurchaseOrderSingleResponse>(`procurement/purchase-orders/${purchaseOrderId}`, data);
     return response.data;
   } catch (err) {
     return handleError(err);

@@ -920,7 +920,7 @@ export interface IPurchaseOrder {
   pdfUrl: string;
   cloudinaryId: string;
   createdBy: Partial<IUser>;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'draft' | 'pending' | 'approved' | 'rejected';
   isFromRfq: boolean;
   comments: IComment[];
   approvedBy?: Partial<IUser>;
@@ -954,6 +954,16 @@ export interface IUpdatePurchaseOrderPayload {
   selectedVendor?: string;
   files?: IFile[];
   comment?: string;
+}
+
+export interface PurchaseOrderFromRFQPayload {
+  itemGroups: IItemGroup[];
+  approvedBy?: string;
+  deliveryDate?: string;
+  poDate?: string;
+  casfodAddressId: string;
+  vat: number;
+  rfqTitle?: string;
 }
 
 // API Response Types

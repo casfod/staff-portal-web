@@ -23,7 +23,7 @@ const EditPurchaseOrder = () => {
   // Redirect logic
   useEffect(() => {
     if (!purchaseOrderId || (!isLoading && !remoteData && !purchaseOrder)) {
-      navigate('/procurement/purchase-orders');
+      navigate('/procurement/purchase-order/purchase-orders');
     }
   }, [remoteData, purchaseOrder, purchaseOrderId, navigate, isLoading]);
 
@@ -34,7 +34,7 @@ const EditPurchaseOrder = () => {
       <div className="sticky -top-8 z-10 bg-[#F8F8F8] pt-4 md:pt-6 pb-3 space-y-1.5 border-b">
         <div className="flex justify-between items-center">
           <TextHeader>Edit Purchase Order</TextHeader>
-          <Button onClick={() => navigate('/procurement/purchase-orders')}>
+          <Button onClick={() => navigate('/procurement/purchase-order/purchase-orders')}>
             <List className="h-4 w-4 mr-1 md:mr-2" />
             List
           </Button>

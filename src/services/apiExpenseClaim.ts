@@ -20,7 +20,6 @@ export const getAllExpenseClaim = async function (queryParams: QueryParams) {
     const response = await apiClient.get<IExpenseClaimsListResponse>(`/finance/expense-claims`, {
       params: queryParams,
     });
-    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);

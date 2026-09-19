@@ -23,7 +23,6 @@ export const getAllPaymentRequest = async function (queryParams: QueryParams) {
         params: queryParams,
       }
     );
-    console.log('API Response:', response.data);
     return response.data;
   } catch (err) {
     return handleError(err);

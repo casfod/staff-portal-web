@@ -10,6 +10,8 @@ import {
   // getPurchaseOrderByCode,
   createPurchaseOrderFromRFQ,
   createIndependentPurchaseOrder,
+  savePurchaseOrderDraftFromRFQ,
+  saveIndependentPurchaseOrderDraft,
   updatePurchaseOrder,
   updatePurchaseOrderStatus,
   deletePurchaseOrder,
@@ -24,6 +26,7 @@ import {
   ICreatePurchaseOrderPayload,
   IItemGroup,
   IHookError,
+  PurchaseOrderFromRFQPayload,
   // IUpdatePurchaseOrderPayload,
 } from '../../../interfaces';
 
@@ -173,6 +176,7 @@ export const useCreateIndependentPurchaseOrder = () => {
 
 export const useUpdatePurchaseOrder = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: ({
@@ -194,6 +198,7 @@ export const useUpdatePurchaseOrder = () => {
             queryKey: purchaseOrderKeys.detail(variables.purchaseOrderId),
           });
         }
+        navigate('/procurement/purchase-order/purchase-orders');
       } else {
         toast.error(data.message || 'Failed to update Purchase Order');
       }
@@ -264,7 +269,7 @@ export const useDeletePurchaseOrder = () => {
     mutationFn: (purchaseOrderId: string) => deletePurchaseOrder(purchaseOrderId),
 
     onSuccess: data => {
-      if (data.status === '200') {
+      if (data.status === '204') {
         toast.success('Purchase Order deleted successfully');
         queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.lists() });
       } else {
@@ -410,5 +415,62 @@ export const useDeletePurchaseOrderComment = (requestId: string) => {
     isPending: mutation.isPending,
     isError: mutation.isError,
     error: mutation.error,
+  };
+};
+
+export const useSavePurchaseOrderDraftFromRFQ = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const mutation = useMutation({
+    mutationFn: ({ rfqId, vendorId, data }: {
+      rfqId: string;
+      vendorId: string;
+      data: PurchaseOrderFromRFQPayload
+    }) => savePurchaseOrderDraftFromRFQ(rfqId, vendorId, data),
+    onSuccess: data => {
+      if (data.statusCode === 201 || data.statusCode === 200) {
+        toast.success('Purchase Order draft saved successfully');
+        queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.lists() });
+        navigate('/procurement/purchase-order/purchase-orders');
+      } else {
+        toast.error(data.message || 'Failed to save Purchase Order draft');
+      }
+    },
+    onError: (err: ApiError) => {
+      toast.error(err.response?.data?.message || 'An error occurred while saving Purchase Order draft');
+    },
+  });
+
+  return {
+    savePurchaseOrderDraftFromRFQ: mutation.mutate,
+    isPending: mutation.isPending,
+  };
+};
+
+export const useSaveIndependentPurchaseOrderDraft = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const mutation = useMutation({
+    mutationFn: ({ data }: { data: ICreatePurchaseOrderPayload }) =>
+      saveIndependentPurchaseOrderDraft(data),
+    onSuccess: data => {
+      if (data.statusCode === 201 || data.statusCode === 200) {
+        toast.success('Purchase Order draft saved successfully');
+        queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.lists() });
+        navigate('/procurement/purchase-order');
+      } else {
+        toast.error(data.message || 'Failed to save Purchase Order draft');
+      }
+    },
+    onError: (err: ApiError) => {
+      toast.error(err.response?.data?.message || 'An error occurred while saving Purchase Order draft');
+    },
+  });
+
+  return {
+    saveIndependentPurchaseOrderDraft: mutation.mutate,
+    isPending: mutation.isPending,
   };
 };
