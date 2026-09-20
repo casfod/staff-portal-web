@@ -65,7 +65,19 @@ export const updateReport = async function (
   data: Partial<IReport>,
 ) {
   try {
-    const response = await apiClient.patch<Partial<IReport>>(`hr/reports/${reportId}`, data);
+    const requestData = {
+      ...data,
+      ...(data.approvedBy
+        ? {
+            approvedBy:
+              typeof data.approvedBy === 'object' ? data.approvedBy.id : data.approvedBy,
+          }
+        : {}),
+    };
+    const response = await apiClient.patch<Partial<IReport>>(
+      `hr/reports/${reportId}`,
+      requestData
+    );
     return response.data;
   } catch (err) {
     return handleError(err);

@@ -116,17 +116,13 @@ const Report = () => {
     });
   };
 
-  // ✅ FIXED: Properly structure the update payload
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const payload: Partial<IReport> = {};
-    
-    // Only include approvedBy if it has a value
-    if (formData.approvedBy) {
-      payload.approvedBy = { id: formData.approvedBy } as Partial<IUser>;
-    }
-    
+
+    const payload: Partial<IReport> = formData.approvedBy
+      ? { approvedBy: { id: formData.approvedBy } as Partial<IUser> }
+      : {};
+
     updateReport(payload);
   };
 
