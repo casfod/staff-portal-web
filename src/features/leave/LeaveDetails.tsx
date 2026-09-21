@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { formatToDDMMYYYY } from '../../utils/formatToDDMMYYYY';
 import FileAttachmentContainer from '../../components/custom/FileAttachmentContainer';
 import DetailContainer from '../../components/custom/DetailContainer';
+import SystemInfo from '@/components/custom/SystemInfo';
 interface LeaveDetailsProps {
   request: ILeave;
 }
@@ -89,46 +90,8 @@ export const LeaveDetails = ({ request }: LeaveDetailsProps) => {
         )}
       </div>
 
-      {/* Approval Chain Section */}
-      {/* <div className="w-fit mt-4 border-t border-gray-300 pt-4 space-y-2">
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-          <span className="font-bold mr-1 uppercase">Staff:</span>
-          {request?.staff_name}
-        </p>
+      {<SystemInfo request={request} />}
 
-        <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-          <span className="font-bold mr-1 uppercase">Role:</span>
-          {request?.staff_role}
-        </p>
-
-        {request.reviewedBy && (
-          <>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Reviewed By:</span>
-              {`${request?.reviewedBy?.firstName} ${request?.reviewedBy?.lastName}`}
-            </p>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Reviewer Role:</span>
-              {request?.reviewedBy?.role}
-            </p>
-          </>
-        )}
-
-        {request.approvedBy && (
-          <>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Approved By:</span>
-              {`${request?.approvedBy?.firstName} ${request?.approvedBy?.lastName}`}
-            </p>
-            <p className={`${!requestId ? "text-sm" : "text-sm md:text-base"}`}>
-              <span className="font-bold mr-1 uppercase">Approver Role:</span>
-              {request?.approvedBy?.role}
-            </p>
-          </>
-        )}
-      </div> */}
-
-      {/* <SystemInfo request={request} /> */}
       {/* File Attachments Section */}
       <FileAttachmentContainer
         modelName="Leave"
