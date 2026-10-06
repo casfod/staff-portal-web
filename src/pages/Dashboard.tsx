@@ -14,6 +14,7 @@ import { useAdvanceRequestStats } from '../features/advance-request/Hooks/useAdv
 import { usePaymentRequestStats } from '../features/payment-request/Hooks/usePaymentRequests';
 import { useTravelRequestStats } from '../features/travel-request/Hooks/useTravelRequests';
 import { useExpenseClaimStats } from '../features/expense-claim/Hooks/useExpenseClaims';
+import { useStoreRequestStats } from '../features/store-request/Hooks/useStoreRequest';
 import { motion } from 'framer-motion';
 
 // Define proper types for each stat
@@ -34,6 +35,7 @@ type StatsData = {
   advanceRequest: RequestStatData;
   travelRequest: RequestStatData;
   expenseClaim: RequestStatData;
+  storeRequest: RequestStatData;
 };
 
 export default function Dashboard() {
@@ -47,6 +49,7 @@ export default function Dashboard() {
   const advanceRequestStats = useAdvanceRequestStats();
   const travelRequestStats = useTravelRequestStats();
   const expenseClaimStats = useExpenseClaimStats();
+  const storeRequestStats = useStoreRequestStats();
 
   // Create stats queries object
   const statsQueries = useMemo(
@@ -58,6 +61,7 @@ export default function Dashboard() {
       advanceRequest: advanceRequestStats,
       travelRequest: travelRequestStats,
       expenseClaim: expenseClaimStats,
+      storeRequest: storeRequestStats,
     }),
     [
       projectStats,
@@ -67,6 +71,7 @@ export default function Dashboard() {
       advanceRequestStats,
       travelRequestStats,
       expenseClaimStats,
+      storeRequestStats,
     ]
   );
 
@@ -106,6 +111,10 @@ export default function Dashboard() {
         totalRequests: expenseClaimStats.data?.data?.totalRequests || 0,
         totalApprovedRequests: expenseClaimStats.data?.data?.totalApprovedRequests || 0,
       },
+      storeRequest: {
+        totalRequests: storeRequestStats.data?.data?.totalRequests || 0,
+        totalApprovedRequests: storeRequestStats.data?.data?.totalApprovedRequests || 0,
+      },
     }),
     [
       projectStats.data,
@@ -115,6 +124,7 @@ export default function Dashboard() {
       advanceRequestStats.data,
       travelRequestStats.data,
       expenseClaimStats.data,
+      storeRequestStats.data,
     ]
   );
 
