@@ -699,6 +699,13 @@ export type IExpenseClaimsListResponse = IApiListResponse<IExpenseClaim>;
 export type IExpenseClaimSingleResponse = IApiSingleResponse<IExpenseClaim>;
 export type IExpenseClaimStatsResponse = IApiStatsResponse<IExpenseClaimStats>;
 
+export interface IStoreRequestStats {
+  totalRequests: number;
+  totalApprovedRequests: number;
+}
+
+export type IStoreRequestStatsResponse = IApiStatsResponse<IStoreRequestStats>;
+
 // =============================================
 // PAYMENT REQUEST TYPES
 // =============================================

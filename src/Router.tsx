@@ -31,6 +31,7 @@ const TravelRequests = lazy(() => import('./pages/TravelRequests'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
 const PaymentRequests = lazy(() => import('./pages/PaymentRequests'));
 const ExpenseClaims = lazy(() => import('./pages/ExpenseClaims'));
+const StoreRequests = lazy(() => import('./pages/StoreRequests'));
 const Procurement = lazy(() => import('./pages/Procurement'));
 const Finance = lazy(() => import('./pages/Finance'));
 const HumanResources = lazy(() => import('./pages/HumanResources'));
@@ -86,10 +87,13 @@ const TravelRequest = lazy(() => import('./features/travel-request/TravelRequest
 const EditTravelRequest = lazy(() => import('./features/travel-request/EditTravelRequest'));
 
 // Lazy load features - Expense Claims
-const AllExpenseClaims = lazy(() => import('./features/expense-claim/AllExpenseCliams'));
+const AllExpenseClaims = lazy(() => import('./features/expense-claim/AllExpenseClaims'));
 const CreateExpenseClaim = lazy(() => import('./features/expense-claim/CreateExpenseClaim'));
 const ExpenseClaim = lazy(() => import('./features/expense-claim/ExpenseClaim'));
 const EditExpenseClaim = lazy(() => import('./features/expense-claim/EditExpenseClaim'));
+
+// Lazy load features - Store Requests
+const AllStoreRequests = lazy(() => import('./features/store-request/AllStoreRequests'));
 
 // Lazy load features - Vendor
 const AllVendors = lazy(() => import('./features/Vendor/AllVendors'));
@@ -468,6 +472,25 @@ const router = createBrowserRouter([
             element: (
               <RouteElement>
                 <EditExpenseClaim />
+              </RouteElement>
+            ),
+          },
+        ],
+      },
+      {
+        path: 'store-requests',
+        element: (
+          <RouteElement>
+            <StoreRequests />
+          </RouteElement>
+        ),
+        children: [
+          { index: true, element: <Navigate to="all-store-request" /> },
+          {
+            path: 'all-store-request',
+            element: (
+              <RouteElement>
+                <AllStoreRequests />
               </RouteElement>
             ),
           },
