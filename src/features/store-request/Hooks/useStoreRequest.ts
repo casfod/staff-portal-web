@@ -1,6 +1,18 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { IStoreRequestStatsResponse } from '../../../interfaces';
-import { getStoreRequestStats } from '../../../services/apiStoreRequest';
+import { IStoreRequestStatsResponse, IStoreRequestsListResponse } from '../../../interfaces';
+import { getAllStoreRequests, getStoreRequestStats } from '../../../services/apiStoreRequest';
+
+export function useAllStoreRequests(
+  queryParams: Record<string, string | number | undefined>,
+  options?: UseQueryOptions<IStoreRequestsListResponse, Error>
+) {
+  return useQuery<IStoreRequestsListResponse, Error>({
+    queryKey: ['all-store-requests', queryParams],
+    queryFn: () => getAllStoreRequests(queryParams),
+    staleTime: 0,
+    ...options,
+  });
+}
 
 export function useStoreRequestStats(
   options?: UseQueryOptions<IStoreRequestStatsResponse, Error>
