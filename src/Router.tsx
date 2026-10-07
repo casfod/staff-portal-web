@@ -94,6 +94,7 @@ const EditExpenseClaim = lazy(() => import('./features/expense-claim/EditExpense
 
 // Lazy load features - Store Requests
 const AllStoreRequests = lazy(() => import('./features/store-request/AllStoreRequests'));
+const CreateStoreRequest = lazy(() => import('./features/store-request/CreateStoreRequest'));
 
 // Lazy load features - Vendor
 const AllVendors = lazy(() => import('./features/Vendor/AllVendors'));
@@ -491,6 +492,14 @@ const router = createBrowserRouter([
             element: (
               <RouteElement>
                 <AllStoreRequests />
+              </RouteElement>
+            ),
+          },
+          {
+            path: 'create-store-request',
+            element: (
+              <RouteElement>
+                <CreateStoreRequest />
               </RouteElement>
             ),
           },

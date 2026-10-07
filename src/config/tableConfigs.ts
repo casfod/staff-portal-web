@@ -65,3 +65,11 @@ export const getStaffStrategyTableHeaders = (): TableHeaderConfig[] => [
   { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '100px' },
   { label: 'Actions', showOnMobile: true, minWidth: '100px' },
 ];
+
+export const getStoreTableHeaders = (): TableHeaderConfig[] => [
+  { label: 'Staff Name', showOnMobile: true, minWidth: '120px' },
+  { label: 'Request Type', showOnMobile: true, minWidth: '100px' },
+  { label: 'Code', showOnMobile: true, minWidth: '100px' },
+  { label: 'Status', showOnMobile: true, minWidth: '100px' },
+  { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '100px' },
+];

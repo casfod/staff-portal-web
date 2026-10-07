@@ -704,6 +704,43 @@ export interface IStoreRequestStats {
   totalApprovedRequests: number;
 }
 
+export interface IStoreItemGroup {
+  itemName: string;
+  department?: string;
+  description?: string;
+  frequency: number;
+  quantity: number;
+  unit: string;
+  dispatchRemarks?: string;
+  returnRemarks?: string;
+}
+
+export interface IStoreRequest {
+  id: string;
+  srCode: string;
+  destination: string;
+  warehouse: string;
+  warehouseCode: string;
+  requestType: 'dispatch' | 'return';
+  requestedAt?: string | null;
+  dispatchDate?: string | null;
+  recipient?: Partial<IUser> | string;
+  warehouseOfficer?: Partial<IUser> | string;
+  assignedDriver?: string;
+  approvedBy?: Partial<IUser> | string;
+  reviewedBy?: Partial<IUser> | string;
+  items: IStoreItemGroup[];
+  comments: IComment[];
+  copiedTo?: Partial<IUser>[];
+  status: WorkflowStatus;
+  isReturned?: boolean;
+  returnedRequestId?: string | null;
+  createdBy: Partial<IUser> | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type IStoreRequestsListResponse = IApiListResponse<IStoreRequest>;
 export type IStoreRequestStatsResponse = IApiStatsResponse<IStoreRequestStats>;
 
 // =============================================
