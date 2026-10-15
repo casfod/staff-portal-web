@@ -1,13 +1,16 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { ListPage } from '../../components/custom/ListPage';
 import { FilterToolbar } from '@/components/filters/FilterToolbar';
 import { useFilteredList } from '@/hooks/useFilteredList';
 import { IFilterConfig, IStoreRequest, STATUS_OPTIONS } from '../../interfaces';
 import { getStoreTableHeaders } from '@/config/tableConfigs';
-import { useAllStoreRequests } from './Hooks/useStoreRequest';
+import { useAllStoreRequests, useDeleteStoreRequest } from './Hooks/useStoreRequest';
 import StoreRequestTableRow from './StoreRequestTableRow';
+import useDeleteRequest from '../../hooks/useDeleteRequest';
+import { setStoreRequest } from '../../store/storeRequestSlice';
 
 const REQUEST_TYPE_OPTIONS = [
     { value: 'dispatch', label: 'Dispatch' },
@@ -35,6 +38,7 @@ const storeRequestFilterConfigs: IFilterConfig[] = [
 
 const AllStoreRequests = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const {
         searchTerm,
@@ -54,9 +58,24 @@ const AllStoreRequests = () => {
     });
 
     const { data, isLoading, isError } = useAllStoreRequests(queryParams);
+    const { deleteStoreRequest } = useDeleteStoreRequest(queryParams);
+    const handleDelete = useDeleteRequest(deleteStoreRequest, {
+        entityName: 'Store Request',
+    });
+
+    const handleEdit = useCallback((request: IStoreRequest) => {
+        dispatch(setStoreRequest(request));
+        navigate(`/store-requests/edit-request/${request.id}`);
+    }, [dispatch, navigate]);
+
+    const handleAction = () => {
+        // Placeholder for future action handling logic
+    };
+
     const storeRequests = useMemo(() => data?.data ?? [], [data]);
     const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);
     const tableHeadData = getStoreTableHeaders();
+
 
     const filterToolbar = (
         <FilterToolbar
@@ -82,7 +101,15 @@ const AllStoreRequests = () => {
             currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-            renderRow={request => <StoreRequestTableRow key={request.id} request={request} />}
+            renderRow={request => (
+                        <StoreRequestTableRow
+                            key={request.id}
+                            request={request}
+                            handleEdit={handleEdit}
+                            handleDelete={handleDelete}
+                            handleAction={handleAction}
+                        />
+            )}
             onAdd={() => navigate('/store-requests/create-store-request')}
             addButtonLabel="Add"
             emptyMessage={hasActiveFilters ? 'No requests match your filters' : 'No requests found'}

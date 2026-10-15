@@ -19,7 +19,7 @@ import { Button } from '../../components/ui/button';
 import TextHeader from '../../components/custom/TextHeader';
 import StatusBadge from '../../components/custom/StatusBadge';
 import ActionIcons from '../../components/custom/ActionIcons';
-import ExpenceClaimCard from './ExpenceClaimCard';
+import ExpenseClaimCard from './ExpenseClaimCard';
 import RequestDetailLayout, { TRequestEntity } from '../../components/custom/RequestDetailLayout';
 import NetworkErrorUI from '../../components/custom/NetworkErrorUI';
 import { DataStateContainer } from '../../components/custom/DataStateContainer';
@@ -39,6 +39,7 @@ import { useStatusUpdate } from '../../hooks/useStatusUpdate';
 import { usePdfDownload } from '../../hooks/usePdfDownload';
 import { getDefaultTableHeaders } from '@/config/tableConfigs';
 import { infoConfig } from '@/config/config-info';
+
 
 const ExpenseClaim = () => {
   const currentUser = localStorageUser();
@@ -230,8 +231,8 @@ const ExpenseClaim = () => {
                 <tr className="sm:hidden">
                   <td colSpan={tableHeadData.length} className="p-4 border-b border-gray-200">
                     {request && (
-                      <ExpenceClaimCard
-                        expenceClaim={request}
+                      <ExpenseClaimCard
+                        expenseClaim={request}
                         requestId={request?.id || ''}
                         actionIconsProps={{
                           copyTo: copyto,

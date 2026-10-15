@@ -33,6 +33,7 @@ import staffStrategyReducer from './staffStrategySlice';
 import appraisalReducer from './appraisalSlice';
 import reportReducer from './reportSlice';
 import userSubTabReducer from './userSubTabSlice';
+import storeRequestReducer from './storeRequestSlice';
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -57,6 +58,7 @@ const rootReducer = combineReducers({
   appraisal: appraisalReducer,
   report: reportReducer,
   userSubTab: userSubTabReducer,
+  storeRequest: storeRequestReducer,
 });
 
 // Create persist config

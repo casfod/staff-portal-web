@@ -72,4 +72,5 @@ export const getStoreTableHeaders = (): TableHeaderConfig[] => [
   { label: 'Code', showOnMobile: true, minWidth: '100px' },
   { label: 'Status', showOnMobile: true, minWidth: '100px' },
   { label: 'Date', showOnMobile: false, showOnTablet: true, minWidth: '100px' },
+  { label: 'Actions', showOnMobile: true, minWidth: '100px' },
 ];
