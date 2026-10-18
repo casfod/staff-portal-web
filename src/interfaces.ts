@@ -699,6 +699,10 @@ export type IExpenseClaimsListResponse = IApiListResponse<IExpenseClaim>;
 export type IExpenseClaimSingleResponse = IApiSingleResponse<IExpenseClaim>;
 export type IExpenseClaimStatsResponse = IApiStatsResponse<IExpenseClaimStats>;
 
+// =============================================
+// STORE REQUEST TYPES
+// =============================================
+
 export interface IStoreRequestStats {
   totalRequests: number;
   totalApprovedRequests: number;
@@ -741,6 +745,7 @@ export interface IStoreRequest {
 }
 
 export type IStoreRequestsListResponse = IApiListResponse<IStoreRequest>;
+export type IStoreRequestSingleResponse = IApiSingleResponse<IStoreRequest>;
 export type IStoreRequestStatsResponse = IApiStatsResponse<IStoreRequestStats>;
 
 // =============================================

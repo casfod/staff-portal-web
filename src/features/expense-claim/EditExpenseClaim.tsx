@@ -12,7 +12,7 @@ const EditExpenseClaim = () => {
 
   const param = useParams();
 
-  // Access the purchaseRequest state from Redux
+  // Access the expenseClaim state from Redux
 
   const expenseClaim = useSelector((state: RootState) => state.expenseClaim.expenseClaim);
 

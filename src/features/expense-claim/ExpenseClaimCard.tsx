@@ -7,20 +7,20 @@ import { sumItemGroupTotal } from '../../utils/sumItemGroupTotal';
 import { getUserFullName } from '../../utils/getUserFullName';
 import { IExpenseClaim } from '../../interfaces';
 
-interface ExpenceClaimCardProps extends RequestCardWrapperProps {
-  expenceClaim: IExpenseClaim;
+interface ExpenseClaimCardProps extends RequestCardWrapperProps {
+  expenseClaim: IExpenseClaim;
 }
 
-const ExpenceClaimCard = ({ expenceClaim, requestId, ...rest }: ExpenceClaimCardProps) => (
+const ExpenseClaimCard = ({ expenseClaim, requestId, ...rest }: ExpenseClaimCardProps) => (
   <BaseRequestCard
-    displayName={getUserFullName(expenceClaim.createdBy)}
-    identifier={expenceClaim.ecNumber}
-    status={expenceClaim.status}
-    date={expenceClaim.createdAt}
-    totalAmount={sumItemGroupTotal(expenceClaim.expenses)}
-    requestId={requestId ?? expenceClaim.id}
+    displayName={getUserFullName(expenseClaim.createdBy)}
+    identifier={expenseClaim.ecNumber}
+    status={expenseClaim.status}
+    date={expenseClaim.createdAt}
+    totalAmount={sumItemGroupTotal(expenseClaim.expenses)}
+    requestId={requestId ?? expenseClaim.id}
     {...rest}
   />
 );
 
-export default ExpenceClaimCard;
+export default ExpenseClaimCard;

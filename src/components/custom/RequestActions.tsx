@@ -10,9 +10,9 @@ export interface IBaseRequestComments {
   id: string;
   status: WorkflowStatus | string;
   comments?: IComment[];
-  reviewedBy?: Partial<IUser> | null;
-  approvedBy?: Partial<IUser> | null;
-  createdBy?: Partial<IUser>;
+  reviewedBy?: Partial<IUser> | string | null;
+  approvedBy?: Partial<IUser> | string | null;
+  createdBy?: Partial<IUser> | string;
 }
 
 // Extended for two-step approval

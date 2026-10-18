@@ -184,6 +184,34 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     },
   },
 
+  // ── Store Request ────────────────────────────────────────────────────────
+  storeRequest: {
+    modelName: 'StoreRequest',
+    displayName: 'Store Request',
+    routePath: '/finance/store-requests',
+    fileAttachment: {
+      canManageFiles: true,
+      blockedStatuses: WORKFLOW_BLOCKED_STATUSES,
+      allowedFileTypes: ['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx', '.xls', '.xlsx'],
+      maxFileSizeMB: 10,
+    },
+    workflow: {
+      hasWorkflow: true,
+      statuses: ['draft', 'pending', 'reviewed', 'approved', 'rejected'],
+      defaultStatus: 'draft',
+      statusFlow: {
+        draft: ['pending'],
+        pending: ['reviewed', 'rejected'],
+        reviewed: ['approved', 'rejected'],
+        approved: [],
+        rejected: [],
+      },
+    },
+    api: {
+      basePath: '/store-requests',
+    },
+  },
+
   // ── Goods Received ──────────────────────────────────────────────────────
   goodsReceived: {
     modelName: 'GoodsReceived',

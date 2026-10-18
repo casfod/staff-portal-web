@@ -9,7 +9,7 @@ import { BaseTableRow } from '../../components/custom/BaseTableRow';
 import ActionIcons from '../../components/custom/ActionIcons';
 import ExpenseClaimDetails from './ExpenseClaimDetails';
 import RequestCommentsAndActions from '../../components/custom/RequestActions';
-import ExpenceClaimCard from './ExpenceClaimCard';
+import ExpenseClaimCard from './ExpenseClaimCard';
 import StatusBadge from '@/components/custom/StatusBadge';
 
 interface ExpenseClaimTableRowProps {
@@ -93,8 +93,8 @@ const ExpenseClaimTableRow = ({
 
   // Mobile card for small screens
   const mobileCard = (
-    <ExpenceClaimCard
-      expenceClaim={request}
+    <ExpenseClaimCard
+      expenseClaim={request}
       requestId={requestId}
       actionIconsProps={{
         isEditable,
