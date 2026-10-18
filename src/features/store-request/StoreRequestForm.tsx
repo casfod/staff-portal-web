@@ -190,25 +190,31 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
   const handleSaveDraft = useCallback(() => {
     if (!validate(false)) return;
     const data = buildSubmitData();
-    if (mode === 'edit') {
+
+    if (formData.reviewedBy) {
+      createStoreRequest(data);
+    } else if (mode === 'edit') {
       updateStoreRequest(data);
     } else {
       saveStoreRequestDraft(data);
     }
-  }, [buildSubmitData, mode, saveStoreRequestDraft, updateStoreRequest, validate]);
+  }, [buildSubmitData, createStoreRequest, formData.reviewedBy, mode, saveStoreRequestDraft, updateStoreRequest, validate]);
 
   const handleCreate = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (!validate(true)) return;
       const data = buildSubmitData();
-      if (mode === 'edit') {
+
+      if (formData.reviewedBy) {
+        createStoreRequest(data);
+      } else if (mode === 'edit') {
         updateStoreRequest(data);
       } else {
-        createStoreRequest(data);
+        saveStoreRequestDraft(data);
       }
     },
-    [buildSubmitData, createStoreRequest, mode, updateStoreRequest, validate]
+    [buildSubmitData, createStoreRequest, formData.reviewedBy, mode, saveStoreRequestDraft, updateStoreRequest, validate]
   );
 
   const renderItem = useCallback(
@@ -448,7 +454,9 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
             className="min-w-[170px]"
           >
             {isSavingDraft && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSavingDraft ? 'Saving Draft...' : 'Save as Draft'}
+            {isSavingDraft
+              ? mode === 'edit' ? 'Updating Draft...' : 'Saving Draft...'
+              : mode === 'edit' ? 'Update Draft' : 'Save as Draft'}
           </Button>
         ) : (
           <Button type="submit" size="md" disabled={isPending} className="min-w-[170px]">

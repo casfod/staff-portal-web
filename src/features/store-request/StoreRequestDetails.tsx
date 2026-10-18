@@ -96,7 +96,7 @@ const StoreRequestDetails = ({ request }: StoreRequestDetailsProps) => {
       )}
 
       <FileAttachmentContainer
-        modelName="StoreRequests"
+        modelName="StoreRequest"
         id={request.id}
         status={request.status}
         canManage={canManageFiles}

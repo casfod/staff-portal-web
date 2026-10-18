@@ -68,9 +68,10 @@ const AllStoreRequests = () => {
         navigate(`/store-requests/edit-request/${request.id}`);
     }, [dispatch, navigate]);
 
-    const handleAction = () => {
-        // Placeholder for future action handling logic
-    };
+    const handleAction = useCallback((request: IStoreRequest) => {
+        dispatch(setStoreRequest(request));
+        navigate(`/store-requests/request/${request.id}`);
+    }, [dispatch, navigate]);
 
     const storeRequests = useMemo(() => data?.data ?? [], [data]);
     const totalPages = useMemo(() => data?.pagination.pages ?? 1, [data]);

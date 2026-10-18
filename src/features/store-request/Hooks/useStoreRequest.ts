@@ -8,10 +8,16 @@ import {
 } from '../../../interfaces';
 import {
   createStoreRequest as createStoreRequestApi,
+  addStoreRequestComment as addStoreRequestCommentApi,
+  copyStoreRequest as copyStoreRequestApi,
+  deleteStoreRequestComment as deleteStoreRequestCommentApi,
   deleteStoreRequest as deleteStoreRequestApi,
   getAllStoreRequests,
+  getStoreRequest,
   getStoreRequestStats,
   saveStoreRequestDraft as saveStoreRequestDraftApi,
+  updateStoreRequestComment as updateStoreRequestCommentApi,
+  updateStoreRequestStatus as updateStoreRequestStatusApi,
   updateStoreRequest as updateStoreRequestApi,
 } from '../../../services/apiStoreRequest';
 import { useNavigate } from 'react-router-dom';
@@ -132,4 +138,79 @@ export function useDeleteStoreRequest(queryParams: Record<string, string | numbe
   });
 
   return { deleteStoreRequest, isPending, isError, error };
+}
+
+export function useStoreRequest(requestId: string) {
+  return useQuery<IStoreRequestSingleResponse, Error>({
+    queryKey: ['store-request', requestId],
+    queryFn: () => getStoreRequest(requestId),
+    enabled: Boolean(requestId),
+    staleTime: 0,
+  });
+}
+
+function useStoreRequestDetailMutation<TVariables>(
+  mutationFn: (variables: TVariables) => Promise<unknown>,
+  successMessage: string,
+  requestId: string
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, IHookError, TVariables>({
+    mutationFn,
+    onSuccess: () => {
+      toast.success(successMessage);
+      queryClient.invalidateQueries({ queryKey: ['store-request', requestId] });
+      queryClient.invalidateQueries({ queryKey: ['all-store-requests'] });
+    },
+    onError: error => {
+      toast.error(error.response?.data.message || `Could not ${successMessage.toLowerCase()}`);
+    },
+  });
+}
+
+export function useCopyStoreRequest(requestId: string) {
+  const { mutate, isPending, isError } = useStoreRequestDetailMutation(
+    (data: { recipients: string[] }) => copyStoreRequestApi(requestId, data),
+    'Store request copied successfully',
+    requestId
+  );
+  return { copyStoreRequest: mutate, isPending, isError };
+}
+
+export function useUpdateStoreRequestStatus(requestId: string) {
+  const { mutateAsync, isPending, isError } = useStoreRequestDetailMutation(
+    (data: { status: string; comment: string }) => updateStoreRequestStatusApi(requestId, data),
+    'Store request status updated',
+    requestId
+  );
+  return { updateStoreRequestStatus: mutateAsync, isPending, isError };
+}
+
+export function useAddStoreRequestComment(requestId: string) {
+  const { mutateAsync, isPending, isError } = useStoreRequestDetailMutation(
+    (data: { text: string }) => addStoreRequestCommentApi(requestId, data),
+    'Comment added successfully',
+    requestId
+  );
+  return { addStoreRequestComment: mutateAsync, isPending, isError };
+}
+
+export function useUpdateStoreRequestComment(requestId: string) {
+  const { mutateAsync, isPending, isError } = useStoreRequestDetailMutation(
+    ({ commentId, text }: { commentId: string; text: string }) =>
+      updateStoreRequestCommentApi(requestId, commentId, { text }),
+    'Comment updated successfully',
+    requestId
+  );
+  return { updateStoreRequestComment: mutateAsync, isPending, isError };
+}
+
+export function useDeleteStoreRequestComment(requestId: string) {
+  const { mutateAsync, isPending, isError } = useStoreRequestDetailMutation(
+    (commentId: string) => deleteStoreRequestCommentApi(requestId, commentId),
+    'Comment deleted successfully',
+    requestId
+  );
+  return { deleteStoreRequestComment: mutateAsync, isPending, isError };
 }
