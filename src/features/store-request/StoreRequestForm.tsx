@@ -28,6 +28,7 @@ import {
 } from '../../components/ui/select';
 
 interface StoreRequestFormData {
+  requestType: 'dispatch' | 'return';
   destination: string;
   warehouse: string;
   warehouseCode: string;
@@ -42,22 +43,30 @@ interface StoreRequestFormData {
 interface StoreRequestFormProps {
   mode: 'create' | 'edit';
   initialData?: IStoreRequest;
+  returnFrom?: IStoreRequest;
 }
 
 const getUserId = (user?: Partial<IUser> | string | null) =>
   typeof user === 'string' ? user : user?.id ?? '';
 
-const getInitialFormData = (initialData?: IStoreRequest): StoreRequestFormData => ({
-  destination: initialData?.destination ?? '',
-  warehouse: initialData?.warehouse ?? '',
-  warehouseCode: initialData?.warehouseCode ?? '',
-  requestedAt: initialData?.requestedAt ?? new Date().toISOString(),
-  dispatchDate: initialData?.dispatchDate ?? '',
-  recipient: getUserId(initialData?.recipient),
-  warehouseOfficer: getUserId(initialData?.warehouseOfficer),
-  assignedDriver: initialData?.assignedDriver ?? '',
-  reviewedBy: getUserId(initialData?.reviewedBy),
-});
+const getInitialFormData = (
+  initialData?: IStoreRequest,
+  returnFrom?: IStoreRequest
+): StoreRequestFormData => {
+  const source = initialData ?? returnFrom;
+  return {
+    requestType: returnFrom ? 'return' : (initialData?.requestType ?? 'dispatch'),
+    destination: source?.destination ?? '',
+    warehouse: source?.warehouse ?? '',
+    warehouseCode: source?.warehouseCode ?? '',
+    requestedAt: returnFrom ? new Date().toISOString() : (source?.requestedAt ?? new Date().toISOString()),
+    dispatchDate: returnFrom ? '' : (source?.dispatchDate ?? ''),
+    recipient: getUserId(source?.recipient),
+    warehouseOfficer: getUserId(source?.warehouseOfficer),
+    assignedDriver: returnFrom ? '' : (source?.assignedDriver ?? ''),
+    reviewedBy: returnFrom ? '' : getUserId(source?.reviewedBy),
+  };
+};
 
 const emptyItem = (): IStoreItemGroup => ({
   itemName: '',
@@ -72,12 +81,14 @@ const emptyItem = (): IStoreItemGroup => ({
 const getUserName = (user: IUser) => `${user.firstName} ${user.lastName}`.trim();
 
 
-const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }) => {
+const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData, returnFrom }) => {
   const [formData, setFormData] = useState<StoreRequestFormData>(() =>
-    getInitialFormData(mode === 'edit' ? initialData : undefined)
+    getInitialFormData(mode === 'edit' ? initialData : undefined, mode === 'create' ? returnFrom : undefined)
   );
   const [items, setItems] = useState<IStoreItemGroup[]>(() =>
-    mode === 'edit' ? initialData?.items ?? [] : []
+    mode === 'edit'
+      ? initialData?.items ?? []
+    : returnFrom?.items.map(item => ({ ...item, dispatchRemarks: '', returnRemarks: '' })) ?? []
   );
 
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({ limit: 1000 });
@@ -129,6 +140,8 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
 
   const buildSubmitData = useCallback((): Partial<IStoreRequest> => {
     return {
+      requestType: formData.requestType,
+      returnedRequestId: returnFrom?.id ?? initialData?.returnedRequestId ?? undefined,
       destination: formData.destination.trim(),
       warehouse: formData.warehouse.trim(),
       warehouseCode: formData.warehouseCode.trim(),
@@ -145,10 +158,12 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
         frequency: item.frequency,
         quantity: item.quantity,
         unit: item.unit?.trim() || '',
-        dispatchRemarks: item.dispatchRemarks?.trim() || undefined,
+        ...(formData.requestType === 'return'
+          ? { returnRemarks: item.returnRemarks?.trim() || undefined }
+          : { dispatchRemarks: item.dispatchRemarks?.trim() || undefined }),
       })),
     };
-  }, [formData, items]);
+  }, [formData, initialData?.returnedRequestId, items, returnFrom?.id]);
 
   const validate = useCallback(
     (isSubmission: boolean) => {
@@ -166,6 +181,14 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
       }
       if (isSubmission && !formData.reviewedBy) {
         toast.error('Select a reviewer before creating the store request');
+        return false;
+      }
+      if (
+        formData.requestType === 'return' &&
+        new Date(formData.dispatchDate).setHours(0, 0, 0, 0) <
+          new Date(formData.requestedAt).setHours(0, 0, 0, 0)
+      ) {
+        toast.error('Return date cannot be before the request date');
         return false;
       }
       if (
@@ -293,11 +316,21 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
           />
         </FormRow>
 
-        <FormRow label="Dispatch Remarks">
+        <FormRow label={formData.requestType === 'return' ? 'Return Remarks' : 'Dispatch Remarks'}>
           <textarea
             className="min-h-[70px] w-full rounded-lg border p-2 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500"
-            value={item.dispatchRemarks || ''}
-            onChange={event => handleItemChange(index, 'dispatchRemarks', event.target.value)}
+            value={
+              formData.requestType === 'return'
+                ? item.returnRemarks || ''
+                : item.dispatchRemarks || ''
+            }
+            onChange={event =>
+              handleItemChange(
+                index,
+                formData.requestType === 'return' ? 'returnRemarks' : 'dispatchRemarks',
+                event.target.value
+              )
+            }
             disabled={isPending}
           />
         </FormRow>
@@ -350,15 +383,19 @@ const StoreRequestForm: React.FC<StoreRequestFormProps> = ({ mode, initialData }
             onChange={date => handleDateChange('requestedAt', date)}
             variant="secondary"
             placeholder="Select request date"
-            disabled={isPending}
+            disabled={isPending || formData.requestType === 'return'}
           />
         </FormRow>
-        <FormRow label="Date of Dispatch" required>
+        <FormRow
+          label={formData.requestType === 'return' ? 'Return Date' : 'Date of Dispatch'}
+          required
+        >
           <DatePicker
             selected={formData.dispatchDate || null}
             onChange={date => handleDateChange('dispatchDate', date)}
             variant="secondary"
-            placeholder="Select dispatch date"
+            placeholder={formData.requestType === 'return' ? "Select return date" : "Select dispatch date"}
+            minDate={formData.requestType === 'return' ? formData.requestedAt : undefined}
             disabled={isPending}
           />
         </FormRow>

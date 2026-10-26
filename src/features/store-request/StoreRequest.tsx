@@ -118,6 +118,17 @@ const StoreRequest = () => {
 
 	const comments = (request?.comments ?? []) as IComment[];
 	const tableHeadData = getStoreTableHeaders();
+	const createdById =
+		typeof request?.createdBy === 'string' ? request.createdBy : request?.createdBy?.id;
+	const canCreateReturnRequest =
+		request?.requestType === 'dispatch' &&
+		request.status === 'approved' &&
+		!request.isReturned &&
+		createdById === currentUser?.id;
+	const handleCreateReturnRequest = () => {
+		if (!request) return;
+		navigate('/store-requests/create-store-request', { state: { returnFrom: request } });
+	};
 
 	if (isError) return <NetworkErrorUI />;
 
@@ -126,10 +137,17 @@ const StoreRequest = () => {
 			<div className="sticky -top-8 z-10 space-y-1.5 border-b bg-[#F8F8F8] pb-3 pt-4 md:pt-6">
 				<div className="flex items-center justify-between">
 					<TextHeader>Store Request</TextHeader>
-					<Button variant="outline" size="sm" onClick={() => navigate('/store-requests')}>
-						<List className="mr-1 h-4 w-4 md:mr-2" />
-						List
-					</Button>
+					<div className="flex items-center gap-2">
+						{canCreateReturnRequest && (
+							<Button variant="outline" size="sm" onClick={handleCreateReturnRequest}>
+								Create return request
+							</Button>
+						)}
+						<Button variant="outline" size="sm" onClick={() => navigate('/store-requests')}>
+							<List className="mr-1 h-4 w-4 md:mr-2" />
+							List
+						</Button>
+					</div>
 				</div>
 			</div>
 
